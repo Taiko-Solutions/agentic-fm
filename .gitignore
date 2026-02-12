@@ -4,6 +4,9 @@ agent/xml_parsed/
 agent/context/
 agent/CONTEXT.json
 
+# Specific files
+Prompt.md
+
 # macOS
 .DS_Store
 .AppleDouble
