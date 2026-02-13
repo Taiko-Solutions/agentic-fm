@@ -13,4 +13,9 @@
     </ErrorMessage>
   </Step>
 </fmxmlsnippet>
-<!-- Condition and ErrorCode and ErrorMessage are optional. -->
+<!-- Option state: "True" shows dialog (with Skip and Revert buttons). "False" suppresses dialog. -->
+<!-- Optional: Condition (reverts only if evaluated as true), ErrorCode (custom error code for Get(LastError), must be 5000–5499), ErrorMessage (custom message for Get(LastErrorDetail), requires ErrorCode in range 5000–5499). -->
+<!-- Only valid between Open Transaction and Commit Transaction; otherwise returns error 3. -->
+<!-- Jumps to the matching Commit Transaction step after reverting. -->
+<!-- Will NOT revert Auto Enter Serial Number Increment or Truncate Table. Will NOT activate the OnRecordRevert trigger. -->
+<!-- See https://help.claris.com/en/pro-help/content/revert-transaction.html -->
