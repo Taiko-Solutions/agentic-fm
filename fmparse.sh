@@ -15,6 +15,9 @@
 #   -t, --output-tree  Specify the output tree root folder: domain or db (default: domain)
 #   -h, --help         Show this help message
 #
+# Environment Variables:
+#   FM_XML_EXPLODER_BIN  Full path to fm-xml-export-exploder (if not in PATH)
+#
 
 set -euo pipefail
 
@@ -38,6 +41,11 @@ XML_PARSED_DIR="$PROJECT_ROOT/agent/xml_parsed"
 # ---------------------------------------------------------------------------
 OUTPUT_TREE="domain"
 EXPLODER_FLAGS=()
+
+# Optional: Specify the full path to fm-xml-export-exploder if it's not in PATH
+# Can also be set as an environment variable before calling this script
+# Example: FM_XML_EXPLODER_BIN="$HOME/bin/fm-xml-export-exploder"
+FM_XML_EXPLODER_BIN="${FM_XML_EXPLODER_BIN:-}"
 
 # ---------------------------------------------------------------------------
 # Usage / help
@@ -64,9 +72,14 @@ Options:
   -t, --output-tree TYPE          Output tree format: domain (default) or db
   -h, --help                      Show this help message
 
+Environment Variables:
+  FM_XML_EXPLODER_BIN             Full path to fm-xml-export-exploder binary
+                                  Use this if the binary is not in PATH (e.g., ~/bin/fm-xml-export-exploder)
+
 Examples:
   $(basename "$0") -s "Invoice Solution" /path/to/export.xml
   $(basename "$0") -s "Invoice Solution" /path/to/exports/ --all-lines
+  FM_XML_EXPLODER_BIN=~/bin/fm-xml-export-exploder $(basename "$0") -s "Invoice Solution" /path/to/export.xml
 EOF
     exit 0
 }
@@ -135,8 +148,32 @@ fi
 # ---------------------------------------------------------------------------
 # Verify fm-xml-export-exploder is available
 # ---------------------------------------------------------------------------
-if ! command -v fm-xml-export-exploder &>/dev/null; then
-    error "fm-xml-export-exploder is not installed or not in PATH. Install it from https://github.com/bc-m/fm-xml-export-exploder and ensure the binary is available on your PATH."
+EXPLODER_CMD=""
+
+# First check if a custom path is specified
+if [[ -n "$FM_XML_EXPLODER_BIN" ]]; then
+    # Expand tilde if present (handle environments where HOME is not set)
+    if [[ "$FM_XML_EXPLODER_BIN" =~ ^~ ]]; then
+        # If HOME is not set, try to determine it
+        if [[ -z "${HOME:-}" ]]; then
+            HOME="$(eval echo ~$(whoami))"
+        fi
+        FM_XML_EXPLODER_BIN="${FM_XML_EXPLODER_BIN/#\~/$HOME}"
+    fi
+    
+    if [[ -x "$FM_XML_EXPLODER_BIN" ]]; then
+        EXPLODER_CMD="$FM_XML_EXPLODER_BIN"
+        msg "Using fm-xml-export-exploder from: $EXPLODER_CMD"
+    else
+        error "Specified FM_XML_EXPLODER_BIN is not executable or does not exist: $FM_XML_EXPLODER_BIN"
+    fi
+else
+    # Fall back to PATH lookup
+    if command -v fm-xml-export-exploder &>/dev/null; then
+        EXPLODER_CMD="fm-xml-export-exploder"
+    else
+        error "fm-xml-export-exploder is not installed or not in PATH. Install it from https://github.com/bc-m/fm-xml-export-exploder and ensure the binary is available on your PATH, or set FM_XML_EXPLODER_BIN to the full path."
+    fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -192,7 +229,7 @@ if [[ ${#EXPLODER_FLAGS[@]} -gt 0 ]]; then
     msg "  Flags: ${EXPLODER_FLAGS[*]}"
 fi
 
-fm-xml-export-exploder \
+"$EXPLODER_CMD" \
     --output_tree "$OUTPUT_TREE" \
     ${EXPLODER_FLAGS[@]+"${EXPLODER_FLAGS[@]}"} \
     "$ARCHIVE_DIR" \
