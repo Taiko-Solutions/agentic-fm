@@ -25,6 +25,8 @@ A FileMaker developer will **ALWAYS** reference line numbers based on the human-
 
 FileMaker objects are transferred via the macOS clipboard using proprietary binary descriptor classes — they are **not** plain text. `pbpaste` and `pbcopy` must never be used; they corrupt multi-byte UTF-8 characters (`≠`, `≤`, `≥`, `¶`) that are common in FileMaker calculations.
 
+## clipboard.py (optional)
+
 The helper script `agent/scripts/clipboard.py` handles both directions:
 
 ```bash
@@ -40,6 +42,16 @@ python agent/scripts/clipboard.py write agent/sandbox/myscript.xml
 The write command auto-detects the correct class from the XML content (`<Step>` → `XMSS`, `<CustomFunction>` → `XMFN`, etc.). Use `--class` to override.
 
 For full technical details including clipboard class codes and low-level encoding, see `agent/docs/CLIPBOARD.md`.
+
+## MBS Plugin clipboard (alternative)
+
+When the MBS FileMaker Plugin is available, the developer may transfer XML to FileMaker using MBS clipboard functions instead of `clipboard.py`. In this case, the AI should **NOT** run the `clipboard.py write` step automatically. The workflow becomes:
+
+1. Generate and validate the script in `agent/sandbox/`
+2. Inform the user that the file is ready in `agent/sandbox/<filename>`
+3. The user handles the clipboard transfer via MBS or other means
+
+The AI should only run `clipboard.py write` when the user explicitly requests it.
 
 # fmxmlsnippet details
 
@@ -117,7 +129,7 @@ Before writing a script, scan `agent/docs/knowledge/MANIFEST.md` for keyword mat
 
 5. Run `python agent/scripts/validate_snippet.py agent/sandbox/<script_name>` to validate the output
 6. Fix any errors reported by the validator before presenting the script to the user
-7. Once validation passes, run `python agent/scripts/clipboard.py write agent/sandbox/<script_name>` to load the script onto the clipboard, ready to paste directly into FileMaker
+7. Once validation passes, inform the user the script is ready in `agent/sandbox/<script_name>`. Only run `clipboard.py write` if the user explicitly requests it (see Clipboard section above).
 
 # Lookup methodology
 
@@ -231,6 +243,21 @@ The context system is designed to minimize token consumption. Follow these rules
 - Do NOT add features not explicitly requested by the user
 - Do NOT guess or assume the XML structure - ALWAYS read the snippet_examples file first
 - Do NOT use `<Calculation><![CDATA["text"]]></Calculation>` for comments - use `<Text>text</Text>` (check the snippet first!)
+
+# FileMaker and MBS documentation
+
+## Dash + MCP (preferred)
+
+When the Dash MCP server is available, use it to look up FileMaker and MBS Plugin documentation directly. This is faster and more accurate than the bundled docs.
+
+- Use `search_documentation` with docset identifiers for FileMaker and MBS to find function syntax, script step options, and error codes.
+- Use `load_documentation_page` to read the full documentation page for a specific topic.
+
+When Dash MCP is available, there is no need to run `agent/docs/filemaker/fetch_docs.py` or to consult the local `agent/docs/filemaker/` directory.
+
+## Bundled docs (fallback)
+
+If Dash MCP is not available, the project can generate local documentation files using `agent/docs/filemaker/fetch_docs.py`. See the README for details. These files are gitignored and must be generated locally.
 
 # Constraints
 

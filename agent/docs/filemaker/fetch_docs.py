@@ -38,6 +38,8 @@ Website Terms of Use (https://claris.com/company/legal/terms).
 Do not commit, redistribute, or publish the generated files.
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import re
