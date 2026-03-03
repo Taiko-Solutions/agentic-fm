@@ -110,6 +110,32 @@ Only fall back to grepping `agent/xml_parsed/` if the needed information is not 
 
 **MANDATORY: All generated FileMaker code — scripts and calculations — MUST follow the conventions in `agent/docs/CODING_CONVENTIONS.md`.** Read that file before writing any calculation logic or script steps. Key areas: variable naming prefixes (`$`, `$$`, `~`), Let() formatting, operator spacing, boolean values, and control structure style.
 
+# Taiko Solutions conventions (override)
+
+`agent/docs/taiko/CODING_CONVENTIONS.md` contains Taiko-specific conventions that **OVERRIDE** the base conventions above. Read this file FIRST — it takes priority. For anything not defined in the Taiko conventions, fall back to the base `agent/docs/CODING_CONVENTIONS.md`.
+
+Key overrides: PascalCase variables (`$ClienteID` not `$invoiceTotal`), comments in Spanish, `Insert Calculated Result` preferred over `Set Variable`, script naming with `.Controller` suffix, three-layer architecture naming.
+
+# Taiko Solutions knowledge base
+
+`agent/docs/taiko/knowledge/` contains Taiko-specific architectural patterns and development decisions. These define how Taiko builds FileMaker solutions — error handling (Clew pattern), three-layer architecture, transactional editing, and logging.
+
+Before writing a script, scan **both** manifests for keyword matches against the current task:
+
+1. `agent/docs/taiko/knowledge/MANIFEST.md` — Taiko patterns (check first)
+2. `agent/docs/knowledge/MANIFEST.md` — general FileMaker knowledge
+
+If any entry matches, read the corresponding document and apply its insights during script composition.
+
+## Taiko script templates
+
+`agent/docs/taiko/templates/` contains human-readable script templates in `scripts_sanitized` format. Use these as structural references when composing Taiko scripts:
+
+- `clew-simple.md` — traditional Clew pattern (read, query, navigation)
+- `clew-transactional.md` — Utility Manager + Initialize Shadow + Transactional Controller
+
+Read the appropriate template before generating a new script to ensure the correct structure and conventions are applied.
+
 # Knowledge base
 
 `agent/docs/knowledge/` contains curated behavioral intelligence about FileMaker — nuances, gotchas, and practical insights that go beyond what the standard help references cover. These documents help avoid common pitfalls when composing scripts.
@@ -258,6 +284,29 @@ When Dash MCP is available, there is no need to run `agent/docs/filemaker/fetch_
 ## Bundled docs (fallback)
 
 If Dash MCP is not available, the project can generate local documentation files using `agent/docs/filemaker/fetch_docs.py`. See the README for details. These files are gitignored and must be generated locally.
+
+# Change log (Obsidian)
+
+When an Obsidian MCP server is available, the AI should log significant completed tasks to keep the team informed.
+
+After the user confirms a task is complete (script created, refactored, bug fixed), append an entry to the solution's changelog in Obsidian:
+
+**Path:** `Proyectos/Taiko/<ProjectName>/Changelog-Agentic.md`
+
+**Entry format:**
+
+```markdown
+## YYYY-MM-DD — Brief summary
+
+- **Script**: name of the script created/modified
+- **Type**: Nuevo | Modificación | Refactoring | Bugfix
+- **Description**: 1-2 sentences describing what was done and why
+- **Files**: list of files in sandbox/ generated
+```
+
+If the file does not exist, create it with a `# Changelog Agentic-FM` header.
+
+Only log when the user explicitly confirms the task is done. Do not log exploratory work, failed attempts, or intermediate steps.
 
 # Constraints
 
