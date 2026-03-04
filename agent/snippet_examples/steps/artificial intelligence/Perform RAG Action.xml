@@ -1,9 +1,38 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Perform RAG Action">
+    <Stream state="True"/>
+    <Field table="" id="0" name=""/>
     <RAGSpace>
-      <RAGSpaceAction>Add</RAGSpaceAction>
-      <DataSource>FromText</DataSource>
+      <RAGAccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </RAGAccountName>
+      <SpaceID>
+        <Calculation><![CDATA[10]]></Calculation>
+      </SpaceID>
+      <RAGSpaceAction>Prompt</RAGSpaceAction>
+      <PromptMessage>
+        <Calculation><![CDATA["prompt"]]></Calculation>
+      </PromptMessage>
+      <AIAccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AIAccountName>
+      <Model>
+        <Calculation><![CDATA["model"]]></Calculation>
+      </Model>
+      <TemplateName>
+        <Calculation><![CDATA["template_name"]]></Calculation>
+      </TemplateName>
+      <Parameters>
+        <Calculation><![CDATA["parameters"]]></Calculation>
+      </Parameters>
     </RAGSpace>
   </Step>
 </fmxmlsnippet>
+<!-- RAGSpaceAction value (HR: "Action"): "Add" → "Add Data" | "Prompt" → "Send Prompt" | "Remove" → "Remove Data". -->
+<!-- Stream state (HR: "Stream"): "True" → "On" | "False" → "Off". Outside RAGSpace. Only present for Send Prompt action. -->
+<!-- Field (HR: "Response Target"): dual-format — <Field table="" id="0" name=""/> for field refs, or <Text/> + <Field>$variable</Field> for variables. Outside RAGSpace, before RAGSpace. Only for Send Prompt action. -->
+<!-- Required inside RAGSpace: RAGAccountName (HR: "RAG Account Name"), SpaceID (HR: "Space ID"), RAGSpaceAction (HR: "Action"). -->
+<!-- Add Data action: add DataSource (HR: "RAG Data"; "FromText" → "From Text") and InputText (bare value in HR). -->
+<!-- Send Prompt action: add PromptMessage (bare prompt value), AIAccountName (HR: "AI Account Name"), Model. Optional: TemplateName (HR: "Prompt Template Name"), Parameters. -->
+<!-- Remove Data action: only RAGAccountName, SpaceID, RAGSpaceAction needed. -->

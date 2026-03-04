@@ -5,17 +5,18 @@
       <Calculation><![CDATA[$object]]></Calculation>
     </ObjectName>
     <FunctionName>
-      <Calculation><![CDATA[]]></Calculation>
+      <Calculation><![CDATA["myFunction"]]></Calculation>
     </FunctionName>
     <Parameters Count="1">
       <P>
-        <Calculation><![CDATA[]]></Calculation>
+        <Calculation><![CDATA[$parameter1]]></Calculation>
       </P>
     </Parameters>
   </Step>
 </fmxmlsnippet>
-<!-- Required: FunctionName (name of JavaScript function to perform; case sensitive). -->
-<!-- Optional: ObjectName (name of web viewer object; if omitted, uses active web viewer), Parameters (one or more text parameters passed to JavaScript function). -->
+<!-- Required: FunctionName (HR: "Function Name"; name of JavaScript function to call; case-sensitive). -->
+<!-- Optional: ObjectName (HR: "Object Name"; name of web viewer layout object; if omitted, uses active web viewer). -->
+<!-- Optional: Parameters (HR: "Parameters") — Count attribute must match the number of <P> child elements. Each <P> holds one Calculation. HR shows parameters as comma-separated values. -->
 <!-- Performs the JavaScript function and waits for it to finish. Any return value from the function is ignored. -->
 <!-- Users cannot cancel the operation or perform other actions while the JavaScript function is executing. -->
 <!-- Does not change which layout object has focus. Use Go to Object script step to change focus to the web viewer. -->

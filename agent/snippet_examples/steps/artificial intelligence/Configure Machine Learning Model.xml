@@ -1,6 +1,13 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Configure Machine Learning Model">
-    <ConfigureCoreML>Uninstall</ConfigureCoreML>
+    <Field table="" id="0" name=""/>
+    <ConfigureCoreML>General<Name><Calculation><![CDATA["model name"]]></Calculation></Name></ConfigureCoreML>
+    <Field table="" id="0" name=""/>
   </Step>
 </fmxmlsnippet>
+<!-- ConfigureCoreML text content: "Uninstall" (HR: Unload) | "Vision" | "General". The text node is mixed with child elements. -->
+<!-- For Vision/General: <Field> element appears twice (duplicated) as sibling of ConfigureCoreML, and <Name> calc is inside ConfigureCoreML. -->
+<!-- For Uninstall: only <Name> calc inside ConfigureCoreML, no <Field>. -->
+<!-- Field supports repetition attribute for repeating fields (e.g. repetition="2"). -->
+<!-- HR "Unload" maps to XML "Uninstall". -->

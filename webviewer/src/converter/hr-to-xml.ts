@@ -1,0 +1,109 @@
+/**
+ * Human-Readable -> fmxmlsnippet XML converter.
+ *
+ * Parses HR script text line-by-line and emits valid fmxmlsnippet XML.
+ */
+
+import { parseScript } from './parser';
+import { getHrToXmlConverter, stepOpen, cdata } from './step-registry';
+import type { IdResolver } from './id-resolver';
+import { createIdResolver } from './id-resolver';
+import type { FMContext } from '@/context/types';
+import type { StepCatalogEntry } from './catalog-types';
+import { registerCatalogConverters } from './catalog-converter';
+
+// Import step registrations (side-effect imports — must come before catalog registration)
+import './steps/control';
+import './steps/fields';
+import './steps/navigation';
+import './steps/records';
+import './steps/windows';
+import './steps/miscellaneous';
+
+let catalogLoaded = false;
+
+/** Load catalog entries into the converter registry (idempotent). */
+export function loadCatalog(catalog: StepCatalogEntry[]): void {
+  if (catalogLoaded) return;
+  catalogLoaded = true;
+  registerCatalogConverters(catalog);
+}
+
+export interface ConversionResult {
+  xml: string;
+  errors: ConversionError[];
+}
+
+export interface ConversionError {
+  line: number;
+  message: string;
+}
+
+/**
+ * Convert human-readable FileMaker script text to fmxmlsnippet XML.
+ */
+export function hrToXml(hrText: string, context?: FMContext | null): ConversionResult {
+  // Trim trailing blank lines so they don't produce extra empty comments
+  const trimmedText = hrText.replace(/\n+$/, '');
+  const lines = parseScript(trimmedText);
+  const resolver = createIdResolver(context ?? null);
+  const errors: ConversionError[] = [];
+  const stepXmls: string[] = [];
+
+  for (const line of lines) {
+    // Empty lines become empty # (comment) steps
+    if (!line.stepName) {
+      stepXmls.push('  <Step enable="True" id="0" name="# (comment)"/>');
+      continue;
+    }
+
+    const converter = getHrToXmlConverter(line.stepName);
+    if (converter) {
+      try {
+        stepXmls.push(converter.toXml(line, resolver));
+      } catch (err) {
+        errors.push({
+          line: line.lineNumber,
+          message: `Error converting "${line.stepName}": ${err}`,
+        });
+        // Emit a comment with the error
+        stepXmls.push(unknownStepXml(line.stepName, line.raw.trim(), !line.disabled));
+      }
+    } else {
+      // Unknown step — emit as comment placeholder
+      errors.push({
+        line: line.lineNumber,
+        message: `Unknown step: "${line.stepName}"`,
+      });
+      stepXmls.push(unknownStepXml(line.stepName, line.raw.trim(), !line.disabled));
+    }
+  }
+
+  // Report unresolved references as errors
+  for (const ref of resolver.getUnresolved()) {
+    errors.push({
+      line: 0,
+      message: `Unresolved ${ref.type}: "${ref.name}" (id will be 0)`,
+    });
+  }
+
+  const xml = [
+    '<?xml version="1.0"?>',
+    '<fmxmlsnippet type="FMObjectList">',
+    ...stepXmls,
+    '</fmxmlsnippet>',
+  ].join('\n');
+
+  return { xml, errors };
+}
+
+/** Generate a comment step for unrecognized steps */
+function unknownStepXml(stepName: string, rawText: string, enabled: boolean): string {
+  return [
+    stepOpen('# (comment)', enabled),
+    `    <Text>[UNKNOWN STEP: ${stepName}] ${rawText}</Text>`,
+    '  </Step>',
+  ].join('\n');
+}
+
+export { createIdResolver };

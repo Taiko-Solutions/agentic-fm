@@ -1,14 +1,36 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Save Records as JSONL">
-    <Option state="True"/>
+    <Option state="False"/>
     <CreateDirectories state="False"/>
-    <FineTuneFormat state="False"/>
+    <FineTuneFormat state="True"/>
     <AutoOpen state="False"/>
     <CreateEmail state="False"/>
     <UniversalPathList>$path</UniversalPathList>
-    <Table id="" name=""/>
-    <SaveAsJSONL/>
+    <SaveAsJSONL>
+      <SystemPrompt>
+        <Calculation><![CDATA["system_prompt"]]></Calculation>
+      </SystemPrompt>
+      <UserPrompt>
+        <Calculation><![CDATA["user_prompt"]]></Calculation>
+      </UserPrompt>
+      <AssistantPrompt>
+        <Calculation><![CDATA["assistant_prompt"]]></Calculation>
+      </AssistantPrompt>
+    </SaveAsJSONL>
   </Step>
 </fmxmlsnippet>
+<!-- FineTuneFormat state: "True" formats for fine-tuning (System/User/Assistant prompts). "False" uses Completion Field mode. -->
+<!-- CreateDirectories state: "True" creates folders in the output path if they don't exist. "False" does not. -->
+<!-- AutoOpen state: "True" automatically opens output file. "False" does not. -->
+<!-- CreateEmail state: "True" creates a new email with the file as attachment. "False" does not. -->
+<!-- Option state: "True" enables Table (source table) selection. "False" uses current table. -->
+<!-- Optional: UniversalPathList (output file path), Table (source table when Option state="True") -->
+<!-- When FineTuneFormat state="False" (Completion Field mode): omit SystemPrompt/UserPrompt/AssistantPrompt; add <Field> as sibling before <SaveAsJSONL> AND inside it:
+  <Field table="" id="0" name=""/>
+  <SaveAsJSONL>
+    <Field table="" id="0" name=""/>
+  </SaveAsJSONL>
+-->
+<!-- When Option state="True" (Table specified): add <Table id="0" name=""/> before <SaveAsJSONL> -->
 <!-- See https://help.claris.com/en/pro-help/content/save-records-as-jsonl.html -->

@@ -9,16 +9,16 @@
     <Profile FieldDelimiter="&#9;" IsPredefined="-1" FieldNameRow="-1" DataType="XLXE"/>
     <UniversalPathList>$path</UniversalPathList>
     <WorkSheet>
-      <Calculation><![CDATA[]]></Calculation>
+      <Calculation><![CDATA["Sheet1"]]></Calculation>
     </WorkSheet>
     <Title>
-      <Calculation><![CDATA[]]></Calculation>
+      <Calculation><![CDATA["title"]]></Calculation>
     </Title>
     <Subject>
-      <Calculation><![CDATA[]]></Calculation>
+      <Calculation><![CDATA["subject"]]></Calculation>
     </Subject>
     <Author>
-      <Calculation><![CDATA[]]></Calculation>
+      <Calculation><![CDATA["author"]]></Calculation>
     </Author>
     <SaveType value="BrowsedRecords"/>
     <UseFieldNames state="False"/>

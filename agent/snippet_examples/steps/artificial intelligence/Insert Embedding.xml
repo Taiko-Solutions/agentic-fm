@@ -1,6 +1,20 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Insert Embedding">
-    <LLMEmbedding/>
+    <Field table="" id="0" name=""/>
+    <LLMEmbedding>
+      <AccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AccountName>
+      <Model>
+        <Calculation><![CDATA["model"]]></Calculation>
+      </Model>
+      <InputText>
+        <Calculation><![CDATA["input"]]></Calculation>
+      </InputText>
+    </LLMEmbedding>
   </Step>
 </fmxmlsnippet>
+<!-- LLMEmbedding children: AccountName (Calculation), Model (Calculation), InputText (Calculation). All required. -->
+<!-- Target: Field element uses <Field table="" id="0" name=""/> for a field, or <Text/><Field>$variable</Field> for a variable. Supports repetition attribute. When omitted, uses active field. -->
+<!-- See https://help.claris.com/en/pro-help/content/insert-embedding.html -->

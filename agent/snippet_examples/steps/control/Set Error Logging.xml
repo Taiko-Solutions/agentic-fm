@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Set Error Logging">
-    <Option state="False"/>
+    <Option state="True"/>
+    <Calculation><![CDATA["custom_debug_info"]]></Calculation>
   </Step>
 </fmxmlsnippet>
+<!-- Option state: "True" enables error logging. "False" disables. -->
+<!-- Optional: Calculation (custom debug info string appended to log entries). Only present when Option state="True". -->
+<!-- When Option state="False": omit the Calculation element. -->
 <!-- See https://help.claris.com/en/pro-help/content/set-error-logging.html -->

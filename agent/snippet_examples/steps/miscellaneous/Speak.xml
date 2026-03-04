@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Speak">
-    <Calculation><![CDATA[]]></Calculation>
-    <SpeechOptions WaitForCompletion="False" VoiceName="" VoiceId="" VoiceCreator=""/>
+    <Calculation><![CDATA["text_to_speak"]]></Calculation>
+    <SpeechOptions WaitForCompletion="True" VoiceName="Daria" VoiceId="2769835375" VoiceCreator="4242"/>
   </Step>
 </fmxmlsnippet>
-<!-- SpeechOptions attributes: WaitForCompletion ("True" waits until speech completes before continuing to next script step; "False" continues immediately), VoiceName (specifies voice synthesizer name), VoiceId (voice identifier), VoiceCreator (voice creator identifier). -->
+<!-- SpeechOptions attributes: WaitForCompletion ("True" waits until speech completes before continuing to next script step; "False" continues immediately), VoiceName (macOS voice name string, e.g. "Daria", "Ellen", "Alex"), VoiceId (numeric voice identifier), VoiceCreator (numeric voice creator identifier). -->
+<!-- VoiceName, VoiceId, and VoiceCreator correspond to macOS system voices. The full list of available voices and their IDs can be obtained via the macOS say command: say -v '?' -->
 <!-- Required: Calculation (text to be spoken; can be literal text or calculated text). -->
 <!-- Optional: SpeechOptions (voice selection and wait behavior). -->
 <!-- Produces speech from text using specified voice synthesizer. -->

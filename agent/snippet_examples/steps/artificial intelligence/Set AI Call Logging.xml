@@ -1,7 +1,17 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Set AI Call Logging">
-    <Set state="False"/>
-    <LLMDebugLog/>
+    <Set state="True"/>
+    <LLMDebugLog>
+      <FileName>
+        <Calculation><![CDATA["ai_log.txt"]]></Calculation>
+      </FileName>
+      <VerboseMode/>
+      <TruncateEmbeddingVectorsMode/>
+    </LLMDebugLog>
   </Step>
 </fmxmlsnippet>
+<!-- Set state: "True" enables AI call logging. "False" disables. -->
+<!-- LLMDebugLog child elements are flagElements — presence = On, absence = Off. -->
+<!-- Optional children of LLMDebugLog: FileName (log file name calc), VerboseMode (Verbose: On), TruncateEmbeddingVectorsMode (Truncate Messages: On). -->
+<!-- When Set state="False" or logging is on with no options: use self-closing <LLMDebugLog/> -->

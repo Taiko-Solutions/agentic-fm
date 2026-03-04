@@ -1,9 +1,38 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Perform Semantic Find">
+    <Field table="" id="0" name=""/>
     <LLMSemanticFind>
       <Query type="1"/>
-      <Records type="1"/>
+      <AccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AccountName>
+      <LLMEmbeddingModel>
+        <Calculation><![CDATA["model"]]></Calculation>
+      </LLMEmbeddingModel>
+      <Text>
+        <Calculation><![CDATA["search text"]]></Calculation>
+      </Text>
+      <Count>
+        <Calculation><![CDATA[10]]></Calculation>
+      </Count>
+      <Condition type="1"/>
+      <Records type="2"/>
+      <Threshold>
+        <Calculation><![CDATA["0.8"]]></Calculation>
+      </Threshold>
+      <SaveResult>
+        <Field table="" id="0" name=""/>
+      </SaveResult>
     </LLMSemanticFind>
   </Step>
 </fmxmlsnippet>
+<!-- Query type (HR: "Query by"): "1" → "Natural language" | "2" → "Vector data" | "3" → "Image". -->
+<!-- Natural language mode: include AccountName (HR: "Account Name"), LLMEmbeddingModel (HR: "Embedding Model"), Text (HR: "Text"). -->
+<!-- Vector data mode: include File (HR: "Vector") instead of AccountName/LLMEmbeddingModel/Text. -->
+<!-- Image mode: include AccountName, LLMEmbeddingModel, Image (HR: "Image"; Calculation holds a field reference e.g. Table::Field). -->
+<!-- Records type (HR: "Record set"): "1" → "All records" | "2" → "Current found set". -->
+<!-- Condition type (HR: "Cosine similarity condition"): "1" → "greater than" | "2" → "less than" | "3" → "equal to" | "4" → "greater than or equal to" | "5" → "less than or equal to". -->
+<!-- Optional inside LLMSemanticFind: Count (HR: "Return count"), Condition, Threshold (HR: "Cosine similarity value"), SaveResult (HR: "Save result"). -->
+<!-- SaveResult contains a Field — dual-format: <Field table="" id="0" name=""/> for field refs, or <Field>$variable</Field> for variables. -->
+<!-- Target field (HR): outer <Field> element placed before LLMSemanticFind. When SaveResult uses a variable, a <Text/> appears at step level before this outer Field. -->

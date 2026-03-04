@@ -1,11 +1,31 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Fine-Tune Model">
-    <Option state="False"/>
+    <Option state="True"/>
     <UniversalPathList type="Embedded"/>
+    <Text/>
     <Table id="0" name=""/>
+    <Field>$variable</Field>
     <FineTuneLLM>
+      <AccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AccountName>
+      <FineTuneBaseModelName>
+        <Calculation><![CDATA["base_model"]]></Calculation>
+      </FineTuneBaseModelName>
+      <Parameters>
+        <Calculation><![CDATA["parameters"]]></Calculation>
+      </Parameters>
       <DataSource>DataTable</DataSource>
+      <Field table="" id="0" name=""/>
     </FineTuneLLM>
   </Step>
 </fmxmlsnippet>
+<!-- Option state: "False" when no table selected or TrainingFile source. "True" when table explicitly selected for DataTable source. Not shown in HR. -->
+<!-- All named calcs (AccountName, FineTuneBaseModelName, Parameters) are inside <FineTuneLLM>. -->
+<!-- DataSource: "DataTable" (HR: Table) | "TrainingFile" (HR: File). -->
+<!-- For DataTable: <UniversalPathList type="Embedded"/>, <Table id="" name=""/> sibling (HR: quoted table name). -->
+<!-- For TrainingFile: <UniversalPathList type="Reference">$path</UniversalPathList>. No <Table> element. -->
+<!-- Completion Field: <Field> INSIDE <FineTuneLLM> (HR: Completion Field). Field ref only (table/id/name). DataTable source only. -->
+<!-- Response Target: <Field> SIBLING of FineTuneLLM (HR: Response Target). Dual format: field ref (table/id/name) or variable (<Field>$variable</Field> with <Text/>). Both formats support repetition attribute. -->
+<!-- Parameters calc is optional, inside <FineTuneLLM>. -->

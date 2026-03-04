@@ -1,10 +1,31 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Perform Find by Natural Language">
-    <Option state="False"/>
+    <Option state="True"/>
     <SelectAll state="True"/>
+    <Field table="" id="0" name=""/>
     <LLMCreateFind>
-      <Action>Query</Action>
+      <AccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AccountName>
+      <Model>
+        <Calculation><![CDATA["model"]]></Calculation>
+      </Model>
+      <PromptMessage>
+        <Calculation><![CDATA["prompt"]]></Calculation>
+      </PromptMessage>
+      <Parameters>
+        <Calculation><![CDATA["parameters"]]></Calculation>
+      </Parameters>
+      <Action>None</Action>
     </LLMCreateFind>
   </Step>
 </fmxmlsnippet>
+<!-- Action value (HR label "Get"): "Query" → "Found Set" | "Data API" → "Found Set as JSON" | "None" → "Find Request as JSON". -->
+<!-- Option state: "True" when Parameters is present. "False" when Parameters is absent. Internal flag with no direct HR label. -->
+<!-- SelectAll state: always "True". No HR representation. -->
+<!-- Required inside LLMCreateFind: AccountName (HR: "Account Name"), Model, PromptMessage (HR: "Prompt"), Action (HR: "Get"). -->
+<!-- Optional inside LLMCreateFind: Parameters. -->
+<!-- Optional: Field (HR: "Response Target") — dual-format: <Field table="" id="0" name=""/> for field refs, or <Text/> + <Field>$variable</Field> for variables. Placed before LLMCreateFind. -->
+<!-- Optional inside LLMCreateFind: PromptTemplateName (HR: "Prompt Template Name") — XML element name unconfirmed; likely <PromptTemplateName><Calculation/></PromptTemplateName>. -->
+<!-- See https://help.claris.com/en/pro-help/content/perform-find-by-natural-language.html -->

@@ -1,6 +1,27 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Insert Embedding in Found Set">
-    <LLMBulkEmbedding/>
+    <Field table="" id="0" name=""/>
+    <LLMBulkEmbedding>
+      <AccountName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AccountName>
+      <Model>
+        <Calculation><![CDATA["model"]]></Calculation>
+      </Model>
+      <Field table="" id="0" name=""/>
+      <Overwrite/>
+      <ContinueOnError/>
+      <ShowSummary/>
+      <Parameters>
+        <Calculation><![CDATA["parameters"]]></Calculation>
+      </Parameters>
+    </LLMBulkEmbedding>
   </Step>
 </fmxmlsnippet>
+<!-- LLMBulkEmbedding children: AccountName (Calculation), Model (Calculation), Field (source field), Overwrite, ContinueOnError, ShowSummary, Parameters (Calculation). -->
+<!-- Required: AccountName, Model. -->
+<!-- Optional: Field (source field inside LLMBulkEmbedding), Overwrite (Replace target contents), ContinueOnError (Continue on error), ShowSummary (Show summary), Parameters (Calculation). -->
+<!-- Target Field: <Field table="" id="0" name=""/> as sibling outside LLMBulkEmbedding. Optional; when omitted, uses active field. -->
+<!-- Overwrite, ContinueOnError, ShowSummary are flag elements: present = on, absent = off. -->
+<!-- See https://help.claris.com/en/pro-help/content/insert-embedding-in-found-set.html -->

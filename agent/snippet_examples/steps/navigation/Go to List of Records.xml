@@ -1,42 +1,17 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Go to List of Records">
-    <ShowInNewWindow state="True"/>
-    <LayoutDestination value="SelectedLayout"/>
-    <Name>
-      <Calculation><![CDATA[]]></Calculation>
-    </Name>
-    <Height>
-      <Calculation><![CDATA[]]></Calculation>
-    </Height>
-    <Width>
-      <Calculation><![CDATA[]]></Calculation>
-    </Width>
-    <DistanceFromTop>
-      <Calculation><![CDATA[]]></Calculation>
-    </DistanceFromTop>
-    <DistanceFromLeft>
-      <Calculation><![CDATA[]]></Calculation>
-    </DistanceFromLeft>
+    <ShowInNewWindow state="False"/>
+    <LayoutDestination value="CurrentLayout"/>
     <RowList>
-      <Calculation><![CDATA[]]></Calculation>
+      <Calculation><![CDATA["calc"]]></Calculation>
     </RowList>
-    <NewWndStyles DimParentWindow="No" Toolbars="Yes" MenuBar="Yes" Style="Document" Close="Yes" Minimize="Yes" Maximize="Yes" Resize="Yes" Styles="1076299266"/>
-    <Layout id="0" name=""/>
+    <NewWndStyles Style="Document" Close="Yes" Minimize="Yes" Maximize="Yes" Resize="Yes" Styles="3606018"/>
   </Step>
 </fmxmlsnippet>
-<!-- ShowInNewWindow state: "True" shows records in new window with specified settings. "False" shows in current window. -->
-<!-- LayoutDestination enumeration: "SelectedLayout" specifies layout by name; other values similar to Go to Layout step. -->
-<!-- NewWndStyles attributes: DimParentWindow ("Yes"/"No"), Toolbars ("Yes"/"No"), MenuBar ("Yes"/"No"), Style ("Document"/etc), Close ("Yes"/"No"), Minimize ("Yes"/"No"), Maximize ("Yes"/"No"), Resize ("Yes"/"No"), Styles (numeric style flags). -->
-<!-- Required: RowList (list of record IDs; specifies records and sort order). -->
-<!-- Optional: LayoutDestination, Layout (layout to display records; if omitted, uses current layout), ShowInNewWindow, Name (window name), Height, Width, DistanceFromTop, DistanceFromLeft, NewWndStyles, Animation (FileMaker Go only). -->
-<!-- RowList formats: (1) List of values (separator characters per ValueCount function; e.g., "1¶5¶21-23¶7"); (2) JSON array of values (numbers or strings; e.g., [1,5,21,22,23,7] or ["1","5","21-23","7"]); (3) JSON array of objects with recordId key (e.g., [{"recordId":"1"},{"recordId":"5"}]; compatible with Perform Semantic Find and Execute FileMaker Data API results). -->
-<!-- Consecutive record IDs can be given as range (hyphen-separated; e.g., "21-23" in list of values or ["21-23"] in JSON string array). Range in JSON number array is invalid JSON and causes error. -->
-<!-- Goes to specified layout in current window (or new window) and changes found set and sort order to those specified by record IDs. Goes to first record in set. -->
-<!-- Record IDs must be valid record identifiers assigned by FileMaker client when record created (same as Get(RecordID), GetRecordIDsFromFoundSet, FileMaker Data API, OData API). Primary key field values or custom identifiers not supported. -->
-<!-- If specified record IDs can't be found (e.g., records deleted), those IDs ignored and found set contains only successfully located records. Records displayed in sort order matching sequence of provided IDs (shown as <Predefined Order> in Sort Records dialog). -->
-<!-- If records can't be found, returns error code 101 ("Record is missing") or 401 ("No records match the request"), capturable with Get(LastError). -->
-<!-- When opening new window: doesn't activate OnFirstWindowOpen or OnWindowOpen triggers (triggered script may not go to desired layout/view). To run script after opening new window, add Perform Script as next step. To bring new window to front, add Select Window step. -->
-<!-- Animation option: FileMaker Go only; can only use for selected window; cannot use for navigating between records via slider or status toolbar buttons. -->
-<!-- Partial support on Pro (no animation), WebDirect (no animation), Server, Cloud, Data API, and CWP. -->
+<!-- ShowInNewWindow state: "True" opens in new window (HR: New window). "False" uses current window (HR: Animation option available). Mutually exclusive with Animation. -->
+<!-- LayoutDestination: see animation-enums.md. "CurrentLayout" (HR: <Current Layout>) | "SelectedLayout" + <Layout id="" name=""/> | "LayoutNameByCalc" + <Layout><Calculation> | "LayoutNumberByCalc" + <Layout><Calculation>. -->
+<!-- RowList: required. List of record IDs (list of values, JSON array, or JSON array of objects with recordId key). -->
+<!-- Animation: see animation-enums.md for all values. Only when ShowInNewWindow=False. FileMaker Go only. -->
+<!-- New window mode: when ShowInNewWindow=True, adds Name, Height, Width, DistanceFromTop, DistanceFromLeft calc siblings. See window-enums.md for NewWndStyles attributes and window types. -->
 <!-- See https://help.claris.com/en/pro-help/content/go-to-list-of-records.html -->

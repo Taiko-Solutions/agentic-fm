@@ -1,0 +1,71 @@
+# Updating Step Catalogs
+
+## Objective
+
+Maintain 100% coverage of `agent/catalogs/step-catalog-en.json`, and any other language variation thereof, for all possible FileMaker script steps. The catalog is the **canonical HR (human-readable) reference** while `snippet_examples/` files are the **canonical XML reference**. There should be a 1:1 match for each entry within a catalog file and the files found within snippet examples.
+
+## Token Efficiency
+
+**NEVER read `step-catalog-en.json` in full.** It is large (~200KB+) and reading it wastes tokens. Always use Grep to extract only the entry being worked on:
+
+```bash
+grep -A 60 '"name": "Step Name Here"' agent/catalogs/step-catalog-en.json
+```
+
+Adjust the `-A` line count if the entry is longer. Similarly, when scanning for remaining work, grep for `"auto"` or `"unfinished"` status rather than reading the whole file.
+
+## Workflow Per Step
+
+The user either pastes both the HR format and fmxmlsnippet XML for each step or references a temporary file name which contains both formats. For each step:
+
+1. **Grep** the current catalog entry (see Token Efficiency above) and read the snippet_examples file (including `agent/snippet_examples/steps/CONVENTIONS.md` for snippet authoring rules)
+2. **Extract** the `id` from the fmxmlsnippet
+3. **Map** HR labels and enum values (which often differ from XML values)
+4. **Cross-check** against snippet_examples — always explicitly present the comparison result to the user, even when there are no differences
+5. **Update catalog**: set id, add hrLabels, HR enumValues, reorder params to HR display order, set hrSignature, status→"complete"
+6. **Update snippet_examples** if needed: fix wrong comments, add missing structure/elements, add HR annotations to comments
+7. **Do NOT** include XML comments in code output — they are reference only
+
+## Key Patterns Discovered
+
+- **`invertedHr: true`** — for `NoInteract` → "With dialog" where HR On = XML False
+- **`parentElement`** — for params nested inside wrapper elements (e.g., `<FineTuneLLM>`, `<LLMRequestWithTools>`)
+- **HR boolean values** — often "On"/"Off" or "Yes"/"No" while XML uses "True"/"False"
+- **Flag-style booleans** — some params shown as a word when True, omitted when False (e.g., "Select", "Automatically open", "Stream", "Agentic mode")
+- **Canonical XML typos** — `SetLLMAccout`, `AccoutName` (missing 'n'), `RAGPPrompt` (extra P) — these are FileMaker's actual XML
+- **Dual-format Field** — `<Field table="" id="" name=""/>` for field refs OR `<Field>$variable</Field>` with `<Text/>` for variables. Both support `repetition` attribute. This is system-wide.
+- **Typed Field elements** — inside wrappers like `<Field type="ToolCalls">` or `<Field type="Messages">`
+- **`<Text/>` empty element** — appears as sibling when Field holds a variable; not a real HR param
+- **`fileReference` type** — for FileReference elements with UniversalPathList children
+- **DataType codes** — 4-character classic Mac file type codes (e.g., `"TABS"`, `"XLS "`, `"DBF "`)
+- **`findRequests` param type** — used for Query elements; references the shared `find-requests.md` for structure, search operators, and variable rules
+- **No-parameter steps** — self-closing steps with no params get `hrSignature: ""` (empty string, not null)
+- **Behavioral variants on omission** — some steps change purpose when an optional element is omitted (e.g., Go to Field without a Field element exits the current field and implicitly commits the record). The `required` flag in auto-generated entries may be wrong — always verify against user-provided examples.
+- **`flagElement` type** — empty XML elements where presence = on, absence = off (e.g., `<Overwrite/>`, `<ContinueOnError/>`, `<ShowSummary/>`). Different from flag-style booleans which use `state="True"/"False"`.
+- **Snippet independence** — snippet_examples must be fully self-contained. Never reference catalog enum files (`animation-enums.md`, `window-enums.md`, etc.) from snippet comments. Those files are only for catalog discussion/modification. Snippet comments must inline all enumerations and attribute values directly.
+- **`<Text>` dual role** — In most steps, `<Text/>` (empty, self-closing) is a sibling of `<Field>` signaling a variable target. In Insert Text, `<Text>content</Text>` holds the literal text being inserted (raw content, not Calculation/CDATA). Same element name, different purpose — check the step's snippet carefully.
+- **Multi-line raw Text** — `<Text>` content in Insert Text uses `&#xD;` (carriage return) XML character entities for line breaks, not literal newlines.
+- **UniversalPathList `type` always explicit** — "Embedded" and "Reference" are always written as explicit attribute values. Never omit the type attribute to mean Embedded. Auto-generated snippets for Insert PDF, Insert Picture, and Insert Audio/Video incorrectly said "omit type attribute to embed" — all corrected.
+
+## Shared Enum Files
+
+Created in `agent/catalogs/` to avoid duplication across steps:
+
+- **`language-enums.md`** — 54 OverrideLanguage values (HR labels + assumed XML values). Simple names confirmed; special variants (Finnish v<>w, German ä=a, Chinese Pinyin/Stroke, Spanish Modern, Swedish v<>w, Serbian Latin, Greek Mixed) marked ⚠️ as needing authoritative XML verification. Used by Sort Records and Sort Records by Field.
+
+- **`shared-enums.md`** — CharacterSet (with HR labels), DataType file source codes, Profile attributes, ImportOptions, ExportOptions, ExportEntries/SummaryFields. Used by Convert File, Export Records, Import Records.
+- **`animation-enums.md`** — 12 Animation values (HR→XML), LayoutDestination values. Used by steps with layout transitions (Go to Layout, Go to List of Records, Go to Related Record, etc.).
+- **`window-enums.md`** — NewWndStyles attributes, 4 window style types (Document, Floating, Dialog, Card) with supported attribute matrix, new window params. Used by steps that support "New window" mode.
+- **`find-requests.md`** — Query XML structure (RequestRow, Criteria, Field, Text), search operators, variable notes, HR parameters. Used by Enter Find Mode, Perform Find, Constrain Found Set, Extend Found Set.
+
+## Status Values
+
+- `"auto"` — auto-generated, not yet reviewed
+- `"complete"` — fully reviewed with HR data from user
+- `"unfinished"` — partially reviewed, missing some data (e.g., Execute SQL needs ODBC setup)
+
+To find remaining work, scan the catalog for any `"status"` that is not `"complete"`.
+
+## Additional Reference
+
+Official Claris documentation for each script step may be available at `agent/docs/filemaker/script-steps/`. Note: if working in a git worktree, these files are in the main repo — navigate up from the worktree path to find them (e.g., `../../agent/docs/filemaker/script-steps/`). These can be consulted for parameter details, behavior notes, and platform support. **Important:** the official docs only reference terms in the human-readable format — they contain no fmxmlsnippet/XML values. They are useful for understanding HR option names and step behavior, not for XML element or attribute names.

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="62" name="Pause/Resume Script">
+  <Step enable="True" id="0" name="Pause/Resume Script">
     <PauseTime value="ForDuration"/>
     <Calculation><![CDATA[10]]></Calculation>
   </Step>

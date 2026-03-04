@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Insert Picture">
-    <UniversalPathList type="Reference">$path</UniversalPathList>
+    <UniversalPathList type="Embedded">$path</UniversalPathList>
   </Step>
 </fmxmlsnippet>
-<!-- UniversalPathList type: "Reference" (stores only a link to the file) | omit type attribute to embed the file. -->
+<!-- UniversalPathList type: "Embedded" (embeds the file) | "Reference" (stores only a link to the file). -->
 <!-- File path must begin with "image", "imagemac", "imagewin", or "imagelinux". -->
 <!-- Optional: UniversalPathList (source file path). If omitted, the user is prompted with a dialog to select a file. -->
 <!-- A container field must be active before this step runs; use Go to Field if needed. Returns an error if no active container field. -->

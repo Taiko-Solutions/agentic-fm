@@ -2,6 +2,18 @@
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Configure AI Account">
     <LLMType value="ChatGPT"/>
-    <SetLLMAccout/>
+    <SetLLMAccout>
+      <AccoutName>
+        <Calculation><![CDATA["account_name"]]></Calculation>
+      </AccoutName>
+      <AccessAPIKey>
+        <Calculation><![CDATA["api_key"]]></Calculation>
+      </AccessAPIKey>
+    </SetLLMAccout>
   </Step>
 </fmxmlsnippet>
+<!-- LLMType value: "ChatGPT" (OpenAI) | "Anthropic" | "Cohere" | "Other" (Custom endpoint) -->
+<!-- Note: XML element names contain typos: "SetLLMAccout" and "AccoutName" (missing 'n'). These are canonical. -->
+<!-- For "Other" (Custom): also includes <Endpoint><Calculation>...</Calculation></Endpoint> inside SetLLMAccout, and <VerifySSLCertificates state="True|False"/> outside SetLLMAccout. -->
+<!-- All child params (AccoutName, AccessAPIKey, Endpoint) are wrapped inside <SetLLMAccout>. -->
+<!-- VerifySSLCertificates is a sibling of LLMType, not inside SetLLMAccout. Only applies to Custom/Other type. -->

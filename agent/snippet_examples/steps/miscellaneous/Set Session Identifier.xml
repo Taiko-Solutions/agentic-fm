@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
   <Step enable="True" id="0" name="Set Session Identifier">
-    <Calculation><![CDATA[]]></Calculation>
+    <Calculation><![CDATA[Invoices::PrimaryKey]]></Calculation>
   </Step>
 </fmxmlsnippet>
 <!-- Required: Calculation (session identifier as text or calculation whose result is text). -->
