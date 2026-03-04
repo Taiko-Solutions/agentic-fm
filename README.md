@@ -10,6 +10,8 @@ FileMaker Pro is a closed environment — logic and schema live inside a binary 
 - **Save a Copy as XML** — the modern export format accessed via **Tools > Save a Copy as XML...**. Covers scripts, layouts, schema, and more. Can also be triggered programmatically via the Save a Copy as XML script step. This is the format this project uses.
 - **fmxmlsnippet** — the clipboard format FileMaker uses to copy and paste individual objects (script steps, fields, layouts, etc.). This is the format AI uses to deliver generated code back into FileMaker.
 
+# Versión de Taiko Solutions
+
 # 🔧 How to Install
 
 See **[filemaker/README.md](filemaker/README.md)** for the full dependency list and step-by-step setup guide, including how to install `fm-xml-export-exploder`, configure the MBS Plugin, and set up the Python virtual environment.
