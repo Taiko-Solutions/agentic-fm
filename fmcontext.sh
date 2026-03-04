@@ -31,7 +31,7 @@ error() { echo "ERROR: $1"; exit 1; }
 # ---------------------------------------------------------------------------
 # Resolve project root relative to this script's location
 # ---------------------------------------------------------------------------
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
 
 XML_PARSED_DIR="$PROJECT_ROOT/agent/xml_parsed"
@@ -42,7 +42,7 @@ CONTEXT_DIR="$PROJECT_ROOT/agent/context"
 # ---------------------------------------------------------------------------
 usage() {
     cat <<EOF
-Usage: $(basename "$0")
+Usage: $(basename -- "$0")
 
 Generate AI-optimized context index files from the exploded XML in
 agent/xml_parsed/. Output is written to agent/context/.
@@ -71,7 +71,7 @@ EOF
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -h|--help) usage ;;
-        *) error "Unknown option '$1'. Run '$(basename "$0") --help' for usage." ;;
+        *) error "Unknown option '$1'. Run '$(basename -- "$0") --help' for usage." ;;
     esac
 done
 
@@ -119,7 +119,7 @@ get_folder_path() {
 
     # Get the directory portion (everything except the filename)
     local dir_part
-    dir_part="$(dirname "$rel_path")"
+    dir_part="$(dirname -- "$rel_path")"
 
     if [[ "$dir_part" == "." ]]; then
         echo ""
@@ -133,7 +133,8 @@ get_folder_path() {
 # Prepare output directory
 # ---------------------------------------------------------------------------
 if [[ -d "$CONTEXT_DIR" ]]; then
-    rm -rf "$CONTEXT_DIR"/*
+    # Clear contents safely without fragile glob expansion.
+    find "$CONTEXT_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
     msg "Cleared agent/context/"
 else
     mkdir -p "$CONTEXT_DIR"
