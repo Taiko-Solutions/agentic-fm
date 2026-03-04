@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="FMObjectList">
+  <Group groupCollapsed="False" id="74" name="Triggers">
+    <CustomFunction id="37" functionArity="0" visible="True" parameters="" name="TriggersAreActive">
+      <Calculation><![CDATA[/**
+ * =====================================
+ * TriggersAreActive
+ * https://github.com/jbante/FileMaker-Techniques/blob/master/CustomFunctions/Triggers/TriggersAreActive.fmfn
+ *
+ * PURPOSE:
+ *		TriggersAreActive checks a global variable to identify whether or not
+ *		script triggers should be allowed to run. This function is best used in
+ *		concert with the TriggersDisable, TriggersEnable, and TriggersReset
+ *		functions.
+ *
+ * RETURNS:
+ *		False (0) if triggers should be suppressed; True (1) otherwise.
+ *
+ * PARAMETERS: none
+ *
+ * REFERENCED VARIABLES:
+ *		$$~DISABLETRIGGERS (deprecated)
+ *		$$~TRIGGERS_DISABLE
+ *
+ * DEPENDENCIES: none
+ *
+ * EXAMPLE (triggered script):
+ *		If [not TriggersAreActive]
+ *			Exit Script [True	// allow triggering event to proceed]
+ *		End If
+ *
+ * RELEASE: 2013-04-08
+ *
+ * REFERENCES:
+ *		Supressible Triggered Scripts Best Practice: http://filemakerstandards.org/display/bp/Suppressible+Triggered+Scripts
+ * =====================================
+ */
+not (
+	$$~TRIGGERS_DISABLE
+	or $$~DISABLETRIGGERS
+)]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="38" functionArity="0" visible="True" parameters="" name="TriggersDisable">
+      <Calculation><![CDATA[/**
+ * =====================================
+ * TriggersDisable
+ * https://github.com/jbante/FileMaker-Techniques/blob/master/CustomFunctions/Triggers/TriggersDisable.fmfn
+ *
+ * PURPOSE:
+ *		TriggersDisable sets global variables to indicate that the current
+ *		script is suppressing triggers. This script must be called from the
+ *		context of a script; otherwise, it will not suppress triggers, and it
+ *		will return False. In order to be suppressed, a script called via
+ *		trigger should use the TriggersAreActive function to decide whether or
+ *		not to run.
+ *
+ * RETURNS:
+ *		True (1) if called from the context of a script, and therefore triggers
+ *		have been suppressed; False (0) otherwise.
+ *
+ * PARAMETERS: none
+ *
+ * REFERENCED VARIABLES:
+ *		$$~DISABLETRIGGERS (deprecated)
+ *		$$~TRIGGERS_DISABLE
+ *		$$~TRIGGERS_SCRIPTS
+ *		$~triggers_disableKey
+ *
+ * DEPENDENCIES: none
+ *
+ * EXAMPLE (script):
+ *		Set Variable [$!; Value:TriggersDisable]
+ *			# Do something
+ *		Set Variable [$!; Value:TriggersEnable]
+ *
+ * NOTES:
+ *		This function should *always* be used in pairs with the TriggersEnable
+ *		function.
+ *
+ * RELEASE: 2013-04-08
+ *
+ * REFERENCES:
+ *		Supressible Triggered Scripts Best Practice: http://filemakerstandards.org/display/bp/Suppressible+Triggered+Scripts
+ * =====================================
+ */
+Let ( [
+	~scriptName			= Get ( ScriptName ) ;
+	~scriptIsRunning	= not IsEmpty ( Get ( ScriptName ) ) ;
+	~disableIsRunning	= not IsEmpty ( $~triggers_disableKey ) ;
+	$~triggers_disableKey =
+		Case (
+			~disableIsRunning	; $~triggers_disableKey ;
+			~scriptIsRunning	; Get ( UUID )
+		) ;
+	$$~TRIGGERS_SCRIPTS =
+		If ( ~scriptIsRunning and not ~disableIsRunning ;
+			~scriptName
+			& Char ( 9 )	// tab
+			& $~triggers_disableKey
+			& ¶
+			& $$~TRIGGERS_SCRIPTS ;
+		/* Else */
+			$$~TRIGGERS_SCRIPTS
+		) ;
+	$$~TRIGGERS_DISABLE =
+		If ( ~scriptIsRunning ; True ; /* Else */ $$~TRIGGERS_DISABLE ) ;
+	$$~DISABLETRIGGERS = $$~TRIGGERS_DISABLE
+] ;
+	~scriptIsRunning
+)]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="39" functionArity="0" visible="True" parameters="" name="TriggersEnable">
+      <Calculation><![CDATA[/**
+ * =====================================
+ * TriggersEnable
+ * https://github.com/jbante/FileMaker-Techniques/blob/master/CustomFunctions/Triggers/TriggersEnable.fmfn
+ *
+ * PURPOSE:
+ *		TriggersEnable sets global variables to indicate that the current script
+ *		is no longer suppressing triggers. This function will also turn off
+ *		trigger suppression altogether if there are no other scripts suppressing
+ *		triggers. In order to be suppressed, a script called via trigger should
+ *		use the TriggersAreActive function to decide whether or not to run.
+ *
+ * RETURNS:
+ *		True (1) if TriggersEnable successfully removed the current script from
+ *		the list of scripts suppressing triggers; False (0) otherwise.
+ *
+ * PARAMETERS: none
+ *
+ * REFERENCED VARIABLES:
+ *		$$~DISABLETRIGGERS (deprecated)
+ *		$$~TRIGGERS_DISABLE
+ *		$$~TRIGGERS_SCRIPTS
+ *		$~triggers_disableKey
+ *
+ * DEPENDENCIES: none
+ *
+ * EXAMPLE (script):
+ *		Set Variable [$!; Value:TriggersDisable]
+ *		# Do something
+ *		Set Variable [$!; Value:TriggersEnable]
+ *
+ * NOTES:
+ *		This function should *always* be used in pairs with the TriggersDisable
+ *		function.
+ *
+ * RELEASE: 2013-04-08
+ *
+ * REFERENCES:
+ *		Supressible Triggered Scripts Best Practice: http://filemakerstandards.org/display/bp/Suppressible+Triggered+Scripts
+ * =====================================
+ */
+If ( not IsEmpty ( $~triggers_disableKey ) ;
+	Let ( [
+		~scriptsLength = Length ( $$~TRIGGERS_SCRIPTS ) ;
+		~scriptPosition =
+			Position (
+				$$~TRIGGERS_SCRIPTS ;
+				Char ( 9 ) /* tab */ & $~triggers_disableKey & ¶ ;
+				~scriptsLength ;
+				-1
+			) ;
+		~breakPosition =
+			If ( ~scriptPosition > 0 ;
+				Position ( $$~TRIGGERS_SCRIPTS ; ¶ ; ~scriptPosition ; 1 ) ;
+				/* Else */ 0
+			) ;
+		$$~TRIGGERS_SCRIPTS =
+			Right ( $$~TRIGGERS_SCRIPTS ; ~scriptsLength - ~breakPosition ) ;
+		$$~TRIGGERS_DISABLE =
+			If ( not IsEmpty ( $$~TRIGGERS_SCRIPTS ) and $$~TRIGGERS_DISABLE ;
+				True ;
+				/* Else */ ""
+			) ;
+		$$~DISABLETRIGGERS = $$~TRIGGERS_DISABLE ;
+		$~triggers_disableKey = ""
+	] ;
+		""
+	)
+)]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="40" functionArity="0" visible="True" parameters="" name="TriggersReset">
+      <Calculation><![CDATA[/**
+ * =====================================
+ * TriggersReset
+ * https://github.com/jbante/FileMaker-Techniques/blob/master/CustomFunctions/Triggers/TriggersReset.fmfn
+ *
+ * PURPOSE:
+ *		TriggersReset sets global variables to indicate that script triggers
+ *		should be allowed to run, regardless of any persisting instructions to
+ *		the contrary from any script. This may be useful to recover from a
+ *		situation where a script forgot to call TriggersEnable at the end of
+ *		operation. In order to be suppressed, a script called via trigger should
+ *		use the TriggersAreActive function to decide whether or not to run.
+ *
+ * RETURNS: "" (null)
+ *
+ * PARAMETERS: none
+ *
+ * REFERENCED VARIABLES:
+ *		$$~DISABLETRIGGERS (deprecated)
+ *		$$~TRIGGERS_DISABLE
+ *		$$~TRIGGERS_SCRIPTS
+ *		$~triggers_disableKey
+ *
+ * DEPENDENCIES: none
+ *
+ * RELEASE: 2013-04-08
+ *
+ * REFERENCES:
+ *		Supressible Triggered Scripts Best Practice: http://filemakerstandards.org/display/bp/Suppressible+Triggered+Scripts
+ * =====================================
+ */
+Let ( [
+	$$~TRIGGERS_SCRIPTS		= "" ;
+	$$~TRIGGERS_DISABLE		= "" ;
+	$$~DISABLETRIGGERS		= "" ;
+	$~triggers_disableKey	= ""
+] ;
+	""
+)]]></Calculation>
+    </CustomFunction>
+  </Group>
+</fmxmlsnippet>
