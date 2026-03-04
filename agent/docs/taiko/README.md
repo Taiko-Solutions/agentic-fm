@@ -27,6 +27,15 @@ Curated documents describing Taiko's architectural patterns and development deci
 | `three-layer-architecture.md` | Interface, Controller, Data layer separation |
 | `utility-transactional.md` | Non-destructive editing with global fields and transactions |
 | `logging-system.md` | Error logging to Log table with retry capability |
+| `executesql-pattern.md` | Resilient ExecuteSQL pattern with SQL.Get* functions |
+
+### custom_functions/
+
+fmxmlsnippet XML files containing custom function definitions that every Taiko solution should include. These can be pasted directly into FileMaker.
+
+| File | Description |
+|------|-------------|
+| `sql-cfs.xml` | fm-sql-cfs module (Geist Interactive) — SQL.GetFieldName, SQL.GetTableName, SQL.GetColumn, SQL.GetColumn2Fields, SQL.GetColumnStatement, SQL.GetRecordsAsJSON, SQL.RecordExists |
 
 ### templates/
 

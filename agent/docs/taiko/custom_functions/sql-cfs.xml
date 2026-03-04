@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="FMObjectList">
+  <CustomFunction id="77" functionArity="3" visible="True" parameters="columnField;whereField;whereValue" name="SQL.GetColumn">
+    <Calculation><![CDATA[/**
+ *
+ * get the values in a field using two WHERE field searches
+ *
+ * @param {reference} columnField
+ * @param {reference} whereField
+ * @param {string} whereValue
+ * @param {reference} whereField2
+ * @param {string} whereValue2
+ *
+ * @returns {string} the list of values in the field targeted with 'columnField'
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-19, todd@geistinteractive.com
+ *
+ */
+Let(
+[
+sql = SQL.GetColumnStatement (columnField; whereField ; "?" )
+];
+ExecuteSQL (
+sql ;
+"" ;"" ; whereValue
+)
+)]]></Calculation>
+  </CustomFunction>
+  <CustomFunction id="78" functionArity="5" visible="True" parameters="columnField;whereField;whereValue;whereField2;whereValue2" name="SQL.GetColumn2Fields">
+    <Calculation><![CDATA[/**
+ *
+ * get the values in a field using two WHERE field searches
+ *
+ * @param {reference} columnField
+ * @param {reference} whereField
+ * @param {string} whereValue
+ * @param {reference} whereField2
+ * @param {string} whereValue2
+ *
+ * @returns {string} the list of values in the field targeted with 'columnField'
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-17, todd@geistinteractive.com
+ *
+ */
+Let(
+[
+sql = SQL.GetColumnStatement (columnField; whereField ; "?" ) ;
+sql = List(
+"SELECT ''|| " & SQL.GetFieldName ( columnField ) ;
+"FROM " & SQL.GetTableName ( whereField ) ;
+"WHERE " & SQL.GetFieldName ( whereField ) & "=?" ;
+"AND" ;
+SQL.GetFieldName ( whereField2 ) & "=?"
+)
+];
+ExecuteSQL (
+sql ;
+"" ;"" ; whereValue; whereValue2
+)
+)]]></Calculation>
+  </CustomFunction>
+  <CustomFunction id="79" functionArity="3" visible="True" parameters="theField;whereField;whereValue" name="SQL.GetColumnStatement">
+    <Calculation><![CDATA[/**
+ *
+ * get the values in a field using two WHERE field searches
+ *
+ * @param {reference} columnField
+ * @param {reference} whereField
+ * @param {string} whereValue
+ * @param {reference} whereField2
+ * @param {string} whereValue2
+ *
+ * @returns {string} the list of values in the field targeted with 'columnField'
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-17, todd@geistinteractive.com
+ *
+ */
+List(
+"SELECT " & SQL.GetFieldName ( theField );
+"FROM " & SQL.GetTableName ( theField );
+Case(
+   not IsEmpty( GetFieldName( whereField) ) ; "WHERE " & SQL.GetFieldName(whereField) & "=" & whereValue;
+  ""
+)
+)]]></Calculation>
+  </CustomFunction>
+  <CustomFunction id="80" functionArity="1" visible="True" parameters="field" name="SQL.GetFieldName">
+    <Calculation><![CDATA[/**
+ *
+ * get the fully qualified SQL Name of a Field
+ *
+ * @param {reference} field
+ *
+ * @returns {string}
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-17, todd@geistinteractive.com
+ *
+ */
+Let(
+[
+q = "\"";
+fn = GetFieldName( field );
+fn = Case( fn = "?" ; field; fn);
+field =   q &  Substitute(  fn; "::" ; q & "." & q ) & q
+];
+field
+)]]></Calculation>
+  </CustomFunction>
+  <CustomFunction id="81" functionArity="2" visible="True" parameters="whereField;whereValue" name="SQL.GetRecordsAsJSON">
+    <Calculation><![CDATA[/**
+ *
+ * Searches the Table specified by the WhereField and retuns a JSON Array
+ * uses SQL for the search and a field called AsJSON as the json object for the record
+ *
+ * @param {fieldReferece} whereField the field to search using a SQL "="
+ * @param {fieldReferece} whereValue the value to searhc for
+ *
+ * @return {array}
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-17, todd@geistinteractive.com
+ *
+ */
+Let(
+[
+sql = List(
+"SELECT ''|| " & SQL.GetTableName ( whereField ) & ".\"AsJSON\"" ;
+"FROM " & SQL.GetTableName ( whereField ) ;
+"WHERE " & SQL.GetFieldName ( whereField ) & "=?"
+);
+result = ExecuteSQL (
+sql ;
+"" ;"," ; whereValue
+)
+];
+"[" & result & "]"
+)]]></Calculation>
+  </CustomFunction>
+  <CustomFunction id="82" functionArity="1" visible="True" parameters="field" name="SQL.GetTableName">
+    <Calculation><![CDATA[/**
+ *
+ * get the fully qualified SQL Name of a Table
+ *
+ * @param {reference} field
+ *
+ * @returns {string}
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-17, todd@geistinteractive.com
+ *
+ */
+Let(
+[
+q = "\"";
+fn = GetFieldName( field );
+fn = Case( fn = "?" ; field; fn);
+table =  Quote(GetValue ( Substitute(    fn ;  "::" ; "¶"  ) ; 1 ) )
+];
+table
+)]]></Calculation>
+  </CustomFunction>
+  <CustomFunction id="83" functionArity="2" visible="True" parameters="WhereField;WhereValue" name="SQL.RecordExists">
+    <Calculation><![CDATA[/**
+ *
+ * tests to so if the record target by the SQL Where Field exists
+ * often used to see if a record with a primary key exists
+ *
+ * @param {refernce} WhereField the field to search with SQL
+ * @param {string} WhereValue
+ *
+ * @returns {boolean}
+ *
+ * @module fm-sql-cfs
+ * @see https://github.com/karbonfm/fm-sql-cfs
+ *
+ * @history  2017-11-17, todd@geistinteractive.com
+ *
+ */
+SQL.GetColumnStatement ( WhereField ; WhereField ;  WhereValue ) <> ""]]></Calculation>
+  </CustomFunction>
+</fmxmlsnippet>

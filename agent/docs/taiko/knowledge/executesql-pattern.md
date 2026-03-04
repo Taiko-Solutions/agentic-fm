@@ -12,13 +12,17 @@
 
 ## Custom functions disponibles
 
+XML source: `agent/docs/taiko/custom_functions/sql-cfs.xml` (module [fm-sql-cfs](https://github.com/karbonfm/fm-sql-cfs) by Geist Interactive)
+
 | Función | Propósito |
 |---------|-----------|
-| `SQL.GetTableName ( campo )` | Devuelve el nombre SQL de la tabla base del campo |
-| `SQL.GetFieldName ( campo )` | Devuelve el nombre SQL del campo |
-| `SQL.GetColumn ( campo ; separadorFila ; separadorColumna ; query... )` | ExecuteSQL con resolución automática |
-| `SQL.GetColumn2Fields ( campo1 ; campo2 ; ... )` | Dos columnas con resolución |
-| `SQL.GetRecordsAsJSON ( ... )` | Resultado como JSON |
+| `SQL.GetTableName ( campo )` | Devuelve el nombre SQL (quoted) de la tabla base del campo |
+| `SQL.GetFieldName ( campo )` | Devuelve el nombre SQL (quoted) del campo como `"TO"."Field"` |
+| `SQL.GetColumnStatement ( theField ; whereField ; whereValue )` | Construye un SELECT/FROM/WHERE como texto — usado internamente por las demás |
+| `SQL.GetColumn ( columnField ; whereField ; whereValue )` | Ejecuta SELECT de un campo con un WHERE |
+| `SQL.GetColumn2Fields ( columnField ; whereField ; whereValue ; whereField2 ; whereValue2 )` | SELECT con dos condiciones WHERE (AND) |
+| `SQL.GetRecordsAsJSON ( whereField ; whereValue )` | Busca registros y devuelve un JSON array usando el campo `AsJSON` de la tabla |
+| `SQL.RecordExists ( whereField ; whereValue )` | Devuelve booleano: ¿existe al menos un registro con ese valor? |
 
 ## Patrón estándar
 
