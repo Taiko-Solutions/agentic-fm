@@ -30,7 +30,7 @@ error() { echo "ERROR: $1"; exit 1; }
 # ---------------------------------------------------------------------------
 # Resolve project root relative to this script's location
 # ---------------------------------------------------------------------------
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$SCRIPT_DIR"
 
 XML_EXPORTS_DIR="$PROJECT_ROOT/xml_exports"
@@ -52,7 +52,7 @@ FM_XML_EXPLODER_BIN="${FM_XML_EXPLODER_BIN:-}"
 # ---------------------------------------------------------------------------
 usage() {
     cat <<EOF
-Usage: $(basename "$0") -s <solution-name> <path-to-export> [options]
+Usage: $(basename -- "$0") -s <solution-name> <path-to-export> [options]
 
 Parse a FileMaker XML export and archive it under a solution-specific, dated
 folder in xml_exports/. The export is then exploded into agent/xml_parsed/
@@ -77,9 +77,9 @@ Environment Variables:
                                   Use this if the binary is not in PATH (e.g., ~/bin/fm-xml-export-exploder)
 
 Examples:
-  $(basename "$0") -s "Invoice Solution" /path/to/export.xml
-  $(basename "$0") -s "Invoice Solution" /path/to/exports/ --all-lines
-  FM_XML_EXPLODER_BIN=~/bin/fm-xml-export-exploder $(basename "$0") -s "Invoice Solution" /path/to/export.xml
+  $(basename -- "$0") -s "Invoice Solution" /path/to/export.xml
+  $(basename -- "$0") -s "Invoice Solution" /path/to/exports/ --all-lines
+  FM_XML_EXPLODER_BIN=~/bin/fm-xml-export-exploder $(basename -- "$0") -s "Invoice Solution" /path/to/export.xml
 EOF
     exit 0
 }
@@ -118,7 +118,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         -*)
-            error "Unknown option '$1'. Run '$(basename "$0") --help' for usage."
+            error "Unknown option '$1'. Run '$(basename -- "$0") --help' for usage."
             ;;
         *)
             if [[ -n "$EXPORT_PATH" ]]; then
@@ -131,15 +131,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$SOLUTION_NAME" ]]; then
-    error "No solution name provided. Use -s <solution-name>. Run '$(basename "$0") --help' for usage."
+    error "No solution name provided. Use -s <solution-name>. Run '$(basename -- "$0") --help' for usage."
 fi
 
 if [[ -z "$EXPORT_PATH" ]]; then
-    error "No export path provided. Run '$(basename "$0") --help' for usage."
+    error "No export path provided. Run '$(basename -- "$0") --help' for usage."
 fi
 
 # Resolve to absolute path
-EXPORT_PATH="$(cd "$(dirname "$EXPORT_PATH")" && pwd)/$(basename "$EXPORT_PATH")"
+EXPORT_PATH="$(cd "$(dirname -- "$EXPORT_PATH")" && pwd)/$(basename -- "$EXPORT_PATH")"
 
 if [[ ! -e "$EXPORT_PATH" ]]; then
     error "Path does not exist: $EXPORT_PATH"
@@ -160,7 +160,7 @@ if [[ -n "$FM_XML_EXPLODER_BIN" ]]; then
         fi
         FM_XML_EXPLODER_BIN="${FM_XML_EXPLODER_BIN/#\~/$HOME}"
     fi
-    
+
     if [[ -x "$FM_XML_EXPLODER_BIN" ]]; then
         EXPLODER_CMD="$FM_XML_EXPLODER_BIN"
         msg "Using fm-xml-export-exploder from: $EXPLODER_CMD"
@@ -192,17 +192,18 @@ if [[ -d "$ARCHIVE_DIR" ]]; then
 fi
 
 mkdir -p "$ARCHIVE_DIR"
-msg "Created archive folder: xml_exports/$SOLUTION_NAME/$(basename "$ARCHIVE_DIR")"
+msg "Created archive folder: xml_exports/$SOLUTION_NAME/$(basename -- "$ARCHIVE_DIR")"
 
 # ---------------------------------------------------------------------------
 # Step 2: Copy export to archive
 # ---------------------------------------------------------------------------
 if [[ -f "$EXPORT_PATH" ]]; then
-    cp "$EXPORT_PATH" "$ARCHIVE_DIR/"
-    msg "Copied file: $(basename "$EXPORT_PATH") -> xml_exports/$SOLUTION_NAME/$(basename "$ARCHIVE_DIR")/"
+    cp -- "$EXPORT_PATH" "$ARCHIVE_DIR/"
+    msg "Copied file: $(basename -- "$EXPORT_PATH") -> xml_exports/$SOLUTION_NAME/$(basename -- "$ARCHIVE_DIR")/"
 elif [[ -d "$EXPORT_PATH" ]]; then
-    cp -R "$EXPORT_PATH"/* "$ARCHIVE_DIR"/
-    msg "Copied directory contents -> xml_exports/$SOLUTION_NAME/$(basename "$ARCHIVE_DIR")/"
+    # Copy directory contents robustly (includes dotfiles, safe with odd names).
+    cp -R -- "$EXPORT_PATH"/. "$ARCHIVE_DIR"/
+    msg "Copied directory contents -> xml_exports/$SOLUTION_NAME/$(basename -- "$ARCHIVE_DIR")/"
 else
     error "Path is neither a file nor a directory: $EXPORT_PATH"
 fi
@@ -211,7 +212,8 @@ fi
 # Step 3: Clear xml_parsed
 # ---------------------------------------------------------------------------
 if [[ -d "$XML_PARSED_DIR" ]]; then
-    rm -rf "$XML_PARSED_DIR"/*
+    # Clear contents safely without fragile glob expansion.
+    find "$XML_PARSED_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
     msg "Cleared agent/xml_parsed/"
 else
     mkdir -p "$XML_PARSED_DIR"
@@ -222,7 +224,7 @@ fi
 # Step 4: Run fm-xml-export-exploder
 # ---------------------------------------------------------------------------
 msg "Running fm-xml-export-exploder..."
-msg "  Source: xml_exports/$SOLUTION_NAME/$(basename "$ARCHIVE_DIR")"
+msg "  Source: xml_exports/$SOLUTION_NAME/$(basename -- "$ARCHIVE_DIR")"
 msg "  Target: agent/xml_parsed/"
 msg "  Output tree: $OUTPUT_TREE"
 if [[ ${#EXPLODER_FLAGS[@]} -gt 0 ]]; then
@@ -243,7 +245,7 @@ DIR_COUNT="$(find "$XML_PARSED_DIR" -type d | wc -l | tr -d ' ')"
 
 echo ""
 msg "Parse complete."
-msg "  Archived to: xml_exports/$SOLUTION_NAME/$(basename "$ARCHIVE_DIR")/"
+msg "  Archived to: xml_exports/$SOLUTION_NAME/$(basename -- "$ARCHIVE_DIR")/"
 msg "  Parsed into: agent/xml_parsed/ ($FILE_COUNT files in $DIR_COUNT directories)"
 
 # ---------------------------------------------------------------------------
