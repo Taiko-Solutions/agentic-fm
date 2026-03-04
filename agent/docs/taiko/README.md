@@ -36,6 +36,7 @@ fmxmlsnippet XML files containing custom function definitions that every Taiko s
 | File | Description |
 |------|-------------|
 | `sql-cfs.xml` | fm-sql-cfs module (Geist Interactive) — SQL.GetFieldName, SQL.GetTableName, SQL.GetColumn, SQL.GetColumn2Fields, SQL.GetColumnStatement, SQL.GetRecordsAsJSON, SQL.RecordExists |
+| `clew.xml` | Clew error handling framework (Marcelo Piñeyro / Soliant) — 40 functions: error.*, _error_* constants, json.* utilities, Log.*, getScriptEnvironment, IsRunningOnServer |
 
 ### templates/
 

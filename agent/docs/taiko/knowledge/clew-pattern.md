@@ -4,6 +4,8 @@ The Clew pattern is Taiko's standard error handling system for FileMaker. It imp
 
 **NOTE:** This pattern relies on a suite of `error.*` custom functions that must be present in the FileMaker solution. These functions manage an internal error state (errorTrace) that propagates through the script chain.
 
+XML source: `agent/docs/taiko/custom_functions/clew.xml` (40 functions — Clew framework by Marcelo Piñeyro / Soliant Consulting, with Taiko adaptations)
+
 ## Pseudo Try-Catch Structure
 
 Every Clew script follows this skeleton:
