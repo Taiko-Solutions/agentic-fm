@@ -209,12 +209,12 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# Step 3: Clear xml_parsed
+# Step 3: Clear xml_parsed for this solution only
 # ---------------------------------------------------------------------------
 if [[ -d "$XML_PARSED_DIR" ]]; then
-    # Clear contents safely without fragile glob expansion.
-    find "$XML_PARSED_DIR" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
-    msg "Cleared agent/xml_parsed/"
+    # Remove only subdirectories named after this solution, preserving other solutions
+    find "$XML_PARSED_DIR" -mindepth 2 -maxdepth 2 -type d -name "$SOLUTION_NAME" -exec rm -rf {} +
+    msg "Cleared agent/xml_parsed/*/$SOLUTION_NAME/"
 else
     mkdir -p "$XML_PARSED_DIR"
     msg "Created agent/xml_parsed/"
