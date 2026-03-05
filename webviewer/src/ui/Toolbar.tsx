@@ -7,6 +7,7 @@ interface ToolbarProps {
   onToggleXmlPreview: () => void;
   onToggleChat: () => void;
   onRefreshContext: () => void;
+  onClearChat: () => void;
   onNewScript: () => void;
   onValidate: () => void;
   onClipboard: () => void;
@@ -21,6 +22,7 @@ export function Toolbar({
   onToggleXmlPreview,
   onToggleChat,
   onRefreshContext,
+  onClearChat,
   onNewScript,
   onValidate,
   onClipboard,
@@ -66,6 +68,12 @@ export function Toolbar({
       >
         AI Chat
       </ToolbarButton>
+
+      {showChat && (
+        <ToolbarButton onClick={onClearChat} title="Start a new AI chat (clears history)">
+          New Chat
+        </ToolbarButton>
+      )}
 
       <div class="flex-1" />
 
