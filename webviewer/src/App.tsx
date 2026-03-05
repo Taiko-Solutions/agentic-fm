@@ -7,7 +7,7 @@ import { ChatPanel } from '@/ai/chat/ChatPanel';
 import { AISettings } from '@/ai/settings/AISettings';
 import { LoadScriptDialog } from '@/ui/LoadScriptDialog';
 import type { FMContext } from '@/context/types';
-import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, validateSnippet, clipboardWrite, writeSandbox } from '@/api/client';
+import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, validateSnippet, clipboardWrite, writeSandbox } from '@/api/client';
 import type { StepInfo } from '@/api/client';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import { hrToXml, loadCatalog } from '@/converter/hr-to-xml';
@@ -25,6 +25,8 @@ export function App() {
   const [steps, setSteps] = useState<StepInfo[]>([]);
   const [catalog, setCatalog] = useState<StepCatalogEntry[]>([]);
   const [promptMarker, setPromptMarker] = useState('prompt');
+  const [codingConventions, setCodingConventions] = useState('');
+  const [knowledgeDocs, setKnowledgeDocs] = useState('');
   const scriptNameRef = useRef('');
 
   // Keep ref in sync so the autosave effect always has the latest name
@@ -40,6 +42,10 @@ export function App() {
       loadCatalog(cat);
     }).catch(() => {});
     fetchSettings().then(s => setPromptMarker(s.promptMarker || 'prompt')).catch(() => {});
+    fetchDocs().then(d => {
+      setCodingConventions(d.conventions);
+      setKnowledgeDocs(d.knowledge);
+    }).catch(() => {});
   }, []);
 
   // Restore draft on mount — skip if it's just the sample boilerplate
@@ -199,6 +205,8 @@ export function App() {
                 catalog={catalog}
                 editorContent={editorContent}
                 promptMarker={promptMarker}
+                codingConventions={codingConventions}
+                knowledgeDocs={knowledgeDocs}
                 onInsertScript={handleInsertScript}
               />
             </div>

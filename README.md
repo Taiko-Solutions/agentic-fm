@@ -104,6 +104,8 @@ npm run dev
 
 The webviewer can run as a standalone browser app or embedded inside a FileMaker WebViewer object. When embedded, FileMaker can push context and load scripts via the bridge API. AI providers include Anthropic API, OpenAI API, and Claude Code CLI proxy.
 
+**The webviewer AI and the CLI/IDE agent have different capabilities.** The CLI agent has full filesystem access, reads knowledge docs selectively via the MANIFEST, and writes validated fmxmlsnippet to `agent/sandbox/`. The webviewer AI works from a pre-loaded system prompt — it has access to the same coding conventions and knowledge base, but cannot access index files, `xml_parsed/`, or the snippet library, and cannot run validation or clipboard scripts directly. See [CLI/IDE vs Webviewer AI](webviewer/WEBVIEWER_INTEGRATION.md#clide-vs-webviewer-ai--capability-comparison) in `WEBVIEWER_INTEGRATION.md` for a full comparison and token budget breakdown.
+
 See `webviewer/WEBVIEWER_INTEGRATION.md` for full details.
 
 # Project Structure

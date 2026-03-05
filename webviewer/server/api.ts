@@ -96,6 +96,31 @@ export function apiMiddleware(): Plugin {
           return;
         }
 
+        // --- GET /api/docs ---
+        if (req.method === 'GET' && pathname === '/api/docs') {
+          const conventionsPath = path.join(agent, 'docs', 'CODING_CONVENTIONS.md');
+          const knowledgeDir = path.join(agent, 'docs', 'knowledge');
+          let conventions = '';
+          let knowledge = '';
+          try {
+            conventions = fs.readFileSync(conventionsPath, 'utf-8');
+          } catch { /* not found */ }
+          try {
+            const files = fs.readdirSync(knowledgeDir)
+              .filter(f => f.endsWith('.md') && f !== 'MANIFEST.md')
+              .sort();
+            knowledge = files
+              .map(f => {
+                const content = fs.readFileSync(path.join(knowledgeDir, f), 'utf-8');
+                return `## ${f.replace('.md', '')}\n\n${content}`;
+              })
+              .join('\n\n---\n\n');
+          } catch { /* not found */ }
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ conventions, knowledge }));
+          return;
+        }
+
         // --- GET /api/index/:name ---
         const indexMatch = pathname.match(/^\/api\/index\/(.+)$/);
         if (req.method === 'GET' && indexMatch) {

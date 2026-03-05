@@ -216,6 +216,54 @@ Three provider options, selected in the AI Settings panel:
 
 The system prompt (`src/ai/prompt/system-prompt.ts`) provides the AI with context about the current CONTEXT.json, the step catalog, and FileMaker script conventions.
 
+### CLI/IDE vs Webviewer AI — Capability Comparison
+
+The two interaction modes use fundamentally different context delivery strategies:
+
+| Capability | CLI / IDE (Claude Code) | Webviewer AI |
+|---|---|---|
+| Filesystem access | Full (read/write) | None |
+| CONTEXT.json | Read on demand via tool call | Formatted and injected at startup |
+| Coding conventions | Read on demand | Injected into every system prompt |
+| Knowledge base | Selective: scans MANIFEST, reads only matching docs | All docs injected wholesale |
+| Step catalog | Grepped per-step (~60 lines each) | All known HR signatures injected |
+| Index files (`context/*.index`) | Grepped on demand | Not available |
+| `xml_parsed/` | Grepped on demand | Not available |
+| Script validation | Runs `validate_snippet.py` subprocess | Via `/api/validate` endpoint |
+| Clipboard | Runs `clipboard.py` subprocess | Via `/api/clipboard` endpoints |
+| Token cost | Variable — only what's needed, when needed | Fixed upfront injection on every request |
+| Output format | fmxmlsnippet XML → written to `agent/sandbox/` | HR script text → converted client-side |
+| Multi-step workflows | Full agentic tool use | Single-turn chat |
+
+The CLI agent can also access the full `agent/library/` of reusable snippets, the `snippet_examples/` templates for complex steps, and can run arbitrary shell commands as part of its toolchain. None of these are available to the webviewer AI.
+
+### Token Budget (Webviewer)
+
+Every AI request in the webviewer carries a fixed system prompt overhead. With all resources injected, the breakdown is:
+
+| Resource | Approx. tokens | Notes |
+|---|---|---|
+| Base instructions | ~400 | Format rules, output constraints |
+| Step catalog (known signatures) | ~3,800 | 197 steps with HR signatures |
+| CONTEXT.json (formatted) | ~500 – 2,000 | Varies by solution size |
+| Coding conventions | ~2,100 | `agent/docs/CODING_CONVENTIONS.md` |
+| Knowledge docs — `field-references.md` | ~1,275 | |
+| Knowledge docs — `found-sets.md` | ~3,000 | |
+| Knowledge docs — `terminology.md` | ~11,400 | Largest single doc (~73% of knowledge total) |
+| **Total (approximate)** | **~22,500 – 24,000** | Before conversation history |
+
+`terminology.md` dominates — it is a broad FileMaker terminology reference (~45 KB) rather than targeted behavioral guidance. As the knowledge base grows, blanket injection will become increasingly expensive.
+
+### Trade-offs and Mitigations
+
+The CLI approach is selective and efficient: the MANIFEST is scanned for keyword matches against the current task, and only relevant docs are read. The webviewer approach is simpler — no filesystem access means no MANIFEST-based filtering — but uses a fixed token budget on every request regardless of relevance.
+
+Options for managing token cost as the knowledge base grows:
+
+1. **Selective injection** — match knowledge doc keywords against the `task` field in CONTEXT.json and only inject relevant docs (mirrors the CLI approach)
+2. **Exclude reference docs** — documents like `terminology.md` are reference material, not behavioral guidance; they are less useful pre-injected than the behavioral docs (`found-sets.md`, `field-references.md`)
+3. **User setting** — expose a toggle in AI Settings to enable/disable knowledge injection per session
+
 ---
 
 ## FileMaker Bridge

@@ -11,6 +11,7 @@ export function buildSystemPrompt(opts: {
   steps?: StepInfo[];
   catalog?: StepCatalogEntry[];
   codingConventions?: string;
+  knowledgeDocs?: string;
   promptMarker?: string;
 }): string {
   const sections: string[] = [];
@@ -38,6 +39,11 @@ Format rules:
   // Coding conventions
   if (opts.codingConventions) {
     sections.push(`## Coding Conventions\n\n${opts.codingConventions}`);
+  }
+
+  // Knowledge base docs
+  if (opts.knowledgeDocs) {
+    sections.push(`## FileMaker Knowledge Base\n\nThe following documents contain curated behavioral insights, gotchas, and practical patterns for FileMaker scripting. Apply these when relevant to the current task.\n\n${opts.knowledgeDocs}`);
   }
 
   // Available step types

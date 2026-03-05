@@ -27,6 +27,17 @@ export async function fetchStepCatalog(): Promise<StepCatalogEntry[]> {
   return res.json();
 }
 
+export interface DocsResult {
+  conventions: string;
+  knowledge: string;
+}
+
+export async function fetchDocs(): Promise<DocsResult> {
+  const res = await fetch(`${BASE}/api/docs`);
+  if (!res.ok) throw new Error('Failed to fetch docs');
+  return res.json();
+}
+
 export async function fetchSnippet(category: string, step: string): Promise<string> {
   const res = await fetch(`${BASE}/api/snippet/${encodeURIComponent(category)}/${encodeURIComponent(step)}`);
   if (!res.ok) throw new Error(`Failed to fetch snippet: ${category}/${step}`);
