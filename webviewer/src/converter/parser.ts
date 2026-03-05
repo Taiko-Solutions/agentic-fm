@@ -91,7 +91,76 @@ export function parseLine(raw: string, lineNumber: number): ParsedLine {
 
 /** Parse all lines of HR script text */
 export function parseScript(text: string): ParsedLine[] {
-  return text.split('\n').map((line, i) => parseLine(line, i + 1));
+  const rawLines = text.split('\n');
+  const merged = mergeMultilineStatements(rawLines);
+  return merged.map((m) => parseLine(m.text, m.sourceLineNumber));
+}
+
+interface MergedLine {
+  text: string;
+  sourceLineNumber: number;
+}
+
+/**
+ * Merge continuation lines into their opening statement.
+ * When a line opens a bracket `[` without a matching `]` on the same line,
+ * subsequent lines are appended (joined with `\n`) until brackets balance.
+ *
+ * Comment lines (`#`) and empty lines at bracket depth 0 pass through unchanged.
+ * Quoted strings are respected when tracking bracket depth.
+ */
+function mergeMultilineStatements(lines: string[]): MergedLine[] {
+  const result: MergedLine[] = [];
+  let accumulator = '';
+  let startLine = 1;
+  let bracketDepth = 0;
+  let inQuote = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    // If we're not accumulating and this is a comment or empty line, pass through
+    if (bracketDepth === 0 && (trimmed.startsWith('#') || trimmed === '')) {
+      result.push({ text: line, sourceLineNumber: i + 1 });
+      continue;
+    }
+
+    // Start or continue accumulation
+    if (bracketDepth === 0) {
+      accumulator = line;
+      startLine = i + 1;
+    } else {
+      accumulator += '\n' + line;
+    }
+
+    // Scan this line for bracket depth changes
+    for (let j = 0; j < line.length; j++) {
+      const ch = line[j];
+      if (ch === '"') {
+        inQuote = !inQuote;
+        continue;
+      }
+      if (inQuote) continue;
+      if (ch === '[') bracketDepth++;
+      if (ch === ']') bracketDepth--;
+    }
+
+    // When brackets are balanced, emit the accumulated line
+    if (bracketDepth <= 0) {
+      result.push({ text: accumulator, sourceLineNumber: startLine });
+      accumulator = '';
+      bracketDepth = 0;
+      inQuote = false;
+    }
+  }
+
+  // Flush any remaining accumulation (unbalanced brackets)
+  if (accumulator) {
+    result.push({ text: accumulator, sourceLineNumber: startLine });
+  }
+
+  return result;
 }
 
 /**

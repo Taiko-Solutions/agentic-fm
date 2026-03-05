@@ -193,8 +193,16 @@ registerHrToXml({
   stepNames: ['Set Variable'],
   toXml(line: ParsedLine): string {
     const name = line.params[0] ?? '$var';
-    const value = line.params[1] ?? '';
-    const rep = line.params[2];
+    let value = line.params[1] ?? '';
+    let rep = line.params[2];
+    // Strip "Value:" label prefix (same pattern as Exit Script's "Result:")
+    const valueMatch = value.match(/^Value:\s*([\s\S]*)$/i);
+    if (valueMatch) value = valueMatch[1].trim();
+    // Strip "Repetition:" label prefix
+    if (rep) {
+      const repMatch = rep.match(/^Repetition:\s*([\s\S]*)$/i);
+      if (repMatch) rep = repMatch[1].trim();
+    }
     const lines = [
       stepOpen('Set Variable', !line.disabled),
       '    <Value>',

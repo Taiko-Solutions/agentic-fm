@@ -32,7 +32,8 @@ Format rules:
   End If
 - Field references use Table::Field notation: Invoices::Total
 - Variables use $ prefix (local) or $$ prefix (global): $invoiceId, $$USER
-- Let variables use ~ prefix in calculations: ~lineTotal`);
+- Let variables use ~ prefix in calculations: ~lineTotal
+- CRITICAL: All indentation inside calculations (Let, Case, List, etc.) MUST use hard tab characters, never spaces. This applies to any expression content inside square brackets.`);
 
   // Coding conventions
   if (opts.codingConventions) {

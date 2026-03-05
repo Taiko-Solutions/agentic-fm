@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from 'preact/hooks';
 import * as monaco from 'monaco-editor';
 import { registerFileMakerLanguage, attachDiagnostics, LANGUAGE_ID } from './language/filemaker-script';
+import { editorConfig } from './editor.config';
 import { fetchStepCatalog } from '@/api/client';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import type { FMContext } from '@/context/types';
@@ -45,24 +46,11 @@ export function EditorPanel({ value, onChange, context }: EditorPanelProps) {
     if (!containerRef.current) return;
 
     const editor = monaco.editor.create(containerRef.current, {
+      ...editorConfig,
       value,
       language: LANGUAGE_ID,
       theme: 'filemaker-dark',
       automaticLayout: true,
-      fontSize: 14,
-      lineNumbers: 'on',
-      minimap: { enabled: false },
-      scrollBeyondLastLine: false,
-      wordWrap: 'on',
-      tabSize: 4,
-      insertSpaces: true,
-      renderWhitespace: 'selection',
-      bracketPairColorization: { enabled: true },
-      guides: {
-        indentation: true,
-        bracketPairs: true,
-      },
-      padding: { top: 8, bottom: 8 },
     });
 
     editorRef.current = editor;

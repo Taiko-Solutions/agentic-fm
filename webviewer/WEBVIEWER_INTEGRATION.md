@@ -92,6 +92,7 @@ webviewer/
     │   └── __tests__/
     ├── editor/
     │   ├── EditorPanel.tsx    # Monaco editor wrapper
+    │   ├── editor.config.ts   # Monaco editor configuration (font, tabs, whitespace, guides)
     │   ├── language/
     │   │   ├── filemaker-script.ts   # Language registration
     │   │   ├── monarch.ts            # Syntax tokenizer (tokenizes HR script)
@@ -296,6 +297,26 @@ Any endpoint that reads context or xml_parsed data uses `mainAgentDir()`. Endpoi
 
 - `step-catalog-en.json` — one entry per FileMaker script step
 - Originally generated from `snippet_examples/` + hardcoded step IDs and HR signatures
+
+---
+
+## Editor Configuration
+
+Monaco editor options are centralized in `src/editor/editor.config.ts`. Edit this file to change editor behavior without touching the component code.
+
+```ts
+// src/editor/editor.config.ts
+export const editorConfig = {
+  fontSize: 14,
+  tabSize: 4,
+  insertSpaces: false,   // false = tab characters; true = spaces
+  wordWrap: 'on',
+  renderWhitespace: 'selection',
+  // ...
+};
+```
+
+The fixed runtime options (`value`, `language`, `theme`, `automaticLayout`) remain in `EditorPanel.tsx` and are not part of the config file.
 
 ---
 
