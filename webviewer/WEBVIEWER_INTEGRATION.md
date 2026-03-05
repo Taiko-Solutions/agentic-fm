@@ -266,6 +266,25 @@ Options for managing token cost as the knowledge base grows:
 
 ---
 
+## FileMaker WebViewer Runtime
+
+The webviewer's **primary runtime environment is a FileMaker WebViewer object**, not a standalone browser. FileMaker embeds a WebKit-based webview that loads the Vite dev server URL. While the app functions fully in a browser (useful for development), any feature that interacts with FileMaker — context delivery, script loading, clipboard — is designed around the webviewer context.
+
+### Context update paths
+
+There are two distinct paths by which CONTEXT.json can reach the client, and they behave differently:
+
+| Path | How it works | When it fires |
+|---|---|---|
+| **Direct JS bridge** | FileMaker's `Perform JavaScript in Web Viewer` step calls `window.pushContext(json)` → `setContext()` in App.tsx | When the Push Context companion script calls into the webviewer directly |
+| **File on disk** | Push Context writes `CONTEXT.json` to disk; the client polls `/api/context` and detects the change via JSON hash comparison | When the script runs in a separate window, or via any other process that writes the file |
+
+Polling (path 2) is the reliable fallback. Vite's HMR WebSocket and `import.meta.hot` custom events are **not reliable inside a FileMaker WebKit webviewer** — the WebSocket connection may not deliver custom broadcast events in that environment. Any feature that needs to react to server-side file changes should use HTTP polling rather than WebSocket/HMR events.
+
+The Load Script dialog uses polling (1.5s interval, active only while waiting) to detect context changes. The Toolbar Refresh button is a manual on-demand fetch. The `window.pushContext` global handles the direct bridge path.
+
+---
+
 ## FileMaker Bridge
 
 When running inside a FileMaker WebViewer object (vs. a browser), the bridge layer enables bidirectional communication:

@@ -27,6 +27,7 @@ export function App() {
   const [promptMarker, setPromptMarker] = useState('prompt');
   const [codingConventions, setCodingConventions] = useState('');
   const [knowledgeDocs, setKnowledgeDocs] = useState('');
+  const [chatKey, setChatKey] = useState(0);
   const scriptNameRef = useRef('');
 
   // Keep ref in sync so the autosave effect always has the latest name
@@ -152,11 +153,12 @@ export function App() {
     setStatus('Script inserted from AI');
   }, []);
 
-  const handleScriptLoaded = useCallback((hr: string, name: string) => {
+  const handleScriptLoaded = useCallback((hr: string, name: string, options: { resetChat: boolean }) => {
     setEditorContent(hr);
     setScriptName(name);
     setShowLoadScript(false);
     setStatus(`Loaded: ${name}`);
+    if (options.resetChat) setChatKey(k => k + 1);
   }, []);
 
   return (
@@ -172,6 +174,7 @@ export function App() {
             setStatus('Failed to refresh context');
           });
         }}
+        onClearChat={() => setChatKey(k => k + 1)}
         onNewScript={handleNewScript}
         onValidate={handleValidate}
         onClipboard={handleClipboard}
@@ -200,6 +203,7 @@ export function App() {
             )}
             <div class={showXmlPreview ? 'w-1/2 min-w-0 h-full' : 'w-full h-full'}>
               <ChatPanel
+                key={chatKey}
                 context={context}
                 steps={steps}
                 catalog={catalog}
@@ -222,8 +226,10 @@ export function App() {
       {showSettings && <AISettings onClose={() => setShowSettings(false)} />}
       {showLoadScript && (
         <LoadScriptDialog
+          context={context}
           editorContent={editorContent}
           onLoad={handleScriptLoaded}
+          onContextUpdate={setContext}
           onClose={() => setShowLoadScript(false)}
         />
       )}

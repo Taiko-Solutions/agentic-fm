@@ -1,20 +1,53 @@
 import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
-import { searchScripts, loadScript } from '@/api/client';
+import { searchScripts, loadScript, fetchContext } from '@/api/client';
 import type { ScriptSearchResult } from '@/api/client';
+import { isFileMakerWebViewer, requestContext } from '@/bridge/fm-bridge';
+import type { FMContext } from '@/context/types';
+
+export interface LoadScriptOptions {
+  resetChat: boolean;
+}
 
 interface LoadScriptDialogProps {
+  context: FMContext | null;
   editorContent: string;
-  onLoad: (hr: string, scriptName: string) => void;
+  onLoad: (hr: string, scriptName: string, options: LoadScriptOptions) => void;
+  onContextUpdate: (ctx: FMContext) => void;
   onClose: () => void;
 }
 
-export function LoadScriptDialog({ editorContent, onLoad, onClose }: LoadScriptDialogProps) {
+export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpdate, onClose }: LoadScriptDialogProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ScriptSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState<ScriptSearchResult | null>(null);
   const [error, setError] = useState('');
+  const [resetChat, setResetChat] = useState(true);
+  const [contextPushed, setContextPushed] = useState(false);
+  const [waitingForContext, setWaitingForContext] = useState(false);
+  const contextHashRef = useRef<string | null>(null);
+  const inFileMaker = isFileMakerWebViewer();
+
+  // Poll /api/context while waiting for FileMaker to push a new context.
+  // Comparing JSON hashes detects any change regardless of how the file was written.
+  useEffect(() => {
+    if (!waitingForContext) return;
+    const interval = setInterval(async () => {
+      try {
+        const fresh = await fetchContext();
+        const newHash = JSON.stringify(fresh);
+        if (contextHashRef.current !== null && newHash !== contextHashRef.current) {
+          onContextUpdate(fresh);
+          setContextPushed(true);
+          setWaitingForContext(false);
+        }
+      } catch {
+        // Server unreachable — keep waiting
+      }
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [waitingForContext, onContextUpdate]);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -53,23 +86,14 @@ export function LoadScriptDialog({ editorContent, onLoad, onClose }: LoadScriptD
       try {
         const res = await searchScripts(value.trim());
         setResults(res);
-      } catch {
+      } catch (err) {
         setResults([]);
-        setError('Search failed');
+        setError(`Search failed: ${err instanceof Error ? err.message : String(err)}`);
       } finally {
         setSearching(false);
       }
     }, 300);
   }, []);
-
-  const handleSelect = useCallback((script: ScriptSearchResult) => {
-    const hasContent = editorContent.trim().length > 0;
-    if (hasContent) {
-      setConfirmTarget(script);
-    } else {
-      doLoad(script);
-    }
-  }, [editorContent]);
 
   const doLoad = useCallback(async (script: ScriptSearchResult) => {
     setLoading(true);
@@ -83,12 +107,24 @@ export function LoadScriptDialog({ editorContent, onLoad, onClose }: LoadScriptD
         setLoading(false);
         return;
       }
-      onLoad(content, result.name ?? script.name);
+      onLoad(content, result.name ?? script.name, { resetChat });
     } catch {
       setError('Failed to load script');
       setLoading(false);
     }
-  }, [onLoad]);
+  }, [onLoad, resetChat]);
+
+  const handleSelect = useCallback((script: ScriptSearchResult) => {
+    const hasContent = editorContent.trim().length > 0;
+    setContextPushed(false);
+    setWaitingForContext(false);
+    contextHashRef.current = null;
+    if (hasContent) {
+      setConfirmTarget(script);
+    } else {
+      doLoad(script);
+    }
+  }, [editorContent, doLoad]);
 
   const handleBackdropClick = useCallback((e: MouseEvent) => {
     if ((e.target as HTMLElement).dataset.backdrop) {
@@ -167,11 +203,60 @@ export function LoadScriptDialog({ editorContent, onLoad, onClose }: LoadScriptD
 
         {/* Confirmation prompt */}
         {confirmTarget && (
-          <div class="px-4 py-3 border-t border-neutral-700 bg-neutral-750">
-            <p class="text-xs text-amber-400 mb-2">
-              Loading a script will replace the current editor content. Continue?
+          <div class="px-4 py-3 border-t border-neutral-700 space-y-3">
+            <p class="text-xs text-amber-400">
+              Loading <span class="font-medium text-amber-300">"{confirmTarget.name}"</span> will replace the current editor content.
             </p>
-            <div class="flex gap-2 justify-end">
+
+            {/* Reset chat option */}
+            <label class="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={resetChat}
+                onChange={(e) => setResetChat((e.target as HTMLInputElement).checked)}
+                class="rounded"
+              />
+              <span class="text-xs text-neutral-300">Reset AI chat history</span>
+            </label>
+
+            {/* Context push */}
+            <div class="space-y-1">
+              {inFileMaker ? (
+                <div class="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      contextHashRef.current = JSON.stringify(context);
+                      setWaitingForContext(true);
+                      setContextPushed(false);
+                      requestContext();
+                    }}
+                    class={`px-2 py-1 rounded text-xs transition-colors ${
+                      contextPushed
+                        ? 'bg-green-700 text-green-200 cursor-default'
+                        : waitingForContext
+                          ? 'bg-neutral-700 text-neutral-400 cursor-wait'
+                          : 'bg-neutral-600 hover:bg-neutral-500 text-neutral-200'
+                    }`}
+                    disabled={contextPushed || waitingForContext}
+                  >
+                    {contextPushed
+                      ? '✓ Context updated'
+                      : waitingForContext
+                        ? 'Waiting for FileMaker…'
+                        : 'Push Context from FileMaker'}
+                  </button>
+                  {!contextPushed && !waitingForContext && (
+                    <span class="text-xs text-neutral-500">recommended when switching layouts</span>
+                  )}
+                </div>
+              ) : (
+                <p class="text-xs text-neutral-500">
+                  Run <span class="text-neutral-400 font-mono">Push Context</span> in FileMaker before loading to update field and layout references.
+                </p>
+              )}
+            </div>
+
+            <div class="flex gap-2 justify-end pt-1">
               <button
                 onClick={() => setConfirmTarget(null)}
                 class="px-3 py-1 rounded text-xs bg-neutral-700 hover:bg-neutral-600 text-neutral-300"
@@ -182,7 +267,7 @@ export function LoadScriptDialog({ editorContent, onLoad, onClose }: LoadScriptD
                 onClick={() => doLoad(confirmTarget)}
                 class="px-3 py-1 rounded text-xs bg-blue-700 hover:bg-blue-600 text-white"
               >
-                Replace
+                Load Script
               </button>
             </div>
           </div>
