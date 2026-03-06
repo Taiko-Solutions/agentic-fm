@@ -118,11 +118,20 @@ export function createDiagnosticsProvider(
     monaco.editor.setModelMarkers(model, 'filemaker-script', markers);
   }
 
-  // Run on change
-  const disposable = model.onDidChangeContent(() => validate());
+  // Run on change — debounced to avoid blocking the main thread on every keystroke
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+  const disposable = model.onDidChangeContent(() => {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(validate, 300);
+  });
 
   // Initial validation
   validate();
 
-  return disposable;
+  return {
+    dispose() {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      disposable.dispose();
+    },
+  };
 }

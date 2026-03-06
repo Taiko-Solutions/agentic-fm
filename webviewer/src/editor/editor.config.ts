@@ -13,10 +13,10 @@ export const editorConfig: monaco.editor.IStandaloneEditorConstructionOptions = 
   tabSize: 4,
   insertSpaces: false,
   renderWhitespace: 'selection',
-  bracketPairColorization: { enabled: true },
+  bracketPairColorization: { enabled: false },
   guides: {
     indentation: true,
-    bracketPairs: true,
+    bracketPairs: false,
   },
   padding: { top: 8, bottom: 8 },
 };

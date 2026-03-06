@@ -60,15 +60,18 @@ export function EditorPanel({ value, onChange, context }: EditorPanelProps) {
       editor.trigger('fm', actionId, null);
     };
 
-    // Listen for changes
+    // Listen for changes — debounced to avoid re-rendering App on every keystroke
+    let changeTimer: ReturnType<typeof setTimeout> | undefined;
     editor.onDidChangeModelContent(() => {
-      onChange(editor.getValue());
+      if (changeTimer) clearTimeout(changeTimer);
+      changeTimer = setTimeout(() => onChange(editor.getValue()), 150);
     });
 
     // Attach diagnostics
     const diagDisposable = attachDiagnostics(editor, catalog);
 
     return () => {
+      if (changeTimer) clearTimeout(changeTimer);
       delete (window as any).triggerEditorAction;
       diagDisposable.dispose();
       editor.dispose();

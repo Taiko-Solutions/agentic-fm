@@ -48,28 +48,21 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
     }, 1500);
     return () => clearInterval(interval);
   }, [waitingForContext, onContextUpdate]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const resultRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Focus input on mount
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Close on Escape
+  // Reset selection when results change
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (confirmTarget) {
-          setConfirmTarget(null);
-        } else {
-          onClose();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [onClose, confirmTarget]);
+    setSelectedIndex(-1);
+    resultRefs.current = [];
+  }, [results]);
 
   // Debounced search
   const handleInput = useCallback((value: string) => {
@@ -126,6 +119,47 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
     }
   }, [editorContent, doLoad]);
 
+  // Keyboard navigation + Escape
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (confirmTarget) {
+          setConfirmTarget(null);
+        } else {
+          onClose();
+        }
+        return;
+      }
+      if (confirmTarget) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          doLoad(confirmTarget);
+        }
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(i => {
+          const next = Math.min(i + 1, results.length - 1);
+          resultRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+          return next;
+        });
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(i => {
+          const next = Math.max(i - 1, 0);
+          resultRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+          return next;
+        });
+      } else if (e.key === 'Enter' && selectedIndex >= 0 && results[selectedIndex]) {
+        e.preventDefault();
+        handleSelect(results[selectedIndex]);
+      }
+    };
+    window.addEventListener('keydown', handleKey, { capture: true });
+    return () => window.removeEventListener('keydown', handleKey, { capture: true });
+  }, [onClose, confirmTarget, results, selectedIndex, handleSelect, doLoad]);
+
   const handleBackdropClick = useCallback((e: MouseEvent) => {
     if ((e.target as HTMLElement).dataset.backdrop) {
       onClose();
@@ -178,14 +212,18 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
 
           {!loading && !searching && results.length > 0 && (
             <div class="space-y-0.5">
-              {results.map(script => (
+              {results.map((script, i) => (
                 <button
                   key={script.id}
+                  ref={(el) => { resultRefs.current[i] = el; }}
                   onClick={() => handleSelect(script)}
-                  class="w-full text-left px-3 py-2 rounded hover:bg-neutral-700 transition-colors group"
+                  onMouseEnter={() => setSelectedIndex(i)}
+                  class={`w-full text-left px-3 py-2 rounded transition-colors group ${
+                    selectedIndex === i ? 'bg-neutral-700' : 'hover:bg-neutral-700'
+                  }`}
                 >
                   <div class="flex items-center justify-between">
-                    <span class="text-sm text-neutral-200 group-hover:text-white">
+                    <span class={`text-sm ${selectedIndex === i ? 'text-white' : 'text-neutral-200 group-hover:text-white'}`}>
                       {script.name}
                     </span>
                     <span class="text-xs text-neutral-500 ml-2 shrink-0">

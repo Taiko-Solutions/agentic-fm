@@ -16,20 +16,18 @@ export interface AutosaveDraft {
 
 let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
-/** Save draft to localStorage immediately, and to server debounced */
+/** Save draft to both localStorage and server, debounced */
 export function saveDraft(hr: string, scriptName: string): void {
-  const draft: AutosaveDraft = { hr, scriptName, timestamp: Date.now() };
-
-  // localStorage: immediate
-  try {
-    localStorage.setItem(LS_KEY, JSON.stringify(draft));
-  } catch (e) {
-    console.warn('[autosave] localStorage failed:', e);
-  }
-
-  // Server: debounced
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
+    const draft: AutosaveDraft = { hr, scriptName, timestamp: Date.now() };
+
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(draft));
+    } catch (e) {
+      console.warn('[autosave] localStorage failed:', e);
+    }
+
     console.log(`[autosave] saving to server (${hr.length} chars, name="${scriptName}")`);
     saveToServer(draft).catch((e) => {
       console.warn('[autosave] server save failed:', e);

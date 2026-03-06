@@ -1,8 +1,9 @@
 import * as monaco from 'monaco-editor';
 import { monarchLanguage, languageConfiguration } from './monarch';
-import { filemakerDarkTheme } from './theme';
-import { createCompletionProvider } from './completion';
+import { buildMonacoTheme, loadSavedTheme, loadSavedPresetId } from './themes';
+import { createCompletionProvider, createFunctionCompletionProvider } from './completion';
 import { createDiagnosticsProvider } from './diagnostics';
+import { loadEditorMode } from './themes';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 
 const LANGUAGE_ID = 'filemaker-script';
@@ -18,12 +19,19 @@ export function registerFileMakerLanguage(
   monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, monarchLanguage);
   monaco.languages.setLanguageConfiguration(LANGUAGE_ID, languageConfiguration);
 
-  monaco.editor.defineTheme('filemaker-dark', filemakerDarkTheme);
+  const savedColors = loadSavedTheme();
+  const savedPreset = loadSavedPresetId();
+  monaco.editor.defineTheme('filemaker-dark', buildMonacoTheme(savedColors, savedPreset === 'solarized_light'));
 
   if (catalog && catalog.length > 0) {
+    const mode = loadEditorMode();
     monaco.languages.registerCompletionItemProvider(
       LANGUAGE_ID,
-      createCompletionProvider(catalog),
+      createCompletionProvider(catalog, mode),
+    );
+    monaco.languages.registerCompletionItemProvider(
+      LANGUAGE_ID,
+      createFunctionCompletionProvider(mode),
     );
   }
 }

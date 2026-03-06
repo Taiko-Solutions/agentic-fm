@@ -12,6 +12,7 @@ import type { StepInfo } from '@/api/client';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import { hrToXml, loadCatalog } from '@/converter/hr-to-xml';
 import { saveDraft, restoreDraft } from '@/autosave';
+import { loadEditorMode, saveEditorMode } from '@/editor/language/themes';
 
 export function App() {
   const [context, setContext] = useState<FMContext | null>(null);
@@ -28,6 +29,7 @@ export function App() {
   const [codingConventions, setCodingConventions] = useState('');
   const [knowledgeDocs, setKnowledgeDocs] = useState('');
   const [chatKey, setChatKey] = useState(0);
+  const [editorMode, setEditorMode] = useState<'script' | 'calc'>(loadEditorMode);
   const scriptNameRef = useRef('');
 
   // Keep ref in sync so the autosave effect always has the latest name
@@ -182,6 +184,7 @@ export function App() {
         context={context}
         showXmlPreview={showXmlPreview}
         showChat={showChat}
+        editorMode={editorMode}
         onToggleXmlPreview={() => setShowXmlPreview(v => !v)}
         onToggleChat={() => setShowChat(v => !v)}
         onRefreshContext={() => {
@@ -195,6 +198,7 @@ export function App() {
         onClipboard={handleClipboard}
         onLoadScript={() => setShowLoadScript(true)}
         onOpenSettings={() => setShowSettings(true)}
+        onSetEditorMode={(mode) => { setEditorMode(mode); saveEditorMode(mode); }}
       />
       <div class="flex-1 min-h-0 flex">
         <div class={`${showXmlPreview || showChat ? 'w-1/2' : 'w-full'} min-w-0 h-full`}>
