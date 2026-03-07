@@ -41,10 +41,10 @@ python agent/scripts/clipboard.py write filemaker/custom_menu/Agentic-fm Menu-sc
 
 Switch to FileMaker, open **Scripts > Script Workspace**, click in the script list, and press **⌘V**. The **Agentic-fm Menu** script will appear.
 
-**Note the script ID FileMaker assigns to it** — you will need this in step 4. You can find it by running the Explode XML script (which populates `agent/xml_parsed/`) and then checking `agent/context/scripts.index`:
+**Note the script ID FileMaker assigns to it** — you will need this in step 4. You can find it by running the Explode XML script (which populates `agent/xml_parsed/`) and then checking your solution's scripts index:
 
 ```bash
-grep "Agentic-fm Menu" agent/context/scripts.index
+grep "Agentic-fm Menu" "agent/context/agentic-fm/scripts.index"
 ```
 
 ### 2. Create placeholder custom menus in FileMaker
@@ -71,23 +71,51 @@ Still in Manage > Custom Menus, create a new custom menu set named **`agentic-fm
 
 Click **OK** to save and close.
 
-### 4. Run Explode XML
+### 4. Capture snapshots
+
+With the placeholder menus and menu set still selected in FileMaker:
+
+1. In **Manage > Custom Menus**, select **all five menus**, copy them (⌘C), then run:
+
+```bash
+source .venv/bin/activate
+python agent/scripts/clipboard.py read agent/sandbox/custom_menus.xml
+```
+
+2. Select the **agentic-fm** menu set, copy it (⌘C), then run:
+
+```bash
+python agent/scripts/clipboard.py read agent/sandbox/custom_menu_set.xml
+```
+
+These snapshot files capture the solution-specific catalog UUIDs that FileMaker requires for paste operations.
+
+### 5. Run Explode XML
 
 Run the **Explode XML** script (or `fmparse.sh` from the terminal) to export the updated solution XML. This writes the new menus and menu set — including their real UUIDs — to `agent/xml_parsed/custom_menus/` and `agent/xml_parsed/custom_menu_sets/`.
 
-### 5. Ask the agent to update the menu XML
+### 6. Run the install script
 
-Give the agent a prompt like:
+```bash
+source .venv/bin/activate
+python agent/scripts/install_menus.py
+```
 
-> "Update `filemaker/custom_menu/custom_menus.xml` to use script ID `<your_script_id>` for the Agentic-fm Menu script, substituting real UUIDs from the exported menus in `agent/xml_parsed/custom_menus/`. Write the result to `agent/sandbox/custom_menus.xml` and load it onto the clipboard."
+The script auto-reads UUIDs from `xml_parsed/`, looks up the script ID from `context/{solution}/scripts.index`, builds the populated XML, writes it to `agent/sandbox/custom_menus.xml`, and loads it onto the clipboard.
 
-The agent will use the `menu-lookup` skill to locate each menu's real UUID, substitute your script ID for all `<Script id="271">` references, and run `clipboard.py write` when done.
-
-### 6. Paste the custom menus
+### 7. Paste the custom menus
 
 In FileMaker, open **File > Manage > Custom Menus**. Select the first menu in the list (`agentic-fm — File`), then press **⌘V**. Repeat for each of the five menus — FileMaker matches by UUID and populates each menu with its items.
 
-### 7. Assign the menu set to the layout
+### 8. Load and paste the menu set
+
+```bash
+python agent/scripts/install_menus.py --set
+```
+
+In FileMaker, select the **agentic-fm** menu set and press **⌘V**.
+
+### 9. Assign the menu set to the layout
 
 Switch to the layout that hosts the web viewer. Enter **Layout mode**, open **Layouts > Layout Setup**, and under **Menu Set** choose **agentic-fm**. Save the layout.
 

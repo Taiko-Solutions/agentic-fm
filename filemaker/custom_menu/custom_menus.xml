@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-16"?>
-<FMObjectTransfer membercount="5" version="1" Source="22.0.4" File="Invoice Solution.fmp12" UUID="7437B702-0720-3641-982A-3AFBA7A31480" locale="English" Has_DDR_INFO="False" timestamp="2026-03-06T17:55:23">
+<FMObjectTransfer membercount="5" version="1" Source="22.0.4" File="{{FM_FILE_NAME}}" UUID="{{FM_FILE_UUID}}" locale="English" Has_DDR_INFO="False" timestamp="2026-03-06T17:55:23">
   <CustomMenuCatalog membercount="5">
-    <UUID modifications="27" userName="Matt" accountName="admin" timestamp="2026-03-06T14:40:56">33EDFC8F-2D5C-0347-8D71-87E8F62F3CB4</UUID>
+    <UUID modifications="27" userName="Matt" accountName="admin" timestamp="2026-03-06T14:40:56">{{CATALOG_UUID}}</UUID>
     <TagList></TagList>
-    <CustomMenu name="agentic-fm — File" id="26">
-      <UUID modifications="10" userName="Matt" accountName="admin" timestamp="2026-03-06T14:38:28">66C4A893-1C9A-43AF-A791-30DD642E5594</UUID>
+    <CustomMenu name="agentic-fm — File" id="{{MENU_FILE_ID}}">
+      <UUID modifications="10" userName="Matt" accountName="admin" timestamp="2026-03-06T14:38:28">{{MENU_FILE_UUID}}</UUID>
       <TagList></TagList>
       <MenuItemList membercount="17">
         <CustomMenuItem hash="3B3934A332688A6902289572040773C2" index="0" isSubMenuItem="False" isSeparatorItem="False">
@@ -19,7 +19,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"agfm.newScript"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -54,7 +54,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"agfm.loadScript"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -89,7 +89,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"agfm.toggleChat"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -332,8 +332,8 @@
         </Override>
       </Options>
     </CustomMenu>
-    <CustomMenu name="agentic-fm — Edit" id="27">
-      <UUID modifications="7" userName="Matt" accountName="admin" timestamp="2026-03-06T14:40:14">CB09E235-3066-4196-9C3F-28F432F38233</UUID>
+    <CustomMenu name="agentic-fm — Edit" id="{{MENU_EDIT_ID}}">
+      <UUID modifications="7" userName="Matt" accountName="admin" timestamp="2026-03-06T14:40:14">{{MENU_EDIT_UUID}}</UUID>
       <TagList></TagList>
       <MenuItemList membercount="16">
         <CustomMenuItem hash="3A8E3A30B074185B6948EF0158952586" index="0" isSubMenuItem="False" isSeparatorItem="False">
@@ -348,7 +348,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"undo"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -376,7 +376,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"redo"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -417,7 +417,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.clipboardCutAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -445,7 +445,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.clipboardCopyAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -473,7 +473,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.clipboardPasteAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -514,7 +514,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.selectAll"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -555,7 +555,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"actions.find"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -590,7 +590,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.startFindReplaceAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -625,7 +625,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.nextMatchFindAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -660,7 +660,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.previousMatchFindAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -708,7 +708,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"agfm.validate"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -743,7 +743,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"agfm.clipboard"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -790,8 +790,8 @@
         </Override>
       </Options>
     </CustomMenu>
-    <CustomMenu name="agentic-fm — Selection" id="29">
-      <UUID modifications="3" userName="Matt" accountName="admin" timestamp="2026-03-06T13:22:15">027A7055-EBB3-4759-9E69-3F849D76F142</UUID>
+    <CustomMenu name="agentic-fm — Selection" id="{{MENU_SELECTION_ID}}">
+      <UUID modifications="3" userName="Matt" accountName="admin" timestamp="2026-03-06T13:22:15">{{MENU_SELECTION_UUID}}</UUID>
       <TagList></TagList>
       <MenuItemList membercount="0"></MenuItemList>
       <Conditions>
@@ -816,8 +816,8 @@
         </Override>
       </Options>
     </CustomMenu>
-    <CustomMenu name="agentic-fm — Format" id="40">
-      <UUID modifications="7" userName="Matt" accountName="admin" timestamp="2026-03-06T14:40:55">5EE0BA57-F967-40B0-9B05-A7C515FDC72C</UUID>
+    <CustomMenu name="agentic-fm — Format" id="{{MENU_FORMAT_ID}}">
+      <UUID modifications="7" userName="Matt" accountName="admin" timestamp="2026-03-06T14:40:55">{{MENU_FORMAT_UUID}}</UUID>
       <SourceUUID>AF47E3FE-BDF6-485A-B182-3CD2B427FAD1</SourceUUID>
       <TagList></TagList>
       <MenuItemList membercount="18">
@@ -834,7 +834,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.commentLine"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -870,7 +870,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.blockComment"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -919,7 +919,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.indentLines"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -955,7 +955,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.outdentLines"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1005,7 +1005,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.moveLinesUpAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1041,7 +1041,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.moveLinesDownAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1077,7 +1077,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.copyLinesUpAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1113,7 +1113,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.copyLinesDownAction"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1149,7 +1149,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.deleteLines"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1185,7 +1185,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.insertLineBefore"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1220,7 +1220,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.insertLineAfter"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1269,7 +1269,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.trimTrailingWhitespace"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1318,7 +1318,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.transformToUppercase"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1353,7 +1353,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.transformToLowercase"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1398,8 +1398,8 @@
         </Override>
       </Options>
     </CustomMenu>
-    <CustomMenu name="agentic-fm — View" id="43">
-      <UUID modifications="4" userName="Matt" accountName="admin" timestamp="2026-03-06T14:37:22">2B3B661E-0A4D-4513-AD72-C4F29D7BFE2C</UUID>
+    <CustomMenu name="agentic-fm — View" id="{{MENU_VIEW_ID}}">
+      <UUID modifications="4" userName="Matt" accountName="admin" timestamp="2026-03-06T14:37:22">{{MENU_VIEW_UUID}}</UUID>
       <SourceUUID>3FAF9997-EC42-48D2-85C3-986E1FE331CA</SourceUUID>
       <TagList></TagList>
       <MenuItemList membercount="14">
@@ -1416,7 +1416,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"agfm.toggleXmlPreview"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1451,7 +1451,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.toggleWordWrap"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1501,7 +1501,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.fontZoomIn"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1537,7 +1537,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.fontZoomOut"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1573,7 +1573,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.fontZoomReset"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1622,7 +1622,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.fold"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1657,7 +1657,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.unfold"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1692,7 +1692,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.foldAll"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1727,7 +1727,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.unfoldAll"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1776,7 +1776,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.toggleMinimap"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1811,7 +1811,7 @@
               <DisplayCalculation>
                 <Chunk type="NoRef">"editor.action.toggleRenderWhitespace"</Chunk>
               </DisplayCalculation>
-              <Script id="271" name="Agentic-fm Menu"></Script>
+              <Script id="{{SCRIPT_ID}}" name="Agentic-fm Menu"></Script>
             </Step>
           </action>
           <Conditions>
@@ -1858,10 +1858,10 @@
     </CustomMenu>
   </CustomMenuCatalog>
   <PasteIndexList membercount="5">
-    <Object id="26"></Object>
-    <Object id="27"></Object>
-    <Object id="29"></Object>
-    <Object id="40"></Object>
-    <Object id="43"></Object>
+    <Object id="{{MENU_FILE_ID}}"></Object>
+    <Object id="{{MENU_EDIT_ID}}"></Object>
+    <Object id="{{MENU_SELECTION_ID}}"></Object>
+    <Object id="{{MENU_FORMAT_ID}}"></Object>
+    <Object id="{{MENU_VIEW_ID}}"></Object>
   </PasteIndexList>
 </FMObjectTransfer>
