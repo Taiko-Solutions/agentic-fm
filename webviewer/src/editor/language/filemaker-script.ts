@@ -1,7 +1,7 @@
 import * as monaco from 'monaco-editor';
 import { monarchLanguage, languageConfiguration } from './monarch';
 import { buildMonacoTheme, loadSavedTheme, loadSavedPresetId } from './themes';
-import { createCompletionProvider, createFunctionCompletionProvider, createVariableCompletionProvider } from './completion';
+import { createCompletionProvider, createFunctionCompletionProvider, createVariableCompletionProvider, createFieldCompletionProvider } from './completion';
 import { createDiagnosticsProvider } from './diagnostics';
 import { loadEditorMode } from './themes';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
@@ -38,7 +38,11 @@ export function registerCompletionProviders(
     LANGUAGE_ID,
     createVariableCompletionProvider(mode),
   );
-  return { dispose: () => { d1.dispose(); d2.dispose(); d3.dispose(); } };
+  const d4 = monaco.languages.registerCompletionItemProvider(
+    LANGUAGE_ID,
+    createFieldCompletionProvider(mode),
+  );
+  return { dispose: () => { d1.dispose(); d2.dispose(); d3.dispose(); d4.dispose(); } };
 }
 
 export function attachDiagnostics(

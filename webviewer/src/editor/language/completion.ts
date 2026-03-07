@@ -1,6 +1,7 @@
 import * as monaco from 'monaco-editor';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import { FM_FUNCTIONS } from './fm-functions';
+import { getContext } from '@/context/store';
 
 /**
  * Autocomplete provider for FileMaker script step names.
@@ -182,6 +183,92 @@ export function createVariableCompletionProvider(
         sortText: String(i).padStart(4, '0'),
         range,
       }));
+
+      return { suggestions };
+    },
+  };
+}
+
+/**
+ * Autocomplete provider for FileMaker field references (TO::FieldName).
+ * - script mode: triggers only when cursor is inside [ ]
+ * - calc mode: triggers at any position
+ * Reads context dynamically from the context store on each invocation.
+ */
+export function createFieldCompletionProvider(
+  mode: 'script' | 'calc' = 'script',
+): monaco.languages.CompletionItemProvider {
+  return {
+    triggerCharacters: [':'],
+
+    provideCompletionItems(
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+    ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
+      const lineContent = model.getLineContent(position.lineNumber);
+      const lineUntilPos = lineContent.substring(0, position.column - 1);
+      const trimmed = lineUntilPos.trimStart();
+
+      if (mode === 'script') {
+        if (!trimmed.includes('[')) return { suggestions: [] };
+        const afterBracket = trimmed.slice(trimmed.lastIndexOf('[') + 1);
+        if (afterBracket.includes(']')) return { suggestions: [] };
+      }
+
+      const context = getContext();
+      if (!context?.tables) return { suggestions: [] };
+
+      // Detect if cursor is inside a "TO::partial" token
+      const doubleColonMatch = lineUntilPos.match(/([\w][\w ]*)::([\w ]*)$/);
+
+      // Triggered by single ':' but not '::' — suppress
+      if (!doubleColonMatch && lineUntilPos.endsWith(':')) return { suggestions: [] };
+
+      let range: monaco.IRange;
+      let filterTO: string | null = null;
+
+      if (doubleColonMatch) {
+        // Cursor is inside "TO::partial" — extend range to cover the full token
+        filterTO = doubleColonMatch[1].trimEnd();
+        const tokenLen = doubleColonMatch[0].length;
+        const afterCursor = lineContent.substring(position.column - 1);
+        const trailingMatch = afterCursor.match(/^[\w]*/);
+        const trailingLen = trailingMatch ? trailingMatch[0].length : 0;
+        range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: position.column - tokenLen,
+          endColumn: position.column + trailingLen,
+        };
+      } else {
+        const word = model.getWordUntilPosition(position);
+        range = {
+          startLineNumber: position.lineNumber,
+          endLineNumber: position.lineNumber,
+          startColumn: word.startColumn,
+          endColumn: word.endColumn,
+        };
+      }
+
+      const suggestions: monaco.languages.CompletionItem[] = [];
+      let i = 0;
+
+      for (const table of Object.values(context.tables)) {
+        const to = table.to;
+        if (filterTO !== null && to !== filterTO) continue;
+
+        for (const [fieldName, field] of Object.entries(table.fields)) {
+          const label = `${to}::${fieldName}`;
+          suggestions.push({
+            label,
+            kind: monaco.languages.CompletionItemKind.Field,
+            insertText: label,
+            detail: field.type,
+            sortText: String(i++).padStart(5, '0'),
+            range,
+          });
+        }
+      }
 
       return { suggestions };
     },

@@ -5,6 +5,7 @@ import { editorConfig } from './editor.config';
 import { fetchStepCatalog } from '@/api/client';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import type { FMContext } from '@/context/types';
+import { setContext as syncContextStore } from '@/context/store';
 
 // Configure Monaco workers
 self.MonacoEnvironment = {
@@ -91,6 +92,11 @@ export function EditorPanel({ value, onChange, context }: EditorPanelProps) {
     };
   }, [containerRef.current]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Sync context prop into the store so completion providers can read it via getContext()
+  useEffect(() => {
+    syncContextStore(context);
+  }, [context]);
+
   // Sync value from parent (e.g. when loading a script)
   useEffect(() => {
     const editor = editorRef.current;
@@ -99,11 +105,6 @@ export function EditorPanel({ value, onChange, context }: EditorPanelProps) {
     }
   }, [value]);
 
-  // Update context-aware completions when context changes
-  useEffect(() => {
-    // Future: update completion providers with context data
-    // (field references, layout names, script names, etc.)
-  }, [context]);
 
   return (
     <div
