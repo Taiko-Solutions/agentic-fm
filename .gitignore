@@ -20,6 +20,7 @@ Prompt.md
 .cursorignore
 agent/library/MANIFEST.md
 agent/sandbox/.autosave.json
+agent/config/removals.json
 
 # macOS
 .DS_Store

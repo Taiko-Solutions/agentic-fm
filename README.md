@@ -218,6 +218,23 @@ A command line tool, called from within FileMaker, that archives a FileMaker XML
 ./fmparse.sh -s "Invoice Solution" /path/to/exports/ --all-lines
 ```
 
+**Removing sensitive items automatically:**
+
+Some scripts or custom functions may contain passwords, API keys, or other credentials that must not be left on disk where they are readable by AI agents. Create `agent/config/removals.json` (gitignored, never committed) to list items that should be deleted from `agent/xml_parsed/` after every export, before the context indexes are built.
+
+Items can be identified by name or by FileMaker ID. ID matching is preferred because it survives renames.
+
+```json
+{
+  "Invoice Solution": {
+    "scripts": ["Admin Password Reset", 42],
+    "custom_functions": ["GetAPIKey", 15]
+  }
+}
+```
+
+Strings match by name; integers match by ID. Each matched item is removed from all parallel directories (`scripts/`, `scripts_sanitized/`, `custom_functions/`, `custom_function_stubs/`). See `agent/config/removals.json.example` for a full template.
+
 # fmcontext.sh
 
 A command line tool that generates AI-optimized index files from the exploded XML in `agent/xml_parsed/`. Uses `xmllint` to extract only the useful data (IDs, names, types, references) and discard noise (UUIDs, hashes, timestamps, visual positioning).
