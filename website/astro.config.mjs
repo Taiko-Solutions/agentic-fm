@@ -6,6 +6,9 @@ export default defineConfig({
   base: '/',
   output: 'static',
   trailingSlash: 'always',
+  server: {
+    host: true
+  },
   vite: {
     plugins: [tailwindcss()],
   },
