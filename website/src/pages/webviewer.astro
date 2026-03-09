@@ -20,12 +20,29 @@ const base = import.meta.env.BASE_URL;
       <img
         src={`${base}agentic-fm-webviewer.png`}
         alt="agentic-fm webviewer embedded in FileMaker showing the Monaco editor with inline prompt markers and AI chat panel"
-        class="w-full"
+        id="webviewer-thumb"
+        class="w-full cursor-zoom-in"
         width="1200"
         height="800"
       />
     </div>
+    <p class="mt-2 text-center text-sm text-gray-400">🔍 Click (or tap) to view full resolution</p>
   </div>
+
+  <dialog id="img-modal" class="fixed inset-0 m-0 h-full w-full max-h-none max-w-none overflow-auto bg-black/80 p-4 backdrop:bg-black/70">
+    <img
+      src={`${base}agentic-fm-webviewer.png`}
+      alt="agentic-fm webviewer full resolution"
+      class="mx-auto block w-[1200px] rounded-xl"
+    />
+  </dialog>
+
+  <script>
+    const thumb = document.getElementById('webviewer-thumb');
+    const modal = document.getElementById('img-modal') as HTMLDialogElement;
+    thumb?.addEventListener('click', () => modal.showModal());
+    modal?.addEventListener('click', () => modal.close());
+  </script>
 
   <div class="mx-auto max-w-4xl px-6 py-16">
     <div class="prose-section">
