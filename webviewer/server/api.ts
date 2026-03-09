@@ -340,6 +340,78 @@ export function apiMiddleware(): Plugin {
           }
         }
 
+        // --- GET /api/library ---
+        if (req.method === 'GET' && pathname === '/api/library') {
+          const libraryDir = path.join(agent, 'library');
+          try {
+            const items = enumerateLibrary(libraryDir);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ items }));
+          } catch (err) {
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: String(err) }));
+          }
+          return;
+        }
+
+        // --- GET /api/library/item?path=Category/File.xml ---
+        if (req.method === 'GET' && pathname === '/api/library/item') {
+          const itemPath = url.searchParams.get('path') ?? '';
+          if (!itemPath) {
+            res.statusCode = 400;
+            res.end('Missing path parameter');
+            return;
+          }
+          // Prevent path traversal
+          const normalized = path.normalize(itemPath);
+          if (normalized.startsWith('..') || path.isAbsolute(normalized)) {
+            res.statusCode = 400;
+            res.end('Invalid path');
+            return;
+          }
+          const fullPath = path.join(agent, 'library', normalized);
+          try {
+            const data = fs.readFileSync(fullPath, 'utf-8');
+            res.setHeader('Content-Type', 'text/plain');
+            res.end(data);
+          } catch {
+            res.statusCode = 404;
+            res.end('Library item not found');
+          }
+          return;
+        }
+
+        // --- POST /api/library/save ---
+        if (req.method === 'POST' && pathname === '/api/library/save') {
+          const raw = await readBody(req);
+          let body: { path?: string; content?: string };
+          try {
+            body = JSON.parse(raw);
+          } catch {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'Invalid JSON' }));
+            return;
+          }
+          const { path: itemPath, content } = body;
+          if (!itemPath || content === undefined) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'path and content are required' }));
+            return;
+          }
+          const normalized = path.normalize(itemPath);
+          if (normalized.startsWith('..') || path.isAbsolute(normalized)) {
+            res.statusCode = 400;
+            res.end(JSON.stringify({ error: 'Invalid path' }));
+            return;
+          }
+          const fullPath = path.join(agent, 'library', normalized);
+          fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+          fs.writeFileSync(fullPath, content, 'utf-8');
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ success: true }));
+          return;
+        }
+
         // --- GET /api/sandbox ---
         if (req.method === 'GET' && pathname === '/api/sandbox') {
           const sandboxDir = path.join(agent, 'sandbox');
@@ -422,6 +494,29 @@ function enumerateSteps(stepsDir: string): { name: string; category: string; fil
   }
 
   return steps.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/** Enumerate all .xml and .md files from the library directory */
+function enumerateLibrary(libraryDir: string): { path: string; name: string; category: string }[] {
+  const items: { path: string; name: string; category: string }[] = [];
+  if (!fs.existsSync(libraryDir)) return items;
+
+  for (const category of fs.readdirSync(libraryDir)) {
+    const catPath = path.join(libraryDir, category);
+    if (!fs.statSync(catPath).isDirectory()) continue;
+
+    for (const file of fs.readdirSync(catPath)) {
+      if (!file.endsWith('.xml') && !file.endsWith('.md')) continue;
+      const ext = path.extname(file);
+      items.push({
+        path: `${category}/${file}`,
+        name: path.basename(file, ext),
+        category,
+      });
+    }
+  }
+
+  return items.sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
 }
 
 /** Read request body as string */

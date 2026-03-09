@@ -9,11 +9,12 @@ flowchart TD
     A["FileMaker Solution"] -->|"Save a Copy as XML"| B["xml_exports/"]
     B -->|"fmparse.sh"| C["agent/xml_parsed/ (exploded XML)"]
     C -->|"fmcontext.sh"| D["agent/context/ (index files)"]
-    E["FileMaker evaluates Context()"] --> F["agent/CONTEXT.json"]
+    E["FileMaker evaluates Context()"] --> F["agent/CONTEXT.json (incl. generated_at)"]
+    N["companion_server.py (port 8765)"] -->|"Insert from URL"| A
     D --> G["AI Script Generation"]
     F --> G
-    K["agent/catalogs/ (step catalog)"] --> G
-    H["agent/snippet_examples/"] -->|"complex steps"| G
+    K["agent/catalogs/ (step catalog — primary)"] --> G
+    H["agent/snippet_examples/ (archival)"] -.->|"fallback"| G
     I["agent/xml_parsed/scripts_sanitized/"] --> G
     G -->|"CLI / IDE"| J["agent/sandbox/ (fmxmlsnippet output)"]
     K --> L["Webviewer (hr-to-xml.ts)"]
@@ -29,9 +30,9 @@ Data flows through three stages before it reaches an AI agent:
 
 At script-generation time three additional inputs converge:
 
-- **CONTEXT.json** -- generated inside FileMaker by the `Context()` custom function. It is scoped to the current layout and task, providing exactly the tables, fields, relationships, layouts, scripts, and value lists the AI needs, complete with IDs that can be embedded directly into fmxmlsnippet output.
-- **Step catalog** (`agent/catalogs/step-catalog-en.json`) -- structured JSON reference for all FileMaker script steps. Provides step IDs, parameter definitions, types, enums, and HR signatures. This is the primary source for step XML structure.
-- **snippet_examples/** -- boilerplate fmxmlsnippet templates for complex steps or those whose catalog entry is incomplete. Acts as a fallback when the step catalog alone is insufficient.
+- **CONTEXT.json** -- generated inside FileMaker by the `Context()` custom function. It is scoped to the current layout and task, providing exactly the tables, fields, relationships, layouts, scripts, and value lists the AI needs, complete with IDs that can be embedded directly into fmxmlsnippet output. Includes a `generated_at` timestamp (ISO 8601 UTC) used for staleness detection.
+- **Step catalog** (`agent/catalogs/step-catalog-en.json`) -- the single source of truth for all FileMaker script step XML structure. Provides step IDs, parameter definitions, types, enums, HR signatures, and behavioral notes. Agents grep it before any other source; it supersedes snippet_examples as the primary step reference.
+- **snippet_examples/** -- archival fmxmlsnippet templates retained for historical reference and complex step examples not yet fully captured in the catalog. No longer the primary lookup source.
 
 The AI combines these inputs to produce fmxmlsnippet output in `agent/sandbox/`, which is then pasted back into FileMaker via the clipboard. The **webviewer** provides a parallel workflow where the same CONTEXT.json and step catalog feed a browser-based editor; HR-to-XML conversion happens client-side via `webviewer/src/converter/hr-to-xml.ts`.
 
@@ -43,13 +44,14 @@ The AI combines these inputs to produce fmxmlsnippet output in `agent/sandbox/`,
 | Exploded XML         | `agent/xml_parsed/`                   | `fmparse.sh`                   | Per-object XML fragments for deep inspection                  |
 | Sanitized scripts    | `agent/xml_parsed/scripts_sanitized/` | `fmparse.sh`                   | Human-readable script text (~90% smaller than XML)            |
 | Index files          | `agent/context/{solution}/*.index`    | `fmcontext.sh`                 | Compact, greppable lookup tables covering the entire solution |
-| CONTEXT.json         | `agent/CONTEXT.json`                  | FileMaker `Context()` function | Scoped context for a single script-generation request         |
+| CONTEXT.json         | `agent/CONTEXT.json`                  | FileMaker `Context()` function | Scoped context for a single script-generation request; includes `generated_at` timestamp |
 | CONTEXT.example.json | `agent/CONTEXT.example.json`          | Manual (checked in)            | Schema reference and realistic example                        |
-| Snippet examples     | `agent/snippet_examples/`             | Manual (checked in)            | Canonical fmxmlsnippet templates for each step type           |
-| Step catalog         | `agent/catalogs/step-catalog-en.json` | Manual (checked in)            | Structured reference for all script steps -- IDs, params, types, enums, HR signatures |
+| Snippet examples     | `agent/snippet_examples/`             | Manual (checked in)            | Archival fmxmlsnippet templates; fallback when catalog entry is insufficient |
+| Step catalog         | `agent/catalogs/step-catalog-en.json` | Manual (checked in)            | Single source of truth for all script steps -- IDs, params, types, enums, HR signatures, behavioral notes |
+| Companion server     | `agent/scripts/companion_server.py`   | Manual (checked in)            | Lightweight HTTP server (port 8765) FileMaker calls via Insert from URL to run shell commands |
 | Webviewer            | `webviewer/`                          | Manual (checked in)            | Browser-based visual script editor with live HR-to-XML conversion and AI chat |
 | Generated scripts    | `agent/sandbox/`                      | AI agent                       | fmxmlsnippet output ready for clipboard import                |
-| Validation script    | `agent/scripts/validate_snippet.py`   | Manual (checked in)            | Post-generation validation of fmxmlsnippet output             |
+| Validation script    | `agent/scripts/validate_snippet.py`   | Manual (checked in)            | Post-generation validation of fmxmlsnippet output; checks staleness and coding conventions |
 
 ## Context Hierarchy
 
@@ -93,6 +95,7 @@ Top-level keys:
 | ------------------ | ------ | ----------------------------------------------------------------------------------- |
 | `solution`         | String | FileMaker file name                                                                 |
 | `task`             | String | Natural-language description of what to create                                      |
+| `generated_at`     | String | ISO 8601 UTC timestamp of when the context was generated; used for staleness detection (>60 min triggers a warning in validate_snippet.py) |
 | `current_layout`   | Object | `name`, `id`, `base_to`, `base_to_id`                                               |
 | `tables`           | Object | Keyed by base table name; each entry has `id`, `to`, `to_id`, and a `fields` object |
 | `ddl`              | String | SQL DDL with FOREIGN KEY constraints and field comments                             |
@@ -142,7 +145,7 @@ The webviewer is a Preact + Monaco + Vite application in `webviewer/`. Its three
 The AI follows a mandatory sequence when generating fmxmlsnippet output:
 
 1. **Read `agent/CONTEXT.json`** -- understand the task and collect all reference IDs.
-2. **Grep the step catalog** (`agent/catalogs/step-catalog-en.json`) for each step type being generated. For steps with `"status": "complete"`, construct XML directly from the catalog's `params` array. Fall back to reading the corresponding `agent/snippet_examples/` file for complex or incomplete steps.
+2. **Grep the step catalog** (`agent/catalogs/step-catalog-en.json`) for each step type being generated. The catalog is the single source of truth — behavioral notes from snippet_examples have been migrated into the catalog's `notes` field. For steps with `"status": "complete"`, construct XML directly from the catalog's `params` array. Fall back to reading the corresponding `agent/snippet_examples/` file only for archival reference when the catalog entry is insufficient.
 3. **Substitute IDs and names** from CONTEXT.json into the step structure.
 4. If a reference is missing from CONTEXT.json, search the relevant `agent/context/{solution}/*.index` file.
 5. Only fall back to `agent/xml_parsed/` as a last resort.
@@ -195,9 +198,22 @@ python agent/scripts/validate_snippet.py [file_or_directory] [options]
 
 - Defaults to validating all files in `agent/sandbox/`.
 - Auto-detects `agent/CONTEXT.json` for reference cross-checking.
-- Checks: well-formed XML, correct root element, no `<Script>` wrapper, required step attributes, paired step balancing (If/End If, Loop/End Loop, Open Transaction/Commit Transaction), Else/Else If ordering, known step names (against snippet_examples), and field/layout/script ID cross-references against CONTEXT.json.
+- Checks: well-formed XML, correct root element, no `<Script>` wrapper, required step attributes, paired step balancing (If/End If, Loop/End Loop, Open Transaction/Commit Transaction), Else/Else If ordering, known step names (against snippet_examples), field/layout/script ID cross-references against CONTEXT.json, context staleness (warns if `generated_at` is older than 60 minutes), and coding convention violations (ASCII comparison operators, variable naming prefix violations).
 - Use `--context <path>` to specify an alternate CONTEXT.json, `--snippets <path>` for a custom snippet_examples directory, or `--quiet` for errors-only output.
 - Exit code 0 = all files passed, 1 = one or more files failed.
+
+### companion_server.py
+
+A lightweight HTTP server that FileMaker calls via `Insert from URL` to run shell commands — replacing the MBS FileMaker Plugin for shell execution.
+
+```
+python agent/scripts/companion_server.py
+```
+
+- Listens on port 8765 by default.
+- Uses Python stdlib only — no virtualenv required.
+- Must be running before the **Explode XML** companion script is invoked.
+- Receives commands from FileMaker (encoded as JSON in a POST body), executes them on the host machine, and returns stdout/stderr output.
 
 ### Context() custom function
 
@@ -227,7 +243,7 @@ When extending this project, keep the following principles in mind:
    - Update `.cursor/AGENTS.md` so the AI knows how to use the new artifact.
    - Update `README.md` if the change affects end-user workflow or project structure.
 
-5. **The step catalog is the primary step structure reference.** `agent/catalogs/step-catalog-en.json` is the first place to look for step XML structure. `snippet_examples/` serves as the fallback for complex steps or those with `"auto"`/`"unfinished"` status. If you add support for a new script step type, add its catalog entry and a corresponding snippet_examples template. All snippet files must follow the conventions in `agent/snippet_examples/steps/CONVENTIONS.md`.
+5. **The step catalog is the single source of truth for step structure.** `agent/catalogs/step-catalog-en.json` is the definitive reference for step XML structure, parameter definitions, enums, and behavioral notes. `snippet_examples/` is archival — it serves as a fallback only for complex steps with `"auto"`/`"unfinished"` catalog status or where the catalog entry remains insufficient. If you add support for a new script step type, add its catalog entry (including behavioral notes in the `notes` field) and a corresponding snippet_examples template for reference. All snippet files must follow the conventions in `agent/snippet_examples/steps/CONVENTIONS.md`.
 
 6. **CONTEXT.json is generated, not authored.** Changes to the CONTEXT.json schema require updating the `Context()` custom function in FileMaker (`filemaker/Context.fmfn`), not just the example file. The `agent/CONTEXT.example.json` file and `docs/Context.fmfn.md` should be updated to reflect any schema changes.
 
@@ -237,9 +253,11 @@ When extending this project, keep the following principles in mind:
 
 ## Dependencies
 
-| Dependency                                                               | Required By          | Notes                                      |
-| ------------------------------------------------------------------------ | -------------------- | ------------------------------------------ |
-| [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder) | `fmparse.sh`         | Must be on PATH                            |
-| `xmllint`                                                                | `fmcontext.sh`       | Ships with macOS; `libxml2-utils` on Linux |
-| FileMaker Pro 21.0+                                                      | `Context()` function | For `GetTableDDL` and `While` support      |
-| Node.js 18+                                                              | `webviewer/`         | For Vite dev server and build              |
+| Dependency                                                               | Required By                                   | Notes                                                                            |
+| ------------------------------------------------------------------------ | --------------------------------------------- | -------------------------------------------------------------------------------- |
+| [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder) | `fmparse.sh`                                  | Must be on PATH or set via `FM_XML_EXPLODER_BIN`                                 |
+| `xmllint`                                                                | `fmcontext.sh`                                | Ships with macOS; `libxml2-utils` on Linux                                       |
+| FileMaker Pro 21.0+                                                      | `Context()` function                          | For `GetTableDDL` and `While` support                                            |
+| Python 3 (stdlib)                                                        | `clipboard.py`, `validate_snippet.py`, `companion_server.py` | No virtualenv required; run directly with `python agent/scripts/...` |
+| Node.js 18+                                                              | `webviewer/`                                  | For Vite dev server and build                                                    |
+| MBS FileMaker Plugin _(legacy)_                                          | Older Explode XML installs only               | Replaced by `companion_server.py`; no longer required for new setups             |

@@ -4,9 +4,11 @@ interface ToolbarProps {
   context: FMContext | null;
   showXmlPreview: boolean;
   showChat: boolean;
+  showLibrary: boolean;
   editorMode: 'script' | 'calc';
   onToggleXmlPreview: () => void;
   onToggleChat: () => void;
+  onToggleLibrary: () => void;
   onRefreshContext: () => void;
   onClearChat: () => void;
   onNewScript: () => void;
@@ -21,9 +23,11 @@ export function Toolbar({
   context,
   showXmlPreview,
   showChat,
+  showLibrary,
   editorMode,
   onToggleXmlPreview,
   onToggleChat,
+  onToggleLibrary,
   onRefreshContext,
   onClearChat,
   onNewScript,
@@ -89,6 +93,14 @@ export function Toolbar({
         title="Toggle AI chat panel"
       >
         AI Chat
+      </ToolbarButton>
+
+      <ToolbarButton
+        onClick={onToggleLibrary}
+        active={showLibrary}
+        title="Toggle library panel"
+      >
+        Library
       </ToolbarButton>
 
       {showChat && (

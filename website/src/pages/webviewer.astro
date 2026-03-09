@@ -25,11 +25,17 @@ const base = import.meta.env.BASE_URL;
         HR-to-XML translation automatically.
       </p>
 
-      <div class="mt-6 grid gap-4 sm:grid-cols-3">
+      <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <h4 class="font-semibold text-zinc-900 dark:text-white">Monaco Editor</h4>
           <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Write scripts with autocomplete powered by the step catalog — all step types with parameter hints.
+          </p>
+        </div>
+        <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <h4 class="font-semibold text-zinc-900 dark:text-white">Inline Validation</h4>
+          <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Red and yellow squiggles appear directly in the editor for step errors and unresolved references — no separate validation step needed.
           </p>
         </div>
         <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -39,9 +45,21 @@ const base = import.meta.env.BASE_URL;
           </p>
         </div>
         <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <h4 class="font-semibold text-zinc-900 dark:text-white">Context Age Indicator</h4>
+          <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            The StatusBar shows how old CONTEXT.json is. Amber at 30 minutes, red at 60 — a reminder to re-run Push Context when working on a changed layout.
+          </p>
+        </div>
+        <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <h4 class="font-semibold text-zinc-900 dark:text-white">AI Chat</h4>
           <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Integrated chat panel for generating and modifying scripts using AI, with context from your solution.
+          </p>
+        </div>
+        <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <h4 class="font-semibold text-zinc-900 dark:text-white">Personal Library</h4>
+          <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+            Browse your personal code library by category and insert snippets into the editor with one click. Highlight any steps and save them back to the library to build your own pattern collection.
           </p>
         </div>
       </div>

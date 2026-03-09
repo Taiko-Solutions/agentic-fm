@@ -115,7 +115,8 @@ const base = import.meta.env.BASE_URL;
           <h4 class="font-semibold text-zinc-900 dark:text-white">Explode XML</h4>
           <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             Saves a copy as XML and calls <code>fmparse.sh</code> to archive and explode it into <code>agent/xml_parsed/</code>.
-            Requires the <a href="https://www.monkeybreadsoftware.com/filemaker/" target="_blank" rel="noopener noreferrer" class="text-primary-600 underline decoration-primary-600/30 hover:decoration-primary-600 dark:text-primary-400">MBS Plugin</a> for shell execution.
+            Uses <code>companion_server.py</code> for shell execution via <code>Insert from URL</code> — no plugin required.
+            The legacy <a href="https://www.monkeybreadsoftware.com/filemaker/" target="_blank" rel="noopener noreferrer" class="text-primary-600 underline decoration-primary-600/30 hover:decoration-primary-600 dark:text-primary-400">MBS Plugin</a> path is still supported as an alternative.
           </p>
         </div>
         <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -194,7 +195,7 @@ const base = import.meta.env.BASE_URL;
           <div class="mt-3 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-950 dark:border-zinc-700">
             <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code>python agent/scripts/validate_snippet.py [file_or_directory] [options]</code></pre>
           </div>
-          <p class="mt-3">Checks include: well-formed XML, correct root element, no Script wrapper, step attributes, paired steps (If/End If, Loop/End Loop), known step names, and reference cross-checks against CONTEXT.json.</p>
+          <p class="mt-3">Checks include: well-formed XML, correct root element, no Script wrapper, step attributes, paired steps (If/End If, Loop/End Loop), known step names, reference cross-checks against CONTEXT.json, context staleness warnings (&gt;60 min), and coding convention violations (ASCII comparison operators, variable naming).</p>
         </div>
 
         <div>
@@ -208,6 +209,15 @@ python agent/scripts/clipboard.py write agent/sandbox/myscript.xml
 python agent/scripts/clipboard.py read agent/sandbox/output.xml</code></pre>
           </div>
         </div>
+
+        <div>
+          <h3>companion_server.py</h3>
+          <p>A lightweight local HTTP server that FileMaker calls via native <code>Insert from URL</code> to execute shell commands — replacing the MBS plugin dependency. Start it once per session before using the Explode XML or Push Context scripts.</p>
+          <div class="mt-3 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-950 dark:border-zinc-700">
+            <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code>python agent/scripts/companion_server.py</code></pre>
+          </div>
+          <p class="mt-3">Listens on <code>localhost:27631</code> by default. The FileMaker companion scripts detect whether the server or MBS plugin is available and route accordingly.</p>
+        </div>
       </div>
     </div>
 
@@ -217,9 +227,10 @@ python agent/scripts/clipboard.py read agent/sandbox/output.xml</code></pre>
       <h2 id="step-catalog">Step Catalog</h2>
       <p>
         <code>agent/catalogs/step-catalog-en.json</code> is a structured JSON reference for all FileMaker script steps.
-        It is the primary source for step XML structure — agents grep it to get step IDs, parameter definitions,
-        types, enums, HR signatures, and Monaco snippets. Fall back to <code>snippet_examples/</code> only for complex
-        or incomplete entries.
+        It is the single source of truth for step XML structure — agents grep it to get step IDs, parameter definitions,
+        types, enums, HR signatures, behavioral notes, and Monaco snippets. Behavioral notes previously scattered
+        across <code>snippet_examples/</code> have been migrated into the catalog's <code>notes</code> field;
+        snippet_examples are now archival and consulted only for complex or unreviewed entries.
       </p>
       <p>
         The catalog is consumed by CLI/IDE agents (for XML construction), the webviewer (for HR-to-XML conversion
@@ -291,9 +302,25 @@ python agent/scripts/clipboard.py read agent/sandbox/output.xml</code></pre>
               </tr>
             </thead>
             <tbody class="text-zinc-600 dark:text-zinc-400">
-              <tr>
+              <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
                 <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">found-sets.md</td>
                 <td class="py-3">Found set attributes, actions on found sets, collecting field values, restoring found sets, snapshot links</td>
+              </tr>
+              <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
+                <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">single-pass-loop.md</td>
+                <td class="py-3">Try/catch pattern using a single-pass loop for structured error handling without nested If blocks</td>
+              </tr>
+              <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
+                <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">variables.md</td>
+                <td class="py-3">Variable scope, naming conventions, initialization patterns, and common pitfalls</td>
+              </tr>
+              <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
+                <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">error-handling.md</td>
+                <td class="py-3">Get(LastError) timing, error capture strategies, and robust error handling patterns</td>
+              </tr>
+              <tr>
+                <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">script-parameters.md</td>
+                <td class="py-3">Passing and parsing script parameters and results using JSON conventions</td>
               </tr>
             </tbody>
           </table>

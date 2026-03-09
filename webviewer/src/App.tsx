@@ -6,6 +6,7 @@ import { XmlPreview } from '@/editor/xml-preview/XmlPreview';
 import { ChatPanel } from '@/ai/chat/ChatPanel';
 import { AISettings } from '@/ai/settings/AISettings';
 import { LoadScriptDialog } from '@/ui/LoadScriptDialog';
+import { LibraryPanel } from '@/ui/LibraryPanel';
 import type { FMContext } from '@/context/types';
 import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, validateSnippet, clipboardWrite, writeSandbox } from '@/api/client';
 import type { StepInfo } from '@/api/client';
@@ -16,6 +17,7 @@ import { loadEditorMode, saveEditorMode } from '@/editor/language/themes';
 
 export function App() {
   const [context, setContext] = useState<FMContext | null>(null);
+  const [generatedAt, setGeneratedAt] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState('Ready');
   const [editorContent, setEditorContent] = useState(sampleScript);
   const [scriptName, setScriptName] = useState('');
@@ -23,6 +25,7 @@ export function App() {
   const [showChat, setShowChat] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showLoadScript, setShowLoadScript] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
   const [steps, setSteps] = useState<StepInfo[]>([]);
   const [catalog, setCatalog] = useState<StepCatalogEntry[]>([]);
   const [promptMarker, setPromptMarker] = useState('prompt');
@@ -31,12 +34,17 @@ export function App() {
   const [chatKey, setChatKey] = useState(0);
   const [editorMode, setEditorMode] = useState<'script' | 'calc'>(loadEditorMode);
   const scriptNameRef = useRef('');
+  const editorContentRef = useRef(editorContent);
 
-  // Keep ref in sync so the autosave effect always has the latest name
+  // Keep refs in sync so callbacks always have the latest values
   scriptNameRef.current = scriptName;
+  editorContentRef.current = editorContent;
 
   useEffect(() => {
-    fetchContext().then(setContext).catch(() => {
+    fetchContext().then(ctx => {
+      setContext(ctx);
+      setGeneratedAt(ctx.generated_at);
+    }).catch(() => {
       setStatus('No CONTEXT.json found');
     });
     fetchSteps().then(setSteps).catch(() => {});
@@ -77,6 +85,7 @@ export function App() {
       try {
         const ctx = JSON.parse(jsonString) as FMContext;
         setContext(ctx);
+        setGeneratedAt(ctx.generated_at);
         setStatus(`Context loaded: ${ctx.solution ?? 'unknown'}`);
       } catch {
         setStatus('Error parsing context');
@@ -156,6 +165,14 @@ export function App() {
     setStatus('Script inserted from AI');
   }, []);
 
+  const handleLibraryInsert = useCallback((content: string) => {
+    setEditorContent(prev => {
+      const trimmed = prev.trimEnd();
+      return trimmed ? `${trimmed}\n\n${content}` : content;
+    });
+    setStatus('Inserted from library');
+  }, []);
+
   const handleScriptLoaded = useCallback((hr: string, name: string, options: { resetChat: boolean }) => {
     setEditorContent(hr);
     setScriptName(name);
@@ -174,6 +191,7 @@ export function App() {
         case 'agfm.loadScript':      setShowLoadScript(true); break;
         case 'agfm.toggleXmlPreview': setShowXmlPreview(v => !v); break;
         case 'agfm.toggleChat':      setShowChat(v => !v); break;
+        case 'agfm.toggleLibrary':   setShowLibrary(v => !v); break;
       }
     };
   }, [handleNewScript, handleValidate, handleClipboard]);
@@ -184,9 +202,11 @@ export function App() {
         context={context}
         showXmlPreview={showXmlPreview}
         showChat={showChat}
+        showLibrary={showLibrary}
         editorMode={editorMode}
         onToggleXmlPreview={() => setShowXmlPreview(v => !v)}
         onToggleChat={() => setShowChat(v => !v)}
+        onToggleLibrary={() => setShowLibrary(v => !v)}
         onRefreshContext={() => {
           fetchContext().then(setContext).catch(() => {
             setStatus('Failed to refresh context');
@@ -201,7 +221,15 @@ export function App() {
         onSetEditorMode={(mode) => { setEditorMode(mode); saveEditorMode(mode); }}
       />
       <div class="flex-1 min-h-0 flex">
-        <div class={`${showXmlPreview || showChat ? 'w-1/2' : 'w-full'} min-w-0 h-full`}>
+        {showLibrary && (
+          <div class="w-56 shrink-0 h-full border-r border-neutral-700">
+            <LibraryPanel
+              onInsert={handleLibraryInsert}
+              getEditorContent={() => editorContentRef.current}
+            />
+          </div>
+        )}
+        <div class={`${showXmlPreview || showChat ? 'w-1/2' : 'flex-1'} min-w-0 h-full`}>
           <EditorPanel
             value={editorContent}
             onChange={setEditorContent}
@@ -240,6 +268,7 @@ export function App() {
         status={status}
         solution={context?.solution}
         layout={context?.current_layout?.name}
+        generatedAt={generatedAt}
       />
 
       {showSettings && <AISettings onClose={() => setShowSettings(false)} />}

@@ -1,11 +1,13 @@
 import { useRef, useEffect, useState } from 'preact/hooks';
 import * as monaco from 'monaco-editor';
 import { registerFileMakerLanguage, registerCompletionProviders, attachDiagnostics, LANGUAGE_ID } from './language/filemaker-script';
+import { updateConversionDiagnostics } from './language/diagnostics';
 import { editorConfig } from './editor.config';
 import { fetchStepCatalog } from '@/api/client';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import type { FMContext } from '@/context/types';
 import { setContext as syncContextStore } from '@/context/store';
+import { hrToXml } from '@/converter/hr-to-xml';
 
 // Configure Monaco workers
 self.MonacoEnvironment = {
@@ -96,6 +98,16 @@ export function EditorPanel({ value, onChange, context }: EditorPanelProps) {
   useEffect(() => {
     syncContextStore(context);
   }, [context]);
+
+  // Update conversion diagnostics whenever editor content or context changes
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const model = editor.getModel();
+    if (!model) return;
+    const result = hrToXml(editor.getValue(), context);
+    updateConversionDiagnostics(model, result.errors);
+  }, [value, context]);
 
   // Sync value from parent (e.g. when loading a script)
   useEffect(() => {

@@ -12,7 +12,7 @@ const base = import.meta.env.BASE_URL;
 >
   <PageHeader
     title="Installation"
-    description="Get agentic-fm set up and connected to your FileMaker solution in five steps."
+    description="Get agentic-fm set up and connected to your FileMaker solution in six steps."
   />
 
   <div class="mx-auto max-w-4xl px-6 py-16">
@@ -38,8 +38,8 @@ const base = import.meta.env.BASE_URL;
               <td class="py-3 pr-6">
                 <a href="https://www.monkeybreadsoftware.com/filemaker/" target="_blank" rel="noopener noreferrer" class="font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400">MBS FileMaker Plugin</a>
               </td>
-              <td class="py-3 pr-6">Explode XML script</td>
-              <td class="py-3">Free trial available; other scripts use native steps only</td>
+              <td class="py-3 pr-6">Explode XML script (legacy)</td>
+              <td class="py-3">No longer required — replaced by <code>companion_server.py</code>. Free trial available if you prefer the plugin path.</td>
             </tr>
             <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
               <td class="py-3 pr-6">
@@ -49,9 +49,9 @@ const base = import.meta.env.BASE_URL;
               <td class="py-3">Download binary; place at <code>~/bin/fm-xml-export-exploder</code></td>
             </tr>
             <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
-              <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">Python 3 + .venv</td>
-              <td class="py-3 pr-6">clipboard.py, validate_snippet.py</td>
-              <td class="py-3"><code>source .venv/bin/activate</code> before use</td>
+              <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">Python 3</td>
+              <td class="py-3 pr-6">clipboard.py, validate_snippet.py, companion_server.py</td>
+              <td class="py-3">Scripts run directly — no virtualenv activation required</td>
             </tr>
             <tr class="border-b border-zinc-100 dark:border-zinc-800/50">
               <td class="py-3 pr-6 font-medium text-zinc-900 dark:text-white">xmllint</td>
@@ -72,6 +72,10 @@ const base = import.meta.env.BASE_URL;
 
     <div class="prose-section">
       <h2 id="setup-steps">Setup Steps</h2>
+      <p>
+        First time? Check <code>QUICKSTART.md</code> in the repo root for a condensed walkthrough.
+        The steps below are the full reference.
+      </p>
 
       <div class="mt-8 space-y-10">
         <div class="relative pl-10">
@@ -92,8 +96,7 @@ const base = import.meta.env.BASE_URL;
             then paste into the Script Workspace in FileMaker:
           </p>
           <div class="mt-3 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-950 dark:border-zinc-700">
-            <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code>source .venv/bin/activate
-python agent/scripts/clipboard.py write filemaker/agentic-fm.xml</code></pre>
+            <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code>python agent/scripts/clipboard.py write filemaker/agentic-fm.xml</code></pre>
           </div>
         </div>
 
@@ -108,6 +111,21 @@ python agent/scripts/clipboard.py write filemaker/agentic-fm.xml</code></pre>
 
         <div class="relative pl-10">
           <div class="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-sm font-bold text-white">4</div>
+          <h3>Start the companion server</h3>
+          <p>
+            The companion server lets FileMaker call shell commands via native <code>Insert from URL</code> — no plugin required.
+            Start it once per session before using the Explode XML or Push Context scripts:
+          </p>
+          <div class="mt-3 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-950 dark:border-zinc-700">
+            <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code>python agent/scripts/companion_server.py</code></pre>
+          </div>
+          <p>
+            It listens on <code>localhost:27631</code> by default. Leave it running in a terminal tab while you work.
+          </p>
+        </div>
+
+        <div class="relative pl-10">
+          <div class="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-sm font-bold text-white">5</div>
           <h3>Explode the XML</h3>
           <p>
             Run the <strong>Explode XML</strong> script to perform your first Save as XML export and populate
@@ -116,7 +134,7 @@ python agent/scripts/clipboard.py write filemaker/agentic-fm.xml</code></pre>
         </div>
 
         <div class="relative pl-10">
-          <div class="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-sm font-bold text-white">5</div>
+          <div class="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-sm font-bold text-white">6</div>
           <h3>Push context before each session</h3>
           <p>
             Navigate to the layout you are working on, run <strong>Push Context</strong>, enter a task description,
@@ -171,11 +189,11 @@ python fetch_docs.py --errors     # error codes only</code></pre>
       <h2 id="verify">Verify Installation</h2>
       <p>Once setup is complete, verify the toolchain works:</p>
       <div class="mt-3 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-950 dark:border-zinc-700">
-        <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code># Activate the virtual environment
-source .venv/bin/activate
-
-# Validate any existing sandbox files
+        <pre class="overflow-x-auto p-4 text-sm text-zinc-300"><code># Validate any existing sandbox files
 python agent/scripts/validate_snippet.py
+
+# Confirm the companion server starts cleanly
+python agent/scripts/companion_server.py --help
 
 # Check that fmparse.sh is available
 ./fmparse.sh --help</code></pre>

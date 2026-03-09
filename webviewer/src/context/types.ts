@@ -3,6 +3,7 @@
 export interface FMContext {
   solution?: string;
   task?: string;
+  generated_at?: string;
   current_layout?: {
     name: string;
     id: number;

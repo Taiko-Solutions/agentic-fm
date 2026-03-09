@@ -1,5 +1,6 @@
 import * as monaco from 'monaco-editor';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
+import type { ConversionError } from '@/converter/hr-to-xml';
 
 /**
  * Client-side diagnostics for FileMaker script.
@@ -134,4 +135,23 @@ export function createDiagnosticsProvider(
       disposable.dispose();
     },
   };
+}
+
+export function updateConversionDiagnostics(
+  model: monaco.editor.ITextModel,
+  errors: ConversionError[],
+): void {
+  const markers: monaco.editor.IMarkerData[] = errors.map(err => {
+    const lineNumber = err.line > 0 ? err.line : 1;
+    const lineContent = lineNumber <= model.getLineCount() ? model.getLineContent(lineNumber) : '';
+    return {
+      severity: monaco.MarkerSeverity.Error,
+      message: err.message,
+      startLineNumber: lineNumber,
+      startColumn: 1,
+      endLineNumber: lineNumber,
+      endColumn: lineContent.length + 1,
+    };
+  });
+  monaco.editor.setModelMarkers(model, 'filemaker-conversion', markers);
 }

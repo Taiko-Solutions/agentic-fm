@@ -13,7 +13,7 @@
         "required": false
       }
     ],
-    "hrSignature": null,
+    "hrSignature": "# {text}",
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
@@ -1690,7 +1690,7 @@
         "defaultValue": "False"
       }
     ],
-    "hrSignature": null,
+    "hrSignature": "Else",
     "monacoSnippet": null,
     "blockPair": {
       "role": "middle",
@@ -1803,7 +1803,7 @@
     "snippetFile": "control/End If.xml",
     "selfClosing": true,
     "params": [],
-    "hrSignature": null,
+    "hrSignature": "End If",
     "monacoSnippet": null,
     "blockPair": {
       "role": "close",
@@ -1821,7 +1821,7 @@
     "snippetFile": "control/End Loop.xml",
     "selfClosing": true,
     "params": [],
-    "hrSignature": null,
+    "hrSignature": "End Loop",
     "monacoSnippet": null,
     "blockPair": {
       "role": "close",
@@ -1992,7 +1992,13 @@
     "hrSignature": "Execute SQL [ With dialog: {On|Off} ; {SQL Text: {text}|Calculated SQL Text: {calc}} ]",
     "monacoSnippet": null,
     "blockPair": null,
-    "status": "unfinished",
+    "notes": {
+      "behavioral": "Executes SQL statements on ODBC data sources only — not FileMaker data sources. Use the ExecuteSQL() function for SELECT queries against FileMaker tables. QueryType 'Query' uses a literal SQL string in the <Query> child element (HR: 'SQL Text:'). QueryType 'Calculation' uses a calculated expression in <QueryCalc><Calculation> (HR: 'Calculated SQL Text:'). The Profile element carries the ODBC DSN, UserName, and password. Maximum query length is 256 K characters (512 KB).",
+      "constraints": "When NoInteract is 'True' (With dialog: Off), the ODBC connection must have the username and password saved or embedded — the user cannot be prompted. Server-side scripts, WebDirect, Data API, and CWP require NoInteract to be 'True'.",
+      "gotchas": "For Microsoft SQL Server, prefix Unicode string literals with 'N' (e.g., N'text') to preserve non-English characters — the ODBC driver must support Unicode. Get(LastError) returns the FileMaker-level error; Get(LastErrorDetail) returns the raw ODBC error state string for diagnosing data-source errors.",
+      "platform": "Supported on FileMaker Pro, Go, and Server. WebDirect, Data API, and CWP require With dialog: Off."
+    },
+    "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/execute-sql.html"
   },
   {
@@ -2205,7 +2211,24 @@
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
-    "helpUrl": "https://help.claris.com/en/pro-help/content/export-records.html"
+    "helpUrl": "https://help.claris.com/en/pro-help/content/export-records.html",
+    "notes": {
+      "behavioral": [
+        "Exports all records currently being browsed. To limit records, run a find request before Export Records.",
+        "File type depends on the import requirements of the receiving program.",
+        "If XML is specified as export type, the Specify XML and XSL Options dialog appears to configure XML grammar and optional XSLT. XSLT source may be a file, HTTP request, or a calculation generating a path or URL.",
+        "If no absolute path is specified and the database is hosted, the path resolves to the current user's Documents folder.",
+        "Do not export fields whose name is entirely numeric (e.g., '2') or a single-byte kana character using FMPDSORESULT grammar."
+      ],
+      "platform": {
+        "server": "Exporting to .fmp12 format not supported. Only certain folders can be accessed (see Paths in server-side scripts). If NoInteract is not True, step runs as though NoInteract is True.",
+        "go": "Exporting to .fmp12 or XML formats not supported. CreateDirectories option not supported.",
+        "webdirect": "Not supported in mobile browsers. Exporting to .fmp12, XML, XLS, or XLSX formats not supported. CreateDirectories not supported. If an output file is specified, the filename and type are used but the path is ignored — output goes to the browser's default download location. If field/record data exceeds format limits, Get(LastError) returns 0 instead of 736.",
+        "cloud": "Exporting to .fmp12 not supported. Only restricted folders accessible.",
+        "dataapi": "Not supported.",
+        "cwp": "Not supported."
+      }
+    }
   },
   {
     "name": "Extend Found Set",
@@ -2378,7 +2401,7 @@
     "snippetFile": "windows/Freeze Window.xml",
     "selfClosing": true,
     "params": [],
-    "hrSignature": null,
+    "hrSignature": "Freeze Window",
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
@@ -3108,7 +3131,30 @@
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
-    "helpUrl": "https://help.claris.com/en/pro-help/content/go-to-related-record.html"
+    "helpUrl": "https://help.claris.com/en/pro-help/content/go-to-related-record.html",
+    "notes": {
+      "behavioral": [
+        "Goes to the current related record(s) in the related table. Example: from Invoices viewing a specific invoice, Go to Related Record [Customers] navigates to the related customer record.",
+        "Works with portal rows: if used from an active portal row and the portal's table is the related table, that related record is made current. If the portal's table is not the related table, the first related record in the found set is made current.",
+        "With external file: opens the file containing the external table and navigates to the specified external layout if selected.",
+        "If related records cannot be found: stays on current layout and returns an error code (capturable with Get(LastError)).",
+        "If the table occurrence has no relationship or the layout doesn't reference the correct TO: displays an error message and continues with the next step.",
+        "If no related records exist or no record is active in the portal row: may produce unexpected results. Use IsEmpty() to check before calling.",
+        "If 'Allow creation of records via this relationship' is enabled and Go to Related Record is performed from an empty portal row: may produce unexpected results.",
+        "When opening a new window: does not activate OnFirstWindowOpen or OnWindowOpen triggers. To run a script after the new window opens, add Perform Script as the next step. To bring the new window to front, add Select Window.",
+        "Sort order is not maintained when related records are in an external file.",
+        "If performed in the context of a filtered portal row with 'Show only related records' set: only filtered records appear in the new found set. If focus is not in a filtered portal row, the new found set may include all related records."
+      ],
+      "platform": {
+        "pro": "Animation option not supported.",
+        "server": "Animation option not supported.",
+        "webdirect": "Animation option not supported.",
+        "go": "Animation (SlideFromLeft, SlideFromRight, etc.) supported for selected window only; cannot use for navigating between records via slider or status toolbar buttons.",
+        "cloud": "Animation option not supported.",
+        "dataapi": "Animation option not supported.",
+        "cwp": "Animation option not supported."
+      }
+    }
   },
   {
     "name": "Halt Script",
@@ -3117,7 +3163,7 @@
     "snippetFile": "control/Halt Script.xml",
     "selfClosing": true,
     "params": [],
-    "hrSignature": null,
+    "hrSignature": "Halt Script",
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
@@ -3247,7 +3293,25 @@
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
-    "helpUrl": "https://help.claris.com/en/pro-help/content/import-records.html"
+    "helpUrl": "https://help.claris.com/en/pro-help/content/import-records.html",
+    "notes": {
+      "behavioral": [
+        "If the source file is open, the current found set is imported. If not open, all records in the source table are imported.",
+        "When import fields are mapped by matching names, name matching is performed dynamically each time the script step runs.",
+        "To use a variable file path: place the variable first in the file path list, followed by a local file path in the target format. When specifying import order interactively, the step uses the local path (since the variable can't be evaluated at design time). At runtime, the step uses the variable path if it can be resolved. If only a variable is specified and no import order options are set, the First Row Option dialog displays to choose whether the first row contains field names."
+      ],
+      "platform": {
+        "server": "If NoInteract is On (dialog), the option is dimmed but the step runs as if NoInteract is True. Returns an error for: importing to a new table, importing from a folder, and importing images to a container field. Only certain folders can be accessed (see Paths in server-side scripts).",
+        "go": "Only FileMaker Pro, CSV, TSV, DBF, and merge file formats supported. Importing to a new table not supported.",
+        "webdirect": "Not supported in mobile browsers. Specify data source option not supported (users must specify a file accessible by the web browser). Only FileMaker Pro, CSV, TSV, DBF, merge, and Excel formats supported. When options are predefined and NoInteract is False, user choices at runtime override predefined options.",
+        "cloud": "Restricted folders only. Returns errors for: importing to a new table, importing from a folder, and importing images to a container field.",
+        "dataapi": "Not supported.",
+        "cwp": "Not supported."
+      },
+      "constraints": [
+        "Server-side scripts, Go, and WebDirect support the following options only when NoInteract is True: custom-separated values source files; any row as field names (when NoInteract is False, only first row can be specified); performing auto-enter options for individual fields."
+      ]
+    }
   },
   {
     "name": "Insert Audio/Video",
@@ -4096,21 +4160,23 @@
       {
         "xmlElement": "Restore",
         "type": "boolean",
-        "hrLabel": null,
+        "hrLabel": "Collapsed",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "enumValues": ["On", "Off"]
       },
       {
         "xmlElement": "FlushType",
         "type": "enum",
-        "hrLabel": null,
+        "hrLabel": "Flush",
         "xmlAttr": "value",
         "required": false,
-        "defaultValue": "Always"
+        "defaultValue": "Always",
+        "enumValues": ["Always", "Minimum", "Defer"]
       }
     ],
-    "hrSignature": null,
+    "hrSignature": "Loop [ Collapsed: {Off|On} ; Flush: {Always|Minimum|Defer} ]",
     "monacoSnippet": "Loop\n\t$0\nEnd Loop",
     "blockPair": {
       "role": "open",
@@ -4227,7 +4293,7 @@
     "snippetFile": "records/New Record_Request.xml",
     "selfClosing": true,
     "params": [],
-    "hrSignature": null,
+    "hrSignature": "New Record/Request",
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
@@ -4423,10 +4489,15 @@
         "required": false
       }
     ],
-    "hrSignature": "[ Open hidden: <On/Off> ; <file> ]",
+    "hrSignature": "Open File [ Open hidden: {On|Off} ; {file} ]",
     "monacoSnippet": null,
     "blockPair": null,
-    "status": "unfinished",
+    "notes": {
+      "behavioral": "Opens a FileMaker file or reestablishes the link to an ODBC data source. If the FileReference element is omitted, the Open File dialog is presented to the user. Script steps following Open File execute in the file that contains the script, not in the newly opened file.",
+      "constraints": "Cannot open a file from an unauthorized (unlinked) file. If a file is opened hidden (Option state: True), its OnOpen scripts still run. FileMaker Pro and Go only.",
+      "platform": "Not supported on WebDirect, FileMaker Server, Claris Cloud, Data API, or CWP."
+    },
+    "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/open-file.html"
   },
   {
@@ -7124,7 +7195,16 @@
     "monacoSnippet": null,
     "blockPair": null,
     "status": "complete",
-    "helpUrl": "https://help.claris.com/en/pro-help/content/send-mail.html"
+    "helpUrl": "https://help.claris.com/en/pro-help/content/send-mail.html",
+    "notes": {
+      "behavioral": [
+        "Email client mode: set SendViaSMTP=False and SendViaOAuthAuthentication=False; omit SMTP/OAuth fields. NoInteract=False leaves the composed message open for review; NoInteract=True places it in the outbox.",
+        "Multiple email addresses in To/Cc/Bcc must be separated by a carriage return or semicolon.",
+        "To/Cc/Bcc UseFoundSet=True collects addresses across all records in the found set; False uses the current record only.",
+        "MultipleEmails=True sends one email per record in the found set; False sends one email using data from the current record.",
+        "Microsoft OAuth requires additional fields beyond the Google OAuth set: OAuthPrincipalName, OAuthTenantID, OAuthClientID, OAuthClientSecret."
+      ]
+    }
   },
   {
     "name": "Set AI Call Logging",
@@ -7750,7 +7830,30 @@
     "monacoSnippet": "Show Custom Dialog [ \"${1:Title}\" ; \"${2:Message}\" ]",
     "blockPair": null,
     "status": "complete",
-    "helpUrl": "https://help.claris.com/en/pro-help/content/show-custom-dialog.html"
+    "helpUrl": "https://help.claris.com/en/pro-help/content/show-custom-dialog.html",
+    "notes": {
+      "behavioral": [
+        "Script pauses while the dialog is displayed.",
+        "Use Get(LastMessageChoice) to determine which button the user pressed: 1 = first button (default OK), 2 = second button (default Cancel), 3 = third button.",
+        "Up to 3 buttons. If all button labels are blank, a single OK button displays in the lower-right.",
+        "Up to 3 input fields. Target can be a field or a variable. Variables always store input as text. Supported field types: text, number, date, time, timestamp, container.",
+        "Button CommitState=True commits input field data to the target when that button is clicked. For a field target with no active field, data commits immediately; if the field is active, data commits when the record is committed.",
+        "InputField UsePasswordCharacter=True masks text with asterisks. This obscures display only — the actual stored data is not altered.",
+        "If input values don't match the target field type, a validation error displays. The user must resolve it before closing the dialog.",
+        "Target fields do not need to appear on the current layout (behaves like Set Field in this regard).",
+        "Cannot insert data into calculation or summary fields.",
+        "Ignores field entry options.",
+        "Data entry is limited by access privileges. To enable for all users, right-click the script in the Scripts pane and choose Grant Full Access Privileges.",
+        "On Windows, create a keyboard shortcut for a button by placing an ampersand before the shortcut letter in the label (e.g., &Done creates Alt+D).",
+        "For more complex dialogs, use the New Window script step instead."
+      ],
+      "platform": {
+        "server": "Not supported.",
+        "cloud": "Not supported.",
+        "dataapi": "Not supported.",
+        "cwp": "Not supported."
+      }
+    }
   },
   {
     "name": "Show Omitted Only",
@@ -7990,58 +8093,68 @@
       {
         "xmlElement": "NoInteract",
         "type": "boolean",
-        "hrLabel": null,
+        "hrLabel": "With dialog",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "True"
+        "defaultValue": "True",
+        "invertedHr": true,
+        "enumValues": ["On", "Off"]
       },
       {
         "xmlElement": "DontEncodeURL",
         "type": "boolean",
-        "hrLabel": null,
+        "hrLabel": "Don't encode URL",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "enumValues": ["On", "Off"]
       },
       {
         "xmlElement": "SelectAll",
         "type": "boolean",
-        "hrLabel": null,
+        "hrLabel": "Select entire contents",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "True"
+        "defaultValue": "True",
+        "enumValues": ["On", "Off"]
       },
       {
         "xmlElement": "VerifySSLCertificates",
         "type": "boolean",
-        "hrLabel": null,
+        "hrLabel": "Verify SSL certificates",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "enumValues": ["On", "Off"]
       },
       {
         "xmlElement": "Flow",
         "type": "text",
-        "hrLabel": null,
+        "hrLabel": "Flow URL",
         "required": false
       },
       {
         "xmlElement": "Calculation",
         "type": "namedCalc",
-        "hrLabel": null,
+        "hrLabel": "cURL options",
         "wrapperElement": "CURLOptions",
         "required": false
       },
       {
         "xmlElement": "Text",
         "type": "text",
-        "hrLabel": null,
+        "hrLabel": "Target variable",
         "required": false
       }
     ],
-    "hrSignature": null,
+    "hrSignature": "Trigger Claris Connect Flow [ With dialog: {On|Off} ; Flow URL: {url} ; cURL options: {calc} ]",
     "monacoSnippet": null,
     "blockPair": null,
+    "notes": {
+      "behavioral": "Triggers a Claris Connect flow via HTTP. The <Flow> element holds the flow's endpoint URL. The <CURLOptions> element wraps a <Calculation> with cURL option strings (e.g. --request POST --header). The <Text> element captures the response target. NoInteract suppresses the associated dialog — must be True for server-side, WebDirect, and Data API contexts.",
+      "gotchas": "Step ID is not yet confirmed — it is null in this catalog entry. Do not rely on the id field until a real xml_parsed example is found. The <Flow> and <Text> elements in the snippet example both contain placeholder '<unknown>' values indicating the full XML structure for those fields has not been fully reverse-engineered.",
+      "constraints": "Requires a valid Claris Connect account and a configured flow with an HTTP trigger. VerifySSLCertificates defaults to False — set to True in production for security."
+    },
     "status": "auto",
     "helpUrl": "https://help.claris.com/en/pro-help/content/trigger-claris-connect-flow.html"
   },

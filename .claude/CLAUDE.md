@@ -11,7 +11,7 @@ This project is designed to create FileMaker scripts in the clipboard supported 
   - _custom_menus_ subfolder contains one XML file per custom menu exported from the solution.
   - _custom_menu_sets_ subfolder contains one XML file per custom menu set exported from the solution.
 - _catalogs/_ contains the step catalog (`step-catalog-en.json`) — a structured index of all FileMaker script steps with parameter definitions, types, enums, and HR signatures. This is the primary reference for step XML structure.
-- _snippet_examples_ is a reference folder where boilerplate xml can be referenced when needed. It remains the authoritative source for complex steps and behavioral notes not captured in the catalog.
+- _snippet_examples_ is an **archival** reference folder. The step catalog is the single source of truth for step structure and behavioral notes. Read snippet_examples only when the catalog's `notes` field is insufficient.
 
 # Line number referencing
 
@@ -55,8 +55,6 @@ FileMaker objects are transferred via the macOS clipboard using proprietary bina
 The helper script `agent/scripts/clipboard.py` handles both directions:
 
 ```bash
-source .venv/bin/activate
-
 # Read FM objects from clipboard → save as XML
 python agent/scripts/clipboard.py read agent/sandbox/output.xml
 
@@ -145,7 +143,7 @@ Auto-detection recognises `<CustomMenu` and `<CustomMenuSet` elements and routes
 
 `agent/docs/knowledge/` contains curated behavioral intelligence about FileMaker — nuances, gotchas, and practical insights that go beyond what the standard help references cover. These documents help avoid common pitfalls when composing scripts.
 
-Before writing a script, scan `agent/docs/knowledge/MANIFEST.md` for keyword matches against the current task. If any entry matches, read the corresponding document and apply its insights during script composition.
+Before writing a script, scan `agent/docs/knowledge/MANIFEST.md` for keyword matches against the current task. If any entry matches, read the corresponding document and apply its insights during script composition. Recent additions include: `single-pass-loop.md`, `variables.md`, `error-handling.md`, `script-parameters.md`.
 
 # Script creation
 
@@ -154,7 +152,7 @@ Before writing a script, scan `agent/docs/knowledge/MANIFEST.md` for keyword mat
 1. Read `agent/CONTEXT.json` for the task description and all reference IDs
 2. Grep the step catalog for each step type used: `grep -A 60 '"name": "Step Name"' agent/catalogs/step-catalog-en.json`
 3. For steps with `"status": "complete"` and standard param types — construct the XML directly from the catalog's `params` array, `selfClosing` flag, and `id`
-4. For complex steps or when the catalog entry is insufficient — read the corresponding snippet_examples file (path is in the catalog's `snippetFile` field) and note any behavioral comments
+4. For behavioral context (constraints, gotchas, platform notes) — check the catalog's `notes` field first (`constraints`, `platform`, `gotchas`, `performance`, `behavioral` sub-keys). Only fall back to reading the snippet_examples file (path in `snippetFile`) if the `notes` field is insufficient or the step status is `"auto"`/`"unfinished"`
 5. Substitute the specific IDs/names/values from CONTEXT.json
 
 **MANDATORY: After writing or updating a script within agent/sandbox/, you MUST:**
@@ -184,7 +182,8 @@ Adjust `-A` line count for longer entries. To find incomplete work: `grep '"stat
 | `params[]` | Full parameter spec: `xmlElement`, `type`, `hrLabel`, `wrapperElement`, `parentElement`, `xmlAttr`, `required`, `defaultValue`, `enumValues` |
 | `hrSignature` | Human-readable parameter format for HR output |
 | `blockPair` | Matching step partners and role (`open`/`middle`/`close`) — e.g., If→End If, Loop→End Loop |
-| `snippetFile` | Path to the corresponding snippet_examples file (fallback reference) |
+| `notes` | Behavioral context: `constraints`, `platform`, `gotchas`, `performance`, `behavioral` sub-keys — check here before reading snippet_examples |
+| `snippetFile` | Path to the archival snippet_examples file — last resort when catalog notes are insufficient |
 | `status` | `"complete"` = fully reviewed, `"auto"` = unreviewed, `"unfinished"` = partial |
 
 ## Catalog param types → XML emission
@@ -204,85 +203,54 @@ The `type` field on each param determines how to emit the XML element:
 
 ## When to use catalog vs snippet_examples
 
-**Use catalog** (grep entry, construct XML from params) when:
-- Status is `"complete"`
-- The step uses standard param types listed above
-- You are confident in the XML emission pattern
+Priority order: **catalog params → catalog notes → snippet_examples (archival)**
 
-**Fall back to snippet_examples** (read the file referenced in `snippetFile`) when:
-- Status is `"auto"` or `"unfinished"`
-- The step has complex nesting (e.g., `parentElement` chains, `findRequests`)
-- The step has behavioral nuances you need to verify (snippet XML comments contain constraints and gotchas)
-- You are unsure about the correct XML structure
+**Use catalog params** to construct XML when:
+- Status is `"complete"` and the step uses standard param types listed above
+
+**Check catalog `notes` field** for behavioral context (constraints, gotchas, platform notes) before reading any file.
+
+**Fall back to snippet_examples** (read the file referenced in `snippetFile`) only when:
+- The catalog `notes` field is insufficient for the behavioral question at hand
+- Status is `"auto"` or `"unfinished"` and you need the XML template
+- The step has complex nesting (e.g., `parentElement` chains, `findRequests`) not fully described in the catalog
 
 ## HR format generation
 
 When generating scripts in HR format:
 - Look up the step in the catalog by name
 - Use the `hrSignature` field for the correct parameter format
-- If `hrSignature` is null, fall back to reading the step's snippet_examples XML file
+- If `hrSignature` is null, fall back to reading the archival snippet_examples XML file
 - The catalog also contains parameter types and enum values for validation
 
 # Lookup methodology
 
-When creating scripts, two kinds of lookup are needed: **solution-specific references** (which layout, which field, which script) and **step structure** (what XML elements and attributes a step type requires). Follow this process:
+Two kinds of lookup are needed when creating scripts: **solution-specific references** (layout, field, script IDs) and **step structure** (XML elements and attributes). Use the decision trees below.
 
-**Step 1: Read CONTEXT.json** — solution-specific IDs and names
+**Lookup Decision Tree**
 
-All IDs and names for the current task should already be here. CONTEXT.json is the single most important file to read before generating any script.
-
-**Step 2: Grep the step catalog** — step XML structure
-
-For each step type used, grep the catalog to get the full parameter specification:
-
-```bash
-grep -A 60 '"name": "Set Field"' agent/catalogs/step-catalog-en.json
-```
-
-The catalog entry tells you the step `id`, whether it's `selfClosing`, every parameter's XML element name and type, required/optional status, default values, and valid enum options. For steps with `"status": "complete"`, this is sufficient to construct the XML.
-
-**Step 3: Read snippet_examples** — complex steps or behavioral notes
-
-Fall back to reading the snippet_examples file (path in the catalog's `snippetFile` field) when:
-- The catalog entry has `"status": "auto"` or `"unfinished"`
-- The step has complex nesting (`parentElement` chains, `findRequests` type)
-- You need behavioral context (constraints, gotchas documented in snippet XML comments)
-
-Prefix the path with `agent/snippet_examples/steps/`: e.g., `snippetFile: "control/Set Variable.xml"` → `agent/snippet_examples/steps/control/Set Variable.xml`.
-
-**Step 4: Search index files** — missing references
-
-If a layout, field, script, or other object is not in CONTEXT.json, search the appropriate `agent/context/{solution}/*.index` file. This is a single-file grep, not a multi-directory search.
-
-**Step 5: xml_parsed as last resort**
-
-Only fall back to grepping `agent/xml_parsed/` if the needed information is not in CONTEXT.json or the index files. Never read entire files from xml_parsed unless absolutely necessary.
-
-**Required workflow:**
-
-1. **READ CONTEXT.json** for the task and reference IDs
-2. **GREP the step catalog** for each step type — construct XML from the catalog's param metadata when status is "complete"
-3. **READ snippet_examples** only when the catalog entry is insufficient (complex steps, "auto"/"unfinished" status, behavioral notes needed)
-4. If a reference is missing from CONTEXT.json, search `agent/context/{solution}/*.index` files
-5. Combine the step structure (from catalog or snippet_examples) with the correct IDs/names (from CONTEXT.json or index files)
+1. Does CONTEXT.json have the reference? → Use it directly. Done.
+2. Is it a step structure question? → Grep the step catalog. Done.
+   - Need behavioral context? → Check the catalog `notes` field first.
+   - Notes insufficient or status is `"auto"`/`"unfinished"`? → Read the archival snippet_examples file (`snippetFile` path, prefixed with `agent/snippet_examples/steps/`).
+3. Reference missing from CONTEXT.json? → Search the appropriate `agent/context/{solution}/*.index` file (single grep, not a multi-directory search).
+4. Still missing? → Grep `agent/xml_parsed/` as last resort. Never read entire files.
 
 **Examples:**
 
 - **Set Field** (standard step):
-  - Grep catalog: `grep -A 60 '"name": "Set Field"' agent/catalogs/step-catalog-en.json` → params tell you the XML elements, types, and wrapper structure
-  - Field IDs/names from: `CONTEXT.json` tables → fields section
-  - If field not in CONTEXT.json: `grep "FieldName" "agent/context/Invoice Solution/fields.index"`
+  - Grep catalog: `grep -A 60 '"name": "Set Field"' agent/catalogs/step-catalog-en.json`
+  - Field IDs/names: `CONTEXT.json` tables → fields section; if absent: `grep "FieldName" "agent/context/Invoice Solution/fields.index"`
 - **Go to Layout** (standard step):
   - Grep catalog: `grep -A 60 '"name": "Go to Layout"' agent/catalogs/step-catalog-en.json`
-  - Layout IDs/names from: `CONTEXT.json` layouts section
-- **Export Records** (complex step with many options):
-  - Grep catalog for the entry, then **also read** `agent/snippet_examples/steps/records/Export Records.xml` for the full XML template and behavioral comments
+  - Layout IDs/names: `CONTEXT.json` layouts section
+- **Export Records** (complex step):
+  - Grep catalog → check `notes` field → if still insufficient, read `agent/snippet_examples/steps/records/Export Records.xml`
 - **Perform Script** (standard step):
   - Grep catalog: `grep -A 60 '"name": "Perform Script"' agent/catalogs/step-catalog-en.json`
-  - Script IDs/names from: `CONTEXT.json` scripts section
-  - If script not in CONTEXT.json: `grep "ScriptName" "agent/context/Invoice Solution/scripts.index"`
+  - Script IDs/names: `CONTEXT.json` scripts section; if absent: `grep "ScriptName" "agent/context/Invoice Solution/scripts.index"`
 
-**Key principle**: CONTEXT.json provides scoped reference data; the step catalog provides step XML structure; snippet_examples provides complex step templates and behavioral notes; index files are the secondary reference lookup; xml_parsed is the last resort.
+**Key principle**: CONTEXT.json provides scoped reference data; the step catalog (params + notes) provides step XML structure and behavioral context; snippet_examples is archival fallback only; index files are the secondary reference lookup; xml_parsed is last resort.
 
 # Custom functions
 
@@ -334,7 +302,7 @@ Use the `library-lookup` skill to access the full manifest with keywords and fil
 The context system is designed to minimize token consumption. Follow these rules:
 
 - **CONTEXT.json first**: It contains exactly what you need for the current task. Read it once at the start.
-- **Step catalog over snippet_examples**: A single grep of the catalog (~60 lines) provides the full parameter specification for a step. Only read snippet_examples when the catalog entry has `"auto"`/`"unfinished"` status or the step requires behavioral notes from the XML comments. This saves a file read per step for the vast majority of steps.
+- **Step catalog over snippet_examples**: A single grep of the catalog (~60 lines) provides the full parameter spec and behavioral notes (`notes` field) for a step. snippet_examples is archival — only read it when the catalog `notes` field is insufficient or status is `"auto"`/`"unfinished"`. This saves a file read per step for the vast majority of steps.
 - **Never read step-catalog-en.json in full** (~200KB+). Always grep for individual entries: `grep -A 60 '"name": "Step Name"' agent/catalogs/step-catalog-en.json`.
 - **Index files are small**: Each index file covers the entire solution in a compact pipe-delimited format. A single grep is far cheaper than searching hundreds of XML files.
 - **Never read full xml_parsed files** when CONTEXT.json or index data has the answer.
@@ -344,11 +312,11 @@ The context system is designed to minimize token consumption. Follow these rules
 # Common mistakes to avoid
 
 - Do NOT wrap output in `<Script>` tags - output steps only
-- Do NOT copy verbose structures from xml_parsed/scripts - use the step catalog or snippet_examples
+- Do NOT copy verbose structures from xml_parsed/scripts - use the step catalog; snippet_examples is archival fallback only
 - Do NOT read full files when CONTEXT.json or index files have the needed information
 - Do NOT read the full step-catalog-en.json — always grep for individual entries
 - Do NOT add features not explicitly requested by the user
-- Do NOT guess or assume the XML structure - grep the step catalog first, then read snippet_examples if needed
+- Do NOT guess or assume the XML structure - grep the step catalog first (params + notes field), then read snippet_examples only if the catalog is insufficient
 - Do NOT use `<Calculation><![CDATA["text"]]></Calculation>` for comments - use `<Text>text</Text>` (check the snippet first!)
 
 # Constraints
@@ -358,4 +326,4 @@ The context system is designed to minimize token consumption. Follow these rules
 - XML within the _snippet_examples_ should NEVER be modified. It is rarely updated and only by the user. Always prompt the user if you believe changes should be made.
 - Index files in _context/_ are NEVER manually edited. They are regenerated by `fmcontext.sh`.
 - _CONTEXT.json_ is generated by FileMaker. It should not be manually created or modified by AI.
-- _step-catalog-en.json_ is maintained via the process in `agent/catalogs/UPDATING_CATALOGS.md`. Do not modify it without following that process.
+- _step-catalog-en.json_ is maintained via the process in `agent/catalogs/UPDATING_CATALOGS.md`. Do not modify it without following that process. See `agent/docs/SCHEMA_GUIDANCE.md` for the complete param type → XML mapping reference.

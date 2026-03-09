@@ -66,6 +66,48 @@ Created in `agent/catalogs/` to avoid duplication across steps:
 
 To find remaining work, scan the catalog for any `"status"` that is not `"complete"`.
 
+## Notes Field
+
+Top-level `notes` object on a catalog entry captures behavioral intelligence migrated from `snippet_examples/` XML comments. Use it as the **first stop** when generating scripts — it avoids a separate file read for the most common gotchas.
+
+### Schema
+
+```json
+"notes": {
+  "behavioral": ["..."],     // general behavioral details, usage patterns, side effects
+  "constraints": ["..."],    // hard rules — FileMaker will not accept or silently breaks these
+  "gotchas": ["..."],        // subtle behaviors that cause bugs in real scripts
+  "performance": ["..."],    // performance guidance
+  "platform": {              // platform-specific notes (only include keys with actual content)
+    "pro": "...",
+    "server": "...",
+    "webdirect": "...",
+    "go": "...",
+    "cloud": "...",
+    "dataapi": "...",
+    "cwp": "..."
+  }
+}
+```
+
+Only include sub-keys that have actual content. Do not add empty arrays or empty objects.
+
+### Migration workflow
+
+1. Read the snippet_examples file for the step (path is in the catalog entry's `snippetFile` field).
+2. Extract all XML comments from the snippet file (lines starting with `<!--`).
+3. Classify each comment into a `notes` sub-key:
+   - Platform-qualified notes (`Server:`, `Go:`, `WebDirect:`, etc.) → `platform` sub-key
+   - Hard restrictions ("not supported", "returns error", "cannot") → `constraints` or `platform`
+   - Subtle or surprising behaviors → `gotchas`
+   - General behavioral detail → `behavioral`
+4. Add the `notes` object after `helpUrl` in the catalog entry.
+5. Validate JSON: `python -m json.tool agent/catalogs/step-catalog-en.json > /dev/null`
+
+### Archive rule
+
+Once notes are migrated, the snippet file becomes the **archive** (XML reference only), not the source of behavioral truth. The catalog `notes` field is the live source for agent consumption. Do **not** modify snippet files during this migration — they remain unchanged and read-only.
+
 ## Additional Reference
 
 Official Claris documentation for each script step may be available at `agent/docs/filemaker/script-steps/`. Note: if working in a git worktree, these files are in the main repo — navigate up from the worktree path to find them (e.g., `../../agent/docs/filemaker/script-steps/`). These can be consulted for parameter details, behavior notes, and platform support. **Important:** the official docs only reference terms in the human-readable format — they contain no fmxmlsnippet/XML values. They are useful for understanding HR option names and step behavior, not for XML element or attribute names.

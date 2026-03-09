@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Group groupCollapsed="False" includeInMenu="False" id="274" name="agentic-fm">
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="275" name="Get agentic-fm path">
+  <Group groupCollapsed="False" includeInMenu="False" id="1" name="agentic-fm">
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="2" name="Get agentic-fm path">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Set a global variable used by other scripts to key/value pairs used by agentic-fm.</Text>
       </Step>
@@ -113,17 +113,17 @@
         <Calculation><![CDATA[True]]></Calculation>
       </Step>
     </Script>
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="277" name="Explode XML">
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="3" name="Explode XML">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Push out solution XML to be parsed for AI use.</Text>
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="89" name="# (comment)">
-        <Text>DEPENDENCY: The MBS plug-in is needed to execute a call to fmparse.sh</Text>
+        <Text>DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</Text>
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="1" name="Perform Script">
-        <Script id="275" name="Get agentic-fm path"/>
+        <Script id="2" name="Get agentic-fm path"/>
       </Step>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>
@@ -164,217 +164,110 @@
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="141" name="Set Variable">
         <Value>
-          <Calculation><![CDATA[ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) & "fmparse.sh"]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$fmparse</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[$fmparse
-& " -s \"" & Get ( FileName ) & "\""
-& " " & Substitute ( ConvertFromFileMakerPath ( $output ; 1 ) ; [ " " ; "\ " ] )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$command</Name>
-      </Step>
-      <Step enable="True" id="89" name="# (comment)"/>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS( "Shell.New" )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$shell</Name>
-      </Step>
-      <Step enable="True" id="75" name="Commit Records/Requests">
-        <NoInteract state="True"/>
-        <Option state="False"/>
-        <ESSForceCommit state="False"/>
-      </Step>
-      <Step enable="True" id="89" name="# (comment)"/>
-      <Step enable="True" id="89" name="# (comment)">
-        <Text>Add environment and arguments.</Text>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS ( "Shell.AddEnvironment" ; $shell ; "FM_XML_EXPLODER_BIN" ; "~/bin/fm-xml-export-exploder" )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$env</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS ( "Shell.SetArgumentsList" ; $shell ; 
-	List (
-		"-s";
-		Get ( FileName );
-		MBS ( "Path.FileMakerPathToNativePath"; $output ; 1 );
-	)
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "solution_name"     ; Get ( FileName )                                                              ; JSONString ] ;
+	[ "export_file_path"  ; ConvertFromFileMakerPath ( $output ; 1 )                                      ; JSONString ] ;
+	[ "repo_path"         ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 )     ; JSONString ] ;
+	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder"                                                ; JSONString ]
 )]]></Calculation>
         </Value>
         <Repetition>
           <Calculation><![CDATA[1]]></Calculation>
         </Repetition>
-        <Name>$arg</Name>
+        <Name>$payload</Name>
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
-      <Step enable="True" id="89" name="# (comment)">
-        <Text>Development check values.</Text>
+      <Step enable="True" id="160" name="Insert from URL">
+        <NoInteract state="True"/>
+        <DontEncodeURL state="False"/>
+        <SelectAll state="True"/>
+        <VerifySSLCertificates state="False"/>
+        <CURLOptions>
+          <Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation>
+        </CURLOptions>
+        <Calculation><![CDATA["http://localhost:8765/explode"]]></Calculation>
+        <Text/>
+        <Field>$response</Field>
       </Step>
       <Step enable="True" id="141" name="Set Variable">
         <Value>
-          <Calculation><![CDATA[MBS ( "Shell.GetArgumentCount" ; $shell )]]></Calculation>
+          <Calculation><![CDATA[Get ( LastError )]]></Calculation>
         </Value>
         <Repetition>
           <Calculation><![CDATA[1]]></Calculation>
         </Repetition>
-        <Name>$argCount</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS ( "Shell.GetArguments" ; $shell )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$argCheck</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS ( "Shell.GetEnvironment" ; $shell )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$envCheck</Name>
+        <Name>$httpError</Name>
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
-      <Step enable="True" id="89" name="# (comment)">
-        <Text>Execute.</Text>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS ( "Shell.Execute" ; $shell ; $fmparse )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$run</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[""]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$error</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[""]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$result</Name>
-      </Step>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>
-        <Calculation><![CDATA[MBS("IsError")]]></Calculation>
+        <Calculation><![CDATA[$httpError ≠ 0]]></Calculation>
       </Step>
       <Step enable="True" id="87" name="Show Custom Dialog">
         <Title>
-          <Calculation><![CDATA["Failed to run"]]></Calculation>
+          <Calculation><![CDATA["Companion server not running"]]></Calculation>
         </Title>
         <Message>
-          <Calculation><![CDATA[$run]]></Calculation>
+          <Calculation><![CDATA["Start the companion server first:¶¶python agent/scripts/companion_server.py¶¶Then run Explode XML again."]]></Calculation>
         </Message>
         <Buttons>
           <Button CommitState="True">
             <Calculation><![CDATA["OK"]]></Calculation>
           </Button>
-          <Button CommitState="False">
-            <Calculation><![CDATA["Cancel"]]></Calculation>
-          </Button>
+          <Button CommitState="False"/>
           <Button CommitState="False"/>
         </Buttons>
       </Step>
-      <Step enable="True" id="69" name="Else">
-        <Restore state="False"/>
-      </Step>
-      <Step enable="True" id="89" name="# (comment)">
-        <Text>Loop while app runs and collect messages</Text>
-      </Step>
-      <Step enable="True" id="71" name="Loop">
-        <Restore state="False"/>
-        <FlushType value="Always"/>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[MBS ( "Shell.Wait" ; $shell ; 1 )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$wait</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[$error & MBS ( "Shell.ReadErrorText" ; $shell ; "UTF-8" )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$error</Name>
-      </Step>
-      <Step enable="True" id="141" name="Set Variable">
-        <Value>
-          <Calculation><![CDATA[$result & MBS ( "Shell.ReadOutputText" ; $shell ; "UTF-8" )]]></Calculation>
-        </Value>
-        <Repetition>
-          <Calculation><![CDATA[1]]></Calculation>
-        </Repetition>
-        <Name>$result</Name>
-      </Step>
-      <Step enable="True" id="72" name="Exit Loop If">
-        <Calculation><![CDATA[MBS( "Shell.IsRunning"; $shell) ≠ 1]]></Calculation>
-      </Step>
-      <Step enable="True" id="73" name="End Loop"/>
-      <Step enable="True" id="75" name="Commit Records/Requests">
-        <NoInteract state="True"/>
-        <Option state="False"/>
-        <ESSForceCommit state="False"/>
-      </Step>
+      <Step enable="True" id="103" name="Exit Script"/>
       <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="141" name="Set Variable">
         <Value>
-          <Calculation><![CDATA[MBS ( "Shell.Release" ; $shell )]]></Calculation>
+          <Calculation><![CDATA[JSONGetElement ( $response ; "success" )]]></Calculation>
         </Value>
         <Repetition>
           <Calculation><![CDATA[1]]></Calculation>
         </Repetition>
-        <Name>$release</Name>
+        <Name>$success</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[JSONGetElement ( $response ; "stdout" )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$stdout</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[JSONGetElement ( $response ; "stderr" )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$stderr</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[JSONGetElement ( $response ; "exit_code" )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$exitCode</Name>
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>
-        <Calculation><![CDATA[not IsEmpty ( $error )]]></Calculation>
+        <Calculation><![CDATA[not $success or $exitCode ≠ 0]]></Calculation>
       </Step>
       <Step enable="True" id="87" name="Show Custom Dialog">
         <Title>
           <Calculation><![CDATA["Error"]]></Calculation>
         </Title>
         <Message>
-          <Calculation><![CDATA[$error]]></Calculation>
+          <Calculation><![CDATA[$stderr & If ( not IsEmpty ( $stdout ) ; ¶ & $stdout ; "" )]]></Calculation>
         </Message>
         <Buttons>
           <Button CommitState="True">
@@ -392,7 +285,7 @@
           <Calculation><![CDATA["Finished"]]></Calculation>
         </Title>
         <Message>
-          <Calculation><![CDATA["The XML has been placed into agentic-fm's xml_parsed folder."]]></Calculation>
+          <Calculation><![CDATA["The XML has been placed into agentic-fm's xml_parsed folder." & If ( not IsEmpty ( $stdout ) ; "¶¶" & $stdout ; "" )]]></Calculation>
         </Message>
         <Buttons>
           <Button CommitState="True">
@@ -408,7 +301,7 @@
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="89" name="# (comment)"/>
     </Script>
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="276" name="Push Context">
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="4" name="Push Context">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Push the current layout context to agentic-fm.</Text>
       </Step>
@@ -417,7 +310,7 @@
         <Text>Check for a valid install.</Text>
       </Step>
       <Step enable="True" id="1" name="Perform Script">
-        <Script id="275" name="Get agentic-fm path"/>
+        <Script id="2" name="Get agentic-fm path"/>
       </Step>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>

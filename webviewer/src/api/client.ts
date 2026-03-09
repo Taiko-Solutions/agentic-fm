@@ -118,6 +118,37 @@ export async function loadScript(id: number, name: string): Promise<ScriptLoadRe
   return res.json();
 }
 
+// --- Library ---
+
+export interface LibraryItem {
+  path: string;
+  name: string;
+  category: string;
+}
+
+export async function fetchLibrary(): Promise<LibraryItem[]> {
+  const res = await fetch(`${BASE}/api/library`);
+  if (!res.ok) throw new Error('Failed to fetch library');
+  const data = await res.json();
+  return data.items ?? [];
+}
+
+export async function fetchLibraryItem(itemPath: string): Promise<string> {
+  const res = await fetch(`${BASE}/api/library/item?path=${encodeURIComponent(itemPath)}`);
+  if (!res.ok) throw new Error(`Failed to fetch library item: ${itemPath}`);
+  return res.text();
+}
+
+export async function saveLibraryItem(itemPath: string, content: string): Promise<{ success: boolean }> {
+  const res = await fetch(`${BASE}/api/library/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path: itemPath, content }),
+  });
+  if (!res.ok) throw new Error('Failed to save library item');
+  return res.json();
+}
+
 // --- AI Settings (server-side .env.local) ---
 
 export interface AISettingsResponse {

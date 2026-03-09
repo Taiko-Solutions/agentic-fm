@@ -18,9 +18,11 @@ agent/docs/filemaker/error-codes.md
 # Specific files
 Prompt.md
 .cursorignore
-agent/library/MANIFEST.md
+agent/library/
 agent/sandbox/.autosave.json
 agent/config/removals.json
+docker-compose.override.yml
+project.env
 
 # macOS
 .DS_Store

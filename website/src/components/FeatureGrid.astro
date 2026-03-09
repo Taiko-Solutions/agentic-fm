@@ -14,7 +14,7 @@ const features: Feature[] = [
   {
     icon: '🔍',
     title: 'Automatic Validation',
-    description: 'Every generated snippet is validated against canonical templates before it reaches the clipboard. Structural errors, missing attributes, and unbalanced blocks are caught immediately.',
+    description: 'Every generated snippet is validated against canonical templates before it reaches the clipboard. Structural errors, missing attributes, unbalanced blocks, and coding convention violations are caught immediately.',
   },
   {
     icon: '📋',
@@ -29,17 +29,27 @@ const features: Feature[] = [
   {
     icon: '🖥️',
     title: 'Visual Script Editor',
-    description: 'Write scripts in human-readable format with Monaco editor autocomplete, live XML preview, and integrated AI chat — in your browser or embedded in FileMaker.',
+    description: 'Write scripts in human-readable format with Monaco editor autocomplete, inline squiggle validation, live XML preview, and integrated AI chat — in your browser or embedded in FileMaker.',
+  },
+  {
+    icon: '📡',
+    title: 'No Plugin Required',
+    description: 'A lightweight companion server replaces the MBS plugin dependency. FileMaker calls it via native Insert from URL — start it with a single command, no third-party software needed.',
+  },
+  {
+    icon: '⏱️',
+    title: 'Context Staleness Detection',
+    description: 'CONTEXT.json carries a timestamp. The validator warns when context is more than 60 minutes old, and the webviewer StatusBar shows context age with amber and red indicators.',
   },
   {
     icon: '📚',
     title: 'Curated Snippet Library',
-    description: 'A growing library of proven, reusable fmxmlsnippet patterns — HTTP requests, error handling, transaction wrappers, UI components, and more.',
+    description: 'A growing library of proven, reusable fmxmlsnippet patterns — HTTP requests, error handling, transaction wrappers, UI components, and more. Personal library browsing coming to the webviewer.',
   },
   {
     icon: '💡',
     title: 'FileMaker Knowledge Base',
-    description: 'Community-curated behavioral intelligence about FileMaker — found set mechanics, single pass loops, using script triggers, and other nuances that AI needs to get things right.',
+    description: 'Community-curated behavioral intelligence about FileMaker — found set mechanics, single-pass loops, variables, error handling, script parameters, and other nuances that AI needs to get things right.',
   },
   {
     icon: '🛠️',
