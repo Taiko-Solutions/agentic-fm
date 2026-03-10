@@ -48,6 +48,10 @@ Human-readable script templates in `scripts_sanitized` format (numbered, indente
 | `clew-simple.md` | Traditional Clew pattern (read, query, navigation scripts) |
 | `clew-transactional.md` | Utility Manager + Initialize Shadow + Transactional Controller |
 
+### UPSTREAM_IMPROVEMENTS.md
+
+Instructions and a reusable CLAUDE.md section for solution-specific repos. When included, the AI will detect tool improvements during normal development and log proposals to `agent/UPSTREAM_PROPOSALS.md` — without ever leaking solution-specific data. The developer reviews proposals periodically and applies them to this template repo.
+
 ## Maintenance
 
 These documents are maintained by the Taiko Solutions team. They live exclusively on the `taiko` branch and are never merged to `main` or proposed upstream.
