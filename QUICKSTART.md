@@ -1,18 +1,29 @@
 # agentic-fm Quickstart
 
+## Two ways to work
+
+agentic-fm supports two complementary workflows — choose based on how you prefer to interact with AI:
+
+**CLI / IDE** — Claude Code, Cursor, VS Code, or any terminal-based agent. The agent reads `agent/CONTEXT.json`, generates `fmxmlsnippet` XML in `agent/sandbox/`, validates it, and loads it onto the clipboard ready to paste into FileMaker's Script Workspace.
+
+**Webviewer** — A visual three-panel script editor (Monaco + AI chat) that runs in your browser and can be embedded directly inside a FileMaker Web Viewer. The HR-to-XML conversion happens automatically in the browser. See the [Webviewer page](https://agentic-fm.com/webviewer/) for setup and embedding details. For webviewer setup, skip to [Webviewer Setup](#webviewer-setup) below after completing the FileMaker setup steps.
+
+---
+
 ## What this does
 
-agentic-fm gives an AI agent (Claude Code, Cursor, etc.) structured knowledge of your FileMaker solution — schema, scripts, layouts, relationships — so it can generate reliable `fmxmlsnippet` code that pastes directly into the Script Workspace. You describe what you want; the agent writes the XML; you paste it into FileMaker.
+agentic-fm gives an AI agent structured knowledge of your FileMaker solution — schema, scripts, layouts, relationships — so it can generate reliable `fmxmlsnippet` code that pastes directly into the Script Workspace. You describe what you want; the agent writes the XML; you paste it into FileMaker.
 
 ---
 
 ## Prerequisites
 
 1. **FileMaker Pro 21.0+** — earlier versions lack required steps (`GetTableDDL`, `While`, data file steps)
-2. **MBS FileMaker Plugin** — required for the in-FileMaker "Explode XML" automation. Free trial available at [monkeybreadsoftware.com/filemaker](https://www.monkeybreadsoftware.com/filemaker/)
-3. **fm-xml-export-exploder** — Rust binary that parses FileMaker XML exports. Download from [GitHub releases](https://github.com/bc-m/fm-xml-export-exploder/releases/latest)
-4. **Python 3** — ships with macOS, or `brew install python`
-5. **Claude Code** (or another AI agent) — this guide uses `claude` in the terminal
+2. **fm-xml-export-exploder** — Rust binary that parses FileMaker XML exports. Download from [GitHub releases](https://github.com/bc-m/fm-xml-export-exploder/releases/latest)
+3. **Python 3** — macOS ships Python 3 at `/usr/bin/python3`. For a newer version: `brew install python`
+4. **Your AI agent of choice** — Claude Code, Cursor, VS Code + Copilot, etc.
+
+> **Python virtual environment**: Only needed if you plan to run `agent/docs/filemaker/fetch_docs.py` to fetch Claris reference documentation. That script auto-installs `requests` and `beautifulsoup4` on first run via pip. The core scripts (`clipboard.py`, `validate_snippet.py`, `companion_server.py`) use the Python standard library only — no venv required.
 
 ---
 
@@ -21,7 +32,7 @@ agentic-fm gives an AI agent (Claude Code, Cursor, etc.) structured knowledge of
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/agentic-fm/agentic-fm.git
+git clone https://github.com/petrowsky/agentic-fm.git
 cd agentic-fm
 ```
 
@@ -35,25 +46,21 @@ chmod +x ~/bin/fm-xml-export-exploder
 
 On first run, macOS Gatekeeper will block it. Right-click the binary in Finder and choose **Open** once to clear the restriction.
 
-### 3. Activate the Python virtual environment
+### 3. Verify Python 3
 
 ```bash
-source .venv/bin/activate
-```
-
-Verify it works:
-
-```bash
-python agent/scripts/clipboard.py --help
+python3 agent/scripts/clipboard.py --help
 ```
 
 ---
 
 ## One-time FileMaker setup
 
-Do this once per solution.
+Do this once per solution. Follow the steps in order — each item may reference the one before it.
 
 ### 1. Install the Context custom function
+
+Custom functions must be installed first because field calculations and scripts may call them by name.
 
 1. Open your solution in FileMaker Pro
 2. Go to **File > Manage > Custom Functions**
@@ -63,22 +70,29 @@ Do this once per solution.
 
 ### 2. Install the companion scripts
 
+With the custom function in place, install the **agentic-fm** script folder. Choose either option:
+
+**Option A — Open the included .fmp12 file (fastest)**
+
+`filemaker/agentic-fm.fmp12` is a pre-built FileMaker file that already contains the **agentic-fm** script folder. Open it in FileMaker, then copy and paste the **agentic-fm** script folder directly into your solution's Script Workspace. This is the quickest path for any FileMaker developer.
+
+**Option B — Install via clipboard**
+
 ```bash
-source .venv/bin/activate
-python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
+python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
 ```
 
 Switch to FileMaker, open **Scripts > Script Workspace**, click in the script list, and press **Cmd+V**. A folder named **agentic-fm** with three scripts will appear.
 
-### 3. Configure the repo path
+### Configure the repo path
 
-Run **Get agentic-fm path** from the Scripts menu. A folder picker appears — select the root of this repo. The path is stored for the session.
+Run **Get agentic-fm path** from the Scripts menu. A folder picker appears — select the root of this repo. The path is stored in `$$AGENTIC.FM` for the session.
 
-> Add a call to this script in your solution's startup script so it runs automatically on launch.
+> **Note:** `$$AGENTIC.FM` is a global variable and is cleared whenever the FileMaker file is closed. You'll need to run **Get agentic-fm path** again each session — or add a call to it in your solution's startup script so it runs automatically on launch. Any script that requires the path will also prompt you to set it if it is not yet populated.
 
-### 4. Explode the XML
+### Explode the XML
 
-Run **Explode XML** from the Scripts menu. This exports your solution's XML and populates `agent/xml_parsed/`. Re-run it any time the schema or scripts change.
+Run the **Explode XML** script. This exports your solution's XML and populates `agent/xml_parsed/`. Re-run it any time the schema or scripts change and you want an agent to reference those changes.
 
 ---
 
@@ -86,68 +100,90 @@ Run **Explode XML** from the Scripts menu. This exports your solution's XML and 
 
 Each time you sit down to write scripts:
 
-1. **Navigate** to the layout you are working on in FileMaker
-2. **Run "Push Context"** from the Scripts menu — enter a plain-English task description when prompted. This writes `agent/CONTEXT.json` with the fields, layouts, relationships, and scripts scoped to your current task.
-3. **Open Claude Code** in the agentic-fm directory and describe what you want
-4. The agent generates an `fmxmlsnippet` file in `agent/sandbox/`, validates it, and loads it onto the clipboard
-5. **Switch to FileMaker**, open the Script Workspace, position your cursor, and press **Cmd+V**
+1. **Start the companion server** — FileMaker calls this to run shell commands. Keep it running in a terminal tab while you work:
+   ```bash
+   python3 agent/scripts/companion_server.py
+   ```
+2. **Navigate** to the layout you are working on in FileMaker
+3. **Run "Push Context"** from the Scripts menu — enter a plain-English task description when prompted. This writes `agent/CONTEXT.json` with the fields, layouts, relationships, and scripts scoped to your current task.
+4. **In your CLI or IDE**, open the agentic-fm directory and prompt your agent to generate the script
+5. The agent generates an `fmxmlsnippet` file in `agent/sandbox/`, validates it, and loads it onto the clipboard
+6. **Switch to FileMaker**, open the Script Workspace, position your cursor, and press **Cmd+V**
 
 ---
 
-## Your first script
+## Your first session
 
-This example creates a simple script that sets a status field and commits the record.
+The fastest way to see agentic-fm in action is to work with a script that already exists in your solution rather than creating one from scratch. Your agent can read, explain, and improve real scripts immediately after Explode XML has run.
 
-### Step 1 — Push context
+### Step 1 — Open your CLI or IDE
 
-In FileMaker, navigate to your Invoices layout. Run **Push Context** and enter:
-
-```
-Set the Status field to "Sent" and commit the record
-```
-
-### Step 2 — Run the agent
-
-```bash
-cd /path/to/agentic-fm
-source .venv/bin/activate
-claude
-```
-
-In the Claude Code prompt:
+Open the agentic-fm directory in your terminal or IDE and start your agent. Then prompt it to load one of your existing scripts by name:
 
 ```
-Generate the script described in CONTEXT.json
+Load script "Send Invoice Email" so we can start to optimize it.
+Give me a description of what the script does.
 ```
 
-The agent will:
-- Read `agent/CONTEXT.json` for your field IDs
-- Look up the correct XML structure for each step
-- Write the snippet to `agent/sandbox/`
-- Validate it with `validate_snippet.py`
-- Load it onto the clipboard with `clipboard.py`
+The agent will locate the script in `agent/xml_parsed/scripts_sanitized/`, read it, and return a plain-English summary of its logic. From there you can ask it to refactor, add error handling, optimize for server execution, or anything else.
 
-### Step 3 — Paste into FileMaker
+### Step 2 — Push context (when you need field or layout awareness)
 
-Switch to FileMaker, open the Script Workspace, create a new script (or open an existing one), click where you want the steps inserted, and press **Cmd+V**.
+If your next prompt requires generating or modifying steps that reference fields, layouts, or related tables, navigate to the relevant layout in FileMaker and run **Push Context** with a task description:
+
+```
+Optimize the Send Invoice Email script to use JSON for parameter passing
+```
+
+This writes `agent/CONTEXT.json` so the agent has the correct field IDs and layout references scoped to your task.
+
+### Step 3 — Paste changes into FileMaker
+
+When the agent produces updated steps, it validates and loads them onto the clipboard automatically. Switch to FileMaker, open the Script Workspace, position your cursor, and press **Cmd+V**.
 
 ### Step 4 — Iterate
 
-If you want changes, describe them in the Claude Code session:
+Keep the conversation going:
 
 ```
-Add error handling around the Commit Records step
+Add error handling around the Send Mail step and exit gracefully if it fails
 ```
 
 The agent updates the file, re-validates, and reloads the clipboard. Paste again.
 
 ---
 
+## Webviewer Setup
+
+The webviewer is an optional visual script editor that runs in your browser and can be embedded directly inside a FileMaker Web Viewer object for an integrated experience.
+
+**Requirements:** Node.js 18+
+
+**Quickest way to see it in action:**
+
+1. Make sure the companion server is running (`python3 agent/scripts/companion_server.py`)
+2. Open `filemaker/agentic-fm.fmp12` in FileMaker
+3. Run the **Agentic-fm webviewer** script from the Scripts menu — it will install dependencies and start the dev server automatically
+
+If you prefer to start the server manually:
+
+```bash
+cd webviewer
+npm install
+npm run dev
+# Open http://localhost:8080
+```
+
+Configure your AI provider (Anthropic API key, OpenAI API key, or Claude Code CLI) in the webviewer settings panel. See the [Webviewer page](https://agentic-fm.com/webviewer/) for full embedding instructions and AI provider details.
+
+---
+
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
-| `clipboard.py` not found | Run `source .venv/bin/activate` first |
-| Explode XML fails | Confirm MBS Plugin is installed and `~/bin/fm-xml-export-exploder` exists and is executable |
-| CONTEXT.json is empty or missing | Run **Push Context** again from the correct layout |
-| Paste does nothing in FileMaker | Confirm the clipboard was loaded — the agent logs `clipboard.py write` output; check for errors |
+| Problem                          | Fix                                                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `python3: command not found`     | Install Python 3 via [Homebrew](https://brew.sh): `brew install python`                                  |
+| Explode XML fails                | Confirm `~/bin/fm-xml-export-exploder` exists and is executable; confirm the companion server is running |
+| CONTEXT.json is empty or missing | Run **Push Context** again from the correct layout                                                       |
+| Paste does nothing in FileMaker  | Confirm the clipboard was loaded — the agent logs `clipboard.py write` output; check for errors          |
+| `$$AGENTIC.FM` not set           | Run **Get agentic-fm path** — it is cleared when the FileMaker file is closed                            |

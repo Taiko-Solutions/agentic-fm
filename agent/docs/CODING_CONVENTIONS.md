@@ -196,6 +196,20 @@ Case (
 - In Case/If branches, use `// Else` as a visual separator before Else steps
 - Script-level comments describe purpose, expected context, parameters, and return values
 
+### HR format comment syntax
+
+FileMaker's `# (comment)` step has two states — enabled and disabled — and both appear in HR format. The syntax convention is:
+
+| HR syntax | Step state | XML | Use for |
+|-----------|-----------|-----|---------|
+| `# text` | Enabled (`enable="True"`) | `<Step enable="True" id="89" name="# (comment)"><Text>text</Text></Step>` | Visible annotations, PURPOSE line |
+| `#// text` | Disabled (`enable="False"`) | `<Step enable="False" id="89" name="# (comment)"><Text>// text</Text></Step>` | Section markers (`// MARK:`), structural dividers |
+| `#` | Enabled, blank | `<Step enable="True" id="89" name="# (comment)"/>` | Visual blank line between sections |
+
+The `//` prefix on a disabled comment is a visual convention borrowed from other languages — it signals "this step is off" in the same way `//` means a commented-out line. `// MARK:` headers always use the disabled form `#//` so they appear greyed out in the Script Workspace and do not clutter the active comment layer.
+
+This distinction matters when HR code is pasted into FileMaker or converted by the webviewer's HR→XML converter: `# text` and `#// text` must produce different `enable` attribute values.
+
 ### Script documentation structure
 
 Every script follows this documentation pattern at the top:

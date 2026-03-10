@@ -38,6 +38,11 @@ Body text. Use concrete examples where the behavior is non-obvious.
 Code examples use triple-backtick blocks with no language tag for HR scripts,
 and ```xml for XML snippets.
 
+HR script examples must use the correct comment step syntax (see `agent/docs/CODING_CONVENTIONS.md` — "HR format comment syntax"):
+- `# text` — enabled comment (visible annotation)
+- `#// text` — disabled comment (section markers, `// MARK:` headers, structural dividers)
+- `#` — blank line separator
+
 ## References
 
 | Name | Type | Local doc | Claris help |

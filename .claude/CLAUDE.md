@@ -56,10 +56,10 @@ The helper script `agent/scripts/clipboard.py` handles both directions:
 
 ```bash
 # Read FM objects from clipboard → save as XML
-python agent/scripts/clipboard.py read agent/sandbox/output.xml
+python3 agent/scripts/clipboard.py read agent/sandbox/output.xml
 
 # Write XML file → clipboard (ready to paste into FileMaker)
-python agent/scripts/clipboard.py write agent/sandbox/myscript.xml
+python3 agent/scripts/clipboard.py write agent/sandbox/myscript.xml
 ```
 
 The write command auto-detects the correct class from the XML content (`<Step>` → `XMSS`, `<CustomFunction>` → `XMFN`, etc.). Use `--class` to override.
@@ -154,7 +154,7 @@ Full XML patterns, clipboard format details, shortcut encoding, and the `<Overri
 
 To write a menu XML file to the clipboard:
 ```bash
-python agent/scripts/clipboard.py write agent/sandbox/<menu>.xml
+python3 agent/scripts/clipboard.py write agent/sandbox/<menu>.xml
 ```
 Auto-detection recognises `<CustomMenu` and `<CustomMenuSet` elements and routes to the `ut16` write path automatically.
 
@@ -214,9 +214,9 @@ Before writing a script, scan `agent/docs/knowledge/MANIFEST.md` for keyword mat
 
 **MANDATORY: After writing or updating a script within agent/sandbox/, you MUST:**
 
-5. Run `python agent/scripts/validate_snippet.py agent/sandbox/<script_name>` to validate the output
+5. Run `python3 agent/scripts/validate_snippet.py agent/sandbox/<script_name>` to validate the output
 6. Fix any errors reported by the validator before presenting the script to the user
-7. Once validation passes, run `python agent/scripts/clipboard.py write agent/sandbox/<script_name>` to load the script onto the clipboard, ready to paste directly into FileMaker
+7. Once validation passes, run `python3 agent/scripts/clipboard.py write agent/sandbox/<script_name>` to load the script onto the clipboard, ready to paste directly into FileMaker
 
 # Step Catalog
 
