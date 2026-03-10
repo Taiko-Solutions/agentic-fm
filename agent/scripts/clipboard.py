@@ -32,6 +32,16 @@ import argparse
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
+
+# Optional fast path: PyObjC (pyobjc-framework-Cocoa) lets us read/write the
+# clipboard via NSPasteboard directly, bypassing osascript subprocesses and the
+# hex-decode round-trip.  Falls back to the osascript path when not installed.
+try:
+    from AppKit import NSPasteboard, NSData  # type: ignore[import]
+    _HAS_APPKIT = True
+except ImportError:
+    _HAS_APPKIT = False
 
 # FileMaker clipboard class codes
 FM_CLASSES = {
@@ -64,6 +74,54 @@ XML_ELEMENT_TO_CLASS = {
 # Class codes that use UTF-16 Unicode text rather than binary FM descriptors
 UT16_CLASSES = {'ut16'}
 
+# CorePasteboardFlavorType hex values for each FM class code.
+# The 4-byte integer is just the ASCII bytes of the class code interpreted as big-endian.
+# e.g. XMSS → 0x58('X') 0x4D('M') 0x53('S') 0x53('S') → 0x584D5353
+# The pasteboard type string is: f"CorePasteboardFlavorType 0x{hex_val:08X}"
+_FM_CLASS_HEX = {
+    'XMSS': 0x584D5353,
+    'XMSC': 0x584D5343,
+    'XML2': 0x584D4C32,
+    'XMLO': 0x584D4C4F,
+    'XMFD': 0x584D4644,
+    'XMFN': 0x584D464E,
+    'XMTB': 0x584D5442,
+    'XMVL': 0x584D564C,
+    'XMTH': 0x584D5448,
+    'ut16': 0x75743136,  # «class ut16» — UTF-16 Unicode text (custom menus)
+}
+
+
+def _pb_type_str(cls):
+    """Return the CorePasteboardFlavorType string for a class code."""
+    return f"CorePasteboardFlavorType 0x{_FM_CLASS_HEX[cls]:08X}"
+
+
+def _nspasteboard_detect():
+    """Detect which FM class is on the clipboard via NSPasteboard. Returns code or None."""
+    pb = NSPasteboard.generalPasteboard()
+    for cls in _FM_CLASS_HEX:
+        if pb.dataForType_(_pb_type_str(cls)) is not None:
+            return cls
+    return None
+
+
+def _nspasteboard_read_bytes(cls):
+    """Read raw clipboard bytes for a given FM class via NSPasteboard. Returns bytes or None."""
+    pb = NSPasteboard.generalPasteboard()
+    data = pb.dataForType_(_pb_type_str(cls))
+    if data is None:
+        return None
+    return data.bytes().tobytes()
+
+
+def _nspasteboard_write(cls, raw_bytes):
+    """Write raw bytes to the clipboard under the given FM class type. Returns True on success."""
+    pb = NSPasteboard.generalPasteboard()
+    pb.clearContents()
+    ns_data = NSData.dataWithBytes_length_(raw_bytes, len(raw_bytes))
+    return bool(pb.setData_forType_(ns_data, _pb_type_str(cls)))
+
 
 def detect_clipboard_class():
     """Return the FM class code currently on the clipboard, or None.
@@ -71,6 +129,9 @@ def detect_clipboard_class():
     Returns 'ut16' when the clipboard holds FM menu objects (Unicode text),
     or a four-letter FM binary descriptor code (e.g. 'XMSS') otherwise.
     """
+    if _HAS_APPKIT:
+        return _nspasteboard_detect()
+
     class_list = ', '.join(f'\u00abclass {c}\u00bb' for c in FM_CLASSES)
     script = f"""try
     set allowed to {{{class_list}}}
@@ -102,6 +163,20 @@ end try"""
 
 def detect_class_from_xml(xml_text):
     """Infer the correct FM clipboard class from the XML element content."""
+    # Try XML parsing first — more robust than regex and naturally handles the
+    # menu-vs-steps priority: the first child of the fmxmlsnippet root is always
+    # the correct type tag, so <Step> elements nested inside menu action blocks
+    # are never seen at this level.
+    try:
+        root = ET.fromstring(xml_text)
+        if len(root) > 0:
+            cls = XML_ELEMENT_TO_CLASS.get(root[0].tag)
+            if cls:
+                return cls
+    except ET.ParseError:
+        pass
+
+    # Fallback: regex scan for malformed or partially-written XML.
     # Menu elements must be checked before 'Step' — menu XML files contain <Step>
     # elements inside their action blocks, which would otherwise match XMSS first.
     for element in ('CustomMenuSet', 'CustomMenu'):
@@ -125,32 +200,39 @@ def read_from_clipboard(output_path=None):
     if cls in UT16_CLASSES:
         return _read_ut16_from_clipboard(output_path)
 
-    # Use "the clipboard as «class XMSS»" rather than "«class XMSS» of (the clipboard)".
-    # The "of" form treats the clipboard as a record and fails when the clipboard's
-    # primary type is plain text (e.g. a single text label copied in Layout Mode).
-    # The "as" coercion form locates the requested type regardless of primary type.
-    cls_expr = f'\u00abclass {cls}\u00bb'  # «class XMSS»
-    result = subprocess.run(
-        ['osascript', '-e', f'the clipboard as {cls_expr}'],
-        capture_output=True
-    )
-    if result.returncode != 0:
-        print(f'ERROR: {result.stderr.decode().strip()}', file=sys.stderr)
-        sys.exit(1)
+    if _HAS_APPKIT:
+        raw_bytes = _nspasteboard_read_bytes(cls)
+        if raw_bytes is None:
+            print(f'ERROR: Could not read {cls} data from clipboard.', file=sys.stderr)
+            sys.exit(1)
+        xml = raw_bytes.decode('utf-8')
+    else:
+        # Use "the clipboard as «class XMSS»" rather than "«class XMSS» of (the clipboard)".
+        # The "of" form treats the clipboard as a record and fails when the clipboard's
+        # primary type is plain text (e.g. a single text label copied in Layout Mode).
+        # The "as" coercion form locates the requested type regardless of primary type.
+        cls_expr = f'\u00abclass {cls}\u00bb'  # «class XMSS»
+        result = subprocess.run(
+            ['osascript', '-e', f'the clipboard as {cls_expr}'],
+            capture_output=True
+        )
+        if result.returncode != 0:
+            print(f'ERROR: {result.stderr.decode().strip()}', file=sys.stderr)
+            sys.exit(1)
 
-    # osascript prints binary descriptors as: «data XMSS<hexstring>»
-    # Extract the hex portion, convert to bytes, decode as UTF-8.
-    # This avoids the sed/xxd/iconv shell pipeline and its quoting hazards.
-    raw = result.stdout.decode('utf-8', errors='replace').strip()
-    # Class codes are exactly 4 chars (e.g. XMSS, XML2). Using \w+ was greedy
-    # and consumed hex digits that belong to the data, leaving an odd-length capture.
-    match = re.search(r'\u00abdata [A-Z0-9]{4}([0-9A-Fa-f]+)\u00bb', raw)
-    if not match:
-        print(f'ERROR: Unexpected clipboard output:\n{raw[:300]}', file=sys.stderr)
-        sys.exit(1)
+        # osascript prints binary descriptors as: «data XMSS<hexstring>»
+        # Extract the hex portion, convert to bytes, decode as UTF-8.
+        # This avoids the sed/xxd/iconv shell pipeline and its quoting hazards.
+        raw = result.stdout.decode('utf-8', errors='replace').strip()
+        # Class codes are exactly 4 chars (e.g. XMSS, XML2). Using \w+ was greedy
+        # and consumed hex digits that belong to the data, leaving an odd-length capture.
+        match = re.search(r'\u00abdata [A-Z0-9]{4}([0-9A-Fa-f]+)\u00bb', raw)
+        if not match:
+            print(f'ERROR: Unexpected clipboard output:\n{raw[:300]}', file=sys.stderr)
+            sys.exit(1)
 
-    hex_str = re.sub(r'\s+', '', match.group(1))
-    xml = bytes.fromhex(hex_str).decode('utf-8')
+        hex_str = re.sub(r'\s+', '', match.group(1))
+        xml = bytes.fromhex(hex_str).decode('utf-8')
 
     # Pretty-print with xmllint (included with macOS Xcode command line tools)
     fmt = subprocess.run(['xmllint', '--format', '-'], input=xml.encode('utf-8'), capture_output=True)
@@ -168,20 +250,25 @@ def read_from_clipboard(output_path=None):
 
 
 def _read_ut16_from_clipboard(output_path=None):
-    """Read a UTF-16 menu object from the clipboard (CustomMenu / CustomMenuSet).
-
-    Unlike binary FM descriptor classes, osascript returns ut16 clipboard content
-    as plain UTF-8 text (not as «data ut16XXXX»), so we decode stdout directly.
-    """
-    result = subprocess.run(
-        ['osascript', '-e', 'the clipboard as \u00abclass ut16\u00bb'],
-        capture_output=True
-    )
-    if result.returncode != 0:
-        print(f'ERROR: {result.stderr.decode().strip()}', file=sys.stderr)
-        sys.exit(1)
-
-    xml = result.stdout.decode('utf-8')
+    """Read a UTF-16 menu object from the clipboard (CustomMenu / CustomMenuSet)."""
+    if _HAS_APPKIT:
+        raw_bytes = _nspasteboard_read_bytes('ut16')
+        if raw_bytes is None:
+            print('ERROR: Could not read ut16 data from clipboard.', file=sys.stderr)
+            sys.exit(1)
+        # NSPasteboard gives us the raw UTF-16 bytes (with BOM); decode directly.
+        xml = raw_bytes.decode('utf-16')
+    else:
+        # Unlike binary FM descriptor classes, osascript returns ut16 clipboard content
+        # as plain UTF-8 text (not as «data ut16XXXX»), so we decode stdout directly.
+        result = subprocess.run(
+            ['osascript', '-e', 'the clipboard as \u00abclass ut16\u00bb'],
+            capture_output=True
+        )
+        if result.returncode != 0:
+            print(f'ERROR: {result.stderr.decode().strip()}', file=sys.stderr)
+            sys.exit(1)
+        xml = result.stdout.decode('utf-8')
 
     # Pretty-print with xmllint
     fmt = subprocess.run(['xmllint', '--format', '-'], input=xml.encode('utf-8'), capture_output=True)
@@ -225,13 +312,18 @@ def write_to_clipboard(input_path, cls=None):
         print(f"ERROR: Unknown class '{cls}'. Valid options: {', '.join(FM_CLASSES)}", file=sys.stderr)
         sys.exit(1)
 
-    hex_data = raw_bytes.hex()
-    # «data XMSS<hexdata>» — the AppleScript binary descriptor literal syntax
-    script = f'set the clipboard to \u00abdata {cls}{hex_data}\u00bb'
-    result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f'ERROR: {result.stderr.strip()}', file=sys.stderr)
-        sys.exit(1)
+    if _HAS_APPKIT:
+        if not _nspasteboard_write(cls, raw_bytes):
+            print('ERROR: NSPasteboard write failed.', file=sys.stderr)
+            sys.exit(1)
+    else:
+        hex_data = raw_bytes.hex()
+        # «data XMSS<hexdata>» — the AppleScript binary descriptor literal syntax
+        script = f'set the clipboard to \u00abdata {cls}{hex_data}\u00bb'
+        result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f'ERROR: {result.stderr.strip()}', file=sys.stderr)
+            sys.exit(1)
 
     print(f'Clipboard ready \u2192 {input_path} as {cls} ({FM_CLASSES[cls]})', file=sys.stderr)
 
@@ -242,12 +334,18 @@ def _write_ut16_to_clipboard(xml_text, input_path):
     # We re-encode as UTF-16 with BOM, which is what FileMaker writes when it copies menus.
     xml_text = re.sub(r'<\?xml[^?]*\?>\s*', '', xml_text, count=1)
     utf16_bytes = xml_text.encode('utf-16')  # includes BOM automatically
-    hex_data = utf16_bytes.hex()
-    script = f'set the clipboard to \u00abdata ut16{hex_data}\u00bb'
-    result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f'ERROR: {result.stderr.strip()}', file=sys.stderr)
-        sys.exit(1)
+
+    if _HAS_APPKIT:
+        if not _nspasteboard_write('ut16', utf16_bytes):
+            print('ERROR: NSPasteboard write failed.', file=sys.stderr)
+            sys.exit(1)
+    else:
+        hex_data = utf16_bytes.hex()
+        script = f'set the clipboard to \u00abdata ut16{hex_data}\u00bb'
+        result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f'ERROR: {result.stderr.strip()}', file=sys.stderr)
+            sys.exit(1)
 
     print(f'Clipboard ready \u2192 {input_path} as ut16 (Menu)', file=sys.stderr)
 
