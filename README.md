@@ -6,7 +6,7 @@ Visual introduction over at the website [agentic-fm.com](https://agentic-fm.com)
 
 If you're a developer, and wanting join the conversation, we've got a [Discord server](https://discord.gg/zHBETxqT) too.
 
-**New to the project?** Start with [QUICKSTART.md](QUICKSTART.md) for a fast path to your first working script.
+**Impatient?** Jump straight to [QUICKSTART.md](QUICKSTART.md) — prerequisites, install, and your first working script in one page.
 
 # Background
 
