@@ -607,13 +607,22 @@ async function clipboardWrite(agent: string, xml: string): Promise<void> {
   }
 }
 
+/** Read solution name from CONTEXT.json if present */
+function solutionFromContext(agentDir: string): string | undefined {
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(agentDir, 'CONTEXT.json'), 'utf-8'));
+    return typeof data.solution === 'string' ? data.solution : undefined;
+  } catch { return undefined; }
+}
+
 /** Search scripts.index for matching scripts */
 function searchScripts(
   _agent: string,
   query: string,
 ): { name: string; id: number; folder: string }[] {
   const main = mainAgentDir();
-  const indexPath = path.join(resolveContextDir(main), 'scripts.index');
+  const solution = solutionFromContext(main);
+  const indexPath = path.join(resolveContextDir(main, solution), 'scripts.index');
   const data = fs.readFileSync(indexPath, 'utf-8');
   const rows = parseIndex(data); // each row: [ScriptName, ScriptID, FolderPath]
 
