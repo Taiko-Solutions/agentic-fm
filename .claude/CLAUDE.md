@@ -27,6 +27,10 @@ If the result is greater than `0`, pause and notify the user before proceeding:
 
 Do this **once per session**, not on every prompt. If the check fails (no network, not a git repo, etc.), skip it silently and continue.
 
+# Local development context
+
+If `PROJECT.md` exists at the project root, read it at session start. It contains local-only context: meta-project notes, toolchain details, and `external_tools/` documentation. Its absence is normal — it is gitignored and will not be present in collaborator environments.
+
 # Line number referencing
 
 A FileMaker developer will **ALWAYS** reference line numbers based on the human-readable script. Scripts within the xml_parsed/scripts_sanitized are the human readable versions of their Save As XML variation within the xml_parsed/scripts folder. Whenever making line number references, they **MUST** come from the human-readable variation.

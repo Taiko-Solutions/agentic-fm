@@ -16,6 +16,7 @@ agent/docs/filemaker/functions/
 agent/docs/filemaker/error-codes.md
 
 # Specific files
+PROJECT.md
 Prompt.md
 .cursorignore
 agent/library/
