@@ -204,6 +204,33 @@ A keyword-indexed manifest at `agent/docs/knowledge/MANIFEST.md` enables fast lo
 
 **Requirement:** The **Explode XML** script communicates with `agent/scripts/companion_server.py` via `Insert from URL`. Start the companion server before running this script (`python3 agent/scripts/companion_server.py`, port 8765). The other two scripts use only native FileMaker steps.
 
+## Closed-Loop Operation with OData
+
+When a FileMaker file is hosted on FileMaker Server with OData enabled, an AI agent can trigger all three feedback scripts **programmatically** — without any manual developer action:
+
+```bash
+# Refresh context (scoped to a layout)
+curl -X POST "https://{server}/fmi/odata/v4/{database}/Script/Push%20Context" \
+  -H "Authorization: Basic {base64credentials}" \
+  -H "Content-Type: application/json" \
+  -d '{"scriptParameterValue": "{\"task\": \"build invoice workflow\"}"}'
+
+# Export and parse the full solution
+curl -X POST "https://{server}/fmi/odata/v4/{database}/Script/Explode%20XML" \
+  -H "Authorization: Basic {base64credentials}" \
+  -H "Content-Type: application/json"
+```
+
+This enables a fully autonomous development loop: the agent generates code, reads back what landed in the solution, and refreshes context — all without the developer running a single script manually.
+
+**For full closed-loop operation:**
+- Host the FM file on FileMaker Server (local Docker or remote)
+- Enable OData on the file with an account that has the `fmodata` extended privilege
+- Run the companion server (`python3 agent/scripts/companion_server.py`) — the Explode XML script calls it
+- Use the `odata-connect` skill if you need help setting this up
+
+The three scripts in `filemaker/agentic-fm.xml` are expected to be present in any solution where you want this level of agent autonomy. Think of them as the bridge between the agent and the live FM environment.
+
 # fmparse.sh
 
 A command line tool, called from within FileMaker, that archives a FileMaker XML export and parses it into its component parts using [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder). Supports the data separation model -- each solution file is parsed independently and only its subdirectories are cleared on re-parse, preserving other solutions' data in `agent/xml_parsed/`.

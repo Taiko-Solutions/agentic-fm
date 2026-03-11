@@ -24,6 +24,8 @@ import signal
 import subprocess
 import sys
 import threading
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
@@ -34,7 +36,19 @@ from socketserver import ThreadingMixIn
 
 DEFAULT_PORT = 8765
 BIND_HOST = "127.0.0.1"
-VERSION = "1.1"
+REMOTE_VERSION_URL = "https://raw.githubusercontent.com/petrowsky/agentic-fm/main/version.txt"
+
+# Read version from version.txt at the repo root
+def _read_local_version() -> str:
+    try:
+        here = os.path.dirname(os.path.abspath(__file__))
+        version_file = os.path.join(here, "..", "..", "version.txt")
+        with open(version_file, "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return "unknown"
+
+VERSION = _read_local_version()
 
 # ---------------------------------------------------------------------------
 # Webviewer process state (module-level, shared across request threads)
@@ -295,6 +309,26 @@ class CompanionHandler(BaseHTTPRequestHandler):
 # Entry point
 # ---------------------------------------------------------------------------
 
+def _check_for_updates():
+    """Fetch the remote version.txt and warn if a newer version is available."""
+    try:
+        with urllib.request.urlopen(REMOTE_VERSION_URL, timeout=5) as resp:
+            remote = resp.read().decode("utf-8").strip()
+        if remote and remote != VERSION:
+            local_parts = tuple(int(x) for x in VERSION.split(".") if x.isdigit())
+            remote_parts = tuple(int(x) for x in remote.split(".") if x.isdigit())
+            if remote_parts > local_parts:
+                log.warning(
+                    "A new version is available: v%s (you have v%s). "
+                    "Run 'git pull --ff-only' in your agentic-fm folder to update, "
+                    "then restart the server. See UPDATES.md for details.",
+                    remote,
+                    VERSION,
+                )
+    except Exception:
+        pass  # No network, rate-limited, etc. — fail silently
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="agentic-fm companion server — exposes fmparse.sh over HTTP for FileMaker.",
@@ -317,6 +351,7 @@ def main():
     server = ThreadingHTTPServer((BIND_HOST, port), CompanionHandler)
 
     log.info("companion_server v%s listening on %s:%d", VERSION, BIND_HOST, port)
+    threading.Thread(target=_check_for_updates, daemon=True).start()
     log.info("Endpoints: GET /health  GET /webviewer/status  POST /explode  POST /debug  POST /webviewer/start  POST /webviewer/stop")
     log.info("Press Ctrl-C to stop.")
 
