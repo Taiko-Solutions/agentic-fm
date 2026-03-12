@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Configure Prompt Template">
+  <Step enable="True" id="226" name="Configure Prompt Template">
     <Option state="False"/>
     <ConfigurePromptTemplate>
       <TemplateName>

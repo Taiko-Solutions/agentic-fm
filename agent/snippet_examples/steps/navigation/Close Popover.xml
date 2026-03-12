@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Close Popover"/>
+  <Step enable="True" id="169" name="Close Popover"/>
 </fmxmlsnippet>
 <!-- See https://help.claris.com/en/pro-help/content/close-popover.html -->

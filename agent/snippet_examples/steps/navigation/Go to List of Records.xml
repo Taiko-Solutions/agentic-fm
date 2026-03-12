@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Go to List of Records">
+  <Step enable="True" id="228" name="Go to List of Records">
     <ShowInNewWindow state="False"/>
     <LayoutDestination value="CurrentLayout"/>
     <RowList>

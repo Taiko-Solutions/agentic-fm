@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Add Account">
+  <Step enable="True" id="134" name="Add Account">
     <ChgPwdOnNextLogin value="True"/>
     <AccountName>
       <Calculation><![CDATA["Account Name"]]></Calculation>

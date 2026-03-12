@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Go to Record/Request/Page">
+  <Step enable="True" id="16" name="Go to Record/Request/Page">
     <NoInteract state="True"/>
     <RowPageLocation value="ByCalculation"/>
     <Calculation><![CDATA[""]]></Calculation>

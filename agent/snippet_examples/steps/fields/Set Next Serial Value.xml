@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Set Next Serial Value">
+  <Step enable="True" id="116" name="Set Next Serial Value">
     <Calculation><![CDATA[100]]></Calculation>
     <Field table="" id="0" name=""/>
   </Step>

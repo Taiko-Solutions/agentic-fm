@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Open Find/Replace"/>
+  <Step enable="True" id="129" name="Open Find/Replace"/>
 </fmxmlsnippet>
 <!-- See https://help.claris.com/en/pro-help/content/open-find-replace.html -->
