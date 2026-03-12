@@ -309,7 +309,7 @@ export function apiMiddleware(): Plugin {
 
         // --- GET/POST /api/layout-prefs ---
         if (pathname === '/api/layout-prefs') {
-          const prefsPath = path.join(agent, 'sandbox', '.layout-prefs.json');
+          const prefsPath = path.join(agent, 'config', '.layout-prefs.json');
 
           if (req.method === 'GET') {
             try {
@@ -335,7 +335,7 @@ export function apiMiddleware(): Plugin {
 
         // --- GET/POST/DELETE /api/autosave ---
         if (pathname === '/api/autosave') {
-          const autosavePath = path.join(agent, 'sandbox', '.autosave.json');
+          const autosavePath = path.join(agent, 'config', '.autosave.json');
 
           if (req.method === 'GET') {
             try {
