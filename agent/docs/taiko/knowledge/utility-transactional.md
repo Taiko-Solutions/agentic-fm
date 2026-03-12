@@ -163,6 +163,56 @@ Perform Script [Subscript Transaccional]
 Revert Transaction [Condition: error.InSubscript]
 ```
 
+### Error 3 en transacciones padre/hijo
+
+Cuando un script hijo se ejecuta dentro de la transacción del padre, `Open Transaction` y `Commit Transaction` devuelven error 3 (comando no disponible) porque la transacción ya está controlada por el padre. Esto es **comportamiento esperado** y no debe tratarse como error.
+
+**Patrón de Commit con manejo de error 3:**
+
+```
+Commit Transaction
+Insert Calculated Result [$ErrorCommit; Get(LastError)]
+
+# Check: error real solo si no es error 3 dentro de transacción del padre
+# Y solo si no hay ya un error Clew activo (evita sobreescribir el hint original)
+If [$ErrorCommit ≠ 0 and not ( $ErrorCommit = 3 and $TransactionOpenState ) and not error.WasThrown]
+  error.Throw ( $ErrorCommit ; "Error al confirmar transacción" )
+End If
+```
+
+**Tres condiciones del check de Commit:**
+
+1. `$ErrorCommit ≠ 0` — hay un error real
+2. `not ( $ErrorCommit = 3 and $TransactionOpenState )` — no es el error 3 esperado en un hijo
+3. `not error.WasThrown` — no hay ya un error Clew activo (p.ej. después de Revert por error en paso anterior, `Get(LastError)` devuelve 5499, que dispararía un throw que sobreescribiría el hint original)
+
+### Revert Transaction: NUNCA condicionado en scripts hijo
+
+Los pasos `Revert Transaction` que responden a errores **nunca** deben estar condicionados a `$TransactionOpenState`. El hijo DEBE revertir la transacción del padre en caso de error:
+
+```
+# CORRECTO: Revert incondicional
+Revert Transaction [Condition: error.ThrowIf(...)]
+
+# INCORRECTO: Revert condicionado — dejaría la transacción del padre abierta
+If [not $TransactionOpenState]
+  Revert Transaction [Condition: error.ThrowIf(...)]
+End If
+```
+
+`$TransactionOpenState` solo se usa para decidir si abrir ventana temporal y para el check de error 3 en Commit. Los Revert de validación siempre se ejecutan incondicionalmente.
+
+### Logging solo en script padre
+
+Los pasos de logging (`Create Log Clew`, `Crear Registro Clew`) solo deben ejecutarse en el script que originó la transacción. Si un hijo registra un log y luego el padre hace Revert, el flujo se complica innecesariamente.
+
+```
+# Solo el script que abrió la transacción registra
+If [not $TransactionOpenState]
+  Perform Script [Create Log Clew]
+End If
+```
+
 ### Error flow through layers
 
 ```
@@ -173,12 +223,15 @@ Transactional Script (child)
 Transactional Script (parent)
   --> error.InSubscript = True
   --> Revert Transaction
+  --> Commit check: $ErrorCommit ≠ 0 and not (3 + state) and not error.WasThrown
+  --> If [not $TransactionOpenState]: Perform Script [Create Log Clew]
   --> Exit Script [error.GetTrace]
 
 Utility Manager (Interface)
   --> error.InSubscript = True
+  --> $ErrorHint = error.GetHint  (capturar inmediatamente)
   --> Perform Script [Create Log Clew]
-  --> Show Custom Dialog ["Error"; error.GetHint]
+  --> Show Custom Dialog ["Error"; $ErrorHint]
   --> Card window stays open for correction
 ```
 

@@ -106,6 +106,10 @@ Exit Loop If [error.NormalizeFromGeist(Get(ScriptResult))]
 
 This dual check is temporary during migration from Geist to Clew. Once all scripts use Clew, only `error.InSubscriptThrow` is needed.
 
+## Nota sobre el Hint en Log
+
+`Create Log Clew` extrae `errorCode`, `ScriptName` y `ScriptParameter` del errorTrace y los almacena en campos separados del registro de Log. Sin embargo, el `hint` (texto descriptivo del error) **no se almacena en un campo independiente** — solo está disponible dentro del JSON completo del campo `Response`. Para consultar hints de errores pasados, hay que parsear el JSON de `Response`.
+
 ## Retry from Log
 
 Scripts `Reintentar Log Clew` and `Reintentar Registro Clew` re-execute failed operations:

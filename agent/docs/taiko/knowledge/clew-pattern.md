@@ -50,11 +50,26 @@ The `Loop` always executes exactly once. Each `Exit Loop If` acts as a validatio
 
 ## Custom Functions
 
+### ⚠️ Namespace vs Hint — Distinción Crítica
+
+Las funciones Clew tienen dos tipos de segundo parámetro que **NO deben confundirse**:
+
+| Segundo parámetro | Tipo | Valor habitual | Funciones |
+|-------------------|------|----------------|-----------|
+| `namespace` | Prefijo para nombres de variable | `""` (vacío) | `error.CreateVarsFromKeys`, `error.ThrowIfMissingParam`, `error.ThrowIfMissingVar` |
+| `hint` | Texto descriptivo para debugging | Frase en español | `error.ThrowIf`, `error.ThrowIfLast`, `error.Throw` |
+
+**¿Qué hace `namespace`?** Se antepone al nombre de cada variable creada o verificada. Si pasas `""`, se crean `$NumeroFactura`, `$Proveedor`, etc. Si pasas `"Fac"`, se crean `$FacNumeroFactura`, `$FacProveedor`.
+
+**Error común:** Pasar un texto descriptivo como namespace (p.ej. `error.CreateVarsFromKeys($Param; "Error al procesar parámetros")`) crea variables con nombres rotos como `$Error al procesar parámetrosNumeroFactura` — que luego no se encuentran en `error.ThrowIfMissingParam`.
+
+**Regla:** Si no necesitas un prefijo específico, usa siempre `""` como namespace.
+
 ### Parameter Parsing and Validation
 
-- `error.CreateVarsFromKeys(json; namespace)` — parses a JSON object into local `$variables`. Returns True (error) if the JSON is invalid.
-- `error.ThrowIfMissingParam(variableList; namespace)` — checks that all variables in the semicolon-delimited list have values. Throws `_error_MISSING_REQUIRED_PARAM` if any are empty.
-- `error.ThrowIfMissingVar(variableList; namespace)` — same as above but for variables that may have been set by other means.
+- `error.CreateVarsFromKeys(json; namespace)` — parses a JSON object into local `$variables`. The `namespace` is prepended to each variable name (use `""` unless you need a prefix). Returns True (error) if the JSON is invalid.
+- `error.ThrowIfMissingParam(variableList; namespace)` — checks that all variables in the semicolon-delimited list have values. The `namespace` must match what was used in `CreateVarsFromKeys`. Throws `_error_MISSING_REQUIRED_PARAM` if any are empty.
+- `error.ThrowIfMissingVar(variableList; namespace)` — same as above but for variables that may have been set by other means. Same `namespace` rule applies.
 
 ### Context Validation
 
@@ -142,6 +157,28 @@ As errors propagate through the script chain, each script adds its own entry to 
 - Do not use `error.InSubscript` without handling the error
 - Do not mix Clew error handling with traditional `Get(LastError)` checks
 - Do not return data and errors simultaneously — a script returns either a result or an errorTrace
+
+## Cross-Script Hint Propagation
+
+When an Interface script calls a Controller subscript and needs to show the error hint to the user, the hint context can get lost between `error.InSubscript` and the CATCH dialog. This happens because `Exit Loop If [True]` changes the execution context.
+
+**Patrón correcto:** Capturar `$ErrorHint` inmediatamente después de `error.InSubscript`, antes de `Exit Loop If`:
+
+```
+Perform Script [Controller.Script]
+If [error.InSubscript]
+  Insert Calculated Result [$ErrorHint; error.GetHint]
+  Exit Loop If [True]
+End If
+```
+
+En el CATCH dialog, usar la variable capturada con fallback:
+
+```
+Show Custom Dialog ["Error"; If ( not IsEmpty ( $ErrorHint ) ; $ErrorHint ; error.GetHint )]
+```
+
+**¿Por qué?** `error.GetHint` lee del errorTrace activo. Si entre `error.InSubscript` y el `Show Custom Dialog` se ejecutan otros pasos que cambian el contexto (como `Exit Loop If`), el hint puede estar vacío. Capturarlo en una variable local garantiza que se preserva.
 
 ## When to Use Clew vs Transactional
 
