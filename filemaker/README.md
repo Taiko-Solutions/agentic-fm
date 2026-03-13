@@ -5,7 +5,8 @@ This folder contains the FileMaker artifacts that connect your solution to the a
 | File | Purpose |
 | ---- | ------- |
 | `Context.fmfn` | Custom function source — install into your FileMaker solution |
-| `agentic-fm.xml` | Companion script group — paste into your Script Workspace |
+| `agentic-fm.fmp12` | Pre-built FileMaker file containing the companion script group — open and copy/paste into your solution |
+| `agentic-fm.xml` | Companion script group in fmxmlsnippet format — alternative install via `clipboard.py` |
 
 ---
 
@@ -110,13 +111,21 @@ apt-get install libxml2-utils
 
 ### 2. Install the companion scripts
 
+Choose either option:
+
+**Option A — Open the included .fmp12 file (fastest)**
+
+Open `filemaker/agentic-fm.fmp12` in FileMaker Pro. Copy the **agentic-fm** script folder from its Script Workspace and paste it directly into your solution's Script Workspace.
+
+**Option B — Install via clipboard**
+
 Load `filemaker/agentic-fm.xml` onto the FileMaker clipboard using `clipboard.py`, then paste into the Script Workspace:
 
 ```bash
 python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
 ```
 
-Switch to FileMaker, open the **Script Workspace** (**Scripts > Script Workspace**), click in the script list, and press **⌘V**. A folder named **agentic-fm** containing the three scripts will appear.
+Switch to FileMaker, open the **Script Workspace** (**Scripts > Script Workspace**), click in the script list, and press **⌘V**. A folder named **agentic-fm** containing the scripts will appear.
 
 ### 3. Configure the repo path
 
