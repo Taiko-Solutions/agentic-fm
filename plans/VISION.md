@@ -30,17 +30,17 @@ FileMaker objects fall into three categories based on how an AI agent can intera
 
 These objects are authored as XML and transferred into FileMaker via the clipboard (`clipboard.py`). The developer pastes them directly into the appropriate FileMaker workspace:
 
-| Object Type         | Clipboard Code | XML Element          | Paste Destination         |
-|---------------------|---------------|----------------------|---------------------------|
-| Script Steps        | `XMSS`        | `<Step>`             | Script Workspace          |
-| Full Scripts        | `XMSC`        | `<Script>`           | Script Workspace          |
-| Field Definitions   | `XMFD`        | `<Field>`            | Manage Database           |
-| Custom Functions    | `XMFN`        | `<CustomFunction>`   | Manage Custom Functions   |
-| Tables              | `XMTB`        | `<BaseTable>`        | Manage Database           |
-| Value Lists         | `XMVL`        | `<ValueList>`        | Manage Value Lists        |
-| Themes              | `XMTH`        | `<Theme>`            | Theme browser             |
-| Custom Menus        | `ut16`        | `<CustomMenu>`       | Manage Custom Menus       |
-| Custom Menu Sets    | `ut16`        | `<CustomMenuSet>`    | Manage Custom Menus       |
+| Object Type       | Clipboard Code | XML Element        | Paste Destination       |
+| ----------------- | -------------- | ------------------ | ----------------------- |
+| Script Steps      | `XMSS`         | `<Step>`           | Script Workspace        |
+| Full Scripts      | `XMSC`         | `<Script>`         | Script Workspace        |
+| Field Definitions | `XMFD`         | `<Field>`          | Manage Database         |
+| Custom Functions  | `XMFN`         | `<CustomFunction>` | Manage Custom Functions |
+| Tables            | `XMTB`         | `<BaseTable>`      | Manage Database         |
+| Value Lists       | `XMVL`         | `<ValueList>`      | Manage Value Lists      |
+| Themes            | `XMTH`         | `<Theme>`          | Theme browser           |
+| Custom Menus      | `ut16`         | `<CustomMenu>`     | Manage Custom Menus     |
+| Custom Menu Sets  | `ut16`         | `<CustomMenuSet>`  | Manage Custom Menus     |
 
 ### 2. API-Managed Schema
 
@@ -67,9 +67,10 @@ FileMaker supports `CREATE TABLE`, `ALTER TABLE`, and `CREATE INDEX` via ODBC/JD
 
 #### Critical Limitation: Relationships Cannot Be Created via Any API
 
-**No external API — OData, Data API, or SQL — can create or modify the FileMaker relationship graph.** This is a hard platform constraint as of FileMaker 2025. Relationships must be defined manually in the Manage Database / Relationships dialog. The OData API can *traverse* existing relationships in queries, but cannot create them.
+**No external API — OData, Data API, or SQL — can create or modify the FileMaker relationship graph.** This is a hard platform constraint as of FileMaker 2025. Relationships must be defined manually in the Manage Database / Relationships dialog. The OData API can _traverse_ existing relationships in queries, but cannot create them.
 
 This means the schema creation workflow for a new solution is:
+
 1. Agent creates tables and fields via OData
 2. **Developer manually creates relationships** in the relationship graph
 3. Agent continues with scripts, menus, custom functions, and layout objects via clipboard
@@ -82,9 +83,9 @@ There is an important distinction between a **layout** and the **objects on a la
 
 **Layout objects, however, can be AI-composed and pasted.** Once a layout exists, the `XML2` clipboard class allows arbitrary layout objects — fields, portals, buttons, text labels, rectangles, web viewers, popovers, tab controls, slide controls, and more — to be authored as XML and pasted directly onto the layout. The full XML structure for every layout object type is documented in `xml_parsed/`, which contains complete exports from the Invoice Solution.
 
-| Object Type         | Clipboard Code | Notes                                          |
-|---------------------|---------------|------------------------------------------------|
-| Layout Objects      | `XML2`        | Paste into an existing layout in Layout Mode   |
+| Object Type    | Clipboard Code | Notes                                        |
+| -------------- | -------------- | -------------------------------------------- |
+| Layout Objects | `XML2`         | Paste into an existing layout in Layout Mode |
 
 What the project can do with layouts:
 
@@ -131,6 +132,7 @@ The goal is to enable an AI agent to **design and generate a complete FileMaker 
 - **Layout scaffolding** (agent-specified): since the layout container itself cannot be created programmatically, the agent specifies what each new layout needs — name, base table occurrence, object list — so the developer can create it in seconds before the agent populates it
 
 A developer should be able to describe an application in plain English and receive:
+
 1. A schema built automatically via API calls to a hosted FileMaker solution
 2. A set of clipboard-ready XML artifacts (scripts, custom functions, value lists, menus) to paste in sequence
 3. For each layout: a brief manual step to create the layout, followed by AI-composed layout objects pasted directly onto it
@@ -152,7 +154,7 @@ FileMaker WebDirect renders layouts as HTML in a browser. That rendered HTML —
 - Together these give the agent enough information to produce semantically equivalent HTML, CSS, and component structure in any target framework (React, Vue, HTMX, plain HTML/CSS, etc.)
 - Business logic encoded in FileMaker scripts can be analyzed and rewritten as server-side or client-side code in the target language
 
-**Layout XML → Native Application (iOS/macOS)**
+**Layout XML → Native Application (iOS/macOS/Android)**
 
 The `xml_parsed/` layout exports contain precise specifications: object positions, dimensions, field bindings, portal definitions, button actions, and visual styling. This is sufficient to drive generation of a native application UI:
 
@@ -198,90 +200,90 @@ Skills are the primary unit of capability in agentic-fm. Each skill is a focused
 
 ### Existing Skills
 
-| Skill | Purpose |
-|---|---|
-| `script-lookup` | Locate an existing script in `xml_parsed/`, resolving to both the human-readable and SaXML versions |
-| `script-preview` | Generate a human-readable preview of a proposed script before committing to XML output |
-| `script-review` | Code review a script and all subscripts it calls |
-| `fm-debug` | Close the feedback loop after a script is created — the script calls a companion "Agentic-fm Debug" script which POSTs runtime state (variables, error codes, `Get(LastErrorLocation)`) to the local companion server; the agent reads `agent/debug/output.json` directly without the developer copying anything |
-| `menu-lookup` | Locate custom menus and menu sets in `xml_parsed/`, extracting real UUIDs required before any paste operation |
-| `library-lookup` | Search the curated library of reusable fmxmlsnippet code across scripts, steps, functions, fields, layouts, and webviews |
+| Skill            | Purpose                                                                                                                                                                                                                                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `script-lookup`  | Locate an existing script in `xml_parsed/`, resolving to both the human-readable and SaXML versions                                                                                                                                                                                                              |
+| `script-preview` | Generate a human-readable preview of a proposed script before committing to XML output                                                                                                                                                                                                                           |
+| `script-review`  | Code review a script and all subscripts it calls                                                                                                                                                                                                                                                                 |
+| `fm-debug`       | Close the feedback loop after a script is created — the script calls a companion "Agentic-fm Debug" script which POSTs runtime state (variables, error codes, `Get(LastErrorLocation)`) to the local companion server; the agent reads `agent/debug/output.json` directly without the developer copying anything |
+| `menu-lookup`    | Locate custom menus and menu sets in `xml_parsed/`, extracting real UUIDs required before any paste operation                                                                                                                                                                                                    |
+| `library-lookup` | Search the curated library of reusable fmxmlsnippet code across scripts, steps, functions, fields, layouts, and webviews                                                                                                                                                                                         |
 
 ### In Development
 
-| Skill | Purpose |
-|---|---|
-| `script-debug` | Systematic debugging workflow — reproduce, isolate, hypothesise, verify, fix |
+| Skill                 | Purpose                                                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `script-debug`        | Systematic debugging workflow — reproduce, isolate, hypothesise, verify, fix                                                        |
 | `implementation-plan` | Structured planning before script creation — decompose requirements, identify dependencies, confirm approach before generating code |
-| `schema-build` | Create and modify database schema via OData against a live hosted solution (supersedes `modify-schema`) |
+| `schema-build`        | Create and modify database schema via OData against a live hosted solution (supersedes `modify-schema`)                             |
 
 ### Proposed Skills
 
 **Setup & Connectivity**
 
-| Skill | Purpose |
-|---|---|
-| `odata-connect` | Walk a developer through setting up OData connectivity for a FileMaker file hosted on a local FileMaker Server running in Docker — covers file creation, server upload, account and privilege setup, SSL handling, and connection verification. Prerequisite for all OData-dependent skills. |
-| `context-refresh` | Instruct the developer to run the **Push Context** script in FM Pro on the target layout — writes a fresh `CONTEXT.json` scoped to that layout. Required any time the FM state changes before the agent generates code referencing FM object IDs. |
-| `solution-export` | Instruct the developer to run the **Explode XML** script in FM Pro — exports the full solution XML and parses it into `xml_parsed/` via the companion server. Use to verify what was pasted, inspect any script, or sync reference material after FM changes. |
+| Skill             | Purpose                                                                                                                                                                                                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `odata-connect`   | Walk a developer through setting up OData connectivity for a FileMaker file hosted on a local FileMaker Server running in Docker — covers file creation, server upload, account and privilege setup, SSL handling, and connection verification. Prerequisite for all OData-dependent skills. |
+| `context-refresh` | Instruct the developer to run the **Push Context** script in FM Pro on the target layout — writes a fresh `CONTEXT.json` scoped to that layout. Required any time the FM state changes before the agent generates code referencing FM object IDs.                                            |
+| `solution-export` | Instruct the developer to run the **Explode XML** script in FM Pro — exports the full solution XML and parses it into `xml_parsed/` via the companion server. Use to verify what was pasted, inspect any script, or sync reference material after FM changes.                                |
 
 **Schema & Data Model**
 
-| Skill | Purpose |
-|---|---|
-| `schema-plan` | Design the data model for a new solution — produce an ERD as a Mermaid diagram stored in `plans/`, then extend it to a FileMaker-specific model showing base tables, table occurrences, and the relationships the developer will need to implement manually |
-| `schema-build` | Execute a planned schema against a live solution via OData — create tables and fields transactionally, report what was created |
-| `relationship-spec` | Derive a precise relationship specification from the ERD: table occurrence names, join fields, cardinality, cascade delete settings — formatted as a click-through checklist for the developer |
+| Skill               | Purpose                                                                                                                                                                                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schema-plan`       | Design the data model for a new solution — produce an ERD as a Mermaid diagram stored in `plans/`, then extend it to a FileMaker-specific model showing base tables, table occurrences, and the relationships the developer will need to implement manually |
+| `schema-build`      | Execute a planned schema against a live solution via OData — create tables and fields transactionally, report what was created                                                                                                                              |
+| `relationship-spec` | Derive a precise relationship specification from the ERD: table occurrence names, join fields, cardinality, cascade delete settings — formatted as a click-through checklist for the developer                                                              |
 
 **Scripts**
 
-| Skill | Purpose |
-|---|---|
-| `script-refactor` | Analyse an existing script and produce an improved version — better error handling, cleaner variable naming, consolidation of repeated logic — while preserving observable behaviour |
-| `script-test` | Generate a companion verification script that exercises a target script and asserts expected results, using the `fm-debug` companion server to report pass/fail back to the agent |
+| Skill                   | Purpose                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `script-refactor`       | Analyse an existing script and produce an improved version — better error handling, cleaner variable naming, consolidation of repeated logic — while preserving observable behaviour                                                                                                                                                                                              |
+| `script-test`           | Generate a companion verification script that exercises a target script and asserts expected results, using the `fm-debug` companion server to report pass/fail back to the agent                                                                                                                                                                                                 |
 | `multi-script-scaffold` | Guide the developer through the Untitled placeholder technique for multi-script systems — calculate how many placeholder scripts are needed, instruct the developer to create them, trigger a context refresh to capture their IDs, generate all scripts with correct inter-script `Perform Script` wiring in one pass, then walk the developer through renaming each placeholder |
 
 **Layout & UI**
 
-| Skill | Purpose |
-|---|---|
-| `layout-design` | Guide the developer through a layout design conversation drawing on AI knowledge of UI/UX, web design, and FM layout conventions; produce `XML2` layout objects ready to paste onto an existing layout |
-| `webviewer-build` | Generate a complete web viewer application — HTML, CSS, JavaScript, and any framework — plus the FileMaker bridge scripts (`Perform JavaScript`, JSON data passing) that connect the viewer to FM data |
-| `layout-spec` | Produce a written layout blueprint (object list, field bindings, portal configuration, button wiring, conditional formatting rules) for a developer to build against manually when object-level generation is not needed |
+| Skill             | Purpose                                                                                                                                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `layout-design`   | Guide the developer through a layout design conversation drawing on AI knowledge of UI/UX, web design, and FM layout conventions; produce `XML2` layout objects ready to paste onto an existing layout                   |
+| `webviewer-build` | Generate a complete web viewer application — HTML, CSS, JavaScript, and any framework — plus the FileMaker bridge scripts (`Perform JavaScript`, JSON data passing) that connect the viewer to FM data                   |
+| `layout-spec`     | Produce a written layout blueprint (object list, field bindings, portal configuration, button wiring, conditional formatting rules) for a developer to build against manually when object-level generation is not needed |
 
 **Custom Functions & Configuration**
 
-| Skill | Purpose |
-|---|---|
-| `function-create` | Generate custom functions from a plain-English description, or translate an equivalent formula from another language or environment into FileMaker calculation syntax |
-| `privilege-design` | Design privilege sets, extended privileges, and account structure for a solution — output as a specification and, where possible, as pasteable FM objects |
+| Skill              | Purpose                                                                                                                                                               |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `function-create`  | Generate custom functions from a plain-English description, or translate an equivalent formula from another language or environment into FileMaker calculation syntax |
+| `privilege-design` | Design privilege sets, extended privileges, and account structure for a solution — output as a specification and, where possible, as pasteable FM objects             |
 
 **Solution-Level**
 
-| Skill | Purpose |
-|---|---|
+| Skill                | Purpose                                                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `solution-blueprint` | Decompose a plain-English application description into a complete, ordered build sequence: schema plan → relationship spec → scripts → custom functions → value lists → menus → layout specs |
-| `solution-audit` | Analyse an existing solution via DDR or `xml_parsed/` for technical debt, naming inconsistencies, missing error handling, anti-patterns, and modernisation opportunities |
+| `solution-audit`     | Analyse an existing solution via DDR or `xml_parsed/` for technical debt, naming inconsistencies, missing error handling, anti-patterns, and modernisation opportunities                     |
 
 **Migration**
 
-| Skill | Purpose |
-|---|---|
-| `migrate-out` | Migrate a FileMaker/WebDirect solution to a modern web stack — parse the DDR XML, conduct requirements discovery, recommend a target stack, produce SQL schema, REST API design, and UI component specifications; builds on the `migrate-filemaker` open-source foundation |
-| `migrate-native` | Translate FileMaker layout XML into a native iOS/macOS Xcode project — UIKit view controllers or SwiftUI views replicating layout structure, field bindings, portal/list views, and button actions |
-| `migrate-in` | Bring an external schema (SQL DDL, ORM model, spreadsheet) into FileMaker — generate OData calls to create tables and fields, translate business logic into FM scripts, map existing UI to layout specifications |
+| Skill            | Purpose                                                                                                                                                                                                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `migrate-out`    | Migrate a FileMaker/WebDirect solution to a modern web stack — parse the DDR XML, conduct requirements discovery, recommend a target stack, produce SQL schema, REST API design, and UI component specifications; builds on the `migrate-filemaker` open-source foundation |
+| `migrate-native` | Translate FileMaker layout XML into a native iOS/macOS Xcode project — UIKit view controllers or SwiftUI views replicating layout structure, field bindings, portal/list views, and button actions                                                                         |
+| `migrate-in`     | Bring an external schema (SQL DDL, ORM model, spreadsheet) into FileMaker — generate OData calls to create tables and fields, translate business logic into FM scripts, map existing UI to layout specifications                                                           |
 
 **Data**
 
-| Skill | Purpose |
-|---|---|
-| `data-seed` | Generate realistic seed or test data and load it into a live solution via OData — useful for populating a new schema before scripts and layouts are built |
-| `data-migrate` | Move records from an external source into a live FM solution via OData — map source fields to FM fields and handle type coercion |
+| Skill          | Purpose                                                                                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-seed`    | Generate realistic seed or test data and load it into a live solution via OData — useful for populating a new schema before scripts and layouts are built |
+| `data-migrate` | Move records from an external source into a live FM solution via OData — map source fields to FM fields and handle type coercion                          |
 
 **Documentation**
 
-| Skill | Purpose |
-|---|---|
+| Skill           | Purpose                                                                                                                                                  |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `solution-docs` | Generate human-readable documentation from DDR or `xml_parsed/` — covering schema, relationships, script inventory, custom functions, and privilege sets |
 
 ## Tooling Infrastructure Roadmap
