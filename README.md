@@ -4,7 +4,7 @@ AI-powered script development for FileMaker Pro. Generate, modify, and validate 
 
 Visual introduction over at the website [agentic-fm.com](https://agentic-fm.com)
 
-If you're a developer, and wanting join the conversation, we've got a [Discord server](https://discord.gg/zHBETxqT) too.
+If you're a developer, and wanting join the conversation, we've got a [Discord server](https://discord.gg/NSg7grhF) too.
 
 **Impatient?** Jump straight to [QUICKSTART.md](QUICKSTART.md) — prerequisites, install, and your first working script in one page.
 
