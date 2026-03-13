@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Install Plug-In File">
+  <Step enable="True" id="157" name="Install Plug-In File">
     <Field table="" id="0" name=""/>
   </Step>
 </fmxmlsnippet>

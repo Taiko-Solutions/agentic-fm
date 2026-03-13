@@ -11,6 +11,7 @@ Checks:
   6. Else/Else If ordering within If blocks
   7. Known step names (cross-referenced against snippet_examples/)
   8. CONTEXT.json cross-reference (field, layout, and script references)
+  9. Coding conventions (ASCII comparison operators, variable naming prefixes)
 
 Usage:
   python validate_snippet.py [file_or_directory] [options]
@@ -26,6 +27,7 @@ import json
 import os
 import sys
 import xml.etree.ElementTree as ET
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 
@@ -110,10 +112,12 @@ def discover_known_steps(snippets_dir):
 def load_context(context_path):
     """Load CONTEXT.json and extract reference sets for cross-validation."""
     ctx = {
-        "fields":  {},     # (to_name, field_name) -> str(field_id)
-        "layouts": {},     # layout_name -> str(layout_id)
-        "scripts": {},     # script_name -> str(script_id)
-        "tables":  set(),  # table-occurrence names
+        "fields":      {},    # (to_name, field_name) -> str(field_id)
+        "layouts":     {},    # layout_name -> str(layout_id)
+        "scripts":     {},    # script_name -> str(script_id)
+        "tables":      set(), # table-occurrence names
+        "generated_at": None, # ISO 8601 UTC string, if present
+        "layout_name":  None, # layout name at push time
     }
 
     if not context_path or not os.path.exists(context_path):
@@ -121,6 +125,9 @@ def load_context(context_path):
 
     with open(context_path, "r", encoding="utf-8") as f:
         data = json.load(f)
+
+    ctx["generated_at"] = data.get("generated_at")
+    ctx["layout_name"] = data.get("current_layout", {}).get("name")
 
     for _base, info in data.get("tables", {}).items():
         to_name = info.get("to", _base)
@@ -135,6 +142,46 @@ def load_context(context_path):
         ctx["scripts"][script_name] = str(script_info.get("id", ""))
 
     return ctx
+
+
+# ---------------------------------------------------------------------------
+# Context staleness check
+# ---------------------------------------------------------------------------
+
+CONTEXT_STALE_MINUTES = 60
+
+
+def check_context_staleness(context):
+    """Warn if CONTEXT.json is older than CONTEXT_STALE_MINUTES or missing a timestamp."""
+    if not context:
+        return
+
+    generated_at = context.get("generated_at")
+    layout_name = context.get("layout_name")
+
+    if not generated_at:
+        print(
+            f"  WARN  CONTEXT.json has no 'generated_at' timestamp — "
+            f"run Push Context to regenerate with staleness tracking"
+        )
+        return
+
+    try:
+        pushed = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        age = datetime.now(timezone.utc) - pushed
+        minutes = int(age.total_seconds() / 60)
+
+        if age > timedelta(minutes=CONTEXT_STALE_MINUTES):
+            print(
+                f"  WARN  CONTEXT.json is {minutes} minute(s) old "
+                f"(pushed at {generated_at}). Re-run Push Context if the "
+                f"layout or task has changed."
+            )
+        else:
+            print(f"  INFO  CONTEXT.json pushed {minutes} minute(s) ago"
+                  + (f" from layout '{layout_name}'" if layout_name else ""))
+    except (ValueError, TypeError):
+        print(f"  WARN  CONTEXT.json 'generated_at' is not a valid ISO 8601 timestamp: {generated_at!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -387,6 +434,79 @@ def check_context_references(steps, context, result):
 
 
 # ---------------------------------------------------------------------------
+# Coding conventions checks
+# ---------------------------------------------------------------------------
+
+import re as _re
+
+# ASCII comparison operators that should be Unicode in FileMaker calculations
+_ASCII_OPS = [
+    ("<>",  "≠"),
+    ("<=",  "≤"),
+    (">=",  "≥"),
+]
+
+# Valid variable name patterns per CODING_CONVENTIONS.md
+# $$~ private globals: $$~UPPER.DOTS
+# $$  globals:         $$UPPER.DOTS
+# ~   Let-scoped:      ~camelCase
+# $   local:           $camelCase
+_VAR_PATTERNS = [
+    (_re.compile(r'^\$\$~[A-Z][A-Z0-9._]*$'), "$$~ private global (ALL_CAPS.DOTS)"),
+    (_re.compile(r'^\$\$[A-Z][A-Z0-9._]*$'),  "$$ global (ALL_CAPS.DOTS)"),
+    (_re.compile(r'^~[a-z][a-zA-Z0-9]*$'),    "~ Let-scoped (camelCase)"),
+    (_re.compile(r'^\$[a-z][a-zA-Z0-9]*$'),   "$ local (camelCase)"),
+]
+
+
+def _cdata_texts(step):
+    """Yield all CDATA calculation text within a step element."""
+    for calc in step.iter("Calculation"):
+        if calc.text:
+            yield calc.text
+
+
+def check_coding_conventions(steps, result):
+    """Warn on ASCII comparison operators and variable naming violations."""
+    op_issues = []
+    var_issues = []
+
+    for i, step in enumerate(steps, 1):
+        step_name = step.get("name", "")
+
+        # --- ASCII operator check in all Calculation elements ---
+        for text in _cdata_texts(step):
+            for ascii_op, unicode_op in _ASCII_OPS:
+                # Skip if it's inside a string literal (simple heuristic: skip quoted regions)
+                # This is not perfect but catches the common AI-generated patterns
+                stripped = _re.sub(r'"[^"]*"', '""', text)
+                if ascii_op in stripped:
+                    op_issues.append(
+                        f'Step {i} ({step_name}): use "{unicode_op}" instead of "{ascii_op}"'
+                    )
+                    break  # one warning per step per operator type is enough
+
+        # --- Variable naming check in Set Variable steps ---
+        if step_name == "Set Variable":
+            name_el = step.find("Name")
+            if name_el is not None and name_el.text:
+                var_name = name_el.text.strip()
+                if not any(pat.match(var_name) for pat, _ in _VAR_PATTERNS):
+                    var_issues.append(
+                        f'Step {i}: variable "{var_name}" does not match naming conventions '
+                        f"($camelCase, $$ALL_CAPS, ~camelCase, $$~ALL_CAPS)"
+                    )
+
+    for msg in op_issues:
+        result.warning(msg)
+    for msg in var_issues:
+        result.warning(msg)
+
+    if not op_issues and not var_issues and steps:
+        result.passed("Coding conventions OK")
+
+
+# ---------------------------------------------------------------------------
 # Main validation driver
 # ---------------------------------------------------------------------------
 
@@ -425,6 +545,9 @@ def validate_file(filepath, known_steps=None, context=None):
     # 8. CONTEXT.json cross-reference
     if context:
         check_context_references(steps, context, result)
+
+    # 9. Coding conventions
+    check_coding_conventions(steps, result)
 
     return result
 
@@ -528,6 +651,7 @@ def main():
         context = load_context(context_path)
         if context:
             print(f"Loaded CONTEXT.json from {context_path}")
+            check_context_staleness(context)
         else:
             print(f"Warning: could not load CONTEXT.json from {context_path}")
 

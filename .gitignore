@@ -6,6 +6,8 @@ agent/CONTEXT.json
 agent/sandbox/
 .private/
 .venv/
+.cursor/in-development/
+external_tools/
 
 # Generated Claris documentation (copyright Claris International Inc.)
 # Run agent/docs/filemaker/fetch_docs.py to generate locally.
@@ -14,9 +16,15 @@ agent/docs/filemaker/functions/
 agent/docs/filemaker/error-codes.md
 
 # Specific files
+PROJECT.md
 Prompt.md
 .cursorignore
-agent/library/MANIFEST.md
+agent/library/
+agent/config/removals.json
+agent/config/.autosave.json
+agent/config/.layout-prefs.json
+docker-compose.override.yml
+project.env
 
 # macOS
 .DS_Store

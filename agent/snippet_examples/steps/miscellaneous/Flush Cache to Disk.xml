@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Flush Cache to Disk"/>
+  <Step enable="True" id="102" name="Flush Cache to Disk"/>
 </fmxmlsnippet>
 <!-- See https://help.claris.com/en/pro-help/content/flush-cache-to-disk.html -->

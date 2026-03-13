@@ -1,0 +1,603 @@
+#!/usr/bin/env npx tsx
+/**
+ * generate-step-catalog.ts
+ *
+ * Generates agent/catalogs/step-catalog-en.json from:
+ * - agent/snippet_examples/steps/**\/*.xml  (canonical XML templates)
+ * - Hardcoded step ID mappings (from Rust constants.rs)
+ * - Hardcoded HR signatures and Monaco snippets (from existing converters)
+ *
+ * Run: npx tsx agent/scripts/generate-step-catalog.ts
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// ── Types (inline for standalone execution) ──────────────────────────
+
+interface StepCatalogEntry {
+  name: string;
+  id: number | null;
+  category: string;
+  snippetFile: string;
+  selfClosing: boolean;
+  params: StepParam[];
+  hrSignature: string | null;
+  monacoSnippet: string | null;
+  blockPair: { role: 'open' | 'close' | 'middle'; partners: string[] } | null;
+  status: 'auto' | 'reviewed' | 'complete';
+  helpUrl: string | null;
+}
+
+interface StepParam {
+  xmlElement: string;
+  type: 'boolean' | 'enum' | 'calculation' | 'namedCalc' | 'field' | 'layout' | 'script' | 'table' | 'text' | 'name' | 'complex';
+  hrLabel: string | null;
+  xmlAttr?: string;
+  enumValues?: string[];
+  wrapperElement?: string;
+  required: boolean;
+  defaultValue?: string;
+  description?: string;
+}
+
+interface CommentMeta {
+  enums: Record<string, string[]>;
+  helpUrl: string | null;
+  required: string[];
+  optional: string[];
+}
+
+// ── Step ID mapping (from Rust constants.rs) ─────────────────────────
+
+const STEP_IDS: Record<string, number> = {
+  'Perform Script': 1,
+  'Go to Previous Field': 4,
+  'Go to Next Field': 5,
+  'Go to Layout': 6,
+  'New Record/Request': 7,
+  'Duplicate Record/Request': 8,
+  'Delete Record/Request': 9,
+  'Delete All Records': 10,
+  'Insert Current Date': 13,
+  'Insert Current Time': 14,
+  'Go to Record/Request/Page': 16,
+  'Go to Field': 17,
+  'Check Record': 19,
+  'Check Found Set': 20,
+  'Unsort Records': 21,
+  'Enter Find Mode': 22,
+  'Show All Records': 23,
+  'Modify Last Find': 24,
+  'Omit Record': 25,
+  'Omit Multiple Records': 26,
+  'Show Omitted Only': 27,
+  'Perform Find': 28,
+  'View As': 30,
+  'Adjust Window': 31,
+  'Open Help': 32,
+  'Open Manage Database': 38,
+  'Exit Application': 44,
+  'Select All': 50,
+  'Enter Browse Mode': 55,
+  'Insert Text': 61,
+  'If': 68,
+  'Else': 69,
+  'End If': 70,
+  'Loop': 71,
+  'Exit Loop If': 72,
+  'End Loop': 73,
+  'Commit Records/Requests': 75,
+  'Set Field': 76,
+  'Freeze Window': 79,
+  'Refresh Window': 80,
+  'New File': 82,
+  'Set Multi-User': 84,
+  'Allow User Abort': 85,
+  'Set Error Capture': 86,
+  'Show Custom Dialog': 87,
+  'Open Script Workspace': 88,
+  '# (comment)': 89,
+  'Halt Script': 90,
+  'Replace Field Contents': 91,
+  'Beep': 93,
+  'Set Use System Formats': 94,
+  'Go to Portal Row': 99,
+  'Copy Record/Request': 101,
+  'Flush Cache to Disk': 102,
+  'Exit Script': 103,
+  'Open Settings': 105,
+  'Correct Word': 106,
+  'Spelling Options': 107,
+  'Select Dictionaries': 108,
+  'Edit User Dictionary': 109,
+  'Open Manage Value Lists': 112,
+  'Open Sharing': 113,
+  'Open File Options': 114,
+  'Allow Formatting Bar': 115,
+  'Open Hosts': 118,
+  'Close Window': 121,
+  'New Window': 122,
+  'Else If': 125,
+  'Constrain Found Set': 126,
+  'Extend Found Set': 127,
+  'Open Find/Replace': 129,
+  'Open Manage Data Sources': 140,
+  'Set Variable': 141,
+  'Go to Object': 145,
+  'Open Edit Saved Finds': 149,
+  'Open Manage Layouts': 151,
+  'Open Manage Containers': 156,
+  'Open Manage Themes': 165,
+  'Refresh Object': 167,
+  'Close Popover': 169,
+  'Open Upload to Host': 172,
+  'AVPlayer Set Playback State': 178,
+  'Truncate Table': 182,
+  'Open Favorites': 183,
+  'Set Error Logging': 200,
+  'Open Transaction': 205,
+  'Commit Transaction': 206,
+  'Revert Transaction': 207,
+};
+
+// ── Known HR signatures (from existing hand-coded converters) ────────
+
+const KNOWN_STEPS: Record<string, { hrSignature: string | null }> = {
+  '# (comment)':            { hrSignature: null },
+  'If':                     { hrSignature: '[ condition ]' },
+  'Else If':                { hrSignature: '[ condition ]' },
+  'Else':                   { hrSignature: null },
+  'End If':                 { hrSignature: null },
+  'Loop':                   { hrSignature: null },
+  'Exit Loop If':           { hrSignature: '[ condition ]' },
+  'End Loop':               { hrSignature: null },
+  'Exit Script':            { hrSignature: '[ Result: value ]' },
+  'Set Variable':           { hrSignature: '[ $name ; value ]' },
+  'Allow User Abort':       { hrSignature: '[ On|Off ]' },
+  'Set Error Capture':      { hrSignature: '[ On|Off ]' },
+  'Perform Script':         { hrSignature: '[ "ScriptName" ; Parameter: value ]' },
+  'Halt Script':            { hrSignature: null },
+  'Set Field':              { hrSignature: '[ Table::Field ; value ]' },
+  'Go to Layout':           { hrSignature: '[ "LayoutName" ]' },
+  'Go to Object':           { hrSignature: '[ Object Name: "objectName" ]' },
+  'Commit Records/Requests': { hrSignature: '[ With dialog: Off ]' },
+  'New Record/Request':     { hrSignature: null },
+  'Freeze Window':          { hrSignature: null },
+  'New Window':             { hrSignature: '[ Name: "name" ; Style: Document ]' },
+  'Close Window':           { hrSignature: '[ Current ]' },
+  'Show Custom Dialog':     { hrSignature: '[ "Title" ; "Message" ]' },
+};
+
+// ── Monaco snippets (from existing completion.ts) ────────────────────
+
+const MONACO_SNIPPETS: Record<string, string> = {
+  'Set Variable':        'Set Variable [ \\$$${1:varName} ; ${2:value} ]',
+  'Set Field':           'Set Field [ ${1:Table::Field} ; ${2:value} ]',
+  'If':                  'If [ ${1:condition} ]\n\t$0\nEnd If',
+  'Else If':             'Else If [ ${1:condition} ]',
+  'Loop':                'Loop\n\t$0\nEnd Loop',
+  'Exit Loop If':        'Exit Loop If [ ${1:condition} ]',
+  'Exit Script':         'Exit Script [ Result: ${1:value} ]',
+  'Go to Layout':        'Go to Layout [ "${1:LayoutName}" ]',
+  'Perform Script':      'Perform Script [ "${1:ScriptName}" ; Parameter: ${2:value} ]',
+  'Show Custom Dialog':  'Show Custom Dialog [ "${1:Title}" ; "${2:Message}" ]',
+  'Go to Object':        'Go to Object [ Object Name: "${1:objectName}" ]',
+};
+
+// ── Block pairs ──────────────────────────────────────────────────────
+
+const BLOCK_PAIRS: Record<string, { role: 'open' | 'close' | 'middle'; partners: string[] }> = {
+  'If':                   { role: 'open',   partners: ['End If'] },
+  'Else If':              { role: 'middle', partners: ['If', 'End If'] },
+  'Else':                 { role: 'middle', partners: ['If', 'End If'] },
+  'End If':               { role: 'close',  partners: ['If'] },
+  'Loop':                 { role: 'open',   partners: ['End Loop'] },
+  'Exit Loop If':         { role: 'middle', partners: ['Loop', 'End Loop'] },
+  'End Loop':             { role: 'close',  partners: ['Loop'] },
+  'Open Transaction':     { role: 'open',   partners: ['Commit Transaction'] },
+  'Revert Transaction':   { role: 'middle', partners: ['Open Transaction', 'Commit Transaction'] },
+  'Commit Transaction':   { role: 'close',  partners: ['Open Transaction'] },
+};
+
+// ── Path resolution ──────────────────────────────────────────────────
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, '../..');
+const SNIPPET_DIR = path.join(PROJECT_ROOT, 'agent/snippet_examples/steps');
+const OUTPUT_DIR = path.join(PROJECT_ROOT, 'agent/catalogs');
+const OUTPUT_FILE = path.join(OUTPUT_DIR, 'step-catalog-en.json');
+
+// ── Utility functions ────────────────────────────────────────────────
+
+/** Recursively walk a directory and return all files matching an extension */
+function walkDir(dir: string, ext: string): string[] {
+  const results: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...walkDir(fullPath, ext));
+    } else if (entry.name.endsWith(ext)) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+/** Extract the step name from the XML name attribute */
+function extractStepName(xml: string): string | null {
+  const match = xml.match(/<Step[^>]+name="([^"]+)"/);
+  return match ? match[1] : null;
+}
+
+/** Detect if the step XML is self-closing (no child elements) */
+function isSelfClosing(xml: string): boolean {
+  // Match <Step ... /> pattern (self-closing)
+  return /<Step[^>]*\/>/.test(xml);
+}
+
+/** Parse XML comments after </fmxmlsnippet> for metadata */
+function parseComments(fileContent: string): CommentMeta {
+  const afterSnippet = fileContent.split('</fmxmlsnippet>')[1] || '';
+  const enums: Record<string, string[]> = {};
+  let helpUrl: string | null = null;
+  const required: string[] = [];
+  const optional: string[] = [];
+
+  // Extract all comment blocks
+  const commentPattern = /<!--\s*([\s\S]*?)\s*-->/g;
+  let match;
+
+  while ((match = commentPattern.exec(afterSnippet)) !== null) {
+    const comment = match[1].trim();
+
+    // Enum values: "ElementName enumeration: ..."
+    const enumMatch = comment.match(/^(\w+)\s+enumeration:\s*([\s\S]+)$/i);
+    if (enumMatch) {
+      const elementName = enumMatch[1];
+      const enumText = enumMatch[2];
+      const values: string[] = [];
+      const valuePattern = /"([^"]+)"/g;
+      let vm;
+      while ((vm = valuePattern.exec(enumText)) !== null) {
+        values.push(vm[1]);
+      }
+      if (values.length > 0) {
+        enums[elementName] = values;
+      }
+    }
+
+    // Help URL: "See https://..."
+    const urlMatch = comment.match(/See\s+(https:\/\/\S+)/i);
+    if (urlMatch && !helpUrl) {
+      helpUrl = urlMatch[1];
+    }
+
+    // Required params: "Required: Param1, Param2 (description)."
+    const reqMatch = comment.match(/^Required:\s*([\s\S]+?)\.?\s*$/i);
+    if (reqMatch) {
+      const parts = reqMatch[1].split(',');
+      for (const p of parts) {
+        const name = p.replace(/\s*\([\s\S]*?\)\s*/g, '').trim();
+        if (name && !name.includes(' ')) {
+          required.push(name);
+        }
+      }
+    }
+
+    // Optional params: "Optional: Param1, Param2."
+    const optMatch = comment.match(/^Optional:\s*([\s\S]+?)\.?\s*$/i);
+    if (optMatch) {
+      const parts = optMatch[1].split(',');
+      for (const p of parts) {
+        const name = p.replace(/\s*\([\s\S]*?\)\s*/g, '').trim();
+        if (name && !name.includes(' ')) {
+          optional.push(name);
+        }
+      }
+    }
+  }
+
+  return { enums, helpUrl, required, optional };
+}
+
+/** Extract parameter definitions from the Step XML content */
+function extractParams(fileContent: string, meta: CommentMeta): StepParam[] {
+  // Get content between <Step ...> and </Step>
+  const stepMatch = fileContent.match(/<Step[^/][^>]*>([\s\S]*?)<\/Step>/);
+  if (!stepMatch) return [];
+
+  const content = stepMatch[1];
+  const params: StepParam[] = [];
+  const lines = content.split('\n');
+  const seen = new Set<string>();
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('</')) continue;
+
+    // Only process direct children of <Step> (4-space indent)
+    const indent = line.length - line.trimStart().length;
+    if (indent !== 4) continue;
+
+    // Boolean: <Tag state="True|False"/>
+    const boolMatch = trimmed.match(/^<(\w+)\s+state="(True|False)"\s*\/>$/);
+    if (boolMatch) {
+      const [, tag, val] = boolMatch;
+      if (seen.has(tag)) continue;
+      seen.add(tag);
+      params.push({
+        xmlElement: tag,
+        type: 'boolean',
+        hrLabel: null,
+        xmlAttr: 'state',
+        required: meta.required.includes(tag),
+        defaultValue: val,
+      });
+      continue;
+    }
+
+    // Enum: <Tag value="..."/>
+    const enumMatch = trimmed.match(/^<(\w+)\s+value="([^"]*)"\s*\/>$/);
+    if (enumMatch) {
+      const [, tag, val] = enumMatch;
+      if (seen.has(tag)) continue;
+      // Skip Layout/Script/Field reference elements
+      if (['Layout', 'Script', 'Field'].includes(tag)) continue;
+      seen.add(tag);
+      const param: StepParam = {
+        xmlElement: tag,
+        type: 'enum',
+        hrLabel: null,
+        xmlAttr: 'value',
+        required: meta.required.includes(tag),
+        defaultValue: val || undefined,
+      };
+      if (meta.enums[tag]) {
+        param.enumValues = meta.enums[tag];
+      }
+      params.push(param);
+      continue;
+    }
+
+    // Field reference: <Field table="..." id="..." name="..."/>
+    if (trimmed.startsWith('<Field ') && trimmed.includes('table=')) {
+      if (seen.has('Field')) continue;
+      seen.add('Field');
+      params.push({
+        xmlElement: 'Field',
+        type: 'field',
+        hrLabel: null,
+        required: meta.required.includes('Field'),
+      });
+      continue;
+    }
+
+    // Layout reference: <Layout id="..." name="..."/>
+    if (trimmed.startsWith('<Layout ') && trimmed.includes('id=')) {
+      if (seen.has('Layout')) continue;
+      seen.add('Layout');
+      params.push({
+        xmlElement: 'Layout',
+        type: 'layout',
+        hrLabel: null,
+        required: meta.required.includes('Layout'),
+      });
+      continue;
+    }
+
+    // Script reference: <Script id="..." name="..."/>
+    if (trimmed.startsWith('<Script ') && trimmed.includes('id=')) {
+      if (seen.has('Script')) continue;
+      seen.add('Script');
+      params.push({
+        xmlElement: 'Script',
+        type: 'script',
+        hrLabel: null,
+        required: meta.required.includes('Script'),
+      });
+      continue;
+    }
+
+    // Direct Calculation: <Calculation>...</Calculation>
+    if (trimmed.startsWith('<Calculation>')) {
+      if (!seen.has('Calculation_direct')) {
+        seen.add('Calculation_direct');
+        params.push({
+          xmlElement: 'Calculation',
+          type: 'calculation',
+          hrLabel: null,
+          required: meta.required.includes('Calculation'),
+        });
+      }
+      continue;
+    }
+
+    // Opening tag — check what's inside
+    const openMatch = trimmed.match(/^<(\w+)([^>]*)>$/);
+    if (openMatch) {
+      const tag = openMatch[1];
+      if (seen.has(tag)) {
+        // Skip to closing tag
+        while (i < lines.length - 1 && !lines[i + 1].trim().startsWith(`</${tag}>`)) i++;
+        i++; // skip closing tag line
+        continue;
+      }
+      seen.add(tag);
+
+      // Look at next non-empty line to determine content type
+      let nextLine = '';
+      for (let j = i + 1; j < lines.length; j++) {
+        if (lines[j].trim()) {
+          nextLine = lines[j].trim();
+          break;
+        }
+      }
+
+      if (nextLine.startsWith('<Calculation>')) {
+        // Named calculation: wrapper element containing <Calculation>
+        params.push({
+          xmlElement: 'Calculation',
+          type: 'namedCalc',
+          hrLabel: null,
+          wrapperElement: tag,
+          required: meta.required.includes(tag),
+        });
+      } else if (nextLine.startsWith('<Field') || nextLine.startsWith('<Button') ||
+                 nextLine.startsWith('<InputField') || nextLine.startsWith('<Column') ||
+                 nextLine.startsWith('<Table') || nextLine.startsWith('<Group')) {
+        // Complex nested structure
+        params.push({
+          xmlElement: tag,
+          type: 'complex',
+          hrLabel: null,
+          required: meta.required.includes(tag),
+        });
+      } else {
+        // Text content or other
+        params.push({
+          xmlElement: tag,
+          type: 'text',
+          hrLabel: null,
+          required: meta.required.includes(tag),
+        });
+      }
+
+      // Skip to closing tag
+      let depth = 1;
+      while (i < lines.length - 1 && depth > 0) {
+        i++;
+        const t = lines[i].trim();
+        if (t.startsWith(`<${tag}`) && !t.endsWith('/>')) depth++;
+        if (t === `</${tag}>`) depth--;
+      }
+      continue;
+    }
+
+    // Text content: <Tag>text</Tag> (inline)
+    const textMatch = trimmed.match(/^<(\w+)>([^<]*)<\/\1>$/);
+    if (textMatch) {
+      const [, tag] = textMatch;
+      if (seen.has(tag)) continue;
+      seen.add(tag);
+      params.push({
+        xmlElement: tag,
+        type: 'text',
+        hrLabel: null,
+        required: meta.required.includes(tag),
+      });
+      continue;
+    }
+
+    // Self-closing with multiple attributes (complex): <Tag attr1="..." attr2="..."/>
+    const complexSelfClose = trimmed.match(/^<(\w+)\s+[^>]*\/>$/);
+    if (complexSelfClose) {
+      const tag = complexSelfClose[1];
+      if (seen.has(tag)) continue;
+      // Already handled boolean and enum above, this catches others
+      if (!['Field', 'Layout', 'Script'].includes(tag)) {
+        seen.add(tag);
+        params.push({
+          xmlElement: tag,
+          type: 'complex',
+          hrLabel: null,
+          required: meta.required.includes(tag),
+        });
+      }
+      continue;
+    }
+  }
+
+  return params;
+}
+
+/** Parse a single snippet XML file into a catalog entry */
+function parseSnippetFile(filePath: string, snippetDir: string): StepCatalogEntry | null {
+  const content = fs.readFileSync(filePath, 'utf-8');
+  const name = extractStepName(content);
+  if (!name) {
+    console.warn(`  Warning: Could not extract step name from ${filePath}`);
+    return null;
+  }
+
+  const relPath = path.relative(snippetDir, filePath);
+  const category = path.dirname(relPath);
+  const selfClosing = isSelfClosing(content);
+  const meta = parseComments(content);
+  const params = selfClosing ? [] : extractParams(content, meta);
+  const known = KNOWN_STEPS[name];
+
+  return {
+    name,
+    id: STEP_IDS[name] ?? null,
+    category,
+    snippetFile: relPath,
+    selfClosing,
+    params,
+    hrSignature: known?.hrSignature ?? null,
+    monacoSnippet: MONACO_SNIPPETS[name] ?? null,
+    blockPair: BLOCK_PAIRS[name] ?? null,
+    status: known ? 'complete' : 'auto',
+    helpUrl: meta.helpUrl,
+  };
+}
+
+// ── Main ─────────────────────────────────────────────────────────────
+
+function main(): void {
+  console.log(`Project root: ${PROJECT_ROOT}`);
+  console.log(`Snippet dir:  ${SNIPPET_DIR}`);
+  console.log(`Output file:  ${OUTPUT_FILE}`);
+
+  if (!fs.existsSync(SNIPPET_DIR)) {
+    console.error(`Error: Snippet directory not found: ${SNIPPET_DIR}`);
+    process.exit(1);
+  }
+
+  const xmlFiles = walkDir(SNIPPET_DIR, '.xml');
+  console.log(`Found ${xmlFiles.length} XML files`);
+
+  const entries: StepCatalogEntry[] = [];
+  let warnings = 0;
+
+  for (const filePath of xmlFiles) {
+    const entry = parseSnippetFile(filePath, SNIPPET_DIR);
+    if (entry) {
+      entries.push(entry);
+    } else {
+      warnings++;
+    }
+  }
+
+  // Sort by name
+  entries.sort((a, b) => a.name.localeCompare(b.name));
+
+  // Write output
+  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(entries, null, 2) + '\n');
+
+  // Summary
+  const complete = entries.filter(e => e.status === 'complete').length;
+  const withId = entries.filter(e => e.id !== null).length;
+  const withHelp = entries.filter(e => e.helpUrl !== null).length;
+  const withSnippet = entries.filter(e => e.monacoSnippet !== null).length;
+  const withBlockPair = entries.filter(e => e.blockPair !== null).length;
+  const selfClosing = entries.filter(e => e.selfClosing).length;
+
+  console.log(`\nGenerated ${entries.length} catalog entries → ${OUTPUT_FILE}`);
+  console.log(`  ${complete} complete (hand-coded converters)`);
+  console.log(`  ${entries.length - complete} auto-generated`);
+  console.log(`  ${withId} with step IDs`);
+  console.log(`  ${withHelp} with help URLs`);
+  console.log(`  ${withSnippet} with Monaco snippets`);
+  console.log(`  ${withBlockPair} with block pairs`);
+  console.log(`  ${selfClosing} self-closing`);
+  if (warnings > 0) {
+    console.log(`  ${warnings} warnings`);
+  }
+}
+
+main();

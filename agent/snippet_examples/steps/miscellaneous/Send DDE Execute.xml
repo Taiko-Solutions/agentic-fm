@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Send DDE Execute">
+  <Step enable="True" id="64" name="Send DDE Execute">
     <ContentType value="File"/>
   </Step>
 </fmxmlsnippet>

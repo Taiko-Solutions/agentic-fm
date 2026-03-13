@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Configure Local Notification">
+  <Step enable="True" id="187" name="Configure Local Notification">
     <Script id="0" name=""/>
     <Action value="Queue">
       <Name>

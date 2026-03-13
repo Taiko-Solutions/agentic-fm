@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Arrange All Windows">
+  <Step enable="True" id="120" name="Arrange All Windows">
     <WindowArrangement value="Cascade"/>
   </Step>
 </fmxmlsnippet>

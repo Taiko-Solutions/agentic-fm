@@ -352,9 +352,20 @@ Let ( [
        Assemble final JSON
        =================================================================== */
 
+    /* ISO 8601 UTC timestamp for staleness detection */
+    ~ts = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) ;
+    ~generatedAt =
+        Year ( ~ts ) & "-" &
+        Right ( "0" & Month ( ~ts ) ; 2 ) & "-" &
+        Right ( "0" & Day ( ~ts ) ; 2 ) & "T" &
+        Right ( "0" & Hour ( ~ts ) ; 2 ) & ":" &
+        Right ( "0" & Minute ( ~ts ) ; 2 ) & ":" &
+        Right ( "0" & Seconds ( ~ts ) ; 2 ) & "Z" ;
+
     ~json = JSONSetElement ( "{}" ;
         [ "solution"                  ; ~fn                  ; JSONString ] ;
         [ "task"                      ; task                 ; JSONString ] ;
+        [ "generated_at"              ; ~generatedAt         ; JSONString ] ;
         [ "current_layout.name"       ; ~layoutName          ; JSONString ] ;
         [ "current_layout.id"         ; ~layoutId            ; JSONNumber ] ;
         [ "current_layout.base_to"    ; ~layoutTO            ; JSONString ] ;

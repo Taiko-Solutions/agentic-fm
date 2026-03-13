@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Save a Copy as XML">
+  <Step enable="True" id="3" name="Save a Copy as XML">
     <Option state="True"/>
     <UniversalPathList>$path</UniversalPathList>
     <Calculation><![CDATA[Get ( WindowName )]]></Calculation>

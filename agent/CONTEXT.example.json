@@ -5,6 +5,8 @@
 
   "task": "Create a script to add a new line item to the current invoice",
 
+  "generated_at": "2026-03-09T14:23:00Z",
+
   "current_layout": {
     "name": "Invoices Details",
     "id": 34,

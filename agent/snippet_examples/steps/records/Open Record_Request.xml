@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Open Record/Request"/>
+  <Step enable="True" id="133" name="Open Record/Request"/>
 </fmxmlsnippet>
 <!-- See https://help.claris.com/en/pro-help/content/open-record-request.html -->
