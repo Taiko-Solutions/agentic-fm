@@ -24,6 +24,23 @@ Each FileMaker object type corresponds to a four-letter AppleScript class code:
 
 This project primarily works with `XMSS` (the output format is steps-only inside `<fmxmlsnippet type="FMObjectList">`).
 
+### CorePasteboardFlavorType values
+
+When accessing the clipboard via the macOS Pasteboard API directly (e.g. via PyObjC's `NSPasteboard`), each class code maps to a `CorePasteboardFlavorType` string. The hex value is simply the four ASCII bytes of the class code interpreted as a big-endian 32-bit integer:
+
+| Code   | Hex value    | Pasteboard type string                         |
+|--------|--------------|------------------------------------------------|
+| `XMSS` | `0x584D5353` | `CorePasteboardFlavorType 0x584D5353`          |
+| `XMSC` | `0x584D5343` | `CorePasteboardFlavorType 0x584D5343`          |
+| `XML2` | `0x584D4C32` | `CorePasteboardFlavorType 0x584D4C32`          |
+| `XMLO` | `0x584D4C4F` | `CorePasteboardFlavorType 0x584D4C4F`          |
+| `XMFD` | `0x584D4644` | `CorePasteboardFlavorType 0x584D4644`          |
+| `XMFN` | `0x584D464E` | `CorePasteboardFlavorType 0x584D464E`          |
+| `XMTB` | `0x584D5442` | `CorePasteboardFlavorType 0x584D5442`          |
+| `XMVL` | `0x584D564C` | `CorePasteboardFlavorType 0x584D564C`          |
+| `XMTH` | `0x584D5448` | `CorePasteboardFlavorType 0x584D5448`          |
+| `ut16` | `0x75743136` | `CorePasteboardFlavorType 0x75743136`          |
+
 ---
 
 ## Using clipboard.py
@@ -136,6 +153,49 @@ on error
     return "Clipboard is empty or unreadable"
 end try
 ```
+
+---
+
+## NSPasteboard / PyObjC fast path
+
+`clipboard.py` automatically uses a faster, subprocess-free clipboard path when `pyobjc-framework-Cocoa` is installed. Install it into the project venv:
+
+```bash
+pip install pyobjc-framework-Cocoa
+```
+
+When available, all clipboard reads and writes go through `NSPasteboard` directly instead of spawning `osascript` subprocesses. This eliminates:
+- The `osascript` process launch overhead (significant for large snippets)
+- The hex-encode/decode round-trip (`«data XMSS3C...»` → regex → `bytes.fromhex()`)
+- Argument-length pressure from very large hex strings passed on the shell command line
+
+Without PyObjC installed the script falls back to the original `osascript` path automatically — no configuration needed.
+
+### How NSPasteboard reads FM binary data
+
+```python
+pb = NSPasteboard.generalPasteboard()
+pb_type = "CorePasteboardFlavorType 0x584D5353"   # XMSS
+data = pb.dataForType_(pb_type)
+xml = data.bytes().tobytes().decode('utf-8')
+```
+
+### How NSPasteboard reads ut16 menu data
+
+```python
+raw_bytes = pb.dataForType_("CorePasteboardFlavorType 0x75743136").bytes().tobytes()
+xml = raw_bytes.decode('utf-16')   # BOM is present; Python handles it automatically
+```
+
+### How NSPasteboard writes FM data
+
+```python
+pb.clearContents()
+ns_data = NSData.dataWithBytes_length_(xml_bytes, len(xml_bytes))
+pb.setData_forType_(ns_data, "CorePasteboardFlavorType 0x584D5353")
+```
+
+Note that `pb.clearContents()` is required before writing — without it, stale data from a previous copy may persist alongside the new data.
 
 ---
 

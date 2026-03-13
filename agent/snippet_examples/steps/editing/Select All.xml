@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Select All"/>
+  <Step enable="True" id="50" name="Select All"/>
 </fmxmlsnippet>
 <!-- See https://help.claris.com/en/pro-help/content/select-all.html -->

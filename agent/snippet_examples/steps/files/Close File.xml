@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Close File">
+  <Step enable="True" id="34" name="Close File">
     <FileReference id="0" name="">
       <UniversalPathList>file:NameOfFile</UniversalPathList>
     </FileReference>

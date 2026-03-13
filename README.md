@@ -2,6 +2,12 @@
 
 AI-powered script development for FileMaker Pro. Generate, modify, and validate `fmxmlsnippet` code that pastes directly into FileMaker with a high degree of confidence.
 
+Visual introduction over at the website [agentic-fm.com](https://agentic-fm.com)
+
+If you're a developer, and wanting join the conversation, we've got a [Discord server](https://discord.gg/zHBETxqT) too.
+
+**Impatient?** Jump straight to [QUICKSTART.md](QUICKSTART.md) — prerequisites, install, and your first working script in one page.
+
 # Background
 
 FileMaker Pro is a closed environment — logic and schema live inside a binary file, not text files. Three XML formats provide the bridge between FileMaker and external tooling:
@@ -14,17 +20,17 @@ FileMaker Pro is a closed environment — logic and schema live inside a binary 
 
 # 🔧 How to Install
 
-See **[filemaker/README.md](filemaker/README.md)** for the full dependency list and step-by-step setup guide, including how to install `fm-xml-export-exploder`, configure the MBS Plugin, and set up the Python virtual environment.
+See **[filemaker/README.md](filemaker/README.md)** for the full dependency list and step-by-step setup guide, including how to install `fm-xml-export-exploder` and set up the companion server.
 
 **Dependencies at a glance:**
 
-| Dependency                                                                               | Required By                       | Notes                                                      |
-| ---------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------------------------------- |
-| FileMaker Pro 21.0+                                                                      | Everything                        | `GetTableDDL`, `While`, and data file steps required       |
-| [MBS FileMaker Plugin](https://www.monkeybreadsoftware.com/filemaker/)                   | Explode XML script                | Free trial available; other scripts use native steps only  |
-| [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) | Explode XML, fmparse.sh           | Download binary; place at `~/bin/fm-xml-export-exploder`   |
-| Python 3 + `.venv`                                                                       | clipboard.py, validate_snippet.py | `source .venv/bin/activate` before use                     |
-| xmllint                                                                                  | fmcontext.sh                      | Ships with macOS; `apt-get install libxml2-utils` on Linux |
+| Dependency                                                                               | Required By                                       | Notes                                                      |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
+| FileMaker Pro 21.0+                                                                      | Everything                                        | `GetTableDDL`, `While`, and data file steps required       |
+| [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) | Explode XML, fmparse.sh                           | Download binary; place at `~/bin/fm-xml-export-exploder`   |
+| Python 3                                                                                 | clipboard.py, validate_snippet.py, companion_server.py | stdlib only — no virtualenv required                  |
+| xmllint                                                                                  | fmcontext.sh                                      | Ships with macOS; `apt-get install libxml2-utils` on Linux |
+| [MBS FileMaker Plugin](https://www.monkeybreadsoftware.com/filemaker/) _(legacy)_        | Older Explode XML installs only                   | Replaced by companion_server.py; no longer required        |
 
 **Setup steps:**
 
@@ -33,23 +39,33 @@ See **[filemaker/README.md](filemaker/README.md)** for the full dependency list 
 2. **Install the companion scripts** — load `filemaker/agentic-fm.xml` onto the clipboard using the `clipboard.py write` command, then paste into the Script Workspace in FileMaker:
 
    ```bash
-   source .venv/bin/activate
-   python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
+   python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
    ```
 
-3. **Configure the repo path** — run the **Get agentic-fm path** script once. It will prompt you to select the agentic-fm folder on disk and store the path in `$$AGENTIC.FM` for use by the other scripts.
+3. **Start the companion server** — the companion server is a lightweight HTTP server that FileMaker calls via `Insert from URL` to run shell commands. Start it before running FileMaker companion scripts:
 
-4. **Explode the XML** — run the **Explode XML** script to perform your first Save as XML export and populate `agent/xml_parsed/`. Re-run it any time the solution schema changes.
+   ```bash
+   python3 agent/scripts/companion_server.py
+   ```
 
-5. **Push context before each session** — navigate to the layout you are working on, run **Push Context**, enter a task description, and the current context will be written to `agent/CONTEXT.json`. You are now ready to work with AI.
+   The server listens on port 8765 by default. Keep it running in a terminal while you work.
+
+4. **Configure the repo path** — run the **Get agentic-fm path** script once. It will prompt you to select the agentic-fm folder on disk and store the path in `$$AGENTIC.FM` for use by the other scripts.
+
+5. **Explode the XML** — run the **Explode XML** script to perform your first Save as XML export and populate `agent/xml_parsed/`. Re-run it any time the solution schema changes.
+
+6. **Push context before each session** — navigate to the layout you are working on, run **Push Context**, enter a task description, and the current context will be written to `agent/CONTEXT.json`. You are now ready to work with AI.
 
 # ⚡ Workflow
 
 ```
+0. Start companion server: python3 agent/scripts/companion_server.py (keep running in background)
 1. In FileMaker, run "Explode XML" to export and parse the current solution into agent/xml_parsed/
 2. Navigate to the target layout and run "Push Context" with a task description → writes agent/CONTEXT.json
-3. AI reads CONTEXT.json + snippet_examples to generate fmxmlsnippet output in agent/sandbox/
+3. AI reads CONTEXT.json + step catalog to generate fmxmlsnippet output in agent/sandbox/
+   (snippet_examples are archival reference — the step catalog is now the primary step structure source)
 4. validate_snippet.py runs automatically as part of the AI toolchain to check for errors
+   (also warns if CONTEXT.json context is older than 60 minutes)
 5. clipboard.py writes the validated snippet to the clipboard
 6. Paste fmxmlsnippet into FileMaker at the desired insertion point
 ```
@@ -83,6 +99,29 @@ Most of a developer's script work (creation, updates, optimizations, and debuggi
 
 For a detailed view of the data pipeline, the context hierarchy, artifact inventory, and guidelines for adding new features, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
+# Step Catalog
+
+`agent/catalogs/step-catalog-en.json` is a structured JSON reference for all FileMaker script steps. It provides step IDs, parameter definitions (XML element names, types, enums, defaults), HR signatures, and Monaco snippets. The step catalog is the **single source of truth** for step XML structure, including behavioral notes (constraints, gotchas, platform notes) in its `notes` field. Agents grep it first; `snippet_examples/` is now archival reference only. See `agent/docs/SCHEMA_GUIDANCE.md` for a complete param type → XML mapping reference, and [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture.
+
+# Webviewer
+
+The `webviewer/` directory contains a browser-based visual script editor built with Preact, Monaco, and Vite. Its three-panel layout provides a Monaco script editor (with autocomplete from the step catalog), a live XML preview, and integrated AI chat.
+
+**Quick start:**
+
+```bash
+cd webviewer
+npm install
+npm run dev
+# Open http://localhost:8080
+```
+
+The webviewer can run as a standalone browser app or embedded inside a FileMaker WebViewer object. When embedded, FileMaker can push context and load scripts via the bridge API. AI providers include Anthropic API, OpenAI API, and Claude Code CLI proxy.
+
+**The webviewer AI and the CLI/IDE agent have different capabilities.** The CLI agent has full filesystem access, reads knowledge docs selectively via the MANIFEST, and writes validated fmxmlsnippet to `agent/sandbox/`. The webviewer AI works from a pre-loaded system prompt — it has access to the same coding conventions and knowledge base, but cannot access index files, `xml_parsed/`, or the snippet library, and cannot run validation or clipboard scripts directly. See [CLI/IDE vs Webviewer AI](webviewer/WEBVIEWER_INTEGRATION.md#clide-vs-webviewer-ai--capability-comparison) in `WEBVIEWER_INTEGRATION.md` for a full comparison and token budget breakdown.
+
+See `webviewer/WEBVIEWER_INTEGRATION.md` for full details.
+
 # Project Structure
 
 ```
@@ -96,6 +135,7 @@ agentic-fm/
 ├── agent/
 │   ├── CONTEXT.json         # Scoped context for the current task (generated in FileMaker)
 │   ├── CONTEXT.example.json # Schema reference and example for CONTEXT.json
+│   ├── catalogs/            # Step catalog — structured step definitions
 │   ├── context/             # Pre-extracted index files (generated by fmcontext.sh)
 │   ├── sandbox/             # Work area for AI-generated scripts (output)
 │   ├── scripts/             # Utility scripts (validation, XML conversion, clipboard)
@@ -104,7 +144,8 @@ agentic-fm/
 │   │   ├── filemaker/       # FileMaker help reference (functions, script steps, errors)
 │   │   └── knowledge/       # Curated behavioral intelligence about FileMaker
 │   ├── library/             # Proven, reusable fmxmlsnippet patterns
-│   └── xml_parsed/          # Exploded XML from the current solution (reference only)
+│   └── xml_parsed/          # Exploded XML from parsed solutions (reference only)
+├── webviewer/               # Visual script editor (Preact + Monaco)
 └── xml_exports/             # Versioned XML exports organized by solution
     └── <Solution Name>/
         ├── 2026-02-08/
@@ -114,9 +155,11 @@ agentic-fm/
 ```
 
 - **filemaker/** -- FileMaker artifacts to install into your solution. See [filemaker/README.md](filemaker/README.md).
+- **agent/catalogs/** -- Structured JSON reference for all FileMaker script steps. Primary source for step XML structure.
+- **webviewer/** -- Browser-based script editor with Monaco, live XML preview, and AI chat. See `webviewer/WEBVIEWER_INTEGRATION.md`.
 - **agent/sandbox/** -- The primary working folder. All AI output lands here; paste from here into FileMaker.
-- **agent/xml_parsed/** -- Always contains the most recent exploded XML for the active solution. Cleared and repopulated each time `fmparse.sh` runs.
-- **agent/context/** -- Compact, pipe-delimited index files generated by `fmcontext.sh`. Provide fast lookups of all fields, relationships, layouts, scripts, table occurrences, and value lists.
+- **agent/xml_parsed/** -- Contains the exploded XML for all parsed solution files. Supports the FileMaker data separation model -- each solution file (e.g. UI.fmp12, Data.fmp12) is parsed independently, and only that solution's subdirectories are cleared on re-parse.
+- **agent/context/** -- Compact, pipe-delimited index files generated by `fmcontext.sh`. Organized into solution subfolders (`agent/context/{solution}/`) mirroring the xml_parsed hierarchy. Provide fast lookups of all fields, relationships, layouts, scripts, table occurrences, and value lists.
 - **agent/CONTEXT.json** -- Generated by FileMaker's `Context()` function before each session. Scoped to the current layout and task so AI has exactly the IDs it needs.
 - **xml_exports/** -- Archived XML exports, one subfolder per solution, dated subfolders per run.
 
@@ -139,29 +182,60 @@ Each knowledge document captures what an experienced FileMaker developer knows i
 
 **Current topics:**
 
-| Document        | Covers                                                                                                     |
-| --------------- | ---------------------------------------------------------------------------------------------------------- |
-| `found-sets.md` | Found set attributes, actions on found sets, collecting field values, restoring found sets, snapshot links |
+| Document               | Covers                                                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `found-sets.md`        | Found set attributes, actions on found sets, collecting field values, restoring found sets, snapshot links |
+| `single-pass-loop.md`  | Single-pass loop pattern for structured exit control                                                       |
+| `variables.md`         | Variable scoping, naming conventions, and lifetime considerations                                          |
+| `error-handling.md`    | Error capture patterns, transaction rollback, and server-side compatibility                                |
+| `script-parameters.md` | Passing and parsing script parameters; JSON vs. positional patterns                                        |
 
 A keyword-indexed manifest at `agent/docs/knowledge/MANIFEST.md` enables fast lookup. AI scans it for keyword matches against the current task and reads any matching documents before writing script steps.
 
-**Contributing knowledge:** This is one of the most impactful ways to contribute. If you know of a FileMaker behavior that AI commonly gets wrong — or a nuance that would help AI write better scripts — see the [Contributing](#contributions) section below.
+**Contributing knowledge:** This is one of the most impactful ways to contribute. See `agent/docs/knowledge/CONTRIBUTING.md` for the article format, review criteria, and a list of 15 good topic ideas.
 
 # 📋 FileMaker Companion Scripts
 
 `filemaker/agentic-fm.xml` is an `fmxmlsnippet` containing a script folder group named **agentic-fm**. Paste it into your FileMaker solution's Script Workspace to install the three companion scripts that connect FileMaker to the agentic-fm toolchain.
 
-| Script                  | Purpose                                                                                                                                                                                                   |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Get agentic-fm path** | One-time setup. Prompts you to select the agentic-fm repo folder and stores the path in `$$AGENTIC.FM`. All other scripts depend on this global being set.                                                |
-| **Explode XML**         | Saves a copy of the current solution as XML and calls `fmparse.sh` via MBS Shell to archive and explode it into `agent/xml_parsed/`. Run this whenever the solution schema or scripts change.             |
-| **Push Context**        | Prompts for a task description, calls `Context($task)`, and writes the result directly to `agent/CONTEXT.json`. Run this from whatever layout you are working on before starting an AI scripting session. |
+| Script                  | Purpose                                                                                                                                                                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Get agentic-fm path** | One-time setup. Prompts you to select the agentic-fm repo folder and stores the path in `$$AGENTIC.FM`. All other scripts depend on this global being set.                                                                   |
+| **Explode XML**         | Saves a copy of the current solution as XML and calls `fmparse.sh` via the companion server to archive and explode it into `agent/xml_parsed/`. Run this whenever the solution schema or scripts change.                     |
+| **Push Context**        | Prompts for a task description, calls `Context($task)`, and writes the result directly to `agent/CONTEXT.json`. The generated context includes a `generated_at` timestamp for staleness detection. Run this from whatever layout you are working on before starting an AI scripting session. |
 
-**Requirement:** The **Explode XML** script uses the [MBS FileMaker Plugin](https://www.monkeybreadsoftware.com/filemaker/) for its shell execution functions (`Shell.New`, `Shell.Execute`, etc.). The other two scripts use only native FileMaker steps.
+**Requirement:** The **Explode XML** script communicates with `agent/scripts/companion_server.py` via `Insert from URL`. Start the companion server before running this script (`python3 agent/scripts/companion_server.py`, port 8765). The other two scripts use only native FileMaker steps.
+
+## Closed-Loop Operation with OData
+
+When a FileMaker file is hosted on FileMaker Server with OData enabled, an AI agent can trigger all three feedback scripts **programmatically** — without any manual developer action:
+
+```bash
+# Refresh context (scoped to a layout)
+curl -X POST "https://{server}/fmi/odata/v4/{database}/Script/Push%20Context" \
+  -H "Authorization: Basic {base64credentials}" \
+  -H "Content-Type: application/json" \
+  -d '{"scriptParameterValue": "{\"task\": \"build invoice workflow\"}"}'
+
+# Export and parse the full solution
+curl -X POST "https://{server}/fmi/odata/v4/{database}/Script/Explode%20XML" \
+  -H "Authorization: Basic {base64credentials}" \
+  -H "Content-Type: application/json"
+```
+
+This enables a fully autonomous development loop: the agent generates code, reads back what landed in the solution, and refreshes context — all without the developer running a single script manually.
+
+**For full closed-loop operation:**
+- Host the FM file on FileMaker Server (local Docker or remote)
+- Enable OData on the file with an account that has the `fmodata` extended privilege
+- Run the companion server (`python3 agent/scripts/companion_server.py`) — the Explode XML script calls it
+- Use the `odata-connect` skill if you need help setting this up
+
+The three scripts in `filemaker/agentic-fm.xml` are expected to be present in any solution where you want this level of agent autonomy. Think of them as the bridge between the agent and the live FM environment.
 
 # fmparse.sh
 
-A command line tool, called from within FileMaker, that archives a FileMaker XML export and parses it into its component parts using [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder).
+A command line tool, called from within FileMaker, that archives a FileMaker XML export and parses it into its component parts using [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder). Supports the data separation model -- each solution file is parsed independently and only its subdirectories are cleared on re-parse, preserving other solutions' data in `agent/xml_parsed/`.
 
 **Usage:**
 
@@ -189,6 +263,23 @@ A command line tool, called from within FileMaker, that archives a FileMaker XML
 ./fmparse.sh -s "Invoice Solution" /path/to/exports/ --all-lines
 ```
 
+**Removing sensitive items automatically:**
+
+Some scripts or custom functions may contain passwords, API keys, or other credentials that must not be left on disk where they are readable by AI agents. Create `agent/config/removals.json` (gitignored, never committed) to list items that should be deleted from `agent/xml_parsed/` after every export, before the context indexes are built.
+
+Items can be identified by name or by FileMaker ID. ID matching is preferred because it survives renames.
+
+```json
+{
+  "Invoice Solution": {
+    "scripts": ["Admin Password Reset", 42],
+    "custom_functions": ["GetAPIKey", 15]
+  }
+}
+```
+
+Strings match by name; integers match by ID. Each matched item is removed from all parallel directories (`scripts/`, `scripts_sanitized/`, `custom_functions/`, `custom_function_stubs/`). See `agent/config/removals.json.example` for a full template.
+
 # fmcontext.sh
 
 A command line tool that generates AI-optimized index files from the exploded XML in `agent/xml_parsed/`. Uses `xmllint` to extract only the useful data (IDs, names, types, references) and discard noise (UUIDs, hashes, timestamps, visual positioning).
@@ -196,12 +287,13 @@ A command line tool that generates AI-optimized index files from the exploded XM
 **Usage:**
 
 ```bash
-./fmcontext.sh
+./fmcontext.sh                         # regenerate all solutions
+./fmcontext.sh -s "Invoice Solution"   # regenerate one solution only
 ```
 
-This is run at the end of `fmparse.sh`. It reads `agent/xml_parsed/` and writes to `agent/context/`.
+This is run at the end of `fmparse.sh`. It reads `agent/xml_parsed/` and writes to `agent/context/{solution}/`.
 
-**Generated files:**
+**Generated files** (per solution under `agent/context/{solution}/`):
 
 | File                      | Contents                                                           |
 | ------------------------- | ------------------------------------------------------------------ |
@@ -221,23 +313,25 @@ A post-generation validation tool that checks `fmxmlsnippet` output for common e
 **Usage:**
 
 ```bash
-python agent/scripts/validate_snippet.py [file_or_directory] [options]
+python3 agent/scripts/validate_snippet.py [file_or_directory] [options]
 ```
 
 With no arguments it validates all files in `agent/sandbox/`. It auto-detects `agent/CONTEXT.json` when present.
 
 **Checks performed:**
 
-| Check                 | Description                                                                |
-| --------------------- | -------------------------------------------------------------------------- |
-| Well-formed XML       | File parses as valid XML                                                   |
-| Root element          | Must be `<fmxmlsnippet type="FMObjectList">`                               |
-| No Script wrapper     | Output must not be wrapped in `<Script>` tags                              |
-| Step attributes       | Every `<Step>` has `enable`, `id`, and `name`                              |
-| Paired steps          | If/End If, Loop/End Loop, Open Transaction/Commit Transaction are balanced |
-| Else/Else If ordering | No Else If after Else, no duplicate Else within an If block                |
-| Known step names      | All step names exist in snippet_examples                                   |
-| Reference cross-check | Field, layout, and script IDs match CONTEXT.json                           |
+| Check                    | Description                                                                |
+| ------------------------ | -------------------------------------------------------------------------- |
+| Well-formed XML          | File parses as valid XML                                                   |
+| Root element             | Must be `<fmxmlsnippet type="FMObjectList">`                               |
+| No Script wrapper        | Output must not be wrapped in `<Script>` tags                              |
+| Step attributes          | Every `<Step>` has `enable`, `id`, and `name`                              |
+| Paired steps             | If/End If, Loop/End Loop, Open Transaction/Commit Transaction are balanced |
+| Else/Else If ordering    | No Else If after Else, no duplicate Else within an If block                |
+| Known step names         | All step names exist in snippet_examples                                   |
+| Reference cross-check    | Field, layout, and script IDs match CONTEXT.json                           |
+| Context staleness        | Warns if CONTEXT.json is older than 60 minutes; shows layout name at push time |
+| Coding conventions       | Warns on ASCII comparison operators (`<>` → `≠`, `<=` → `≤`, `>=` → `≥`) and variable naming prefix violations |
 
 **Options:**
 
@@ -260,7 +354,7 @@ Because the output is scoped to the current layout's context, the AI receives ex
 
 # CONTEXT.json
 
-Generated by the `Context` custom function in FileMaker before each script generation request. Contains scoped context — only the tables, fields, layouts, scripts, relationships, and value lists relevant to the current task.
+Generated by the `Context` custom function in FileMaker before each script generation request. Contains scoped context — only the tables, fields, layouts, scripts, relationships, and value lists relevant to the current task. The `generated_at` field (ISO 8601 UTC) is included for staleness detection; `validate_snippet.py` warns if the context is older than 60 minutes.
 
 See `agent/CONTEXT.example.json` for the full schema and a realistic example.
 
@@ -274,11 +368,11 @@ The `agent/docs/filemaker/` directory contains a script that fetches the officia
 
 ```bash
 cd agent/docs/filemaker
-python fetch_docs.py              # fetch everything
-python fetch_docs.py --steps      # script steps only
-python fetch_docs.py --functions  # functions only
-python fetch_docs.py --errors     # error codes only
-python fetch_docs.py --force      # re-download cached files
+python3 fetch_docs.py              # fetch everything
+python3 fetch_docs.py --steps      # script steps only
+python3 fetch_docs.py --functions  # functions only
+python3 fetch_docs.py --errors     # error codes only
+python3 fetch_docs.py --force      # re-download cached files
 ```
 
 **Outputs** (written relative to `agent/docs/filemaker/`):
@@ -297,8 +391,10 @@ See [filemaker/README.md](filemaker/README.md) for full installation instruction
 
 - **[fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder/releases/latest)** — required by `fmparse.sh` and the **Explode XML** FileMaker script. Place the binary at `~/bin/fm-xml-export-exploder` or set `FM_XML_EXPLODER_BIN` to the full path.
 - **xmllint** — required by `fmcontext.sh`. Ships with macOS via libxml2. On Linux: `apt-get install libxml2-utils`.
-- **Python 3** — required by `clipboard.py` and `validate_snippet.py`. Activate the included virtual environment: `source .venv/bin/activate`.
-- **MBS FileMaker Plugin** — required by the **Explode XML** companion script for shell execution. See [monkeybreadsoftware.com](https://www.monkeybreadsoftware.com/filemaker/).
+- **Python 3** — required by `clipboard.py`, `validate_snippet.py`, and `companion_server.py`. All three use stdlib only; no virtualenv is needed. Run directly with `python3 agent/scripts/...`. macOS ships Python 3 at `/usr/bin/python3`; for a newer version install via [Homebrew](https://brew.sh): `brew install python`.
+- **companion_server.py** — lightweight HTTP server on port 8765 that FileMaker calls via `Insert from URL` to run shell commands. Replaces the MBS FileMaker Plugin for shell execution. Start with `python3 agent/scripts/companion_server.py`.
+- **MBS FileMaker Plugin** _(legacy)_ — no longer required. Older installations that still use MBS for shell execution will continue to work, but new setups should use `companion_server.py` instead.
+- **Node.js 18+** — required by the webviewer (`webviewer/`). Optional if you only use the CLI/IDE workflow.
 
 # Project Website
 
@@ -322,6 +418,7 @@ Contributions are welcome. This project is intended to grow through collaboratio
 - **Bug reports and corrections** -- If you find an error, an omission, or a snippet that produces incorrect output, please open an issue.
 - **Updated snippet examples** -- Additional and/or updated `fmxmlsnippet` templates for step types not yet covered are among the most valuable contributions.
 - **Editor and workflow support** -- The core toolchain should be editor-agnostic. It was developed using Cursor. If you build support for a specific editor, IDE, or automation workflow, a pull request is welcome.
+- **Webviewer and HR converter** -- Improvements to the webviewer UI, the HR-to-XML converter, Monaco autocomplete definitions, or AI chat integration. If you add or modify step catalog entries, verify the webviewer's converter handles the changes correctly.
 - **Improvements to the companion scripts** -- The FileMaker scripts in `filemaker/agentic-fm.xml` are early versions. Better path handling, error reporting, and cross-platform support are all good targets.
 
 Please follow the standard fork-and-pull-request workflow. For significant changes, open an issue first to discuss the approach.

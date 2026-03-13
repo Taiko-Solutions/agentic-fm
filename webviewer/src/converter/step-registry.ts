@@ -1,0 +1,70 @@
+import type { ParsedLine } from './parser';
+import type { IdResolver } from './id-resolver';
+
+/**
+ * Step converter interface.
+ * Each step type implements HR -> XML and XML -> HR conversion.
+ */
+export interface StepConverter {
+  /** HR step name(s) this converter handles */
+  stepNames: string[];
+  /** Convert a parsed HR line to fmxmlsnippet XML Step element */
+  toXml(line: ParsedLine, resolver: IdResolver): string;
+}
+
+export interface XmlStepConverter {
+  /** XML step name attribute this converter handles */
+  xmlStepNames: string[];
+  /** Convert an XML Step element to HR text */
+  toHR(stepEl: Element): string;
+}
+
+/** Registry of HR -> XML converters */
+const hrToXmlRegistry = new Map<string, StepConverter>();
+
+/** Registry of XML -> HR converters */
+const xmlToHrRegistry = new Map<string, XmlStepConverter>();
+
+export function registerHrToXml(converter: StepConverter): void {
+  for (const name of converter.stepNames) {
+    hrToXmlRegistry.set(name, converter);
+  }
+}
+
+export function registerXmlToHr(converter: XmlStepConverter): void {
+  for (const name of converter.xmlStepNames) {
+    xmlToHrRegistry.set(name, converter);
+  }
+}
+
+export function getHrToXmlConverter(stepName: string): StepConverter | undefined {
+  return hrToXmlRegistry.get(stepName);
+}
+
+export function getXmlToHrConverter(xmlStepName: string): XmlStepConverter | undefined {
+  return xmlToHrRegistry.get(xmlStepName);
+}
+
+/** XML helper: escape special chars for XML content */
+export function escXml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** XML helper: wrap in CDATA */
+export function cdata(s: string): string {
+  return `<![CDATA[${s}]]>`;
+}
+
+/** XML helper: create a Step opening tag */
+export function stepOpen(name: string, enabled = true): string {
+  return `  <Step enable="${enabled ? 'True' : 'False'}" id="0" name="${escXml(name)}">`;
+}
+
+/** XML helper: create a self-closing Step tag */
+export function stepSelfClose(name: string, enabled = true): string {
+  return `  <Step enable="${enabled ? 'True' : 'False'}" id="0" name="${escXml(name)}"/>`;
+}

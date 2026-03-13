@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Execute SQL">
+  <Step enable="True" id="117" name="Execute SQL">
     <NoInteract state="True"/>
     <Profile QueryType="Query" flags="0" password="" UserName="" dsn="" FieldDelimiter="&#9;" IsPredefined="-1" FieldNameRow="0" DataType="ODBC">
       <Query>$sql_statement</Query>
     </Profile>
   </Step>
 </fmxmlsnippet>
-<!-- NoInteract state: "True" suppresses the Specify SQL dialog, Select ODBC Data Source dialog, and password dialog. "False" shows the dialogs. -->
-<!-- Profile QueryType: "Query" | other values may exist for different query types. -->
+<!-- NoInteract state: "True" suppresses dialogs (HR: With dialog: Off). "False" shows dialogs (HR: With dialog: On). -->
+<!-- Profile QueryType: "Query" (HR: SQL Text) with <Query> child containing literal SQL. "Calculation" (HR: Calculated SQL Text) with <QueryCalc><Calculation> child. -->
 <!-- Profile dsn: ODBC data source name. Profile UserName and password: credentials. Select "Save user name and password" if NoInteract is "True". -->
 <!-- Query element: contains SQL statement (manually entered or calculated). Maximum 256 K characters (512 KB). -->
 <!-- Executes SQL statements on ODBC data sources (not FileMaker data sources; use ExecuteSQL function for FileMaker SELECT queries). -->

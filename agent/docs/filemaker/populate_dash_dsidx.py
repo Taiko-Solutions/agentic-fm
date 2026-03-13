@@ -39,7 +39,11 @@ except Exception:
 DSIDX_REL = Path("Contents/Resources/docSet.dsidx")
 DOCS_REL = Path("Contents/Resources/Documents")
 
-TITLE_SUFFIX_RE = re.compile(r"\s*\|\s*Claris\s+FileMaker\s+Pro\s+Help\s*$", re.IGNORECASE)
+# El docset puede venir de Pro Help o Server Help (y otros podrían heredar el mismo patrón)
+TITLE_SUFFIX_RE = re.compile(
+    r"\s*\|\s*Claris\s+FileMaker\s+(?:Pro|Server)\s+Help\s*$",
+    re.IGNORECASE,
+)
 
 RE_GET_TITLE = re.compile(r"^Get\(([^)]+)\)$")
 RE_EVENT_TITLE = re.compile(r"^On[A-Z].+")

@@ -1,0 +1,152 @@
+# Keeping agentic-fm Up to Date
+
+agentic-fm is actively maintained. New features, fixes, and FileMaker catalog improvements are added regularly. Because you downloaded the project as a folder of files on your computer, those updates do not reach you automatically — you need to pull them in manually.
+
+This guide walks you through how to know when an update is available and how to apply it, even if you are not familiar with git or the command line.
+
+---
+
+## The short version
+
+If you use **Claude Code or another AI IDE** (Cursor, VS Code), the AI agent will check for updates automatically when you start a new session and tell you what to do. You do not need to set anything up.
+
+If you want an extra safety net, follow **Option 2** below to watch the project on GitHub so you get an email whenever changes are pushed.
+
+---
+
+## Option 1 — The AI agent checks for you (no setup required)
+
+This is already built in. Every time you open a new Claude Code session and send your first message, the agent quietly checks whether your copy of agentic-fm is up to date. If it is not, it will pause and tell you before doing anything else:
+
+> **agentic-fm update available** — your copy is 3 commit(s) behind the latest version. Run `git pull --ff-only` in your agentic-fm folder to update, then restart your session.
+
+When you see this message, open your terminal, navigate to your agentic-fm folder, and run:
+
+```bash
+git pull --ff-only
+```
+
+Then close and reopen your Claude Code session. That is all.
+
+> If you are not sure how to open a terminal or navigate to the folder, see [How to open a terminal in your agentic-fm folder](#how-to-open-a-terminal-in-your-agentic-fm-folder) at the bottom of this page.
+
+---
+
+## Option 2 — Get an email when changes are pushed
+
+This is the easiest way to stay informed without doing anything on your computer. GitHub can send you an email whenever new commits are pushed to the main branch — agentic-fm does not use versioned releases, so watching for pushes is the right trigger.
+
+**Steps:**
+
+1. Create a free GitHub account at [github.com](https://github.com) if you do not already have one
+2. Go to the agentic-fm project page: [github.com/petrowsky/agentic-fm](https://github.com/petrowsky/agentic-fm)
+3. Click the **Watch** button near the top right of the page (it looks like an eye icon)
+4. Select **All Activity** from the dropdown menu that appears
+5. Click **Apply**
+
+You will now receive an email notification whenever changes are pushed to the project.
+
+**To control where notifications go:**
+
+1. Click your profile picture in the top right corner of GitHub
+2. Click **Settings**
+3. Click **Notifications** in the left sidebar
+4. Under **Email notification preferences**, make sure your email address is confirmed
+
+---
+
+## Option 3 — Check manually before you start working
+
+If you prefer to check on your own schedule, you can run a simple command in the terminal before starting a session.
+
+Open a terminal in your agentic-fm folder (see below if you need help with this), then run:
+
+```bash
+git fetch origin --quiet && git status
+```
+
+If your copy is up to date, you will see:
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+```
+
+If an update is available, you will see:
+
+```
+Your branch is behind 'origin/main' by 2 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+```
+
+To apply the update, run:
+
+```bash
+git pull --ff-only
+```
+
+---
+
+## How to apply an update
+
+Whenever you are told an update is available — whether by the AI agent, a GitHub email, or a manual check — applying it is always the same two steps:
+
+**1. Open a terminal in your agentic-fm folder** (see below)
+
+**2. Run:**
+
+```bash
+git pull --ff-only
+```
+
+That's it. Your files will be updated to the latest version. If the companion server is running, stop it and restart it after pulling.
+
+---
+
+## How to open a terminal in your agentic-fm folder
+
+**In VS Code, Cursor, or any compatible IDE:**
+
+If you already have agentic-fm open as your project folder, the easiest option is to use the built-in terminal — it opens directly in the project root. Go to **Terminal > New Terminal** in the menu bar.
+
+**On macOS:**
+
+1. Open **Finder** and navigate to your agentic-fm folder
+2. Right-click (or Control-click) the folder
+3. Select **New Terminal at Folder** from the menu
+
+> If you do not see "New Terminal at Folder", go to **System Settings > Privacy & Security > Extensions > Finder Extensions** and enable **Terminal**.
+
+Alternatively, open the **Terminal** app (search for it in Spotlight with `Cmd+Space`), then type:
+
+```bash
+cd /path/to/your/agentic-fm
+```
+
+Replace `/path/to/your/agentic-fm` with the actual location. For example, if it is in your home folder:
+
+```bash
+cd ~/agentic-fm
+```
+
+**On Windows (if using WSL or Git Bash):**
+
+Open **Git Bash**, then navigate to the folder:
+
+```bash
+cd /c/Users/YourName/agentic-fm
+```
+
+---
+
+## Something went wrong
+
+If `git pull --ff-only` gives an error, the most common cause is that you have made changes to files in the agentic-fm folder. Run these two commands to set your changes aside, pull the update, and then restore them:
+
+```bash
+git stash
+git pull --ff-only
+git stash pop
+```
+
+If you see a message about conflicts after `git stash pop`, the safest option is to ask the AI agent to help you resolve them.

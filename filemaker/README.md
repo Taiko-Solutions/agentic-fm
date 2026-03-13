@@ -19,19 +19,31 @@ The minimum version is **21.0**. Earlier versions lack:
 - `While` — used by `Context.fmfn` for iteration
 - `Create Data File` / `Open Data File` / `Write to Data File` / `Close Data File` — used by the **Push Context** script to write `CONTEXT.json` to disk
 
-### MBS FileMaker Plugin
+### Companion Server
 
-Required for the **Explode XML** companion script only. The other two scripts (**Get agentic-fm path** and **Push Context**) use only native FileMaker steps.
+The **Explode XML** companion script calls `agent/scripts/companion_server.py` — a lightweight HTTP server — to run shell commands from FileMaker without any third-party plugin. FileMaker communicates with it via `Insert from URL`.
 
-The plugin provides the shell execution functions the script relies on:
+**Start the server before running Explode XML:**
+
+```bash
+python agent/scripts/companion_server.py
+```
+
+The server listens on port 8765 by default and uses only Python stdlib — no virtualenv is required. Keep it running in a terminal while you work.
+
+The other two companion scripts (**Get agentic-fm path** and **Push Context**) use only native FileMaker steps and do not require the companion server.
+
+### MBS FileMaker Plugin _(legacy — no longer required)_
+
+Earlier versions of agentic-fm used the MBS FileMaker Plugin for shell execution in the **Explode XML** script. This dependency has been removed. If you have an existing installation that still uses MBS, it will continue to work, but new setups should use `companion_server.py` instead.
+
+The MBS functions previously used were:
 
 - `Shell.New` / `Shell.Execute` / `Shell.Wait` / `Shell.Release`
 - `Shell.AddEnvironment` / `Shell.SetArgumentsList`
 - `Shell.ReadOutputText` / `Shell.ReadErrorText`
 - `Path.FileMakerPathToNativePath`
 - `IsError`
-
-Download from [monkeybreadsoftware.com/filemaker](https://www.monkeybreadsoftware.com/filemaker/). A free trial is available. Without this plugin, you can still run `fmparse.sh` manually from the terminal — only the in-FileMaker automation is unavailable.
 
 ### fm-xml-export-exploder
 
@@ -51,7 +63,7 @@ A Rust binary that parses FileMaker XML exports into individual files. Used by b
    chmod +x ~/bin/fm-xml-export-exploder
    ```
 
-> **Why `~/bin`?** The **Explode XML** companion script passes `~/bin/fm-xml-export-exploder` as the `FM_XML_EXPLODER_BIN` environment variable to `fmparse.sh`. If you want to place the binary elsewhere, open the **Explode XML** script in FileMaker and update the `Set Variable [$env ; MBS("Shell.AddEnvironment" ...)]` step to reflect your actual path.
+> **Why `~/bin`?** The **Explode XML** companion script passes `~/bin/fm-xml-export-exploder` as the `FM_XML_EXPLODER_BIN` environment variable to `fmparse.sh`. If you want to place the binary elsewhere, open the **Explode XML** script in FileMaker and update the `Set Variable [$payload ; JSONSetElement ( "{}" ;[ "exploder_bin_path" ;  ...]` step to reflect your actual path.
 
 When calling `fmparse.sh` directly from the terminal you can also override the path via the environment variable:
 
@@ -61,7 +73,7 @@ FM_XML_EXPLODER_BIN=/your/path/fm-xml-export-exploder ./fmparse.sh -s "My Soluti
 
 ### Python 3
 
-Required for `agent/scripts/clipboard.py` (loading snippets onto the FileMaker clipboard) and `agent/scripts/validate_snippet.py` (post-generation validation).
+Required for `agent/scripts/clipboard.py` (loading snippets onto the FileMaker clipboard), `agent/scripts/validate_snippet.py` (post-generation validation), and `agent/scripts/companion_server.py` (shell execution server). All three use Python stdlib only — no virtualenv is required.
 
 Python 3 ships with macOS or can be installed via [Homebrew](https://brew.sh):
 
@@ -69,10 +81,11 @@ Python 3 ships with macOS or can be installed via [Homebrew](https://brew.sh):
 brew install python
 ```
 
-A virtual environment is included in the repo at `.venv/`. Always activate it before running Python scripts:
+Run scripts directly — no activation step needed:
 
 ```bash
-source .venv/bin/activate
+python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
+python agent/scripts/companion_server.py
 ```
 
 ### xmllint
@@ -100,7 +113,6 @@ apt-get install libxml2-utils
 Load `filemaker/agentic-fm.xml` onto the FileMaker clipboard using `clipboard.py`, then paste into the Script Workspace:
 
 ```bash
-source .venv/bin/activate
 python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
 ```
 
@@ -111,6 +123,16 @@ Switch to FileMaker, open the **Script Workspace** (**Scripts > Script Workspace
 Run the **Get agentic-fm path** script once (from the Scripts menu or Script Workspace). A folder picker will appear. Select the root of the agentic-fm repo folder. The path is stored in `$$AGENTIC.FM` and persists for the session.
 
 > This script must be run again each time FileMaker is relaunched, as global variables do not persist across sessions. Consider adding a call to it in your solution's startup script.
+
+### 3.5. Start the companion server
+
+Before running **Explode XML**, start `companion_server.py` in a terminal and leave it running:
+
+```bash
+python agent/scripts/companion_server.py
+```
+
+This server listens on port 8765 and handles the shell command that **Explode XML** issues via `Insert from URL`. You will need to restart it each time you open a new terminal session.
 
 ### 4. Run Explode XML
 
@@ -124,12 +146,37 @@ Navigate to the layout you are working on and run the **Push Context** script. A
 
 ---
 
+## Optional: agentic-fm web viewer
+
+The agentic-fm web viewer is a browser-based Monaco editor embedded directly in FileMaker. It provides a three-panel interface — script editor, XML preview, and AI chat — without leaving FileMaker Pro.
+
+### Adding the web viewer to a layout
+
+Add a **WebViewer** object to any layout and set its URL to `http://localhost:8080` (the Vite dev server). Name the object exactly **`agentic-fm`** — this name is required for the bridge script and custom menu integration to work correctly.
+
+The web viewer works on any layout, but a **dedicated layout** is strongly recommended:
+
+- Place only the web viewer object on the layout with no other interactive objects
+- Make the layout window **resizable** so you can expand the editor to a comfortable size
+- A single-object layout ensures the custom menu set (assigned per-layout) applies consistently whenever the editor is in use
+
+See `webviewer/WEBVIEWER_INTEGRATION.md` for full setup and development workflow details.
+
+### Custom menu integration (optional)
+
+The `filemaker/custom_menu/` folder contains an optional custom menu set that adds five editor-aware menus to the layout hosting the web viewer. These menus expose keyboard shortcuts for common Monaco editor actions (comment toggle, indent, move line, find, and more) without requiring the developer to remember key bindings.
+
+See `filemaker/custom_menu/README.md` for the integration steps.
+
+---
+
 ## Dependency Summary
 
 | Dependency | Required By | Where to Get |
 | ---------- | ----------- | ------------ |
 | FileMaker Pro 21.0+ | Everything | [claris.com](https://www.claris.com) |
-| MBS FileMaker Plugin | Explode XML script | [monkeybreadsoftware.com](https://www.monkeybreadsoftware.com/filemaker/) |
+| companion_server.py | Explode XML script | Included — `python agent/scripts/companion_server.py` |
 | fm-xml-export-exploder | Explode XML script, fmparse.sh | [GitHub releases](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) |
-| Python 3 | clipboard.py, validate_snippet.py | Ships with macOS or `brew install python` |
+| Python 3 | clipboard.py, validate_snippet.py, companion_server.py | Ships with macOS or `brew install python` |
 | xmllint | fmcontext.sh | Ships with macOS; `apt-get install libxml2-utils` on Linux |
+| MBS FileMaker Plugin _(legacy)_ | Older Explode XML installs only | [monkeybreadsoftware.com](https://www.monkeybreadsoftware.com/filemaker/) |

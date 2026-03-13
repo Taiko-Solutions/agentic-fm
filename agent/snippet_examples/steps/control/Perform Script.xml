@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Perform Script">
+  <Step enable="True" id="1" name="Perform Script">
     <Calculation><![CDATA[$parameter]]></Calculation>
     <Script id="0" name=""/>
   </Step>

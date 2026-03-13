@@ -1,0 +1,10 @@
+{
+  "_comment": "Strings match by name, integers match by ID. ID matching is preferred as it survives renames.",
+  "Invoice Solution": {
+    "scripts": ["Admin Password Reset", 42],
+    "custom_functions": ["GetAPIKey", 15]
+  },
+  "Another Solution": {
+    "scripts": [101]
+  }
+}
