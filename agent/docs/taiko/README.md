@@ -46,6 +46,7 @@ Human-readable script templates in `scripts_sanitized` format (numbered, indente
 | File | Description |
 |------|-------------|
 | `clew-simple.md` | Traditional Clew pattern (read, query, navigation scripts) |
+| `clew-completo.md` | Complete Clew with all subscript scenarios (InSubscriptThrow, InSubscript, DeleteTrace) |
 | `clew-transactional.md` | Utility Manager + Initialize Shadow + Transactional Controller |
 
 ### UPSTREAM_IMPROVEMENTS.md
