@@ -61,6 +61,35 @@ Build the pluggable deployment module described in `VISION.md` → Automation Ti
 
 ---
 
+### Webviewer Output Channel
+
+Cross-cutting output infrastructure consumed by every skill that produces HR script output. Must be built alongside the first HR-output skill — retrofitting later requires touching every skill. See `SKILL_INTERFACES.md` → Webviewer output channel for the full interface spec.
+
+**Scope**:
+- `automation.json` — add `webviewer_url` field (Vite dev server URL)
+- **Companion endpoints**:
+  - `GET /webviewer/status` — checks `webviewer_url` reachability, returns `{ available: true/false }`
+  - `POST /webviewer/push` — accepts `{ type, content, before? }`, forwards to webviewer via SSE
+- **Webviewer**: persistent SSE connection to companion; "Agent output" panel renders pushed content in Monaco; diff editor for `type: "diff"` payloads
+- **Payload types**: `preview` (HR display), `diff` (before/after Monaco diff editor), `result` (evaluation or structured output)
+
+**Design constraint**: webviewer channel is always additive. Skills must still produce useful terminal output when the webviewer is unavailable. No skill should require the Vite server to be running.
+
+---
+
+### AGFMEvaluation + Snapshot
+
+FM-side infrastructure for runtime calculation validation and data context capture. See `DEPLOYMENT_STATUS.md` → AGFMEvaluation + Snapshot for full design.
+
+**Scope**:
+- **`AGFMEvaluation` FM script** — server-side via OData; navigates to a layout, evaluates an expression via `EvaluationError`/`Evaluate`, saves a verification snapshot, returns result JSON
+- **Push Context update** — add `Save Records as Snapshot Link` step writing to `$$AGENTIC.FM & "/agent/context/snapshot.xml"`; add `snapshot_path` and `snapshot_timestamp` to CONTEXT.json output
+- **`calc-eval` skill** — see `SKILL_INTERFACES.md`; agent calls `AGFMEvaluation` via OData, reads result, routes to webviewer channel if available
+
+**Human prerequisite**: developer installs `AGFMEvaluation` in the solution (paste from `agent/sandbox/AGFMEvaluation.xml`), then runs Push Context once to generate the first reference snapshot.
+
+---
+
 ## Phase 1 — Multi-Script Scaffold
 
 **Status**: `planned`

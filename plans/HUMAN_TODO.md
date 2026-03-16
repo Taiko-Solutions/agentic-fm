@@ -16,7 +16,13 @@ Everything the developer must provide, decide, confirm, or set up before the pha
 
 2. **agentic-fm scripts installed in your solution** — The four FM-side scripts (`Get agentic-fm path`, `Push Context`, `Explode XML`, `Agentic-fm Debug`) must be installed and functional in every solution you plan to work with. Confirm `$$AGENTIC.FM` resolves to the correct project path.
 
-3. **FileMaker Server with OData access (Phase 3b+)** — Required for schema-build and data tooling phases. This means:
+3. **Add `webviewer_url` to `automation.json`** — Required for the webviewer output channel. Set it to your Vite dev server URL (typically `http://localhost:5173`). If the webviewer is not in use, omit or leave empty — skills degrade gracefully to terminal-only output.
+
+   ```json
+   "webviewer_url": "http://localhost:5173"
+   ```
+
+4. **FileMaker Server with OData access (Phase 3b+)** — Required for schema-build and data tooling phases. This means:
    - A FileMaker Server instance running (Docker or native) — **confirmed working: FMS 21.1.5 in Docker container `fms`, reachable at `https://local.hub/`**
    - A hosted database file to work against — **confirmed: Invoice Solution**
    - An account with the `fmodata` extended privilege enabled — **confirmed: `Odata` account**
@@ -26,13 +32,23 @@ Everything the developer must provide, decide, confirm, or set up before the pha
 
 ---
 
+## AGFMEvaluation Setup
+
+These are required before the `calc-eval` skill can be used. Complete after the deployment loop is stable.
+
+- [ ] **Paste `AGFMEvaluation.xml` into Invoice Solution** — once the script is built in `agent/sandbox/`, paste via Tier 1 into a new script named exactly `AGFMEvaluation`, save it
+- [ ] **Run Push Context after the snapshot update** — once Push Context is updated to save `agent/context/snapshot.xml`, run it on the relevant layout to generate the first reference snapshot; confirm `CONTEXT.json` now includes `snapshot_path`
+- [ ] **Run Explode XML** — after both scripts are installed, export the solution so `xml_parsed/` reflects the new agentic-fm scripts
+
+---
+
 ## Context & Reference Data
 
-4. **Run Explode XML to populate `xml_parsed/`** — Phase 3a (Layout Design) validates XML2 output against layout exports in `xml_parsed/`. These must be current before that phase starts. Run the `Explode XML` script in FM Pro against the Invoice Solution (or whichever solution you're targeting).
+5. **Run Explode XML to populate `xml_parsed/`** — Phase 3a (Layout Design) validates XML2 output against layout exports in `xml_parsed/`. These must be current before that phase starts. Run the `Explode XML` script in FM Pro against the Invoice Solution (or whichever solution you're targeting).
 
-5. **Run Push Context on the relevant layout** — Confirm `Push Context` works end-to-end: prompts for task description, calls the `Context()` custom function, and writes a valid `agent/CONTEXT.json`. This is the primary feedback loop for every phase.
+6. **Run Push Context on the relevant layout** — Confirm `Push Context` works end-to-end: prompts for task description, calls the `Context()` custom function, and writes a valid `agent/CONTEXT.json`. This is the primary feedback loop for every phase.
 
-6. **Provide a test solution for multi-script validation** — Phase 1 needs to test against a 3-script and a 5-script interdependent system. Identify (or create) a solution where you can create placeholder scripts, paste generated output, and verify correct `Perform Script` wiring at runtime.
+7. **Provide a test solution for multi-script validation** — Phase 1 needs to test against a 3-script and a 5-script interdependent system. Identify (or create) a solution where you can create placeholder scripts, paste generated output, and verify correct `Perform Script` wiring at runtime.
 
 ---
 
@@ -104,8 +120,17 @@ The bare minimum to start Phase 1:
 |---|------|--------|
 | 1 | Companion server running on host (`COMPANION_BIND_HOST=0.0.0.0`) | [x] |
 | 2 | agentic-fm scripts installed | [x] |
-| 5 | Push Context works end-to-end | [x] |
-| 6 | Test solution identified | [x] Invoice Solution |
-| 7 | Automation tier chosen + `automation.json` created | [x] Tier 1 default, Tier 3 project target |
-| 8 | `SKILL_INTERFACES.md` finalized | [x] |
-| 9 | Shared infrastructure confirmed stable | [x] |
+| 6 | Push Context works end-to-end | [x] |
+| 7 | Test solution identified | [x] Invoice Solution |
+| 8 | Automation tier chosen + `automation.json` created | [x] Tier 1 default, Tier 3 project target |
+| 9 | `SKILL_INTERFACES.md` finalized | [x] |
+| 10 | Shared infrastructure confirmed stable | [x] |
+
+Additional items before `calc-eval` skill can be used (post-Phase 1):
+
+| # | Item | Status |
+|---|------|--------|
+| AGFMEval-1 | `AGFMEvaluation.xml` built and installed in solution | [ ] |
+| AGFMEval-2 | Push Context updated to write `agent/context/snapshot.xml` | [ ] |
+| AGFMEval-3 | `snapshot_path` field confirmed present in `CONTEXT.json` | [ ] |
+| AGFMEval-4 | `webviewer_url` added to `automation.json` | [ ] |

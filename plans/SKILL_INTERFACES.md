@@ -72,6 +72,37 @@ The `osascript` trigger path in the companion server (`/trigger` endpoint, to be
 
 ---
 
+### Webviewer output channel
+
+Not a skill. A shared output routing layer consumed by every skill that produces HR script output. When the webviewer Vite server is running alongside a CLI/IDE session, skills route rich output through Monaco rather than printing plain text to the terminal. The terminal remains the primary interaction surface; Monaco is the rich display layer.
+
+**Detection**: companion server exposes `GET /webviewer/status` — checks whether the `webviewer_url` configured in `automation.json` is reachable. Skills query this before deciding output routing.
+
+**Interface**:
+- **Config**: `automation.json` field `"webviewer_url": "http://localhost:5173"` — Vite dev server URL; omit or leave empty to disable
+- **Companion endpoints** (to build):
+  - `GET /webviewer/status` — returns `{ "available": true/false }`
+  - `POST /webviewer/push` — forwards payload to webviewer via SSE; accepts `{ type, content, before? }`
+- **Payload types**:
+  - `"preview"` — display HR script in Monaco editor
+  - `"diff"` — Monaco diff editor; `content` = proposed HR, `before` = current from `scripts_sanitized`
+  - `"result"` — structured evaluation or other result output
+- **Webviewer side**: persistent SSE connection from webviewer to companion; "Agent output" panel renders pushed content in Monaco; developer can edit inline and agent reads back via companion
+
+**Routing rule**: skills always print a terminal summary regardless of webviewer availability. Webviewer delivery is additive, never a replacement.
+
+**Design constraint**: every skill that produces HR output must check webviewer status and route accordingly from initial implementation — retrofitting later is costly.
+
+| Skill | Monaco output type |
+|---|---|
+| `script-preview` | `preview` — HR with syntax highlighting |
+| `script-refactor` | `diff` — current vs proposed side by side |
+| Any script-generating skill | `preview` — HR output alongside XML in sandbox |
+| `calc-eval` | `result` — expression + result + error context |
+| `multi-script-scaffold` | `preview` — each script in sequence |
+
+---
+
 ## Setup & Connectivity
 
 ### `context-refresh`
@@ -175,6 +206,33 @@ A single skill with three sub-modes covering OData connection setup, schema crea
 **Calls**: `context-refresh` (to capture script IDs), deployment module (for output)
 
 **Called by**: `solution-blueprint` (future)
+
+---
+
+### `calc-eval`
+
+**Trigger phrases**: "evaluate this calculation", "check this calc", "validate expression", "test this formula", "does this calculation work", "is this calc valid"
+
+**Inputs**:
+- A calculation expression (inline in conversation or from current context)
+- `agent/CONTEXT.json` — provides `current_layout.name` for navigation and `snapshot_path` for context reference
+- OData connection available
+
+**Outputs**:
+- Terminal: validation summary — valid/invalid, result value, FM error code and description if any
+- Webviewer (if available): full result in Monaco via `POST /webviewer/push` with `type: "result"`
+- If invalid: identified cause (bad field ref, syntax error, unknown function) and proposed fix
+
+**Workflow**:
+1. Read `current_layout.name` from `CONTEXT.json`; note `snapshot_path` if present (confirms developer has established data context)
+2. Call `AGFMEvaluation` via OData → AGFMScriptBridge with `{ expression, layout }`
+3. `AGFMEvaluation` navigates to layout, evaluates, saves `snapshot-eval.xml` to server Documents, returns result
+4. Agent optionally asks companion to read `snapshot-eval.xml` and confirm layout name matches `CONTEXT.json` — mismatch means context drift, flag it
+5. Route full result to webviewer if channel available
+
+**Calls**: none (direct OData call to `AGFMEvaluation` FM script)
+
+**Called by**: agent proactively during script generation for any calculation it wants to verify — especially complex `Let()` blocks, JSON path expressions, field cross-references, and WebViewer data-passing expressions
 
 ---
 

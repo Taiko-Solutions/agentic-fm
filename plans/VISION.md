@@ -260,6 +260,17 @@ Constraints:
 - **Cannot automate drag-and-drop operations**
 - Process name has changed across FM versions ("FileMaker Pro" vs "FileMaker Pro Advanced" vs "Claris FileMaker Pro") — use bundle identifier for resilience
 
+### The webviewer as a rich output channel
+
+When the developer runs the Vite dev server alongside their CLI/IDE session, skills gain a fourth output path beyond Tiers 1–3. Rather than printing HR script output as plain terminal text, skills route it through the companion server to the webviewer, where Monaco renders it with full syntax highlighting. Two output types are available:
+
+- **Preview** (`type: "preview"`) — displays the generated HR script in Monaco; the developer sees exactly what will be deployed before it lands in the Script Workspace
+- **Diff** (`type: "diff"`) — displays a side-by-side diff of the current script (from `scripts_sanitized`) against the agent's proposed version; Monaco's diff editor makes changes immediately readable in a way that is impossible in the Script Workspace itself
+
+Detection is automatic: if the companion server can reach the configured `webviewer_url`, the channel is available. Skills always produce terminal output regardless — the webviewer is additive, never a dependency.
+
+This channel is particularly valuable for `script-refactor` (diff view) and any skill used from CLI/IDE while the webviewer editor is open — the developer can see and edit the proposed HR output in Monaco before approving deployment.
+
 ### The pluggable deployment model
 
 Skills should not hardcode a deployment tier. Instead, every skill that produces fmxmlsnippet output follows a common pattern:
@@ -313,6 +324,7 @@ Skills are the primary unit of capability in agentic-fm. Each skill is a focused
 
 | Skill                 | Purpose                                                                                                                             |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `calc-eval`           | Validate FileMaker calculation expressions at runtime via OData — evaluates against a live solution, returns result and FM error code; agent uses proactively for any calculation it generates |
 | `script-debug`        | Systematic debugging workflow — reproduce, isolate, hypothesise, verify, fix                                                        |
 | `implementation-plan` | Structured planning before script creation — decompose requirements, identify dependencies, confirm approach before generating code |
 | `schema-build`        | Create and modify database schema via OData against a live hosted solution (supersedes `modify-schema`)                             |

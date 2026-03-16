@@ -74,11 +74,29 @@ The following files must not be modified by any agent without coordinator approv
 - `.claude/CLAUDE.md`
 - Companion server endpoints
 
-### 5. `fm-debug` skill is stable
+### 5. Webviewer output channel is wired
+
+Every skill that produces HR output uses this channel. Build it before the first HR-output skill ships so it's never retrofitted. See `PHASES.md` → Webviewer Output Channel for scope.
+
+**Done when**:
+- `GET /webviewer/status` and `POST /webviewer/push` endpoints live in companion server
+- Webviewer has persistent SSE connection to companion and renders pushed content in Monaco
+- `automation.json` includes `webviewer_url`; skills check status before routing
+
+### 6. AGFMEvaluation + snapshot infrastructure is in place
+
+Required before `calc-eval` skill can be used. See `PHASES.md` → AGFMEvaluation + Snapshot for scope.
+
+**Done when**:
+- `AGFMEvaluation` FM script installed in solution
+- Push Context writes `agent/context/snapshot.xml` and includes `snapshot_path` in CONTEXT.json output
+- First reference snapshot confirmed present after a Push Context run
+
+### 7. `fm-debug` skill is stable
 
 Phase 2's `script-test` skill depends on it. Confirm the current `fm-debug` implementation is production-ready before Phase 2 starts.
 
-### 6. Invoice Solution XML is current
+### 8. Invoice Solution XML is current
 
 Phase 3a (XML2 generation) validates against `xml_parsed/` layout exports. Run `solution-export` to ensure these are up to date before Phase 3a begins.
 

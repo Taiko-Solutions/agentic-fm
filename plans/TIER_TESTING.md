@@ -161,11 +161,45 @@ If the script triggers but paste doesn't happen, add `Insert from URL` checkpoin
 
 ---
 
-## Tier 3 — NOT YET IMPLEMENTED
+## Tier 3 — Create script + inline paste
 
-Tier 3 adds `AGFMNewScript` — an FM script that creates a blank placeholder by name before the Tier 2 paste. This is needed when the target script doesn't exist yet. It is the project's target tier for production use.
+`deploy.py _tier3()` loads the XML to clipboard first, then fires a `raw_applescript` directly to the companion `/trigger` endpoint. The AppleScript runs synchronously on the host — no FM-side script required, no Agentic-fm Paste involved.
 
-Status: `deploy.py` calls `_tier3()` which posts to `/trigger` with `script: "AGFMNewScript"`, but `AGFMNewScript` has not been built yet. `deploy.py` falls back to Tier 2 on failure.
+### Test
+```bash
+python3 agent/scripts/deploy.py agent/sandbox/AGFMRoundTripTest.xml "My New Script" --tier 3
+```
+
+**Expected sequence:**
+1. FM Pro comes to the foreground
+2. Script Workspace opens (if not already open)
+3. A new script named `"My New Script"` appears in the sidebar
+4. Script is saved (no `*` on tab)
+5. Steps from `AGFMRoundTripTest.xml` are pasted in, replacing the placeholder content
+6. CLI output: `Script 'My New Script' created and steps pasted via Tier 3.`
+
+### Test (auto-save)
+```bash
+python3 agent/scripts/deploy.py agent/sandbox/AGFMRoundTripTest.xml "My New Script" --tier 3 --auto-save
+```
+Same as above — final save after paste removes `*` from tab.
+
+### AppleScript sequence (all within one `tell process "FileMaker Pro"` block)
+1. Activate FM Pro
+2. Open Script Workspace (try/catch — skips gracefully if already open)
+3. `Cmd+N` → creates "New Script"
+4. Scripts menu → "Rename Script" → type target name → Return
+5. `Cmd+S` → save (required before paste or FM blocks with unsaved-scripts dialog on subsequent `do script`)
+6. `Cmd+A` → select all placeholder steps
+7. `Cmd+V` → paste from clipboard (pre-loaded before AppleScript fired)
+8. If `auto_save`: `Cmd+S` → save after paste
+
+### Key quirks
+- `tell process` requires `"FileMaker Pro"` (base name only — no version suffix)
+- "Rename Script" requires `delay 1.0` after clicking before keystrokes land
+- Save before paste is mandatory — FM blocks `do script` if unsaved changes exist
+- `try` block around Script Workspace open is required — menu item errors if already open
+- MBS `Menubar.RunMenuCommand(57637)` does not work after System Events manipulation; System Events `Cmd+V` does — that's why paste is inline here rather than delegated to Agentic-fm Paste
 
 ---
 
