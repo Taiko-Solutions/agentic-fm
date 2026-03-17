@@ -84,18 +84,21 @@ The `/trigger` path works for both hosted and local files — it does not depend
 
 Not a skill. A shared output routing layer consumed by every skill that produces HR script output. When the webviewer Vite server is running alongside a CLI/IDE session, skills route rich output through Monaco rather than printing plain text to the terminal. The terminal remains the primary interaction surface; Monaco is the rich display layer.
 
-**Detection**: companion server exposes `GET /webviewer/status` — checks whether the `webviewer_url` configured in `automation.json` is reachable. Skills query this before deciding output routing.
+**Detection**: skill checks URL reachability directly — `curl -s --max-time 2 {webviewer_url}` — rather than via companion. `webviewer_url` is configured in `automation.json`.
+
+**Important constraint**: SSE and WebSocket are unreliable inside FileMaker's WebKit webviewer. The delivery mechanism is **HTTP polling** — the webviewer polls a Vite API endpoint rather than receiving pushes over a persistent connection. See `plans/WEBVIEWER_STATUS.md` for full architecture.
 
 **Interface**:
-- **Config**: `automation.json` field `"webviewer_url": "http://localhost:5173"` — Vite dev server URL; omit or leave empty to disable
-- **Companion endpoints** (to build):
-  - `GET /webviewer/status` — returns `{ "available": true/false }`
-  - `POST /webviewer/push` — forwards payload to webviewer via SSE; accepts `{ type, content, before? }`
+- **Config**: `automation.json` field `"webviewer_url": "http://localhost:8080"` — Vite dev server URL (port 8080, `strictPort: true`); omit or leave empty to disable
+- **Companion endpoint** (to build):
+  - `POST /webviewer/push` — accepts `{ type, content, before? }`, writes to `agent/config/.agent-output.json`
+- **Vite endpoint** (to build):
+  - `GET /api/agent-output` — webviewer polls this; returns payload or `{ "available": false }`
 - **Payload types**:
-  - `"preview"` — display HR script in Monaco editor
+  - `"preview"` — display HR script in read-only Monaco editor
   - `"diff"` — Monaco diff editor; `content` = proposed HR, `before` = current from `scripts_sanitized`
   - `"result"` — structured evaluation or other result output
-- **Webviewer side**: persistent SSE connection from webviewer to companion; "Agent output" panel renders pushed content in Monaco; developer can edit inline and agent reads back via companion
+- **Webviewer side**: Agent output panel polls `/api/agent-output` on ~1s interval; renders payload in Monaco
 
 **Routing rule**: skills always print a terminal summary regardless of webviewer availability. Webviewer delivery is additive, never a replacement.
 
