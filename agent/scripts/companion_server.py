@@ -360,6 +360,14 @@ def main():
     except KeyboardInterrupt:
         log.info("Shutting down.")
         server.server_close()
+        with _webviewer_lock:
+            if _webviewer_proc is not None and _webviewer_proc.poll() is None:
+                try:
+                    pgid = os.getpgid(_webviewer_proc.pid)
+                    os.killpg(pgid, signal.SIGTERM)
+                    log.info("Stopped webviewer (process group %d)", pgid)
+                except Exception as exc:
+                    log.warning("Failed to stop webviewer on shutdown: %s", exc)
 
 
 if __name__ == "__main__":
