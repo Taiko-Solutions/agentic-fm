@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Perform AppleScript">
+  <Step enable="True" id="67" name="Perform AppleScript">
     <ContentType value="Calculation"/>
     <Calculation><![CDATA["tell application \"Notes\" to open"]]></Calculation>
   </Step>

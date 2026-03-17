@@ -10,7 +10,7 @@ This guide walks you through how to know when an update is available and how to 
 
 If you use **Claude Code or another AI IDE** (Cursor, VS Code), the AI agent will check for updates automatically when you start a new session and tell you what to do. You do not need to set anything up.
 
-If you want an extra safety net, follow **Option 2** below to watch the project on GitHub so you get an email when a new version is released.
+If you want an extra safety net, follow **Option 2** below to watch the project on GitHub so you get an email whenever changes are pushed.
 
 ---
 
@@ -32,20 +32,19 @@ Then close and reopen your Claude Code session. That is all.
 
 ---
 
-## Option 2 — Get an email when a new version is released
+## Option 2 — Get an email when changes are pushed
 
-This is the easiest way to stay informed without doing anything on your computer. GitHub (the website where agentic-fm is hosted) can send you an email whenever a new version is published.
+This is the easiest way to stay informed without doing anything on your computer. GitHub can send you an email whenever new commits are pushed to the main branch — agentic-fm does not use versioned releases, so watching for pushes is the right trigger.
 
 **Steps:**
 
 1. Create a free GitHub account at [github.com](https://github.com) if you do not already have one
 2. Go to the agentic-fm project page: [github.com/petrowsky/agentic-fm](https://github.com/petrowsky/agentic-fm)
 3. Click the **Watch** button near the top right of the page (it looks like an eye icon)
-4. Select **Custom** from the dropdown menu that appears
-5. Check the box next to **Releases**
-6. Click **Apply**
+4. Select **All Activity** from the dropdown menu that appears
+5. Click **Apply**
 
-You will now receive an email notification whenever a new version of agentic-fm is published. The email will contain a summary of what changed.
+You will now receive an email notification whenever changes are pushed to the project.
 
 **To control where notifications go:**
 
@@ -105,6 +104,10 @@ That's it. Your files will be updated to the latest version. If the companion se
 ---
 
 ## How to open a terminal in your agentic-fm folder
+
+**In VS Code, Cursor, or any compatible IDE:**
+
+If you already have agentic-fm open as your project folder, the easiest option is to use the built-in terminal — it opens directly in the project root. Go to **Terminal > New Terminal** in the menu bar.
 
 **On macOS:**
 

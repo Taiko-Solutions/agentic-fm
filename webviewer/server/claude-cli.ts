@@ -149,8 +149,12 @@ export function streamClaudeCode(
       }
 
       if (code !== 0 && code !== null) {
-        const errMsg = stderrBuffer.trim() || `claude CLI exited with code ${code}`;
-        console.warn(`[ai-chat:cli] error response: ${errMsg.slice(0, 300)}`);
+        const rawErr = stderrBuffer.trim() || `claude CLI exited with code ${code}`;
+        const isAuthError = rawErr.includes('authentication_error') || rawErr.includes('OAuth token has expired') || rawErr.includes('401');
+        const errMsg = isAuthError
+          ? "You don't have an active Claude session. You may need to log in again via the CLI (`claude login`)."
+          : rawErr;
+        console.warn(`[ai-chat:cli] error response: ${rawErr.slice(0, 300)}`);
         res.write(`data: ${JSON.stringify({ type: 'error', error: errMsg })}\n\n`);
       }
 

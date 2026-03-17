@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Configure Region Monitor Script">
+  <Step enable="True" id="185" name="Configure Region Monitor Script">
     <Text/>
     <Script id="0" name=""/>
     <MonitorType value="iBeacon">

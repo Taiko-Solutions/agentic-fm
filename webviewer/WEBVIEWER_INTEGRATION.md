@@ -1,5 +1,8 @@
 # Webviewer Integration
 
+> [!WARNING]
+> **Beta — Work in Progress.** The webviewer is under active development. Expect rough edges and breaking changes. If you run into issues, please [report them on the issue queue](https://github.com/petrowsky/agentic-fm/issues).
+
 This feature adds a browser-based FileMaker script editor as a third interaction method alongside the CLI and IDE. It runs inside a FileMaker WebViewer object pointed at a local Vite dev server, giving developers a Monaco-powered editor for composing and editing scripts in the human-readable (HR) format with live conversion to fmxmlsnippet XML.
 
 The `agent/` folder can be interacted with in three ways:
@@ -130,8 +133,8 @@ All endpoints are served by the Vite dev middleware in `server/api.ts`. The `age
 | POST   | `/api/convert/xml-to-hr`                | Stub (conversion is client-side; exists for headless use)                         |
 | GET    | `/api/scripts/search?q=<query>`         | Searches `scripts.index` by ID, exact name, or token match; returns top 20        |
 | GET    | `/api/scripts/load?id=<id>&name=<name>` | Loads script HR (`.txt`) and converts SaXML to snippet via `fm_xml_to_snippet.py` |
-| GET    | `/api/autosave`                         | Returns `agent/sandbox/.autosave.json`                                            |
-| POST   | `/api/autosave`                         | Saves draft to `agent/sandbox/.autosave.json`                                     |
+| GET    | `/api/autosave`                         | Returns `agent/config/.autosave.json`                                             |
+| POST   | `/api/autosave`                         | Saves draft to `agent/config/.autosave.json`                                      |
 | DELETE | `/api/autosave`                         | Deletes the autosave file                                                         |
 | GET    | `/api/sandbox`                          | Lists `.xml` files in `agent/sandbox/`                                            |
 | GET    | `/api/sandbox/:filename`                | Returns contents of a sandbox XML file                                            |
@@ -330,7 +333,7 @@ FileMaker WebViewer objects reinitialize frequently (layout changes, window swit
 **Dual-layer storage:**
 
 1. **localStorage** — written immediately on every edit (fast, synchronous)
-2. **Server** (`agent/sandbox/.autosave.json`) — written via debounced POST (2s delay), survives localStorage wipes
+2. **Server** (`agent/config/.autosave.json`) — written via debounced POST (2s delay), survives localStorage wipes
 
 **Restore logic on init:**
 

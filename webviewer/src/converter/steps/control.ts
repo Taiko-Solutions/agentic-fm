@@ -281,11 +281,14 @@ registerHrToXml({
     let scriptName = '';
     let parameter = '';
 
+    // Known FM display tokens that are not the script name (e.g. "From list", "Specified: From list")
+    const listTokens = /^(from list|specified:\s*from list)$/i;
+
     for (const p of line.params) {
       const paramMatch = p.match(/^Parameter:\s*(.*)$/i);
       if (paramMatch) {
         parameter = paramMatch[1].trim();
-      } else if (!scriptName) {
+      } else if (!scriptName && !listTokens.test(p.trim())) {
         scriptName = p.replace(/^"|"$/g, '').trim();
       }
     }
@@ -311,8 +314,8 @@ registerXmlToHr({
     const script = el.querySelector('Script');
     const name = script?.getAttribute('name') ?? '';
     const calc = el.querySelector('Calculation')?.textContent ?? '';
-    const parts = [`"${name}"`];
-    if (calc) parts.push(`Parameter: ${calc}`);
+    const specified = name ? 'Specified: From list' : 'Specified: By calculation';
+    const parts = [`"${name}"`, specified, `Parameter: ${calc}`];
     return `Perform Script [ ${parts.join(' ; ')} ]`;
   },
 });

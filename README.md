@@ -4,9 +4,9 @@ AI-powered script development for FileMaker Pro. Generate, modify, and validate 
 
 Visual introduction over at the website [agentic-fm.com](https://agentic-fm.com)
 
-If you're a developer, and wanting join the conversation, we've got a [Discord server](https://discord.gg/zHBETxqT) too.
+If you're a developer, and wanting join the conversation, we've got a [Discord server](https://discord.gg/NSg7grhF) too.
 
-**New to the project?** Start with [QUICKSTART.md](QUICKSTART.md) for a fast path to your first working script.
+**Impatient?** Jump straight to [QUICKSTART.md](QUICKSTART.md) — prerequisites, install, and your first working script in one page.
 
 # Background
 
@@ -34,11 +34,16 @@ See **[filemaker/README.md](filemaker/README.md)** for the full dependency list 
 
 1. **Install the Context custom function** — open your solution, go to **File > Manage > Custom Functions**, create a function named `Context` with one `task` parameter, and paste in the contents of `filemaker/Context.fmfn`.
 
-2. **Install the companion scripts** — load `filemaker/agentic-fm.xml` onto the clipboard using the `clipboard.py write` command, then paste into the Script Workspace in FileMaker:
+2. **Install the companion scripts** — choose either option:
 
+   **Option A — Open the included .fmp12 file (fastest):**
+   Open `filemaker/agentic-fm.fmp12` in FileMaker, then copy and paste the **agentic-fm** script folder directly into your solution's Script Workspace.
+
+   **Option B — Install via clipboard:**
    ```bash
    python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
    ```
+   Switch to FileMaker, open the Script Workspace, and press **Cmd+V**.
 
 3. **Start the companion server** — the companion server is a lightweight HTTP server that FileMaker calls via `Insert from URL` to run shell commands. Start it before running FileMaker companion scripts:
 
@@ -128,7 +133,8 @@ agentic-fm/
 ├── fmcontext.sh            # CLI tool for generating AI-optimized context indexes
 ├── filemaker/
 │   ├── Context.fmfn        # Custom function source — install into your solution
-│   ├── agentic-fm.xml      # Companion script group — paste into Script Workspace
+│   ├── agentic-fm.fmp12    # Pre-built FM file — open and copy/paste scripts into your solution
+│   ├── agentic-fm.xml      # Companion script group — alternative install via clipboard.py
 │   └── README.md           # Full dependency and setup guide
 ├── agent/
 │   ├── CONTEXT.json         # Scoped context for the current task (generated in FileMaker)
@@ -152,7 +158,7 @@ agentic-fm/
             └── ...
 ```
 
-- **filemaker/** -- FileMaker artifacts to install into your solution. See [filemaker/README.md](filemaker/README.md).
+- **filemaker/** -- FileMaker artifacts to install into your solution, including a pre-built `.fmp12` file for fast script installation. See [filemaker/README.md](filemaker/README.md).
 - **agent/catalogs/** -- Structured JSON reference for all FileMaker script steps. Primary source for step XML structure.
 - **webviewer/** -- Browser-based script editor with Monaco, live XML preview, and AI chat. See `webviewer/WEBVIEWER_INTEGRATION.md`.
 - **agent/sandbox/** -- The primary working folder. All AI output lands here; paste from here into FileMaker.
@@ -194,7 +200,7 @@ A keyword-indexed manifest at `agent/docs/knowledge/MANIFEST.md` enables fast lo
 
 # 📋 FileMaker Companion Scripts
 
-`filemaker/agentic-fm.xml` is an `fmxmlsnippet` containing a script folder group named **agentic-fm**. Paste it into your FileMaker solution's Script Workspace to install the three companion scripts that connect FileMaker to the agentic-fm toolchain.
+`filemaker/agentic-fm.fmp12` is a pre-built FileMaker file containing the **agentic-fm** script folder group. Open it in FileMaker and copy/paste the script folder into your solution's Script Workspace — this is the fastest installation path. Alternatively, `filemaker/agentic-fm.xml` provides the same scripts in `fmxmlsnippet` format for installation via `clipboard.py`.
 
 | Script                  | Purpose                                                                                                                                                                                                                      |
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

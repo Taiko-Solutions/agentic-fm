@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Perform Find/Replace">
+  <Step enable="True" id="128" name="Perform Find/Replace">
     <NoInteract state="False"/>
     <FindReplaceOperation MatchWholeWords="True" MatchCase="True" WithinOptions="All" AcrossOptions="All" direction="Forward" type="FindNext"/>
     <FindCalc>

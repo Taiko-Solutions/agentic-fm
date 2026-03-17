@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Sort Records by Field">
+  <Step enable="True" id="154" name="Sort Records by Field">
     <SortRecordsByField value="SortAscending"/>
     <Field table="" id="0" name=""/>
   </Step>
