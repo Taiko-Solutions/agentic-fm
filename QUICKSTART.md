@@ -1,33 +1,34 @@
-# agentic-fm Quickstart
+# 🚀 agentic-fm Quickstart
 
-## Two ways to work
+## 🔀 Two ways to work
 
 agentic-fm supports two complementary workflows — choose based on how you prefer to interact with AI:
 
-**CLI / IDE** — Claude Code, Cursor, VS Code, or any terminal-based agent. The agent reads `agent/CONTEXT.json`, generates `fmxmlsnippet` XML in `agent/sandbox/`, validates it, and loads it onto the clipboard ready to paste into FileMaker's Script Workspace.
+**🌐 Webviewer** — A visual three-panel script editor (Monaco + AI chat) that runs in your browser and can be embedded directly inside a FileMaker Web Viewer. The HR-to-XML conversion happens automatically in the browser. Recommended starting point for FileMaker developers not familiar with the CLI or an IDE. See [Webviewer Setup](#webviewer-setup) below.
 
-**Webviewer** — A visual three-panel script editor (Monaco + AI chat) that runs in your browser and can be embedded directly inside a FileMaker Web Viewer. The HR-to-XML conversion happens automatically in the browser. See the [Webviewer page](https://agentic-fm.com/webviewer/) for setup and embedding details. For webviewer setup, skip to [Webviewer Setup](#webviewer-setup) below after completing the FileMaker setup steps.
+**🖥️ CLI / IDE** — Claude Code, Cursor, VS Code, or any terminal-based agent. The agent reads `agent/CONTEXT.json`, generates `fmxmlsnippet` XML in `agent/sandbox/`, validates it, and loads it onto the clipboard ready to paste into FileMaker's Script Workspace. This is the most powerful path — CLI agents have access to the full skill set, deeper context awareness, and tighter feedback loops.
 
 ---
 
-## What this does
+## 💡 What this does
 
 agentic-fm gives an AI agent structured knowledge of your FileMaker solution — schema, scripts, layouts, relationships — so it can generate reliable `fmxmlsnippet` code that pastes directly into the Script Workspace. You describe what you want; the agent writes the XML; you paste it into FileMaker.
 
 ---
 
-## Prerequisites
+## ✅ Prerequisites
 
 1. **FileMaker Pro 21.0+** — earlier versions lack required steps (`GetTableDDL`, `While`, data file steps)
 2. **fm-xml-export-exploder** — Rust binary that parses FileMaker XML exports. Download from [GitHub releases](https://github.com/bc-m/fm-xml-export-exploder/releases/latest)
 3. **Python 3** — macOS ships Python 3 at `/usr/bin/python3`. For a newer version: `brew install python`
-4. **Your AI agent of choice** — Claude Code, Cursor, VS Code + Copilot, etc.
+4. **Node.js 18+** — required for the webviewer. Install from [nodejs.org](https://nodejs.org) or via `brew install node`
+5. **Your AI agent of choice** — Claude Code, Cursor, VS Code + Copilot, etc. (CLI/IDE path only)
 
 > **Python virtual environment**: Only needed if you plan to run `agent/docs/filemaker/fetch_docs.py` to fetch Claris reference documentation. That script auto-installs `requests` and `beautifulsoup4` on first run via pip. The core scripts (`clipboard.py`, `validate_snippet.py`, `companion_server.py`) use the Python standard library only — no venv required.
 
 ---
 
-## Install
+## 📦 Install
 
 ### 1. Clone the repo
 
@@ -54,7 +55,7 @@ python3 agent/scripts/clipboard.py --help
 
 ---
 
-## One-time FileMaker setup
+## 🗄️ One-time FileMaker setup
 
 Do this once per solution. Follow the steps in order — each item may reference the one before it.
 
@@ -84,35 +85,64 @@ python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
 
 Switch to FileMaker, open **Scripts > Script Workspace**, click in the script list, and press **Cmd+V**. A folder named **agentic-fm** with three scripts will appear.
 
-### Configure the repo path
+### ⚙️ Configure the repo path
 
 Run **Get agentic-fm path** from the Scripts menu. A folder picker appears — select the root of this repo. The path is stored in `$$AGENTIC.FM` for the session.
 
 > **Note:** `$$AGENTIC.FM` is a global variable and is cleared whenever the FileMaker file is closed. You'll need to run **Get agentic-fm path** again each session — or add a call to it in your solution's startup script so it runs automatically on launch. Any script that requires the path will also prompt you to set it if it is not yet populated.
 
-### Explode the XML
+### 💥 Explode the XML
 
 Run the **Explode XML** script. This exports your solution's XML and populates `agent/xml_parsed/`. Re-run it any time the schema or scripts change and you want an agent to reference those changes.
 
 ---
 
-## Every session
+## 🌐 Webviewer Setup
 
-Each time you sit down to write scripts:
+The webviewer is a visual three-panel editor (script list + Monaco editor + AI chat) that runs in your browser and can be embedded directly in a FileMaker Web Viewer for an integrated experience.
 
-1. **Start the companion server** — FileMaker calls this to run shell commands. Keep it running in a terminal tab while you work:
-   ```bash
-   python3 agent/scripts/companion_server.py
-   ```
-2. **Navigate** to the layout you are working on in FileMaker
-3. **Run "Push Context"** from the Scripts menu — enter a plain-English task description when prompted. This writes `agent/CONTEXT.json` with the fields, layouts, relationships, and scripts scoped to your current task.
-4. **In your CLI or IDE**, open the agentic-fm directory and prompt your agent to generate the script
-5. The agent generates an `fmxmlsnippet` file in `agent/sandbox/`, validates it, and loads it onto the clipboard
-6. **Switch to FileMaker**, open the Script Workspace, position your cursor, and press **Cmd+V**
+> **Requirements:** Node.js 18+
+
+### ▶️ Start the companion server first
+
+The companion server must be running before you launch the webviewer — it handles all communication between FileMaker and the agent. Open a terminal tab and keep it running while you work:
+
+```bash
+python3 agent/scripts/companion_server.py
+```
+
+### Launch the webviewer
+
+**From FileMaker (easiest):** Run the **Agentic-fm webviewer** script from the Scripts menu. It installs Node dependencies and starts the dev server automatically, then confirms the URL.
+
+**From the terminal:**
+
+```bash
+cd webviewer
+npm install
+npm run dev
+# Open http://localhost:8080
+```
+
+Configure your AI provider (Anthropic API key, OpenAI API key, or Claude Code CLI) in the webviewer settings panel. See the [Webviewer page](https://agentic-fm.com/webviewer/) for full embedding instructions and AI provider details.
 
 ---
 
-## Your first session
+## 🔄 Every session (CLI / IDE)
+
+Each time you sit down to write scripts from the CLI or IDE:
+
+1. **🗺️ Navigate** to the layout you are working on in FileMaker
+2. **📤 Run "Push Context"** from the Scripts menu — enter a plain-English task description when prompted. This writes `agent/CONTEXT.json` with the fields, layouts, relationships, and scripts scoped to your current task.
+3. **💬 In your CLI or IDE**, open the agentic-fm directory and prompt your agent to generate the script
+4. The agent generates an `fmxmlsnippet` file in `agent/sandbox/`, validates it, and loads it onto the clipboard
+5. **📋 Switch to FileMaker**, open the Script Workspace, position your cursor, and press **Cmd+V**
+
+> **Companion server not needed here.** Push Context writes directly to the filesystem; `clipboard.py` uses the macOS clipboard directly. The companion server is only required for the webviewer, Explode XML, and the debug script.
+
+---
+
+## 🎯 Your first CLI/IDE session
 
 The fastest way to see agentic-fm in action is to work with a script that already exists in your solution rather than creating one from scratch. Your agent can read, explain, and improve real scripts immediately after Explode XML has run.
 
@@ -153,37 +183,13 @@ The agent updates the file, re-validates, and reloads the clipboard. Paste again
 
 ---
 
-## Webviewer Setup
+## 🔧 Troubleshooting
 
-The webviewer is an optional visual script editor that runs in your browser and can be embedded directly inside a FileMaker Web Viewer object for an integrated experience.
-
-**Requirements:** Node.js 18+
-
-**Quickest way to see it in action:**
-
-1. Make sure the companion server is running (`python3 agent/scripts/companion_server.py`)
-2. Open `filemaker/agentic-fm.fmp12` in FileMaker
-3. Run the **Agentic-fm webviewer** script from the Scripts menu — it will install dependencies and start the dev server automatically
-
-If you prefer to start the server manually:
-
-```bash
-cd webviewer
-npm install
-npm run dev
-# Open http://localhost:8080
-```
-
-Configure your AI provider (Anthropic API key, OpenAI API key, or Claude Code CLI) in the webviewer settings panel. See the [Webviewer page](https://agentic-fm.com/webviewer/) for full embedding instructions and AI provider details.
-
----
-
-## Troubleshooting
-
-| Problem                          | Fix                                                                                                      |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `python3: command not found`     | Install Python 3 via [Homebrew](https://brew.sh): `brew install python`                                  |
-| Explode XML fails                | Confirm `~/bin/fm-xml-export-exploder` exists and is executable; confirm the companion server is running |
-| CONTEXT.json is empty or missing | Run **Push Context** again from the correct layout                                                       |
-| Paste does nothing in FileMaker  | Confirm the clipboard was loaded — the agent logs `clipboard.py write` output; check for errors          |
-| `$$AGENTIC.FM` not set           | Run **Get agentic-fm path** — it is cleared when the FileMaker file is closed                            |
+| Problem                             | Fix                                                                                                      |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `python3: command not found`        | Install Python 3 via [Homebrew](https://brew.sh): `brew install python`                                  |
+| Webviewer script shows server error | Start the companion server first: `python3 agent/scripts/companion_server.py`                            |
+| Explode XML fails                   | Confirm `~/bin/fm-xml-export-exploder` exists and is executable; confirm the companion server is running |
+| CONTEXT.json is empty or missing    | Run **Push Context** again from the correct layout                                                       |
+| Paste does nothing in FileMaker     | Confirm the clipboard was loaded — the agent logs `clipboard.py write` output; check for errors          |
+| `$$AGENTIC.FM` not set              | Run **Get agentic-fm path** — it is cleared when the FileMaker file is closed                            |

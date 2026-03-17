@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Truncate Table">
+  <Step enable="True" id="182" name="Truncate Table">
     <NoInteract state="True"/>
     <BaseTable id="131" comment="" name="Clients"/>
   </Step>

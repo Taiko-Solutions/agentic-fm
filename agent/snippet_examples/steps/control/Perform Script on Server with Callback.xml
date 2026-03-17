@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Perform Script on Server with Callback">
+  <Step enable="True" id="210" name="Perform Script on Server with Callback">
     <CallbackScriptState value="Continue"/>
     <Calculation><![CDATA[$optional_parameter]]></Calculation>
     <Script id="0" name=""/>

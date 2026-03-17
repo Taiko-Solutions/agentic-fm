@@ -20,9 +20,10 @@ PROJECT.md
 Prompt.md
 .cursorignore
 agent/library/
-agent/sandbox/.autosave.json
 agent/config/removals.json
 agent/config/automation.json
+agent/config/.autosave.json
+agent/config/.layout-prefs.json
 docker-compose.override.yml
 project.env
 

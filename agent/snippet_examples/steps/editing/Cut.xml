@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Cut">
+  <Step enable="True" id="46" name="Cut">
     <SelectAll state="True"/>
     <Field table="" id="0" name=""/>
   </Step>

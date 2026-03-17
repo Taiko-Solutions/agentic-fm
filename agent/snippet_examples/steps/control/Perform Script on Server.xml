@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Perform Script on Server">
+  <Step enable="True" id="164" name="Perform Script on Server">
     <WaitForCompletion state="True"/>
     <Calculation><![CDATA[$optional_parameter]]></Calculation>
     <Script id="0" name=""/>

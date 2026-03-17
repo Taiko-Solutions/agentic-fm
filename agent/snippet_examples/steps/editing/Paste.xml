@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Paste">
+  <Step enable="True" id="48" name="Paste">
     <NoStyle state="True"/>
     <SelectAll state="True"/>
     <LinkAvail state="False"/>

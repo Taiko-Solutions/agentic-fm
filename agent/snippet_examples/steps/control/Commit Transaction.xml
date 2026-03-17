@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Commit Transaction"/>
+  <Step enable="True" id="206" name="Commit Transaction"/>
 </fmxmlsnippet>
 <!-- Requires a preceding Open Transaction step. -->
 <!-- See https://help.claris.com/en/pro-help/content/commit-transaction.html -->

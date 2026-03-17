@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Save Records as Snapshot Link">
+  <Step enable="True" id="152" name="Save Records as Snapshot Link">
     <CreateDirectories state="True"/>
     <CreateEmail state="False"/>
     <SaveType value="BrowsedRecords"/>

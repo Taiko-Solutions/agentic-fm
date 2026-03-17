@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Insert from Index">
+  <Step enable="True" id="11" name="Insert from Index">
     <SelectAll state="True"/>
     <Field table="" id="0" name=""/>
   </Step>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Configure NFC Reading">
+  <Step enable="True" id="201" name="Configure NFC Reading">
     <Calculation><![CDATA[$scriptParameter]]></Calculation>
     <Script id="0" name=""/>
     <Action value="Read">

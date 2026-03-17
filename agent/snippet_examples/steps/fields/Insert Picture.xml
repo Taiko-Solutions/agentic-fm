@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Insert Picture">
+  <Step enable="True" id="56" name="Insert Picture">
     <UniversalPathList type="Embedded">$path</UniversalPathList>
   </Step>
 </fmxmlsnippet>

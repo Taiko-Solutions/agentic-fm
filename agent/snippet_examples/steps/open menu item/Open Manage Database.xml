@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Open Manage Database"/>
+  <Step enable="True" id="38" name="Open Manage Database"/>
 </fmxmlsnippet>
 <!-- See https://help.claris.com/en/pro-help/content/open-manage-database.html -->

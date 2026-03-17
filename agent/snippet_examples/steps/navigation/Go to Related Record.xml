@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Go to Related Record">
+  <Step enable="True" id="74" name="Go to Related Record">
     <Option state="False"/>
     <MatchAllRecords state="False"/>
     <ShowInNewWindow state="False"/>

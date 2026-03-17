@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Insert from Last Visited">
+  <Step enable="True" id="12" name="Insert from Last Visited">
     <SelectAll state="True"/>
     <Field table="" id="0" name=""/>
   </Step>

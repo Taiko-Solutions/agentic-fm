@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="End If"/>
+  <Step enable="True" id="70" name="End If"/>
 </fmxmlsnippet>
 <!-- Requires a preceding If step. -->
 <!-- See https://help.claris.com/en/pro-help/content/end-if.html -->

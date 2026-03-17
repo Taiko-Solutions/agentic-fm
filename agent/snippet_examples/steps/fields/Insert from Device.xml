@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Insert from Device">
+  <Step enable="True" id="161" name="Insert from Device">
     <InsertFrom value="Camera"/>
     <Field table="" id="0" name=""/>
     <DeviceOptions>

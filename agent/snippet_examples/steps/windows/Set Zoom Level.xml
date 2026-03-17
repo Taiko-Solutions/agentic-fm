@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Set Zoom Level">
+  <Step enable="True" id="97" name="Set Zoom Level">
     <Lock state="False"/>
     <Zoom value="100"/>
   </Step>

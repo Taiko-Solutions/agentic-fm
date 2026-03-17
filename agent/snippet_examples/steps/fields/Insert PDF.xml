@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Step enable="True" id="0" name="Insert PDF">
+  <Step enable="True" id="158" name="Insert PDF">
     <UniversalPathList type="Embedded">$path</UniversalPathList>
   </Step>
 </fmxmlsnippet>
