@@ -117,6 +117,31 @@ export function apiMiddleware(): Plugin {
           return;
         }
 
+        // --- GET /api/custom-instructions ---
+        if (req.method === 'GET' && pathname === '/api/custom-instructions') {
+          const filePath = path.join(agent, 'config', '.custom-instructions.md');
+          let content = '';
+          try { content = fs.readFileSync(filePath, 'utf-8'); } catch { /* not found */ }
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ content }));
+          return;
+        }
+
+        // --- POST /api/custom-instructions ---
+        if (req.method === 'POST' && pathname === '/api/custom-instructions') {
+          const body = JSON.parse(await readBody(req));
+          const filePath = path.join(agent, 'config', '.custom-instructions.md');
+          const content = (body.content ?? '').toString();
+          if (content.trim()) {
+            fs.writeFileSync(filePath, content, 'utf-8');
+          } else {
+            try { fs.unlinkSync(filePath); } catch { /* already absent */ }
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ ok: true }));
+          return;
+        }
+
         // --- GET /api/docs ---
         if (req.method === 'GET' && pathname === '/api/docs') {
           const conventionsPath = path.join(agent, 'docs', 'CODING_CONVENTIONS.md');
@@ -436,6 +461,30 @@ export function apiMiddleware(): Plugin {
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ success: true }));
           return;
+        }
+
+        // --- GET/DELETE /api/agent-output ---
+        if (pathname === '/api/agent-output') {
+          const outputPath = path.join(agent, 'config', '.agent-output.json');
+
+          if (req.method === 'GET') {
+            try {
+              const data = fs.readFileSync(outputPath, 'utf-8');
+              res.setHeader('Content-Type', 'application/json');
+              res.end(data);
+            } catch {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ available: false }));
+            }
+            return;
+          }
+
+          if (req.method === 'DELETE') {
+            try { fs.unlinkSync(outputPath); } catch { /* already gone */ }
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ ok: true }));
+            return;
+          }
         }
 
         // --- GET /api/sandbox ---

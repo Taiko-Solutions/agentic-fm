@@ -15,6 +15,7 @@ interface ChatPanelProps {
   promptMarker?: string;
   codingConventions?: string;
   knowledgeDocs?: string;
+  customInstructions?: string;
   onInsertScript?: (script: string) => void;
   onClearChat?: () => void;
 }
@@ -25,7 +26,7 @@ interface ChatMessage {
   streaming?: boolean;
 }
 
-export function ChatPanel({ context, steps, catalog, editorContent, promptMarker, codingConventions, knowledgeDocs, onInsertScript, onClearChat }: ChatPanelProps) {
+export function ChatPanel({ context, steps, catalog, editorContent, promptMarker, codingConventions, knowledgeDocs, customInstructions, onInsertScript, onClearChat }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -40,7 +41,7 @@ export function ChatPanel({ context, steps, catalog, editorContent, promptMarker
     const userMsg: ChatMessage = { role: 'user', content: text };
     setMessages(prev => [...prev, userMsg]);
 
-    const systemPrompt = buildSystemPrompt({ context, steps, catalog, promptMarker, codingConventions, knowledgeDocs });
+    const systemPrompt = buildSystemPrompt({ context, steps, catalog, promptMarker, codingConventions, knowledgeDocs, customInstructions });
 
     // Include editor content as context with line numbers
     let contextMsg = '';

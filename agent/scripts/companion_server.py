@@ -126,6 +126,8 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._handle_webviewer_start()
         elif self.path == "/webviewer/stop":
             self._handle_webviewer_stop()
+        elif self.path == "/webviewer/push":
+            self._handle_webviewer_push()
         else:
             self._send_json({"error": "Not found"}, status=404)
 
@@ -488,6 +490,51 @@ class CompanionHandler(BaseHTTPRequestHandler):
                 log.exception("Failed to stop webviewer: %s", exc)
                 self._send_json({"success": False, "error": str(exc)}, status=500)
 
+    def _handle_webviewer_push(self):
+        """
+        Write an agent output payload for the webviewer to pick up via polling.
+
+        Payload: { "type": "preview"|"diff"|"result", "content": "...", "before": "...", "repo_path": "..." }
+        Returns: { "success": bool }
+        """
+        try:
+            body = self._read_body()
+            payload = json.loads(body)
+        except (ValueError, OSError) as exc:
+            self._send_json({"success": False, "error": f"Invalid request: {exc}"}, status=400)
+            return
+
+        payload_type = payload.get("type", "")
+        if payload_type not in ("preview", "diff", "result"):
+            self._send_json({"success": False, "error": f"Unknown type: {payload_type!r}. Must be preview, diff, or result."}, status=400)
+            return
+
+        repo_path = payload.get("repo_path", "")
+        if not repo_path:
+            self._send_json({"success": False, "error": "Missing required field: repo_path"}, status=400)
+            return
+
+        repo_path = os.path.expanduser(repo_path)
+        output_path = os.path.join(repo_path, "agent", "config", ".agent-output.json")
+
+        import time
+        output = {
+            "type": payload_type,
+            "content": payload.get("content", ""),
+            "before": payload.get("before", ""),
+            "timestamp": time.time(),
+        }
+
+        try:
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(output, f, ensure_ascii=False, indent=2)
+            log.info("Agent output written to %s (type=%s)", output_path, payload_type)
+            self._send_json({"success": True, "path": output_path})
+        except Exception as exc:
+            log.exception("Failed to write agent output: %s", exc)
+            self._send_json({"success": False, "error": str(exc)}, status=500)
+
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
@@ -552,7 +599,7 @@ def main():
 
     log.info("companion_server v%s listening on %s:%d", VERSION, BIND_HOST, port)
     threading.Thread(target=_check_for_updates, daemon=True).start()
-    log.info("Endpoints: GET /health  GET /webviewer/status  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop")
+    log.info("Endpoints: GET /health  GET /webviewer/status  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop  POST /webviewer/push")
     log.info("Press Ctrl-C to stop.")
 
     try:
