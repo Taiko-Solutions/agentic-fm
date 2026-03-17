@@ -8,8 +8,9 @@ import { AISettings } from '@/ai/settings/AISettings';
 import { LoadScriptDialog } from '@/ui/LoadScriptDialog';
 import { LibraryPanel } from '@/ui/LibraryPanel';
 import type { FMContext } from '@/context/types';
-import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, validateSnippet, clipboardWrite, writeSandbox } from '@/api/client';
-import type { StepInfo } from '@/api/client';
+import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, fetchCustomInstructions, validateSnippet, clipboardWrite, writeSandbox, fetchAgentOutput } from '@/api/client';
+import type { StepInfo, AgentOutput } from '@/api/client';
+import { AgentOutputPanel } from '@/ui/AgentOutputPanel';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import { hrToXml, loadCatalog } from '@/converter/hr-to-xml';
 import { saveDraft, restoreDraft } from '@/autosave';
@@ -85,6 +86,7 @@ export function App() {
   const [promptMarker, setPromptMarker] = useState('prompt');
   const [codingConventions, setCodingConventions] = useState('');
   const [knowledgeDocs, setKnowledgeDocs] = useState('');
+  const [customInstructions, setCustomInstructions] = useState('');
   const [chatKey, setChatKey] = useState(0);
   const [editorMode, setEditorMode] = useState<'script' | 'calc'>(loadEditorMode);
   const [presetId, setPresetId] = useState(() => loadSavedPresetId());
@@ -92,6 +94,7 @@ export function App() {
   const themeBg = getThemeBackgrounds(presetId);
   const scriptNameRef = useRef('');
   const editorContentRef = useRef(editorContent);
+  const getLiveContent = useRef<(() => string) | null>(null);
   const mainSplit = useSplitPane(initialPrefs.editorPct);
   const editorXmlSplit = useSplitPane(initialPrefs.editorXmlPct, 15, 85, 'vertical');
   const library = useResizablePanel(initialPrefs.libraryWidth, 140, 480);
@@ -117,6 +120,7 @@ export function App() {
       setCodingConventions(d.conventions);
       setKnowledgeDocs(d.knowledge);
     }).catch(() => {});
+    fetchCustomInstructions().then(setCustomInstructions).catch(() => {});
   }, []);
 
   // Restore draft on mount — skip if it's just the sample boilerplate
@@ -207,18 +211,27 @@ export function App() {
 
   const handleValidate = useCallback(async () => {
     setStatus('Validating...');
-    const { xml, errors } = hrToXml(editorContent, context);
+    setStatusDetail(null);
+    const content = getLiveContent.current?.() ?? editorContent;
+    const { xml, errors } = hrToXml(content, context);
     if (errors.length > 0) {
       console.warn('[validate] conversion errors:', errors);
-      setStatus(`Conversion: ${errors.map((e: { line: number; message: string }) => `L${e.line}: ${e.message}`).join('; ')}`);
+      const detail = errors.map((e: { line: number; message: string }) => `L${e.line}: ${e.message}`).join('\n');
+      setStatus(`Conversion failed — ${errors.length} error(s)`);
+      setStatusDetail(detail);
       return;
     }
     try {
       const result = await validateSnippet(xml);
       if (result.valid) {
         setStatus('Validation passed');
+        setStatusDetail(null);
       } else {
-        setStatus(`Validation: ${result.errors.join('; ')}`);
+        const fullOutput = result.errors.join('\n');
+        const countMatch = fullOutput.match(/FAILED \((\d+) error/);
+        const errorCount = countMatch ? parseInt(countMatch[1]) : result.errors.filter(l => l.trim().startsWith('FAIL')).length;
+        setStatus(`Validation failed — ${errorCount} error(s)`);
+        setStatusDetail(fullOutput);
       }
     } catch {
       setStatus('Validation failed (server error)');
@@ -246,12 +259,18 @@ export function App() {
   }, [editorContent, context]);
 
   const handleInsertScript = useCallback((script: string) => {
-    setEditorContent(script);
-    setScriptName('');
-    setStatus('Script inserted from AI');
+    setAgentOutput({
+      type: 'diff',
+      content: script,
+      before: editorContentRef.current,
+      available: true,
+    });
   }, []);
 
   const [showInsertWarning, setShowInsertWarning] = useState(false);
+  const [agentOutput, setAgentOutput] = useState<AgentOutput | null>(null);
+  const [statusDetail, setStatusDetail] = useState<string | null>(null);
+  const [showStatusDetail, setShowStatusDetail] = useState(false);
 
   const handleLibraryInsert = useCallback((content: string) => {
     const inserted = (window as any).insertAtEditorCursor?.(content) ?? false;
@@ -267,6 +286,19 @@ export function App() {
     setStatus(`Loaded: ${name}`);
     if (options.resetChat) setChatKey(k => k + 1);
   }, []);
+
+  // Poll for agent output — skip polling while panel is already open to avoid re-render churn
+  useEffect(() => {
+    if (agentOutput) return;
+    const poll = async () => {
+      const output = await fetchAgentOutput();
+      if (output.available !== false) {
+        setAgentOutput(output);
+      }
+    };
+    const id = setInterval(poll, 2000);
+    return () => clearInterval(id);
+  }, [agentOutput]);
 
   // Expose app-level toolbar actions for FileMaker JS bridge (agfm.* action IDs)
   useEffect(() => {
@@ -344,6 +376,7 @@ export function App() {
                 value={editorContent}
                 onChange={setEditorContent}
                 context={context}
+                getLiveContent={getLiveContent}
               />
             </div>
 
@@ -383,6 +416,7 @@ export function App() {
                 promptMarker={promptMarker}
                 codingConventions={codingConventions}
                 knowledgeDocs={knowledgeDocs}
+                customInstructions={customInstructions}
                 onInsertScript={handleInsertScript}
                 onClearChat={() => setChatKey(k => k + 1)}
               />
@@ -395,9 +429,19 @@ export function App() {
         solution={context?.solution}
         layout={context?.current_layout?.name}
         generatedAt={generatedAt}
+        onDetail={statusDetail ? () => setShowStatusDetail(true) : undefined}
       />
 
-      {showSettings && <AISettings onClose={() => setShowSettings(false)} onPresetChange={setPresetId} />}
+      {showSettings && (
+        <AISettings
+          onClose={() => {
+            setShowSettings(false);
+            // Refresh custom instructions in case they were edited
+            fetchCustomInstructions().then(setCustomInstructions).catch(() => {});
+          }}
+          onPresetChange={setPresetId}
+        />
+      )}
       {showLoadScript && (
         <LoadScriptDialog
           context={context}
@@ -406,6 +450,40 @@ export function App() {
           onContextUpdate={setContext}
           onClose={() => setShowLoadScript(false)}
         />
+      )}
+
+      <AgentOutputPanel
+        output={agentOutput}
+        visible={agentOutput !== null}
+        onClose={() => setAgentOutput(null)}
+        onAccept={(content) => { setEditorContent(content); setAgentOutput(null); }}
+      />
+
+      {showStatusDetail && statusDetail && (
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-neutral-800 rounded-lg shadow-xl w-[600px] max-w-[90vw] flex flex-col max-h-[70vh]">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-700 shrink-0">
+              <h2 class="text-sm font-semibold text-neutral-200">Validation Details</h2>
+              <button
+                onClick={() => setShowStatusDetail(false)}
+                class="text-neutral-400 hover:text-neutral-200 text-lg leading-none"
+              >
+                &times;
+              </button>
+            </div>
+            <div class="flex-1 overflow-auto p-4">
+              <pre class="text-xs text-neutral-300 whitespace-pre-wrap font-mono leading-relaxed">{statusDetail}</pre>
+            </div>
+            <div class="flex justify-end px-4 py-3 border-t border-neutral-700 shrink-0">
+              <button
+                onClick={() => setShowStatusDetail(false)}
+                class="px-3 py-1 rounded text-xs bg-neutral-600 hover:bg-neutral-500 text-neutral-200 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showInsertWarning && (

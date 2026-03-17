@@ -71,7 +71,7 @@ function renderContent(
 
     const code = match[1].trim();
     parts.push(
-      <div class="my-2 rounded bg-neutral-800 border border-neutral-700">
+      <div class="my-2 rounded bg-neutral-800 border border-neutral-700 min-w-0 overflow-hidden">
         <div class="flex items-center justify-between px-2 py-1 border-b border-neutral-700">
           <span class="text-xs text-neutral-500">Script</span>
           {onInsertScript && (
@@ -83,7 +83,7 @@ function renderContent(
             </button>
           )}
         </div>
-        <pre class="p-2 text-xs overflow-x-auto">{code}</pre>
+        <pre class="p-2 text-xs overflow-x-auto whitespace-pre-wrap">{code}</pre>
       </div>,
     );
 

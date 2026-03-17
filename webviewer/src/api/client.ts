@@ -180,6 +180,23 @@ export async function saveSettings(update: {
   return res.json();
 }
 
+// --- Custom Instructions ---
+
+export async function fetchCustomInstructions(): Promise<string> {
+  const res = await fetch(`${BASE}/api/custom-instructions`);
+  if (!res.ok) return '';
+  const data = await res.json();
+  return data.content ?? '';
+}
+
+export async function saveCustomInstructions(content: string): Promise<void> {
+  await fetch(`${BASE}/api/custom-instructions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+}
+
 // --- AI Chat (server-side proxy) ---
 
 export interface ChatStreamEvent {
@@ -244,6 +261,32 @@ export interface StepInfo {
   name: string;
   category: string;
   file: string;
+}
+
+// --- Agent output ---
+
+export interface AgentOutput {
+  type: 'preview' | 'diff' | 'result';
+  content: string;
+  before?: string;
+  timestamp?: number;
+  available?: boolean;
+}
+
+export async function fetchAgentOutput(): Promise<AgentOutput> {
+  try {
+    const res = await fetch(`${BASE}/api/agent-output`);
+    if (!res.ok) return { type: 'result', content: '', available: false };
+    return res.json();
+  } catch {
+    return { type: 'result', content: '', available: false };
+  }
+}
+
+export async function clearAgentOutput(): Promise<void> {
+  try {
+    await fetch(`${BASE}/api/agent-output`, { method: 'DELETE' });
+  } catch { /* ignore */ }
 }
 
 export interface ValidationResult {

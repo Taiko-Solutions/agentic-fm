@@ -123,14 +123,15 @@ Add `"webviewer_url": "http://localhost:8080"` (port 8080, not 5173 — Vite is 
 | Graceful Vite shutdown on companion exit | ✅ Built |
 | Monaco editor with FM HR syntax highlighting | ✅ Built (webviewer) |
 | CONTEXT.json polling in webviewer | ✅ Built (webviewer) |
-| `webviewer_url` in `automation.json` | 🔴 Not built |
-| URL-reachability check for skills | 🔴 Not built |
-| Companion `/webviewer/push` endpoint (writes `.agent-output.json`) | 🔴 Not built |
-| Vite `/api/agent-output` polling endpoint | 🔴 Not built |
-| Webviewer "Agent output" panel | 🔴 Not built |
-| `preview` payload → read-only Monaco HR display | 🔴 Not built |
-| `diff` payload → Monaco diff editor | 🔴 Not built |
-| `result` payload → structured output display | 🔴 Not built |
+| `webviewer_url` in `automation.json` | ✅ Built |
+| URL-reachability check for skills | 🔵 No skills use it yet |
+| Companion `/webviewer/push` endpoint (writes `.agent-output.json`) | ✅ Built + tested |
+| Vite `/api/agent-output` polling endpoint | ✅ Built + tested |
+| Webviewer "Agent output" panel | ✅ Built + tested |
+| `preview` payload → read-only Monaco HR display | ✅ Working end-to-end (persistent editor, no disposal bug) |
+| `diff` payload → Monaco diff editor | ✅ Built — persistent editor, editable right pane (untested in FM WebKit) |
+| `result` payload → structured output display | ✅ Built — persistent editor (untested in FM WebKit) |
+| Polling in FM WebKit (not browser) | 🔵 Not yet tested in FM WebViewer object |
 | Terminal fallback when webviewer unavailable | 🔵 Design only — no skills exist yet |
 
 ---
@@ -216,6 +217,28 @@ Open the webviewer inside a FileMaker WebViewer object (not a browser). Run step
 
 ---
 
+## Known bugs
+
+### Monaco `InstantiationService has been disposed` — autocomplete broken after AgentOutputPanel
+
+**Status**: ✅ Fixed — persistent Monaco editors (Option 1)
+
+**Root cause**: Monaco editors share global services (`IInstantiationService`, `ICodeEditorService`) via a static service registry. Disposing an editor tears down shared services that the main editor still depends on.
+
+**Fix applied**: AgentOutputPanel is always rendered in the DOM (visibility controlled via `display: none/flex` in CSS). Monaco editor instances (preview + diff) are created lazily on first use and **never disposed**. Models are managed normally (created/disposed on content changes). This eliminates the disposal lifecycle that destroyed shared services.
+
+Changes:
+- `AgentOutputPanel` accepts `visible` boolean instead of being conditionally rendered
+- `App.tsx` always renders `<AgentOutputPanel>` with `visible={agentOutput !== null}`
+- Preview editor: read-only Monaco with FileMaker syntax highlighting (`preview`/`result` types)
+- Diff editor: side-by-side Monaco diff editor with editable right pane; Accept reads from modified editor (user edits preserved)
+
+**Files changed**:
+- `webviewer/src/ui/AgentOutputPanel.tsx` — persistent Monaco editors, no disposal
+- `webviewer/src/App.tsx` — always-render pattern with visibility prop
+
+---
+
 ## Open items
 
 - **SKILL_INTERFACES.md** references SSE from companion to webviewer. This should be updated to describe the polling approach once the implementation is confirmed.
@@ -225,27 +248,32 @@ Open the webviewer inside a FileMaker WebViewer object (not a browser). Run step
 
 ## What to do next
 
-### 1. Add `webviewer_url` to `automation.json`
+### 1. Test in FM WebViewer object
 
-```json
-"webviewer_url": "http://localhost:8080"
+Open the webviewer inside an actual FileMaker WebViewer object (not a browser tab) and confirm:
+- The 2s polling loop fires correctly inside FM WebKit
+- `POST /webviewer/push` → panel appears within ~2s
+- Panel dismissal correctly clears `.agent-output.json`
+
+### 2. Wire `/webviewer/push` into skills
+
+The output channel is built. The next step is for skills (`script-preview`, `script-review`, etc.) to call it:
+- Check `automation.json["solutions"][solution]["webviewer_url"]` for availability
+- `curl -s --max-time 2 -o /dev/null -w "%{http_code}" {webviewer_url}` to confirm reachability
+- If reachable: `POST {companion_url}/webviewer/push` with HR content
+- If not reachable: terminal output only (no error)
+
+### 3. `diff` payload end-to-end test
+
+```bash
+curl -s -X POST http://local.hub:8765/webviewer/push \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "diff",
+    "before": "Set Variable [ $x ; 1 ]",
+    "content": "Set Variable [ $x ; 42 ]",
+    "repo_path": "/path/to/roadmap"
+  }'
 ```
 
-### 2. Add `/webviewer/push` to companion server
-
-In `companion_server.py`, route `POST /webviewer/push` to a new `_handle_webviewer_push` handler:
-- Reads `{ type, content, before? }` from body
-- Writes to `agent/config/.agent-output.json`
-- Returns `{ "success": true }`
-
-### 3. Add `/api/agent-output` to Vite server
-
-In `webviewer/server/api.ts`:
-- `GET /api/agent-output` — reads `.agent-output.json`, returns contents or `{ "available": false }`
-- `DELETE /api/agent-output` — removes the file
-
-### 4. Build Agent output panel in webviewer
-
-- Poll `/api/agent-output` on ~1s interval (active only when panel is open or pending)
-- Render `preview` / `diff` / `result` payload types
-- Run full test plan (tests 1–7)
+Confirm Monaco diff editor opens with old on left, new on right.
