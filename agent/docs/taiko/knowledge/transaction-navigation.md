@@ -4,7 +4,7 @@ FileMaker transactions hold record changes in a local temporary file until `Comm
 
 ## The Core Problem
 
-`Perform Find` operates against the main file's indexes, which are only updated after `Commit Transaction`. Records created with `New Record/Request` inside an open transaction **cannot be found** by `Enter Find Mode → Perform Find`. The find returns error 401 (no records match) even though the record exists in the transaction's temporary space.
+`Perform Find` and `ExecuteSQL` both operate against the main file's indexes, which are only updated after `Commit Transaction`. Records created with `New Record/Request` inside an open transaction **cannot be found** by either method. `Perform Find` returns error 401; `ExecuteSQL` simply does not include them in its result set. Pre-existing records (created before the transaction opened) **are** findable by both methods — only newly created records within the transaction are invisible.
 
 This also applies to related records accessed through relationships — new records created within a transaction may not appear in portals or through relationship-based navigation until committed.
 
@@ -133,7 +133,9 @@ End If
 | `New Record/Request` | Yes | Record is held in temp space |
 | `Set Field` on new record | Yes | Changes held until Commit |
 | `Perform Find` for new records | **No** | New records not indexed yet |
+| `ExecuteSQL` for new records | **No** | Same limitation — operates on indexes |
 | `Perform Find` for existing records | Yes | Existing records are in the index |
+| `ExecuteSQL` for existing records | Yes | Existing records are in the index |
 | `Go to Record [Next/Previous]` | Yes | Navigates within current found set |
 | Read field values from new record | Yes | Values are in temp space |
 | Read auto-enter calculated values | **Deferred** | Calculated at Commit time |
