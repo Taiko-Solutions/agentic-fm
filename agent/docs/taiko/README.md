@@ -28,6 +28,7 @@ Curated documents describing Taiko's architectural patterns and development deci
 | `utility-transactional.md` | Non-destructive editing with global fields and transactions |
 | `logging-system.md` | Error logging to Log table with retry capability |
 | `executesql-pattern.md` | Resilient ExecuteSQL pattern with SQL.Get* functions |
+| `transaction-navigation.md` | Navigation strategies within open transactions |
 
 ### custom_functions/
 
