@@ -43,6 +43,12 @@ export function AgentOutputPanel({ output, visible, onClose, onAccept }: AgentOu
     onClose();
   }, [onClose, onAccept, output]);
 
+  const handleReplace = useCallback(async () => {
+    await clearAgentOutput();
+    onAccept?.(output?.content ?? '');
+    onClose();
+  }, [onClose, onAccept, output]);
+
   // Lock body scroll while panel is visible
   useEffect(() => {
     if (!visible) return;
@@ -147,6 +153,14 @@ export function AgentOutputPanel({ output, visible, onClose, onAccept }: AgentOu
                 class="text-xs px-1.5 py-0.5 rounded font-medium bg-green-700 hover:bg-green-600 text-white transition-colors"
               >
                 Accept
+              </button>
+            )}
+            {activeType === 'preview' && onAccept && (
+              <button
+                onClick={handleReplace}
+                class="text-xs px-1.5 py-0.5 rounded font-medium bg-green-700 hover:bg-green-600 text-white transition-colors"
+              >
+                Replace
               </button>
             )}
             <button
