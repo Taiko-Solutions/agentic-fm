@@ -22,6 +22,8 @@ FileMaker Pro is a closed environment — logic and schema live inside a binary 
 
 See **[filemaker/README.md](filemaker/README.md)** for the full dependency list and step-by-step setup guide, including how to install `fm-xml-export-exploder` and set up the companion server.
 
+Para equipos macOS que quieran operación local automatizada (launchd + Docker, flujo multi-repo y helpers opcionales de shell), consulta **[ops/services/README.md](ops/services/README.md)**.
+
 **Dependencies at a glance:**
 
 | Dependency                                                                               | Required By                                       | Notes                                                      |
@@ -238,6 +240,27 @@ This enables a fully autonomous development loop: the agent generates code, read
 - Use the `odata-connect` skill if you need help setting this up
 
 The three scripts in `filemaker/agentic-fm.xml` are expected to be present in any solution where you want this level of agent autonomy. Think of them as the bridge between the agent and the live FM environment.
+
+### Multi-file solutions
+
+FileMaker solutions often separate UI and data across multiple files. Each file is a distinct FM solution with its own OData endpoint, account, and export paths. `agent/config/automation.json` (gitignored) supports this with a `solutions` object keyed by FM file name:
+
+```json
+{
+  "solutions": {
+    "MyApp UI": {
+      "odata": { "base_url": "...", "database": "MyApp UI", "username": "...", "password": "...", "script_bridge": "AGFMScriptBridge" },
+      "explode_xml": { "repo_path": "...", "export_path": "...", "companion_url": "http://host.docker.internal:8765" }
+    },
+    "MyApp Data": {
+      "odata": { "base_url": "...", "database": "MyApp Data", "username": "...", "password": "...", "script_bridge": "AGFMScriptBridge" },
+      "explode_xml": { "repo_path": "...", "export_path": "...", "companion_url": "http://host.docker.internal:8765" }
+    }
+  }
+}
+```
+
+The agent matches the active solution by comparing the key to `CONTEXT.json["solution"]` (which reflects `Get(FileName)` at the time Push Context was run). Switch between files by running Push Context on the target layout in the target file — the agent picks up the correct OData config automatically.
 
 # fmparse.sh
 
