@@ -25,6 +25,7 @@ Result dict keys:
     fallback_reason — str (why the fallback occurred)
     error         — str (present on failure)
 """
+from __future__ import annotations
 
 import argparse
 import json
