@@ -25,6 +25,7 @@ agent/config/automation.json
 agent/config/.autosave.json
 agent/config/.layout-prefs.json
 agent/config/.custom-instructions.md
+agent/config/webviewer-system-prompt.md
 docker-compose.override.yml
 project.env
 

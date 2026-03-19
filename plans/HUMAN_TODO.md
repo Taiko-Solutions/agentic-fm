@@ -130,7 +130,7 @@ Additional items before `calc-eval` skill can be used (post-Phase 1):
 
 | # | Item | Status |
 |---|------|--------|
-| AGFMEval-1 | `AGFMEvaluation.xml` built and installed in solution | [ ] |
-| AGFMEval-2 | Push Context updated to write `agent/context/snapshot.xml` | [ ] |
-| AGFMEval-3 | `snapshot_path` field confirmed present in `CONTEXT.json` | [ ] |
-| AGFMEval-4 | `webviewer_url` added to `automation.json` | [ ] |
+| AGFMEval-1 | `AGFMEvaluation.xml` built and installed in solution | [x] Script ID 315 |
+| AGFMEval-2 | Push Context updated to write `agent/context/snapshot.xml` | [x] Script ID 280 |
+| AGFMEval-3 | `snapshot_path` field confirmed present in `CONTEXT.json` | [x] Confirmed 2026-03-18 |
+| AGFMEval-4 | `webviewer_url` added to `automation.json` | [x] |

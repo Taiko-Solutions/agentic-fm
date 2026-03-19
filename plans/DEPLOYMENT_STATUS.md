@@ -189,8 +189,8 @@ When confident in the deployment loop, flip `auto_save` to `true` in `automation
 ### Run Explode XML
 Agentic-fm Paste is confirmed stable. Run `Explode XML` in FM Pro to export the solution and get the latest agentic-fm scripts into `xml_parsed/`. This is the canonical record of what's installed in the solution.
 
-### Build AGFMEvaluation script
-Once the deployment loop is stable, build the `AGFMEvaluation` FM script (see design below) and install it in the Invoice Solution. Then update `Push Context` to save a reference snapshot alongside `CONTEXT.json`.
+### ~~Build AGFMEvaluation script~~ ✅ Done
+AGFMEvaluation installed in Invoice Solution as script ID 315. Push Context (ID 280) updated to write `agent/context/snapshot.xml` with `snapshot_path` and `snapshot_timestamp` in CONTEXT.json. Confirmed working 2026-03-18.
 
 ---
 

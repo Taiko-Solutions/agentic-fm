@@ -8,7 +8,7 @@ import { AISettings } from '@/ai/settings/AISettings';
 import { LoadScriptDialog } from '@/ui/LoadScriptDialog';
 import { LibraryPanel } from '@/ui/LibraryPanel';
 import type { FMContext } from '@/context/types';
-import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, fetchCustomInstructions, validateSnippet, clipboardWrite, writeSandbox, fetchAgentOutput } from '@/api/client';
+import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, fetchCustomInstructions, fetchSystemPrompt, validateSnippet, clipboardWrite, writeSandbox, fetchAgentOutput } from '@/api/client';
 import type { StepInfo, AgentOutput } from '@/api/client';
 import { AgentOutputPanel } from '@/ui/AgentOutputPanel';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
@@ -87,6 +87,7 @@ export function App() {
   const [codingConventions, setCodingConventions] = useState('');
   const [knowledgeDocs, setKnowledgeDocs] = useState('');
   const [customInstructions, setCustomInstructions] = useState('');
+  const [baseSystemPrompt, setBaseSystemPrompt] = useState('');
   const [chatKey, setChatKey] = useState(0);
   const [editorMode, setEditorMode] = useState<'script' | 'calc'>(loadEditorMode);
   const [presetId, setPresetId] = useState(() => loadSavedPresetId());
@@ -121,6 +122,7 @@ export function App() {
       setKnowledgeDocs(d.knowledge);
     }).catch(() => {});
     fetchCustomInstructions().then(setCustomInstructions).catch(() => {});
+    fetchSystemPrompt().then(setBaseSystemPrompt).catch(() => {});
   }, []);
 
   // Restore draft on mount — skip if it's just the sample boilerplate
@@ -258,11 +260,30 @@ export function App() {
     }
   }, [editorContent, context]);
 
-  const handleInsertScript = useCallback((script: string) => {
+  const handleInsertScript = useCallback((script: string, lineRange?: { start: number; end: number }) => {
+    const before = editorContentRef.current;
+    let content: string;
+
+    if (lineRange) {
+      // Splice the suggestion into the specific line range
+      const lines = before.split('\n');
+      const { start, end } = lineRange;
+      // start and end are 1-based inclusive.
+      // When start > end (e.g. lines=5-4), it's a pure insertion before line `start`.
+      const deleteCount = end >= start ? end - start + 1 : 0;
+      const insertLines = script.split('\n');
+      const spliced = [...lines];
+      spliced.splice(start - 1, deleteCount, ...insertLines);
+      content = spliced.join('\n');
+    } else {
+      // No line range — full replacement (original behavior)
+      content = script;
+    }
+
     setAgentOutput({
       type: 'diff',
-      content: script,
-      before: editorContentRef.current,
+      content,
+      before,
       available: true,
     });
   }, []);
@@ -417,8 +438,10 @@ export function App() {
                 codingConventions={codingConventions}
                 knowledgeDocs={knowledgeDocs}
                 customInstructions={customInstructions}
+                baseSystemPrompt={baseSystemPrompt}
                 onInsertScript={handleInsertScript}
                 onClearChat={() => setChatKey(k => k + 1)}
+                scriptName={scriptName}
               />
             </div>
           )}

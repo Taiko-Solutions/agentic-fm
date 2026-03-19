@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "marked": "^17.0.4",
     "monaco-editor": "^0.52.2",
     "preact": "^10.25.4"
   },

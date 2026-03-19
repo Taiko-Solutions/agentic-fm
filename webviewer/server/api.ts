@@ -142,6 +142,22 @@ export function apiMiddleware(): Plugin {
           return;
         }
 
+        // --- GET /api/system-prompt ---
+        // Returns the webviewer system prompt base instructions.
+        // Override: agent/config/webviewer-system-prompt.md
+        // Fallback: agent/config/webviewer-system-prompt.example.md
+        if (req.method === 'GET' && pathname === '/api/system-prompt') {
+          const overridePath = path.join(agent, 'config', 'webviewer-system-prompt.md');
+          const examplePath = path.join(agent, 'config', 'webviewer-system-prompt.example.md');
+          let content = '';
+          try { content = fs.readFileSync(overridePath, 'utf-8'); } catch {
+            try { content = fs.readFileSync(examplePath, 'utf-8'); } catch { /* neither found */ }
+          }
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ content }));
+          return;
+        }
+
         // --- GET /api/docs ---
         if (req.method === 'GET' && pathname === '/api/docs') {
           const conventionsPath = path.join(agent, 'docs', 'CODING_CONVENTIONS.md');

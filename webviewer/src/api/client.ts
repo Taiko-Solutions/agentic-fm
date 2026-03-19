@@ -197,47 +197,51 @@ export async function saveCustomInstructions(content: string): Promise<void> {
   });
 }
 
+// --- System prompt (base instructions) ---
+
+export async function fetchSystemPrompt(): Promise<string> {
+  const res = await fetch(`${BASE}/api/system-prompt`);
+  if (!res.ok) return '';
+  const data = await res.json();
+  return data.content ?? '';
+}
+
 // --- AI Chat (server-side proxy) ---
 
 export interface ChatStreamEvent {
-  type: 'text' | 'done' | 'error';
+  type: 'text' | 'done' | 'error' | 'session';
   text?: string;
   error?: string;
+  sessionId?: string;
 }
 
-export async function streamChat(
+/**
+ * Stream chat via XHR instead of fetch+ReadableStream.
+ * FileMaker's WebKit webview buffers the entire fetch response before
+ * ReadableStream yields, breaking incremental streaming. XHR's onprogress
+ * fires as chunks arrive, which WebKit has supported reliably for years.
+ */
+export function streamChat(
   messages: { role: string; content: string }[],
   onEvent: (event: ChatStreamEvent) => void,
   signal?: AbortSignal,
+  sessionId?: string,
 ): Promise<void> {
-  const res = await fetch(`${BASE}/api/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages }),
-    signal,
-  });
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${BASE}/api/chat`);
+    xhr.setRequestHeader('Content-Type', 'application/json');
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    onEvent({ type: 'error', error: err.error ?? `HTTP ${res.status}` });
-    return;
-  }
+    let processed = 0;
+    let buffer = '';
 
-  const reader = res.body?.getReader();
-  if (!reader) {
-    onEvent({ type: 'error', error: 'No response body' });
-    return;
-  }
+    const processNewData = () => {
+      const raw = xhr.responseText;
+      if (raw.length <= processed) return;
 
-  const decoder = new TextDecoder();
-  let buffer = '';
+      buffer += raw.slice(processed);
+      processed = raw.length;
 
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() ?? '';
 
@@ -251,10 +255,32 @@ export async function streamChat(
           }
         }
       }
+    };
+
+    xhr.onprogress = processNewData;
+
+    xhr.onload = () => {
+      // Process any remaining buffered data
+      processNewData();
+      resolve();
+    };
+
+    xhr.onerror = () => {
+      onEvent({ type: 'error', error: 'Network error' });
+      resolve();
+    };
+
+    xhr.onabort = () => {
+      resolve();
+    };
+
+    if (signal) {
+      if (signal.aborted) { xhr.abort(); resolve(); return; }
+      signal.addEventListener('abort', () => xhr.abort(), { once: true });
     }
-  } finally {
-    reader.releaseLock();
-  }
+
+    xhr.send(JSON.stringify({ messages, sessionId }));
+  });
 }
 
 export interface StepInfo {
