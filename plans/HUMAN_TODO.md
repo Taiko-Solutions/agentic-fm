@@ -82,10 +82,12 @@ These were required before the `calc-eval` skill can be used.
 
 ## Stability Checks
 
-10. **Confirm `fm-debug` skill is production-ready** — Phase 2's `script-test` skill depends on `fm-debug`. Before Phase 2 starts, verify:
-    - [ ] The `Agentic-fm Debug` FM script successfully POSTs runtime state to `localhost:8765/debug`
-    - [ ] `agent/debug/output.json` is written correctly and the agent can read it
-    - [ ] The skill handles common failure modes (script errors, missing variables, timeout)
+10. **~~Confirm `fm-debug` skill is production-ready~~** ✅ Done (2026-03-22)
+    - [x] The `Agentic-fm Debug` FM script successfully POSTs runtime state to `localhost:8765/debug`
+    - [x] `agent/debug/output.json` is written correctly and the agent can read it
+    - [x] The skill handles common failure modes (script errors, missing variables, timeout)
+    - [x] Discovered: `Get(LastError)` resets error state — documented in `agent/docs/knowledge/error-data-capture.md`
+    - [x] Full autonomous deploy → run → debug → read loop validated (see `plans/DEBUG_FINDINGS.md`)
 
 11. **Confirm `validate_snippet.py` covers all step types in use** — Verify it catches structural errors for the step types your existing skills produce.
 
@@ -95,23 +97,26 @@ These were required before the `calc-eval` skill can be used.
 
 These are not prerequisites, but they recur during execution. Know them in advance.
 
-12. **Phase 1 (Multi-Script Scaffold)** — You will need to:
-    - Create N blank placeholder scripts in FM Pro (click **+** N times)
-    - Run `Push Context` to capture their IDs
-    - Paste generated scripts into each placeholder (Tier 1) or approve auto-paste (Tier 2/3)
-    - Rename each placeholder to its real name as directed
-    - Verify correct inter-script wiring at runtime
+12. **Phase 1 (Multi-Script Scaffold)** ✅ Complete
 
-13. **Phase 3a (Layout Design)** — You will need to:
+13. **Phase 2 (Script Tooling)** — Skills are built. You will need to:
+    - Test each skill against Invoice Solution scripts (trigger phrases, workflow, output)
+    - For `script-test`: run a generated test script in FM and verify pass/fail reporting via `agent/debug/output.json`
+    - For `script-debug`: trigger a real bug scenario and verify the autonomous Tier 3 loop (instrument → deploy → run → read → diagnose)
+    - For `script-refactor`: refactor an existing script, verify the diff output, paste and confirm behaviour is preserved
+    - For `script-review`: review a script with subscripts, verify call-tree resolution loads all subscripts
+    - Clean up any test scripts created during validation (`Debug Test`, `Debug Error Test`, `Debug Location Test`, `Debug Combined Test` from the 2026-03-22 session)
+
+15. **Phase 3a (Layout Design)** — You will need to:
     - Create layout shells manually in FM Pro (name, base TO)
     - Paste XML2 layout objects onto each layout in Layout Mode
     - Verify object placement, field bindings, and portal configuration
 
-14. **Phase 3b (OData Schema)** — You will need to:
+16. **Phase 3b (OData Schema)** — You will need to:
     - Manually create all relationships in the Manage Database > Relationships dialog (no API can do this)
     - Follow the click-through checklist the agent produces (TO names, join fields, cardinality, cascade delete)
 
-15. **All phases** — You are the FM validation bottleneck. For every phase:
+17. **All phases** — You are the FM validation bottleneck. For every phase:
     - [ ] Paste generated artifacts and confirm they appear correctly
     - [ ] Run generated scripts and confirm runtime behaviour
     - [ ] Report results back so the agent can unblock

@@ -27,6 +27,10 @@ Set Variable [ $error ; Value: Get ( LastError ) ]
 Exit Loop If [ $error ≠ 0 ]
 ```
 
+### Capturing full error data (error + location + detail)
+
+`Get ( LastError )` also resets the error state for its companion functions `Get ( LastErrorLocation )` and `Get ( LastErrorDetail )`. If you need location or detail data alongside the error code, all three must be captured in a **single expression** — see `agent/docs/knowledge/error-data-capture.md` for the full pattern and rationale.
+
 ## Script Header Steps for Server-Side Scripts
 
 Two steps should appear at the top of every script that runs on FileMaker Server or in a background context:
@@ -166,3 +170,5 @@ Scripts that run on FileMaker Server (via `Perform Script on Server` **(step)**,
 | Commit Records/Requests | step    | `agent/docs/filemaker/script-steps/commit-records-requests.md`               | [commit-records-requests](https://help.claris.com/en/pro-help/content/commit-records-requests.html)           |
 | Revert Record/Request  | step     | `agent/docs/filemaker/script-steps/revert-record-request.md`                 | [revert-record-request](https://help.claris.com/en/pro-help/content/revert-record-request.html)               |
 | Get ( LastError )      | function | `agent/docs/filemaker/functions/get/get-lasterror.md`                        | [get-lasterror](https://help.claris.com/en/pro-help/content/get-lasterror.html)                               |
+| Get ( LastErrorLocation ) | function | `agent/docs/filemaker/functions/get/get-lasterrorlocation.md`             | [get-lasterrorlocation](https://help.claris.com/en/pro-help/content/get-lasterrorlocation.html)               |
+| Get ( LastErrorDetail ) | function | `agent/docs/filemaker/functions/get/get-lasterrordetail.md`                | [get-lasterrordetail](https://help.claris.com/en/pro-help/content/get-lasterrordetail.html)                   |

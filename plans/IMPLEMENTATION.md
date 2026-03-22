@@ -9,7 +9,7 @@ How to execute the agentic-fm build phases using a sequential, confidence-buildi
 ```
    Phase 1 (Multi-Script) ← proof-of-concept ✅ merged
         │
-   Phase 2 (Script Tooling)
+   Phase 2 (Script Tooling) ← skills built ✅, FM validation pending
         │
    Phase 3a (Layout) ──┐
                         ├── parallel pair
@@ -80,9 +80,9 @@ Required before `calc-eval` skill can be used. See `PHASES.md` → AGFMEvaluatio
 - Push Context writes `agent/context/snapshot.xml` and includes `snapshot_path` in CONTEXT.json output
 - First reference snapshot confirmed present after a Push Context run
 
-### 7. `fm-debug` skill is stable
+### 7. `fm-debug` skill is stable ✅ Done
 
-Phase 2's `script-test` skill depends on it. Confirm the current `fm-debug` implementation is production-ready before Phase 2 starts.
+Phase 2's `script-test` skill depends on it. Confirmed production-ready via autonomous testing 2026-03-22. See `plans/DEBUG_FINDINGS.md` for full test results. Key discovery: `Get(LastError)` resets the error state — all error data must be captured in a single expression. Documented in `agent/docs/knowledge/error-data-capture.md`.
 
 ### 8. Target solution XML is current
 
@@ -98,22 +98,26 @@ Skill built and available at `.claude/skills/multi-script-scaffold/` and `.curso
 
 ---
 
-### Phase 2 — Script Tooling
+### Phase 2 — Script Tooling ✅ Skills Built (2026-03-22)
 
 **Purpose**: Expand the core script development capabilities with four complementary skills.
 
-**Setup**:
-```bash
-git worktree add /worktrees/script-tooling -b feature/script-tooling
-```
+All four skills built in the `roadmap` worktree (no separate branch needed). The `script-review` skill was also rewritten as part of this work.
 
-**Agent prompt**:
-> You are building the script tooling skills for the agentic-fm project. Your scope is: `script-refactor`, `script-test`, `script-debug`, and `implementation-plan`. Read `plans/VISION.md` (Skills section), `plans/SKILL_INTERFACES.md`, and existing skill files for format reference. `script-test` must use `fm-debug` per the interface spec. Do not modify shared infrastructure files.
+**What was delivered**:
+- `implementation-plan` — structured planning before script creation
+- `script-refactor` — analyse + improve existing scripts, tier-aware deployment, webviewer diff
+- `script-debug` — systematic debug workflow, Tier 3 autonomous instrument → deploy → run → read loop
+- `script-test` — generate test scripts with assertions via fm-debug
+- `script-review` — rewritten with full call-tree resolution and cross-script analysis
+- `fm-debug` — rewritten with tier awareness and autonomous Tier 3 workflow
+- New knowledge article: `error-data-capture.md`
+- Updated: `AGENTIC_DEBUG.md`, `error-handling.md`
 
-**Done when**:
-- All four skill files validate via `validate_snippet.py`
-- `script-test` companion scripts validate in FM via `fm-debug`
-- Branch merged to main
+**Remaining**:
+- [ ] FM validation: test each skill against Invoice Solution scripts
+- [ ] Confirm `script-test` generates valid fmxmlsnippet that runs in FM
+- [ ] Confirm `script-debug` Tier 3 autonomous loop works end-to-end on a real bug
 
 ---
 
@@ -212,5 +216,5 @@ One human should own:
 | FM validation bottleneck delays merge | High | Medium | `validate_snippet.py` gates development; FM validation is batched |
 | XML2 format assumptions incorrect | Medium | Medium | Phase 3a validates against `xml_parsed/` before finalising |
 | OData API behaviour differs from docs | Medium | Medium | Phase 3b documents deviations in `plans/schema/odata-notes.md` |
-| `fm-debug` instability blocks Phase 2 | Low | Medium | Confirm fm-debug stability as prerequisite |
+| ~~`fm-debug` instability blocks Phase 2~~ | ~~Low~~ | ~~Medium~~ | ✅ Resolved 2026-03-22 — fm-debug confirmed stable, documented in `plans/DEBUG_FINDINGS.md` |
 | Combined `schema-build` skill too large | Low | Medium | Sub-modes keep concerns separated within one skill file |

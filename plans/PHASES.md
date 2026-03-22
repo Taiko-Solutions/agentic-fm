@@ -103,18 +103,34 @@ Skill built and available at `.claude/skills/multi-script-scaffold/` and `.curso
 
 ## Phase 2 — Script Tooling Expansion
 
-**Status**: `planned`
-**Branch**: `feature/script-tooling`
-**Worktree**: `/worktrees/script-tooling`
+**Status**: `active` — skills built 2026-03-22, pending FM validation testing
 **Vision ref**: Skills → `script-refactor`, `script-test`, `script-debug`, `implementation-plan`
 
-**Scope**:
-- Complete the `script-refactor` skill
-- Complete the `script-test` skill — companion verification script via `fm-debug`
-- Complete the `script-debug` skill — systematic reproduce/isolate/fix workflow
-- Complete the `implementation-plan` skill — decompose requirements before generation
+**Prerequisite**: ✅ `fm-debug` confirmed stable (autonomous testing session 2026-03-22, see `plans/DEBUG_FINDINGS.md`)
 
-**Prerequisite**: Confirm `fm-debug` skill is stable before starting `script-test`.
+**What was delivered**:
+
+| Skill | File | Description |
+|---|---|---|
+| `implementation-plan` | `.claude/skills/implementation-plan/SKILL.md` | Structured planning before script creation — decompose requirements, identify dependencies, surface FM-specific constraints |
+| `script-refactor` | `.claude/skills/script-refactor/SKILL.md` | Analyse existing script + full call tree, produce improved version preserving behaviour. Tier-aware deployment. Webviewer diff output. |
+| `script-debug` | `.claude/skills/script-debug/SKILL.md` | Systematic reproduce → isolate → hypothesise → verify → fix. Tier 3: autonomous instrument → deploy → trigger → read → iterate loop. |
+| `script-test` | `.claude/skills/script-test/SKILL.md` | Generate companion verification script with assertions, reports pass/fail via fm-debug. Tier-aware. |
+| `script-review` | `.claude/skills/script-review/SKILL.md` | Rewritten — full call-tree resolution, cross-script analysis (parameter contracts, layout context, error propagation, variable scope). |
+
+**Additional deliverables from the 2026-03-22 session**:
+- `fm-debug` skill rewritten with proper frontmatter, tier awareness, and autonomous Tier 3 workflow
+- New knowledge article: `agent/docs/knowledge/error-data-capture.md` — `Get(LastError)` resets error state; single-expression capture pattern
+- Updated `agent/docs/AGENTIC_DEBUG.md` — corrected calling convention, forced-error technique
+- Updated `agent/docs/knowledge/error-handling.md` — cross-reference to new article
+- All skills include call-tree resolution: extract `Perform Script` refs → load subscripts → recurse → present tree
+- `plans/DEBUG_FINDINGS.md` — full autonomous testing report
+
+**Remaining for Phase 2 completion**:
+- [ ] FM validation: test each skill against Invoice Solution scripts
+- [ ] Confirm trigger phrases invoke skills correctly
+- [ ] Confirm `script-test` generates valid fmxmlsnippet that runs in FM
+- [ ] Confirm `script-debug` Tier 3 autonomous loop works end-to-end on a real bug
 
 ---
 

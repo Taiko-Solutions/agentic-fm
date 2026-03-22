@@ -194,6 +194,12 @@ Agentic-fm Paste is confirmed stable. Run `Explode XML` in FM Pro to export the 
 ### ~~Build AGFMEvaluation script~~ ✅ Done
 AGFMEvaluation installed in agentic-fm.fmp12 (also installed in Invoice Solution test file). Push Context updated to write `agent/context/snapshot.xml` with `snapshot_path` and `snapshot_timestamp` in CONTEXT.json. Confirmed working 2026-03-18. Note: script IDs differ between files — always look up by name, not ID.
 
+### ~~fm-debug autonomous validation~~ ✅ Done (2026-03-22)
+Full autonomous testing of the fm-debug skill completed. The agent deployed test scripts via Tier 3, triggered them via `/trigger`, and read debug output — all without human intervention. Key discovery: `Get(LastError)` resets the error state, requiring all error data to be captured in a single `JSONSetElement` expression. See `plans/DEBUG_FINDINGS.md` for full results. Updated files: `fm-debug` skill, `AGENTIC_DEBUG.md`, new knowledge article `error-data-capture.md`.
+
+### `deploy.py` container detection (should fix)
+`deploy.py`'s `_check_accessibility()` fails in Linux containers because it tries to run `osascript` locally. For containerised agents, `deploy.py` should detect the environment and skip the local pre-flight, relying on the companion to run AppleScript. Workaround: call companion endpoints directly (as done during the 2026-03-22 testing session).
+
 ---
 
 ## AGFMEvaluation + Snapshot (planned)
