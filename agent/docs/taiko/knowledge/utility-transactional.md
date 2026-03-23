@@ -136,12 +136,42 @@ Always check `Get(TransactionOpenState)` first — if a parent script already op
 
 ## Error Handling in Transactional Scripts
 
-### Validation pattern
+### Revert Transaction: ErrorCode y ErrorMessage OBLIGATORIOS
+
+Todo `Revert Transaction [Condition: ...]` DEBE incluir `ErrorCode` y `ErrorMessage`:
+
+- **ErrorCode:** `5499` (rango 5000-5499 para errores custom)
+- **ErrorMessage:** `transaction.SetError ( $_ErrorHint )` — guarda el contexto completo en `$$TRANSACTION_ERROR` y devuelve el hint
+
+**¿Por qué?** `Commit Transaction` limpia el estado Clew (`error.GetTrace` se vacía). Sin ErrorCode, `Get(LastError)` devuelve 0 después del Commit y el check post-Commit no detecta nada. El error se pierde silenciosamente.
+
+### Validation pattern: pre-capture de hint
+
+**CRÍTICO:** `ErrorMessage` se evalúa simultáneamente con `Condition` en `Revert Transaction`. Si se usa `error.GetHint` directamente en ErrorMessage, devuelve vacío porque el estado Clew aún no se ha seteado.
+
+El patrón correcto es **pre-capturar** el hint antes del Revert:
+
+```
+# CORRECTO: pre-captura + Revert con ErrorCode/ErrorMessage
+Insert Calculated Result [$_Check; error.ThrowIfMissingParam($REQUIRED; "")]
+If [$_Check]
+    Insert Calculated Result [$_ErrorHint; error.GetHint]
+End If
+Revert Transaction [Condition: $_Check; ErrorCode: 5499; ErrorMessage: transaction.SetError($_ErrorHint)]
+
+# INCORRECTO: sin pre-captura — el hint llega vacío
+Revert Transaction [Condition: error.ThrowIfMissingParam($REQUIRED; ""); ErrorMessage: error.GetHint]
+```
+
+Para validaciones antes de modificar datos:
 
 ```
 # CORRECT: validate BEFORE modifying data
-Revert Transaction [Condition: error.ThrowIfMissingParam($REQUIRED; "")]
-Revert Transaction [Condition: error.ThrowIf($Total < 0; _error_INVALID_PARAM; "Total debe ser positivo")]
+Insert Calculated Result [$_Check; error.ThrowIfMissingParam($REQUIRED; "")]
+If [$_Check]
+    Insert Calculated Result [$_ErrorHint; error.GetHint]
+End If
+Revert Transaction [Condition: $_Check; ErrorCode: 5499; ErrorMessage: transaction.SetError($_ErrorHint)]
 Set Field [Cliente::Total; $Total]
 
 # WRONG: validate AFTER modifying data
@@ -163,6 +193,17 @@ Perform Script [Subscript Transaccional]
 Revert Transaction [Condition: error.InSubscript]
 ```
 
+**⚠️ CRITICAL: Revert del hijo salta al Commit del padre**
+
+Cuando un script hijo corre dentro de la transacción del padre y su `Revert Transaction` se dispara, el salto NO va al `Commit Transaction` del hijo — salta directamente al `Commit Transaction` del **padre** (el script que abrió la transacción). Esto significa que TODO el código entre el Revert del hijo y el Commit del padre se salta:
+
+- `Exit Script [error.GetTrace]` del hijo → **nunca se ejecuta**
+- `error.InSubscript` en el padre → **nunca se evalúa**
+- `$_ErrorHint` en el padre → **nunca se captura**
+- Logging en el padre → **nunca se ejecuta**
+
+Para solucionar esto, se usa el patrón `$$TRANSACTION_ERROR` (ver sección dedicada más abajo).
+
 ### Error 3 en transacciones padre/hijo
 
 Cuando un script hijo se ejecuta dentro de la transacción del padre, `Open Transaction` y `Commit Transaction` devuelven error 3 (comando no disponible) porque la transacción ya está controlada por el padre. Esto es **comportamiento esperado** y no debe tratarse como error.
@@ -171,12 +212,19 @@ Cuando un script hijo se ejecuta dentro de la transacción del padre, `Open Tran
 
 ```
 Commit Transaction
-Insert Calculated Result [$ErrorCommit; Get(LastError)]
+
+# CRÍTICO: Capturar LastError y LastErrorDetail en UN SOLO paso
+# Cada paso de script resetea Get(LastError) a 0. Si se capturan en pasos
+# separados, el segundo siempre será 0.
+Insert Calculated Result [$ErrorCommit; Let (
+    $ErrorDetail = Get ( LastErrorDetail ) ;
+    Get ( LastError )
+)]
 
 # Check: error real solo si no es error 3 dentro de transacción del padre
 # Y solo si no hay ya un error Clew activo (evita sobreescribir el hint original)
 If [$ErrorCommit ≠ 0 and not ( $ErrorCommit = 3 and $TransactionOpenState ) and not error.WasThrown]
-  error.Throw ( $ErrorCommit ; "Error al confirmar transacción" )
+    Set Variable [$_Void; error.Throw ( $ErrorCommit ; transaction.GetHint )]
 End If
 ```
 
@@ -215,24 +263,151 @@ End If
 
 ### Error flow through layers
 
-```
-Transactional Script (child)
-  --> Revert Transaction (error detected)
-  --> Exit Script [error.GetTrace]
+**Caso 1: Error en validación del propio script (padre o hijo standalone)**
 
-Transactional Script (parent)
-  --> error.InSubscript = True
-  --> Revert Transaction
-  --> Commit check: $ErrorCommit ≠ 0 and not (3 + state) and not error.WasThrown
-  --> If [not $TransactionOpenState]: Perform Script [Create Log Clew]
+```
+Transactional Script
+  --> $_Check = error.ThrowIfMissingParam(...)
+  --> $_ErrorHint = error.GetHint (pre-captura)
+  --> Revert Transaction [Condition: $_Check; ErrorCode: 5499; ErrorMessage: transaction.SetError($_ErrorHint)]
+  --> (salta a Commit)
+  --> $ErrorCommit = Let($ErrorDetail = Get(LastErrorDetail); Get(LastError))
+  --> error.Throw($ErrorCommit; transaction.GetHint)
+  --> Create Log con getScriptEnvironment
+  --> transaction.Clear
+  --> Exit Script [error.GetTrace]
+```
+
+**Caso 2: Error en subscript anidado (hijo dentro de transacción del padre)**
+
+```
+Transactional Script (hijo — dentro de transacción del padre)
+  --> $_Check = error.ThrowIfMissingParam(...)
+  --> $_ErrorHint = error.GetHint (pre-captura)
+  --> Revert Transaction [ErrorMessage: transaction.SetError($_ErrorHint)]
+  ↓ SALTA DIRECTAMENTE AL COMMIT DEL PADRE ↓
+  (Exit Script del hijo NUNCA se ejecuta)
+  ($$TRANSACTION_ERROR sobrevive al salto cross-script)
+
+Transactional Script (padre — retoma en su Commit)
+  --> $ErrorCommit = Let($ErrorDetail = Get(LastErrorDetail); Get(LastError)) → 5499
+  --> error.Throw($ErrorCommit; transaction.GetHint) → reconstruye desde $$TRANSACTION_ERROR
+  --> Create Log con getScriptEnvironment + $$TRANSACTION_ERROR
+  --> transaction.Clear
   --> Exit Script [error.GetTrace]
 
 Utility Manager (Interface)
   --> error.InSubscript = True
-  --> $ErrorHint = error.GetHint  (capturar inmediatamente)
-  --> Perform Script [Create Log Clew]
+  --> $ErrorHint = error.GetHint (capturar inmediatamente)
   --> Show Custom Dialog ["Error"; $ErrorHint]
   --> Card window stays open for correction
+```
+
+## $$TRANSACTION_ERROR: Error Propagation en Transacciones Anidadas
+
+### El problema
+
+Cuando un script hijo corre dentro de la transacción del padre, existen tres problemas fundamentales de FileMaker que impiden la propagación de errores por el camino estándar Clew:
+
+1. **Revert del hijo → Commit del padre:** El `Revert Transaction` del hijo salta directamente al `Commit Transaction` del padre, bypaseando Exit Script, error.InSubscript, y todo el error handling intermedio
+2. **Commit limpia estado Clew:** `error.GetTrace` se vacía después de `Commit Transaction`
+3. **Cada paso resetea Get(LastError):** Si se captura `Get(LastErrorDetail)` y `Get(LastError)` en pasos separados, el segundo siempre es 0
+
+### La solución: $$TRANSACTION_ERROR
+
+Se usa una **variable global** como canal paralelo que sobrevive al salto Revert→Commit cross-script:
+
+| Mecanismo | Sobrevive Revert→Commit padre | Sobrevive entre pasos |
+|-----------|-------------------------------|----------------------|
+| Clew local (`$clew.ERROR`) | ❌ | ✅ |
+| `Get(LastError)` | ❌ (cada paso lo resetea) | ❌ |
+| `Get(LastErrorDetail)` | ✅ (con Let en 1 paso) | ❌ |
+| **`$$TRANSACTION_ERROR`** | **✅** | **✅** |
+
+### Custom Functions: transaction.*
+
+Tres funciones encapsulan el patrón:
+
+#### `transaction.SetError ( hint )`
+
+Guarda el contexto completo de error en `$$TRANSACTION_ERROR` y devuelve el hint. Diseñada para usarse en el **ErrorMessage** del Revert Transaction:
+
+```
+Revert Transaction [
+    Condition: $_Check ;
+    ErrorCode: 5499 ;
+    ErrorMessage: transaction.SetError ( $_ErrorHint )
+]
+```
+
+Internamente construye un JSON con:
+- `scriptName` — `Get(ScriptName)` del script que falla
+- `hint` — el mensaje de error
+- `parameter` — `Get(ScriptParameter)` original
+- `timestamp` — momento del error
+
+#### `transaction.GetHint`
+
+Recupera el hint desde `$$TRANSACTION_ERROR` después de que Commit Transaction haya limpiado el estado Clew:
+
+```
+# En el post-Commit check:
+Set Variable [$_Void; error.Throw ( $ErrorCommit ; transaction.GetHint )]
+```
+
+#### `transaction.Clear`
+
+Limpia `$$TRANSACTION_ERROR` y `$$PARAMLOG` al salir de la transacción. Llamar SIEMPRE en la sección de logging/salida, dentro de `If [not $TransactionOpenState]`:
+
+```
+If [not $TransactionOpenState]
+    Perform Script ["Create Log"; ...]
+    Set Variable [$_Void; transaction.Clear]
+End If
+```
+
+### Flujo completo con $$TRANSACTION_ERROR
+
+```
+HIJO (Contactos | Actividad):
+  Open Transaction  → error 3 (esperado dentro de padre)
+  $_Check = error.ThrowIfMissingParam(...)  → True
+  $_ErrorHint = error.GetHint → "Falta IDENTIFICACIONAPELLIDOS"
+  Revert Transaction [
+      Condition: $_Check ;
+      ErrorCode: 5499 ;
+      ErrorMessage: transaction.SetError($_ErrorHint)
+  ]
+  ↓ SALTA AL COMMIT DEL PADRE ↓
+  (Exit Script nunca se ejecuta)
+  ($$TRANSACTION_ERROR = {"scriptName":"Contactos | Actividad", "hint":"Falta IDENTIFICACION...", ...})
+
+PADRE (Peticiones | Actividad):
+  (error.InSubscript nunca se evalúa — el código fue saltado)
+  Commit Transaction  → limpia Clew, Get(LastError) = 5499
+  $ErrorCommit = Let($ErrorDetail = Get(LastErrorDetail); Get(LastError))  → 5499
+  If [$ErrorCommit ≠ 0 and not(3+state) and not error.WasThrown]
+      error.Throw(5499; transaction.GetHint) → reconstruye error Clew desde $$TRANSACTION_ERROR
+  End If
+  ...logging...
+  transaction.Clear → limpia globales
+  Exit Script [error.GetTrace]
+```
+
+### Integración con Create Log
+
+Para que el log reciba los campos correctos (ScriptName, ScriptParameter, errorCode), construir el parámetro usando `$$TRANSACTION_ERROR` y `getScriptEnvironment`:
+
+```
+Perform Script ["Create Log"; JSONSetElement ( "{}" ;
+    [ "errorCode" ; 5499 ; JSONNumber ] ;
+    [ "scriptName" ; If ( not IsEmpty($$TRANSACTION_ERROR) ;
+        JSONGetElement($$TRANSACTION_ERROR; "scriptName") ;
+        Get(ScriptName)
+    ) ; JSONString ] ;
+    [ "environment" ; getScriptEnvironment ; JSONObject ] ;
+    [ "result" ; error.GetTrace ; JSONString ]
+)]
 ```
 
 ## Card Window Behavior
