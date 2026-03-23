@@ -35,9 +35,9 @@ Script: [Entity] Utility | Alta, Editar
 20.     Insert Calculated Result [ $REQUIRED ; List ( "Accion" ; If ( $Accion = "Editar" ; "Id" ; "" ) ) ]
 21.     Exit Loop If [ error.ThrowIfMissingParam ( $REQUIRED ; "" ) ]
 22.
-23.     # ──────────────────────────────────────────
+23.     # -------------------------------------------------------------------------------------
 24.     # EJECUTAR ACCIÓN
-25.     # ──────────────────────────────────────────
+25.     # -------------------------------------------------------------------------------------
 26.
 27.     If [ $Accion = "Editar" ]
 28.         Perform Script [ "[Entity] Utility | Initialize Shadow" ; Parameter: Get ( ScriptParameter ) ]
@@ -137,9 +137,9 @@ Script: [Entity] | Alta Modificar [Entity] {json}
 13. Allow User Abort [ Off ]
 14. Set Error Capture [ On ]
 15.
-16. # ──────────────────────────────────────────
+16. # -------------------------------------------------------------------------------------
 17. # VERIFICAR ESTADO DE TRANSACCIÓN
-18. # ──────────────────────────────────────────
+18. # -------------------------------------------------------------------------------------
 19.
 20. Insert Calculated Result [ $TransactionOpenState ; Get ( TransactionOpenState ) ]
 21.
@@ -152,30 +152,30 @@ Script: [Entity] | Alta Modificar [Entity] {json}
 28.     End If
 29. End If
 30.
-31. # ──────────────────────────────────────────
+31. # -------------------------------------------------------------------------------------
 32. # ABRIR TRANSACCIÓN
-33. # ──────────────────────────────────────────
+33. # -------------------------------------------------------------------------------------
 34.
 35. Open Transaction
 36.
-37. # ──────────────────────────────────────────
+37. # -------------------------------------------------------------------------------------
 38. # PARSEAR Y VALIDAR PARÁMETROS
-39. # ──────────────────────────────────────────
+39. # -------------------------------------------------------------------------------------
 40.
 41. Insert Calculated Result [ $Param ; Get ( ScriptParameter ) ]
 42. Revert Transaction [ Condition: error.CreateVarsFromKeys ( $Param ; "" ) ]
 43. Insert Calculated Result [ $REQUIRED ; List ( "Campo1" ; "Campo2" ) ]
 44. Revert Transaction [ Condition: error.ThrowIfMissingParam ( $REQUIRED ; "" ) ]
 45.
-46. # ──────────────────────────────────────────
+46. # -------------------------------------------------------------------------------------
 47. # VALIDACIONES DE NEGOCIO
-48. # ──────────────────────────────────────────
+48. # -------------------------------------------------------------------------------------
 49.
 50. Revert Transaction [ Condition: error.ThrowIf ( $Total < 0 ; _error_INVALID_PARAM ; "Total debe ser positivo" ) ]
 51.
-52. # ──────────────────────────────────────────
+52. # -------------------------------------------------------------------------------------
 53. # LÓGICA PRINCIPAL
-54. # ──────────────────────────────────────────
+54. # -------------------------------------------------------------------------------------
 55.
 56. Go to Layout [ "[Table]" ([Table]) ]
 57.
@@ -199,18 +199,18 @@ Script: [Entity] | Alta Modificar [Entity] {json}
 75. # Perform Script [ "Subscript.Controller" ; Parameter: $SubParams ]
 76. # Revert Transaction [ Condition: error.InSubscript ]
 77.
-78. # ──────────────────────────────────────────
+78. # -------------------------------------------------------------------------------------
 79. # CONSTRUIR RESULTADO
-80. # ──────────────────────────────────────────
+80. # -------------------------------------------------------------------------------------
 81.
 82. Insert Calculated Result [ $Respuesta ; JSONSetElement ( "{}" ;
 83.     [ "Id" ; [Table]::Id ; JSONString ] ;
 84.     [ "Campo1" ; [Table]::Campo1 ; JSONString ]
 85. ) ]
 86.
-87. # ──────────────────────────────────────────
+87. # -------------------------------------------------------------------------------------
 88. # CERRAR TRANSACCIÓN
-89. # ──────────────────────────────────────────
+89. # -------------------------------------------------------------------------------------
 90.
 91. Commit Transaction
 92. Insert Calculated Result [ $Nothing ; error.ThrowIfLast ( "Error al cerrar transacción" ) ]

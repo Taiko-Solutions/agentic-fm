@@ -83,8 +83,16 @@ Las funciones Clew tienen dos tipos de segundo parámetro que **NO deben confund
 
 ### Subscript Error Handling
 
-- `error.InSubscript` — returns True if the last `Perform Script` returned an errorTrace. Does not re-throw.
-- `error.InSubscriptThrow` — returns True if the last `Perform Script` returned an errorTrace AND re-throws it into the current error state. Use this in `Exit Loop If` to propagate errors automatically.
+- `error.InSubscript` — returns True if the last `Perform Script` returned an errorTrace. Does NOT re-throw. Use this when you want to **check** the error and **decide locally** how to handle it (log it, take alternative action, or ignore it).
+- `error.InSubscriptThrow` — returns True if the last `Perform Script` returned an errorTrace AND re-throws it into the current error state. Use this in `Exit Loop If` to **propagate errors automatically** to the caller. This is the **default/most common** pattern.
+
+**Choosing between them:**
+
+| Scenario | Function | Pattern |
+|----------|----------|---------|
+| Subscript error should abort the caller | `error.InSubscriptThrow` | `Exit Loop If [ error.InSubscriptThrow ]` |
+| Subscript error should be handled locally | `error.InSubscript` | `If [ error.InSubscript ] ... End If` |
+| Subscript error should be logged but ignored | `error.InSubscript` + `error.DeleteTrace` | Check → log → clean |
 
 ### Error State Inspection
 
@@ -94,7 +102,7 @@ Las funciones Clew tienen dos tipos de segundo parámetro que **NO deben confund
 - `error.GetHint` — returns the hint string from the active error.
 - `error.GetScriptName` — returns the script name where the error originated.
 - `error.GetDescription(errorCode)` — returns the standard description for a given error code.
-- `error.DeleteTrace` — clears the active error. Use when an error has been handled and should not propagate further.
+- `error.DeleteTrace` — clears the active error. Use when an error has been handled and should not propagate further. **IMPORTANT:** Must be called via `Set Variable` (step id="141"), not `Insert Calculated Result`, because it modifies internal state and returns a void value. Pattern: `Set Variable [$_Void; Value: error.DeleteTrace]`
 
 ## Error Constants
 

@@ -15,82 +15,84 @@ Script: Buscar[Entity].Controller
 2.  # Propósito: [Descripción del propósito]
 3.  # Contexto: [Table]
 4.  # Capa: Controlador
-5.  # Parámetros Requeridos:
-6.  #   - [ParamName] (tipo): descripción
-7.  # Parámetros Opcionales:
-8.  #   ninguno
-9.  # Retorna:
-10. #   Éxito: {"campo": valor, "success": true}
-11. #   Error: errorTrace JSON
-12. # Historial:
-13. #   Creado: YYYY-MM-DD Marco Antonio Pérez
-14. # =====================================================================================
-15. Allow User Abort [ Off ]
-16. Set Error Capture [ On ]
-17.
-18. # ──────────────────────────────────────────
-19. # INICIO DEL BLOQUE TRY
-20. # ──────────────────────────────────────────
-21.
-22. Loop
-23.     # ──────────────────────────────────────────
-24.     # PARSEAR Y VALIDAR PARÁMETROS
-25.     # ──────────────────────────────────────────
-26.     Exit Loop If [ error.CreateVarsFromKeys ( Get ( ScriptParameter ) ; "" ) ]
-27.     Insert Calculated Result [ $REQUIRED ; List ( "ParamName1" ; "ParamName2" ) ]
-28.     Exit Loop If [ error.ThrowIfMissingParam ( $REQUIRED ; "" ) ]
-29.
-30.     # ──────────────────────────────────────────
-31.     # VALIDAR CONTEXTO
-32.     # ──────────────────────────────────────────
-33.     Exit Loop If [ error.ThrowIfWrongContext ( GetFieldName ( [Table]::Id ) ) ]
-34.
-35.     # ──────────────────────────────────────────
-36.     # LÓGICA PRINCIPAL
-37.     # ──────────────────────────────────────────
-38.     Go to Layout [ "[Table]" ([Table]) ]
-39.     Enter Find Mode [ Pause: Off ]
-40.     Set Field [ [Table]::Campo ; $ParamName1 ]
-41.     Perform Find []
-42.     Exit Loop If [ error.ThrowIfLast ( "No se encontraron registros para: " & $ParamName1 ) ]
-43.
-44.     # Validaciones de negocio adicionales
-45.     Exit Loop If [ error.ThrowIf ( Get ( FoundCount ) > 1 ; _error_MULTIPLE_RECORDS_FOUND ; "Se encontraron múltiples registros" ) ]
-46.
-47.     # ──────────────────────────────────────────
-48.     # LLAMAR SUBSCRIPTS (si es necesario)
-49.     # ──────────────────────────────────────────
-50.     # Perform Script [ "OtroScript.Controller" ; Parameter: $Params ]
-51.     # Exit Loop If [ error.InSubscriptThrow ]
-52.
-53.     # ──────────────────────────────────────────
-54.     # CONSTRUIR RESULTADO
-55.     # ──────────────────────────────────────────
-56.     Insert Calculated Result [ $Result ; JSONSetElement ( "{}" ;
-57.         [ "campo1" ; [Table]::Campo1 ; JSONString ] ;
-58.         [ "campo2" ; [Table]::Campo2 ; JSONString ] ;
-59.         [ "success" ; True ; JSONBoolean ]
-60.     ) ]
-61.
-62.     Exit Loop If [ True ]
-63. End Loop
-64.
-65. # ──────────────────────────────────────────
-66. # BLOQUE CATCH
-67. # ──────────────────────────────────────────
-68.
-69. If [ error.WasThrown ]
-70.     Exit Script [ error.GetTrace ]
-71. End If
-72.
-73. Exit Script [ $Result ]
+5.  # -------------------------------------------------------------------------------------
+6.  # Parámetros Requeridos:
+7.  #   - [ParamName] (tipo): descripción
+8.  # Parámetros Opcionales:
+9.  #   ninguno
+10. # -------------------------------------------------------------------------------------
+11. # Retorna:
+12. #   Éxito: {"campo": valor, "success": true}
+13. #   Error: errorTrace JSON
+14. # -------------------------------------------------------------------------------------
+15. # Historial:
+16. #   Creado: YYYY-MM-DD Marco Antonio Pérez
+17. # =====================================================================================
+18. #
+19. Allow User Abort [ Off ]
+20. Set Error Capture [ On ]
+21. #
+22. # Este bucle es un bloque pseudo try-catch
+23. Loop
+24.     # -------------------------------------------------------------------------------------
+25.     # PARSEAR Y VALIDAR PARÁMETROS
+26.     #
+27.     Exit Loop If [ error.CreateVarsFromKeys ( Get ( ScriptParameter ) ; "" ) ]
+28.     Insert Calculated Result [ $REQUIRED ; List ( "ParamName1" ; "ParamName2" ) ]
+29.     Exit Loop If [ error.ThrowIfMissingParam ( $REQUIRED ; "" ) ]
+30.     #
+31.     # -------------------------------------------------------------------------------------
+32.     # VALIDAR CONTEXTO
+33.     #
+34.     Exit Loop If [ error.ThrowIfWrongContext ( GetFieldName ( [Table]::Id ) ) ]
+35.     #
+36.     # -------------------------------------------------------------------------------------
+37.     # LÓGICA PRINCIPAL
+38.     #
+39.     Go to Layout [ "[Table]" ([Table]) ]
+40.     Enter Find Mode [ Pause: Off ]
+41.     Set Field [ [Table]::Campo ; $ParamName1 ]
+42.     Perform Find []
+43.     Exit Loop If [ error.ThrowIfLast ( "No se encontraron registros para: " & $ParamName1 ) ]
+44.     #
+45.     # Validaciones de negocio adicionales
+46.     Exit Loop If [ error.ThrowIf ( Get ( FoundCount ) > 1 ; _error_MULTIPLE_RECORDS_FOUND ; "Se encontraron múltiples registros" ) ]
+47.     #
+48.     # -------------------------------------------------------------------------------------
+49.     # CONSTRUIR RESULTADO
+50.     #
+51.     Insert Calculated Result [ $Result ; JSONSetElement ( "{}" ;
+52.         [ "campo1" ; [Table]::Campo1 ; JSONString ] ;
+53.         [ "campo2" ; [Table]::Campo2 ; JSONString ] ;
+54.         [ "success" ; True ; JSONBoolean ]
+55.     ) ]
+56.     #
+57.     Exit Loop If [ True ]
+58. End Loop
+59. #
+60. # BLOQUE CATCH
+61. If [ error.WasThrown ]
+62.     Exit Script [ error.GetTrace ]
+63. End If
+64. #
+65. Exit Script [ $Result ]
 ```
+
+## Comment formatting rules
+
+Each line shown as `# texto` becomes a **separate** `<Step id="89" name="# (comment)">` in the XML output. Never combine multiple lines into one comment step — this is unreadable in FileMaker's Script Workspace.
+
+- Header separators use `====...====` (equals signs)
+- Section separators use `----...----` (dashes, NOT box-drawing `────`)
+- Lines showing just `#` become empty/self-closing comment steps: `<Step id="89" name="# (comment)"/>`
+
+See `CODING_CONVENTIONS.md` for the complete XML formatting rules and step ID reference.
 
 ## Notes
 
-- Line 26: `error.CreateVarsFromKeys` parses JSON into `$variables` and returns True on error.
-- Line 28: `$REQUIRED` is a return-delimited list of variable names to validate.
-- Line 33: Context validation is optional — omit for scripts marked as "insensitive".
-- Line 42: `error.ThrowIfLast` checks `Get(LastError)` — use immediately after risky steps.
-- Line 62: The final `Exit Loop If [True]` terminates the loop on success.
-- Line 69-71: The catch block runs only if an error was thrown during the try block.
+- Line 27: `error.CreateVarsFromKeys` parses JSON into `$variables` and returns True on error.
+- Line 29: `$REQUIRED` is a return-delimited list of variable names to validate.
+- Line 34: Context validation is optional — omit for scripts marked as "insensitive".
+- Line 43: `error.ThrowIfLast` checks `Get(LastError)` — use immediately after risky steps.
+- Line 57: The final `Exit Loop If [True]` terminates the loop on success.
+- Line 61-63: The catch block runs only if an error was thrown during the try block.
