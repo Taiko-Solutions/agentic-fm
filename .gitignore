@@ -8,6 +8,7 @@ agent/sandbox/
 .venv/
 .cursor/in-development/
 external_tools/
+plans/
 
 # Generated Claris documentation (copyright Claris International Inc.)
 # Run agent/docs/filemaker/fetch_docs.py to generate locally.
@@ -21,8 +22,11 @@ Prompt.md
 .cursorignore
 agent/library/
 agent/config/removals.json
+agent/config/automation.json
 agent/config/.autosave.json
 agent/config/.layout-prefs.json
+agent/config/.custom-instructions.md
+agent/config/webviewer-system-prompt.md
 docker-compose.override.yml
 project.env
 

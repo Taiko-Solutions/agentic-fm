@@ -2,10 +2,12 @@
 
 This folder contains the FileMaker artifacts that connect your solution to the agentic-fm toolchain.
 
-| File | Purpose |
-| ---- | ------- |
-| `Context.fmfn` | Custom function source — install into your FileMaker solution |
-| `agentic-fm.xml` | Companion script group — paste into your Script Workspace |
+| File               | Purpose                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `Context.fmfn`     | Custom function source — install into your FileMaker solution                                           |
+| `context.xml`      | fmxmlsnippet format of the `Context` custom function — alternative install via `clipboard.py`           |
+| `agentic-fm.fmp12` | Pre-built FileMaker file containing the companion script group — open and copy/paste into your solution |
+| `agentic-fm.xml`   | Companion script group in fmxmlsnippet format — alternative install via `clipboard.py`                  |
 
 ---
 
@@ -26,24 +28,12 @@ The **Explode XML** companion script calls `agent/scripts/companion_server.py` �
 **Start the server before running Explode XML:**
 
 ```bash
-python agent/scripts/companion_server.py
+python3 agent/scripts/companion_server.py
 ```
 
 The server listens on port 8765 by default and uses only Python stdlib — no virtualenv is required. Keep it running in a terminal while you work.
 
 The other two companion scripts (**Get agentic-fm path** and **Push Context**) use only native FileMaker steps and do not require the companion server.
-
-### MBS FileMaker Plugin _(legacy — no longer required)_
-
-Earlier versions of agentic-fm used the MBS FileMaker Plugin for shell execution in the **Explode XML** script. This dependency has been removed. If you have an existing installation that still uses MBS, it will continue to work, but new setups should use `companion_server.py` instead.
-
-The MBS functions previously used were:
-
-- `Shell.New` / `Shell.Execute` / `Shell.Wait` / `Shell.Release`
-- `Shell.AddEnvironment` / `Shell.SetArgumentsList`
-- `Shell.ReadOutputText` / `Shell.ReadErrorText`
-- `Path.FileMakerPathToNativePath`
-- `IsError`
 
 ### fm-xml-export-exploder
 
@@ -51,8 +41,8 @@ A Rust binary that parses FileMaker XML exports into individual files. Used by b
 
 **Installation:**
 
-1. Download the macOS binary from the [releases page](https://github.com/bc-m/fm-xml-export-exploder/releases/latest)
-2. On first run, macOS Gatekeeper will block it. Right-click the binary and choose **Open** once to clear the restriction.
+1. Download the macOS binary from the [releases page](https://github.com/bc-m/fm-xml-export-exploder/releases/latest). Bleeding edge versions can be found [here](https://github.com/petrowsky/fm-xml-export-exploder/releases)
+2. On first run, macOS Gatekeeper will block it. Right-click the binary and choose **Open** once to clear the restriction. You will need to authorize its execution within **System Settings -> Privacy & Security**.
 3. Create `~/bin/` if it does not exist:
    ```bash
    mkdir -p ~/bin
@@ -75,6 +65,8 @@ FM_XML_EXPLODER_BIN=/your/path/fm-xml-export-exploder ./fmparse.sh -s "My Soluti
 
 Required for `agent/scripts/clipboard.py` (loading snippets onto the FileMaker clipboard), `agent/scripts/validate_snippet.py` (post-generation validation), and `agent/scripts/companion_server.py` (shell execution server). All three use Python stdlib only — no virtualenv is required.
 
+> Note: You are not required to use the clipboard.py with python3. If you are already using another tool such as the MBS or BaseElements plug-in then those methods will still function. The convenience of the clipboard.py and python3 method is such that the agent will automatically put the code it creates onto the clipboard.
+
 Python 3 ships with macOS or can be installed via [Homebrew](https://brew.sh):
 
 ```bash
@@ -84,8 +76,8 @@ brew install python
 Run scripts directly — no activation step needed:
 
 ```bash
-python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
-python agent/scripts/companion_server.py
+python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
+python3 agent/scripts/companion_server.py
 ```
 
 ### xmllint
@@ -100,6 +92,8 @@ apt-get install libxml2-utils
 
 ## Installation Steps
 
+For the full first-run workflow, see the main [QUICKSTART.md](../QUICKSTART.md#-one-time-filemaker-setup), especially the `One-time FileMaker setup` section.
+
 ### 1. Install the Context custom function
 
 1. Open your FileMaker solution in FileMaker Pro.
@@ -110,13 +104,25 @@ apt-get install libxml2-utils
 
 ### 2. Install the companion scripts
 
+Choose either option:
+
+**Option A — Open the included .fmp12 file (fastest)**
+
+Open `filemaker/agentic-fm.fmp12` in FileMaker Pro. Copy the **agentic-fm** script folder from its Script Workspace and paste it directly into your solution's Script Workspace.
+
+**Option B — Install via clipboard**
+
 Load `filemaker/agentic-fm.xml` onto the FileMaker clipboard using `clipboard.py`, then paste into the Script Workspace:
 
 ```bash
-python agent/scripts/clipboard.py write filemaker/agentic-fm.xml
+python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
 ```
 
-Switch to FileMaker, open the **Script Workspace** (**Scripts > Script Workspace**), click in the script list, and press **⌘V**. A folder named **agentic-fm** containing the three scripts will appear.
+Switch to FileMaker, open the **Script Workspace** (**Scripts > Script Workspace**), click in the script list, and press **⌘V**. A folder named **agentic-fm** containing the scripts will appear.
+
+> If you already use another method of clipboard manipulation (e.g. MBS/BaseElements plug-in, AppleScript, et al), `clipboard.py` may be optional here.
+
+> Valuable info: MBS added automatic clipboard conversion for FileMaker XML in version `15.4`; with that converter enabled, the plugin can recognize valid `fmxmlsnippet` text on the clipboard and make it pasteable in FileMaker in the background. See [Copy and paste XML in FileMaker](https://www.mbsplugins.de/archive/2025-08-29/Copy_and_paste_XML_in_FileMake) and [MBS FileMaker Plugin, version 15.4pr4](https://www.mbsplugins.de/archive/2025-08-25/MBS_FileMaker_Plugin_version_1).
 
 ### 3. Configure the repo path
 
@@ -129,7 +135,7 @@ Run the **Get agentic-fm path** script once (from the Scripts menu or Script Wor
 Before running **Explode XML**, start `companion_server.py` in a terminal and leave it running:
 
 ```bash
-python agent/scripts/companion_server.py
+python3 agent/scripts/companion_server.py
 ```
 
 This server listens on port 8765 and handles the shell command that **Explode XML** issues via `Insert from URL`. You will need to restart it each time you open a new terminal session.
@@ -172,11 +178,10 @@ See `filemaker/custom_menu/README.md` for the integration steps.
 
 ## Dependency Summary
 
-| Dependency | Required By | Where to Get |
-| ---------- | ----------- | ------------ |
-| FileMaker Pro 21.0+ | Everything | [claris.com](https://www.claris.com) |
-| companion_server.py | Explode XML script | Included — `python agent/scripts/companion_server.py` |
-| fm-xml-export-exploder | Explode XML script, fmparse.sh | [GitHub releases](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) |
-| Python 3 | clipboard.py, validate_snippet.py, companion_server.py | Ships with macOS or `brew install python` |
-| xmllint | fmcontext.sh | Ships with macOS; `apt-get install libxml2-utils` on Linux |
-| MBS FileMaker Plugin _(legacy)_ | Older Explode XML installs only | [monkeybreadsoftware.com](https://www.monkeybreadsoftware.com/filemaker/) |
+| Dependency             | Required By                                            | Where to Get                                                                      |
+| ---------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| FileMaker Pro 21.0+    | Everything                                             | [claris.com](https://www.claris.com)                                              |
+| companion_server.py    | Explode XML script                                     | Included — `python3 agent/scripts/companion_server.py`                            |
+| fm-xml-export-exploder | Explode XML script, fmparse.sh                         | [GitHub releases](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) |
+| Python 3               | clipboard.py, validate_snippet.py, companion_server.py | Ships with macOS or `brew install python`                                         |
+| xmllint                | fmcontext.sh                                           | Ships with macOS; `apt-get install libxml2-utils` on Linux                        |
