@@ -1,89 +1,173 @@
-# fm-debug Skill
+---
+name: fm-debug
+description: Debug a FileMaker script by capturing runtime state. At Tier 1 the agent instruments the script and gives the developer run instructions. At Tier 3 the agent can autonomously look up the script source, generate a debug-instrumented copy, deploy it via AppleScript, trigger it via the companion, and read the results — no human intervention required. Triggers on phrases like "debug this", "script not working", "wrong output", "script error", or when a script produces unexpected behavior that cannot be diagnosed from source alone.
+---
 
-Use this skill when a FileMaker script is producing unexpected results, an error dialog, or incorrect behavior that you cannot diagnose from the source code alone. FileMaker script execution is **opaque to the agent** — the agent cannot trigger scripts, observe runtime state, or read FileMaker variables directly. This skill defines the two supported methods for bridging that gap.
+# fm-debug
+
+Debug a FileMaker script by capturing runtime variable state, error codes, and error locations. The agent's level of autonomy depends on the deployment tier configured in `agent/config/automation.json`.
 
 ---
 
-## How to use this skill
+## Step 1: Determine the automation tier
 
-When invoked, do the following in order:
+Read `agent/config/automation.json` and check `project_tier` (preferred) or `default_tier`:
 
-1. **State the diagnosis gap** — identify specifically what runtime information is needed to diagnose the issue (e.g. variable values, exit codes, script result, error number).
-2. **Check for an existing debug output file** at `agent/debug/output.json`. If it exists and is recent, read it and skip to step 5.
-3. **Choose the appropriate method** based on what's available in the solution (see below).
-4. **Give the developer clear run instructions** — the agent cannot execute FileMaker scripts. Tell the developer exactly which script to run and how.
-5. **Read and analyze the output** once the developer confirms it's ready.
+- **Tier 1** — the developer runs scripts manually. The agent instruments the script and provides run instructions.
+- **Tier 3** — the agent can autonomously deploy and trigger scripts. The agent instruments, deploys, runs, and reads results without developer intervention.
+
+Tier 2 follows the Tier 3 workflow for running scripts (via `/trigger`) but cannot create new scripts autonomously.
 
 ---
 
-## Method 1: Agentic-fm Debug Script (preferred)
+## Step 2: Identify the diagnosis gap
 
-The solution should contain a script named **"Agentic-fm Debug"** (or similar). This script accepts a JSON parameter specifying what to capture, then writes the result to `agent/debug/output.json` so the agent can read it directly — no copy/paste required.
+Before generating any instrumentation:
 
-### When to use
-- Any time the solution has the Agentic-fm Debug script available
-- Preferred because output is machine-readable and the agent reads it directly
+1. **State specifically what runtime information is needed** — variable values, error codes, script result, which conditional branch was taken, etc.
+2. **Check for existing debug output** at `agent/debug/output.json`. If it exists and is recent, read it and skip to Step 5.
+3. **Look up the script source** — read the human-readable version from `agent/xml_parsed/scripts_sanitized/` to understand the script's logic and identify where to insert debug instrumentation.
 
-### Instructions to give the developer
+---
 
-> To debug this, I need runtime variable state from the script. Please do the following:
+## Step 3: Instrument the script
+
+### Critical: error data capture pattern
+
+`Get ( LastError )` resets the error state as a side effect. Once evaluated, `Get ( LastErrorLocation )` and `Get ( LastErrorDetail )` can no longer return data for that error. **All three must be captured in a single expression within one `Set Variable` step:**
+
+```
+Set Variable [ $errData ; JSONSetElement ( "{}" ;
+    [ "lastError" ; Get ( LastError ) ; JSONNumber ] ;
+    [ "lastErrorDetail" ; Get ( LastErrorDetail ) ; JSONString ] ;
+    [ "lastErrorLocation" ; Get ( LastErrorLocation ) ; JSONString ]
+) ]
+```
+
+When this pattern is used, `Get ( LastErrorLocation )` returns `"ScriptName\rStepName\rLineNumber"` (carriage-return separated).
+
+**Never capture error data in separate steps** — the first `Set Variable` clears the error for subsequent ones. See `agent/docs/knowledge/error-data-capture.md` for full details.
+
+Additionally, `Perform Script` resets `Get ( LastError )` to 0 when it successfully begins executing the subscript. The Agentic-fm Debug script's own error capture always sees `lastError = 0`. **Callers must capture error data in the calling script and pass it as part of the JSON parameter.**
+
+### Building the instrumented script
+
+Look up the target script's ID from CONTEXT.json or the scripts index:
+
+```bash
+grep "ScriptName" "agent/context/{solution}/scripts.index"
+```
+
+Read the human-readable source from `agent/xml_parsed/scripts_sanitized/` to understand the logic. Identify where to insert debug capture points — typically immediately after steps that might fail or at decision points.
+
+Generate a modified copy of the script as fmxmlsnippet XML in `agent/sandbox/` that includes debug instrumentation at the identified points. Each debug point should:
+
+1. Capture error data in a single expression (the `$errData` pattern above)
+2. Capture any relevant local variables
+3. Call `Perform Script [ "Agentic-fm Debug" ]` with the captured state as a JSON parameter
+
+Example debug instrumentation to insert after a risky step:
+
+```
+# Capture error data in ONE expression — Get(LastError) resets the error state
+Set Variable [ $errData ; JSONSetElement ( "{}" ;
+    [ "lastError" ; Get ( LastError ) ; JSONNumber ] ;
+    [ "lastErrorDetail" ; Get ( LastErrorDetail ) ; JSONString ] ;
+    [ "lastErrorLocation" ; Get ( LastErrorLocation ) ; JSONString ]
+) ]
+Perform Script [ "Agentic-fm Debug" ; Parameter: JSONSetElement ( "{}" ;
+    [ "label" ; "after the risky step" ; JSONString ] ;
+    [ "vars"  ; JSONSetElement ( "{}" ;
+        [ "errData"  ; $errData  ; JSONRaw ] ;
+        [ "myVar"    ; $myVar    ; JSONString ] ;
+        [ "otherVar" ; $otherVar ; JSONString ]
+    ) ; JSONRaw ]
+) ]
+```
+
+Validate the instrumented script with `validate_snippet.py` before proceeding.
+
+---
+
+## Step 4: Deploy and run
+
+### Tier 3 (autonomous)
+
+The agent has the full deploy → run → read loop available:
+
+1. **Load clipboard** — `POST {companion_url}/clipboard` with the XML
+2. **Deploy via raw AppleScript** — `POST {companion_url}/trigger` with a `raw_applescript` payload that:
+   - Activates FM Pro and switches to standard menus
+   - Opens Script Workspace
+   - Uses Cmd+N → Rename to create the debug script (if new), OR uses AXPress to open the existing script tab and Cmd+A → Delete → Cmd+V to replace (if modifying)
+   - Saves with Cmd+S
+3. **Run the script** — `POST {companion_url}/trigger` with `fm_app_name`, `script`, and optionally `target_file`
+4. **Read the output** — read `agent/debug/output.json` (allow 2–3 seconds for the script to execute and the companion to write the file)
+
+**Prerequisites for Tier 3 autonomous debugging:**
+- `fmextscriptaccess` extended privilege must be enabled on the active account's privilege set in the frontmost FM document (required for `/trigger` `do script` calls)
+- The companion server must be running on the host and reachable at `companion_url`
+- Agentic-fm Debug script must be installed in the solution
+
+**Important**: if deploying an instrumented copy of an existing script, use `--replace` mode (Cmd+A → Delete → Cmd+V) rather than creating a new script. After debugging, deploy the original script back to restore it.
+
+### Tier 1 (developer-assisted)
+
+Give the developer clear instructions:
+
+> To debug this, I need runtime variable state. Please do the following:
 >
-> 1. Open FileMaker and navigate to the layout where you run this script
-> 2. Run the script **"[Script Name]"** as you normally would
-> 3. When done, run the script **"Agentic-fm Debug"** with this parameter:
->    ```
->    [JSON parameter you specify]
->    ```
->    (Or the debug script may run automatically as part of the failing script.)
-> 4. Let me know when it's done — I'll read `agent/debug/output.json` directly.
+> 1. The instrumented script is on your clipboard. Open **"Script Name"** in Script Workspace
+> 2. **Cmd+A** — select all existing steps and delete
+> 3. **Cmd+V** — paste the instrumented version
+> 4. Run the script as you normally would
+> 5. Let me know when it's done — I'll read `agent/debug/output.json` directly.
 
-### Reading the output
+After debugging, provide the original script back on the clipboard for the developer to restore.
 
-Once the developer confirms the script ran:
+---
+
+## Step 5: Read and analyze the output
+
+Read `agent/debug/output.json`:
+
 ```bash
 cat agent/debug/output.json
 ```
 
----
+The output contains:
+- **`vars`** — the variables and error data captured by the instrumented script. **This is the authoritative diagnostic data.** The `errData` object within `vars` contains `lastError`, `lastErrorDetail`, and `lastErrorLocation` as captured by the calling script.
+- **Top-level `lastError`/`lastErrorLocation`** — captured by the debug script itself. Always 0/empty because `Perform Script` resets the error state. Ignore these for diagnosis.
+- **`timestamp`** — when the debug script ran
+- **`label`** — description of the debug point
 
-## Method 2: $$DEBUG Global Variable (fallback)
-
-If the solution does not have an Agentic-fm Debug script, the developer can add a temporary `Set Variable` step in the failing script to collect debug state into a `$$DEBUG` global, then show it via a custom dialog or copy it manually.
-
-### When to use
-- Solution does not have the Agentic-fm Debug script
-- Quick one-off diagnostic for a simple script
-
-### Instructions to give the developer
-
-> I need to see the runtime variable state. Please:
->
-> 1. Temporarily add this step to the script just before the failing condition:
->    ```
->    Set Variable [ $$DEBUG ; JSONSetElement ( "{}" ;
->        [ "varName1" ; $varName1 ; JSONString ] ;
->        [ "varName2" ; $varName2 ; JSONString ] ;
->        [ "exitCode" ; $exitCode ; JSONString ]
->    ) ]
->    ```
->    (Replace with the actual variables you want to inspect.)
-> 2. Run the script
-> 3. Open the Data Viewer (Tools > Data Viewer) and find `$$DEBUG`, or add a Show Custom Dialog step to display it
-> 4. Copy the full JSON value and paste it here
-
-### What to ask for
-
-Be specific about which variables to capture. Common patterns:
-
-- Shell/HTTP calls: `$exitCode`, `$stderr`, `$stdout`, `$response`, `$httpError`
-- Script calls: `Get ( ScriptResult )`, `Get ( LastError )`
-- Conditional failures: the specific variables involved in the failing `If` condition
+Parse the error data and identify the root cause. Explain the issue clearly and propose the fix.
 
 ---
 
-## After receiving debug output
+## Fallback: $$DEBUG Global Variable
 
-1. Parse the JSON and identify the root cause
-2. Explain the issue clearly to the developer
-3. Propose the fix
+If the solution does not have an Agentic-fm Debug script, the developer can add a temporary `Set Variable` step to collect debug state into a `$$DEBUG` global:
+
+```
+Set Variable [ $$DEBUG ; JSONSetElement ( "{}" ;
+    [ "errData" ; JSONSetElement ( "{}" ;
+        [ "lastError" ; Get ( LastError ) ; JSONNumber ] ;
+        [ "lastErrorDetail" ; Get ( LastErrorDetail ) ; JSONString ] ;
+        [ "lastErrorLocation" ; Get ( LastErrorLocation ) ; JSONString ]
+    ) ; JSONRaw ] ;
+    [ "varName1" ; $varName1 ; JSONString ] ;
+    [ "varName2" ; $varName2 ; JSONString ]
+) ]
+```
+
+The developer retrieves the value from the Data Viewer (Tools > Data Viewer) and pastes it into the conversation.
+
+---
+
+## After diagnosis
+
+1. Explain the root cause clearly
+2. Propose and generate the fix
+3. **Restore the original script** — if the script was modified for debugging, deploy the original version back (Tier 3: autonomous restore; Tier 1: clipboard with paste instructions)
 4. If the Agentic-fm Debug script doesn't exist yet, offer to help create it (see `agent/docs/AGENTIC_DEBUG.md`)

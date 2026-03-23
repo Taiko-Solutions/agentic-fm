@@ -11,6 +11,12 @@ FileMaker script execution is opaque to the agent — the agent cannot trigger s
 3. The companion server writes `agent/debug/output.json`
 4. The agent reads the file and analyzes the output
 
+## Critical: `Get ( LastError )` resets the error state
+
+`Get ( LastError )` is not a passive read — **it clears the error state as a side effect.** Once evaluated, `Get ( LastErrorLocation )` and `Get ( LastErrorDetail )` can no longer return data for that error. All three functions must be captured in a **single expression** within one `Set Variable` step. See `agent/docs/knowledge/error-data-capture.md` for the full explanation and test evidence.
+
+Additionally, `Perform Script` resets `Get ( LastError )` to 0 when it successfully begins executing the subscript. This means the debug script's own `$errorContext` capture (see below) always sees `lastError = 0`. **Callers must capture error data before calling `Perform Script` and pass it as part of the JSON parameter.**
+
 ## Script design
 
 The script accepts a single parameter: a JSON object with any keys the calling script wants to expose. It forwards that object to the companion server along with metadata (timestamp, calling script name).
@@ -20,23 +26,27 @@ The script accepts a single parameter: a JSON object with any keys the calling s
 {
   "label": "optional description of where this debug point is",
   "vars": {
+    "errData": { "lastError": 102, "lastErrorDetail": "", "lastErrorLocation": "MyScript\rSet Field\r6" },
     "exitCode": "1",
     "stderr": "",
-    "stdout": "...",
-    "httpError": "0"
+    "stdout": "..."
   }
 }
 ```
+
+**Important**: The `errData` object above was captured by the **calling script** using the single-expression pattern (see Calling Convention below). It is the authoritative error data. The debug script's own `lastError`/`lastErrorLocation` fields in the output will always be 0/empty because `Perform Script` resets the error state.
 
 **Agentic-fm Debug script steps (HR format):**
 ```
 # PURPOSE: Write runtime debug state to agent/debug/output.json for agent inspection.
 # Called by other scripts via Perform Script with a JSON parameter.
 #
-# lastError and lastErrorLocation are captured as the very first step so they
-# reflect the caller's error state — any successful Set Variable resets Get(LastError) to 0.
+# $errorContext capture is a safety net for edge cases only (e.g., errors within
+# the Perform Script step itself). Callers should NOT rely on it — Perform Script
+# resets Get(LastError) to 0 before this script's first line runs. Error data
+# must be captured by the caller and passed in the parameter's "vars" key.
 
-# Capture caller's error state before any other step can clear it
+# Capture caller's error state (safety net — usually 0 due to Perform Script reset)
 Set Variable [ $errorContext ; JSONSetElement ( "{}" ;
     [ "lastError" ; Get ( LastError ) ; JSONNumber ] ;
     [ "lastErrorLocation" ; Get ( LastErrorLocation ) ; JSONString ]
@@ -61,22 +71,63 @@ If [ Get ( LastError ) ≠ 0 ]
 End If
 ```
 
+## Calling convention: how to instrument a script
+
+Error data must be captured **in the calling script** before `Perform Script`. Use this pattern:
+
+```
+# After the step that might fail:
+# Capture ALL error data in ONE expression — Get(LastError) resets the error state
+Set Variable [ $errData ; JSONSetElement ( "{}" ;
+    [ "lastError" ; Get ( LastError ) ; JSONNumber ] ;
+    [ "lastErrorDetail" ; Get ( LastErrorDetail ) ; JSONString ] ;
+    [ "lastErrorLocation" ; Get ( LastErrorLocation ) ; JSONString ]
+) ]
+Perform Script [ "Agentic-fm Debug" ; Parameter: JSONSetElement ( "{}" ;
+    [ "label" ; "after the risky step" ; JSONString ] ;
+    [ "vars"  ; JSONSetElement ( "{}" ;
+        [ "errData"  ; $errData  ; JSONRaw ] ;
+        [ "myVar"    ; $myVar    ; JSONString ] ;
+        [ "otherVar" ; $otherVar ; JSONString ]
+    ) ; JSONRaw ]
+) ]
+```
+
+### Interpreting the output
+
+The output in `agent/debug/output.json` contains two sources of error data:
+- **`vars.errData`** — captured by the calling script. **This is the authoritative error data.** Use this for diagnosis.
+- **Top-level `lastError`/`lastErrorLocation`** — captured by the debug script itself. Always 0/empty because `Perform Script` resets the error state. Kept as a safety net for edge cases.
+
 ## Get ( LastErrorLocation ) and line numbers
 
-`Get ( LastErrorLocation )` (added in FM 19.6.1) returns the script name, step name, and line number of the last error — e.g. `"Explode XML > Set Field, line 24"`. It is automatically captured in the debug payload.
+`Get ( LastErrorLocation )` (added in FM 19.6.1) returns the script name, step name, and line number of the last error in the format `"ScriptName\rStepName\rLineNumber"` (carriage-return separated — `\r` / `&#xD;` / `Char(13)`).
 
-**When a real error occurred:** `lastErrorLocation` will already be populated with the exact failure point. No extra work needed in the calling script.
+**It works correctly** but only when captured in the same expression as `Get ( LastError )`. If captured in a separate step after `Get ( LastError )`, it returns empty because the error state has already been cleared.
 
-**When no error occurred but you need the current line number:** Force a harmless error in the calling script immediately before `Perform Script`, then let the debug script capture it:
+**When a real error occurred:** capture `$errData` immediately after the failing step using the single-expression pattern above.
+
+**When no error occurred but you need the current line number:** Force a harmless error, then capture immediately in one expression:
 
 ```
 Set Error Capture [ On ]
-Set Field []   # error 102 — no field specified; populates LastErrorLocation with current line
-Perform Script [ "Agentic-fm Debug" ; Parameter: $debugParam ]
+Set Field []   # error 102 — no field specified
+# Capture ALL error data in ONE expression immediately
+Set Variable [ $errData ; JSONSetElement ( "{}" ;
+    [ "lastError" ; Get ( LastError ) ; JSONNumber ] ;
+    [ "lastErrorDetail" ; Get ( LastErrorDetail ) ; JSONString ] ;
+    [ "lastErrorLocation" ; Get ( LastErrorLocation ) ; JSONString ]
+) ]
+Perform Script [ "Agentic-fm Debug" ; Parameter: JSONSetElement ( "{}" ;
+    [ "label" ; "forced error for line number" ; JSONString ] ;
+    [ "vars"  ; JSONSetElement ( "{}" ;
+        [ "errData" ; $errData ; JSONRaw ]
+    ) ; JSONRaw ]
+) ]
 Set Error Capture [ Off ]
 ```
 
-The `Set Field []` step must be the **last step before `Perform Script`** — any intervening successful step resets `Get ( LastError )` to 0. The forced error line number appears in `lastErrorLocation` in `output.json`.
+The `$errData.lastErrorLocation` will contain the line number of the `Set Field []` step.
 
 ## Companion server endpoint
 
