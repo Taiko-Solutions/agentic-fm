@@ -126,12 +126,114 @@ All scripts must include a header block in Spanish:
 
 ## Script Section Separators
 
-Use this format for section comments within scripts:
+Use this 3-step format for section comments within scripts:
 
 ```
-# ──────────────────────────────────────────
+# -------------------------------------------------------------------------------------
 # NOMBRE DE LA SECCIÓN
-# ──────────────────────────────────────────
+#
+```
+
+Each section separator consists of:
+1. A comment step with a line of dashes (`-`, NOT box-drawing characters `─`)
+2. A comment step with the section title in UPPERCASE
+3. An empty comment step for visual spacing
+
+**IMPORTANT:** Use standard ASCII dashes `----...----` for separators and `====...====` for headers. Box-drawing characters (`──────`) look similar but cause rendering issues in some editors and are not the Taiko standard.
+
+---
+
+## XML Comment Formatting
+
+When generating fmxmlsnippet XML, every line of text in comments must be a **separate** `<Step>` element. This is critical for readability in FileMaker's Script Workspace, where multi-line text inside a single comment step collapses into one unreadable line.
+
+### Header comments — each line is a separate step:
+
+```xml
+<Step enable="True" id="89" name="# (comment)">
+  <Text>=====================================================================================</Text>
+</Step>
+<Step enable="True" id="89" name="# (comment)">
+  <Text>Propósito: Descripción del script</Text>
+</Step>
+<Step enable="True" id="89" name="# (comment)">
+  <Text>Contexto: NombreTabla o insensitive</Text>
+</Step>
+<!-- ... cada línea es un paso separado ... -->
+<Step enable="True" id="89" name="# (comment)">
+  <Text>=====================================================================================</Text>
+</Step>
+```
+
+### Section separators — 3 pasos (separador + título + vacío):
+
+```xml
+<Step enable="True" id="89" name="# (comment)">
+  <Text>-------------------------------------------------------------------------------------</Text>
+</Step>
+<Step enable="True" id="89" name="# (comment)">
+  <Text>NOMBRE DE LA SECCIÓN</Text>
+</Step>
+<Step enable="True" id="89" name="# (comment)"/>
+```
+
+### Empty comment steps for visual spacing:
+
+Use self-closing tags between sections:
+
+```xml
+<Step enable="True" id="89" name="# (comment)"/>
+```
+
+---
+
+## FM Script Step ID Reference
+
+When generating fmxmlsnippet XML, use these real step IDs instead of `id="0"`:
+
+| Step Name | ID | Notes |
+|-----------|-----|-------|
+| `# (comment)` | 89 | Comments, headers, separators |
+| `Allow User Abort` | 85 | |
+| `Set Error Capture` | 86 | |
+| `Loop` | 71 | |
+| `End Loop` | 73 | |
+| `Exit Loop If` | 72 | Primary Clew control flow |
+| `If` | 68 | |
+| `Else` | 69 | |
+| `Else If` | 125 | |
+| `End If` | 70 | |
+| `Set Field` | 76 | |
+| `Insert Calculated Result` | 77 | Preferred for variables |
+| `Set Variable` | 141 | Only for void calls like `error.DeleteTrace` |
+| `Perform Script` | 1 | |
+| `Exit Script` | 103 | |
+| `Go to Layout` | 6 | |
+| `New Record/Request` | 7 | |
+| `Commit Records/Requests` | 75 | |
+| `Enter Find Mode` | 22 | |
+| `Perform Find` | 28 | |
+| `New Window` | 122 | |
+| `Close Window` | 118 | |
+| `Show Custom Dialog` | 87 | |
+| `Open Transaction` | 200 | |
+| `Commit Transaction` | 201 | |
+| `Revert Transaction` | 202 | |
+
+### Special case: `error.DeleteTrace`
+
+`error.DeleteTrace` clears the error state and returns a void value. It MUST use `Set Variable` (id="141"), NOT `Insert Calculated Result`:
+
+```xml
+<Step enable="True" id="141" name="Set Variable">
+  <Value>
+    <Calculation><![CDATA[error.DeleteTrace]]></Calculation>
+  </Value>
+  <Repetition>
+    <Calculation><![CDATA[1]]></Calculation>
+  </Repetition>
+  <Name>$_Void</Name>
+</Step>
 ```
 
 ---
