@@ -283,6 +283,20 @@ export function streamChat(
   });
 }
 
+// --- Version check ---
+
+export interface VersionInfo {
+  local: string;
+  remote: string | null;
+  updateAvailable: boolean;
+}
+
+export async function fetchVersion(): Promise<VersionInfo> {
+  const res = await fetch(`${BASE}/api/version`);
+  if (!res.ok) throw new Error('Failed to fetch version');
+  return res.json();
+}
+
 export interface StepInfo {
   name: string;
   category: string;
