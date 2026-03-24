@@ -45,6 +45,8 @@ mv ~/Downloads/fm-xml-export-exploder ~/bin/
 chmod +x ~/bin/fm-xml-export-exploder
 ```
 
+> If you want the bleeding edge changes to this tool, then you can find them [here](https://github.com/petrowsky/fm-xml-export-exploder/releases)
+
 On first run, macOS Gatekeeper will block it. Right-click the binary in Finder and choose **Open** once to clear the restriction.
 
 ### 3. Verify Python 3
@@ -83,13 +85,23 @@ With the custom function in place, install the **agentic-fm** script folder. Cho
 python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
 ```
 
-Switch to FileMaker, open **Scripts > Script Workspace**, click in the script list, and press **Cmd+V**. A folder named **agentic-fm** with three scripts will appear.
+Switch to FileMaker, open **Scripts > Script Workspace**, click in the script list, and press **Cmd+V**. A folder named **agentic-fm** with the companion scripts will appear.
 
 ### ⚙️ Configure the repo path
 
 Run **Get agentic-fm path** from the Scripts menu. A folder picker appears — select the root of this repo. The path is stored in `$$AGENTIC.FM` for the session.
 
 > **Note:** `$$AGENTIC.FM` is a global variable and is cleared whenever the FileMaker file is closed. You'll need to run **Get agentic-fm path** again each session — or add a call to it in your solution's startup script so it runs automatically on launch. Any script that requires the path will also prompt you to set it if it is not yet populated.
+
+### 🖥️ Start the companion server
+
+The companion server is a lightweight HTTP server that several FileMaker scripts (Explode XML, Agentic-fm Debug, Agentic-fm webviewer) call via `Insert from URL`. Open a terminal and keep it running while you work:
+
+```bash
+python3 agent/scripts/companion_server.py
+```
+
+The server listens on port 8765 by default.
 
 ### 💥 Explode the XML
 

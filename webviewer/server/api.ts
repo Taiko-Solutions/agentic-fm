@@ -77,6 +77,31 @@ export function apiMiddleware(): Plugin {
         const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
         const pathname = url.pathname;
 
+        // --- GET /api/version ---
+        if (req.method === 'GET' && pathname === '/api/version') {
+          const versionFile = path.resolve(process.cwd(), '..', 'version.txt');
+          let local = 'unknown';
+          try { local = fs.readFileSync(versionFile, 'utf-8').trim(); } catch { /* missing */ }
+
+          // Fetch remote version from GitHub (non-blocking, best-effort)
+          let remote: string | null = null;
+          try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+            const resp = await fetch(
+              'https://raw.githubusercontent.com/petrowsky/agentic-fm/main/version.txt',
+              { signal: controller.signal },
+            );
+            clearTimeout(timeout);
+            if (resp.ok) remote = (await resp.text()).trim();
+          } catch { /* no network / timeout */ }
+
+          const updateAvailable = remote !== null && remote !== local && compareVersions(remote, local) > 0;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ local, remote, updateAvailable }));
+          return;
+        }
+
         // --- GET /api/context ---
         if (req.method === 'GET' && pathname === '/api/context') {
           const contextPath = path.join(agent, 'CONTEXT.json');
@@ -805,6 +830,18 @@ async function loadScript(
   }
 
   return result;
+}
+
+/** Compare semver strings: returns >0 if a > b, <0 if a < b, 0 if equal */
+function compareVersions(a: string, b: string): number {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const na = pa[i] ?? 0;
+    const nb = pb[i] ?? 0;
+    if (na !== nb) return na - nb;
+  }
+  return 0;
 }
 
 /** Call clipboard.py read, return XML */
