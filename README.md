@@ -6,7 +6,7 @@ Visual introduction over at the website [agentic-fm.com](https://agentic-fm.com)
 
 If you're a developer, and wanting to join the conversation, we've got a [Discord server](https://discord.gg/NSg7grhF) too.
 
-**Impatient?** Jump straight to [QUICKSTART.md](QUICKSTART.md) — prerequisites, install, and your first working script in one page.
+**New here?** Start with [QUICKSTART.md](QUICKSTART.md) — prerequisites, install, and your first working script in one page.
 
 # Background
 
@@ -24,12 +24,12 @@ See **[filemaker/README.md](filemaker/README.md)** for the full dependency list 
 
 **Dependencies at a glance:**
 
-| Dependency                                                                               | Required By                                       | Notes                                                      |
-| ---------------------------------------------------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
-| FileMaker Pro 21.0+                                                                      | Everything                                        | `GetTableDDL`, `While`, and data file steps required       |
-| [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) | Explode XML, fmparse.sh                           | Download binary; place at `~/bin/fm-xml-export-exploder`   |
-| Python 3                                                                                 | clipboard.py, validate_snippet.py, companion_server.py | stdlib only — no virtualenv required                  |
-| xmllint                                                                                  | fmcontext.sh                                      | Ships with macOS; `apt-get install libxml2-utils` on Linux |
+| Dependency                                                                               | Required By                                            | Notes                                                      |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------- |
+| FileMaker Pro 21.0+                                                                      | Everything                                             | `GetTableDDL`, `While`, and data file steps required       |
+| [fm-xml-export-exploder](https://github.com/bc-m/fm-xml-export-exploder/releases/latest) | Explode XML, fmparse.sh                                | Download binary; place at `~/bin/fm-xml-export-exploder`   |
+| Python 3                                                                                 | clipboard.py, validate_snippet.py, companion_server.py | stdlib only — no virtualenv required                       |
+| xmllint                                                                                  | fmcontext.sh                                           | Ships with macOS; `apt-get install libxml2-utils` on Linux |
 
 **Setup steps:**
 
@@ -41,9 +41,11 @@ See **[filemaker/README.md](filemaker/README.md)** for the full dependency list 
    Open `filemaker/agentic-fm.fmp12` in FileMaker, then copy and paste the **agentic-fm** script folder directly into your solution's Script Workspace.
 
    **Option B — Install via clipboard:**
+
    ```bash
    python3 agent/scripts/clipboard.py write filemaker/agentic-fm.xml
    ```
+
    Switch to FileMaker, open the Script Workspace, and press **Cmd+V**.
 
 3. **Start the companion server** — the companion server is a lightweight HTTP server that FileMaker calls via `Insert from URL` to run shell commands. Start it before running FileMaker companion scripts:
@@ -78,23 +80,43 @@ See **[filemaker/README.md](filemaker/README.md)** for the full dependency list 
 
 Skills are opt-in workflows that extend an agent's default behavior. Invoke them naturally in conversation — no special syntax required.
 
-| Skill              | What it does                                                                                                                                                                                                          | Example triggers                                                                         |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| **script-lookup**  | Locates a specific script in the parsed XML export by ID or name, resolving the matched pair of human-readable (`scripts_sanitized`) and Save-As-XML (SaXML) (`scripts`) files. Confirms the match before proceeding. | "review script ID 123", "show me the invoice script", "open the New Invoice script"      |
-| **script-preview** | Generates a human-readable, numbered step outline of a proposed script for review and iteration before any XML is generated. Loops until you approve, then hands off to full generation.                              | "preview the script", "outline the steps", "draft the logic before you generate"         |
-| **script-review**  | Performs a code review of an existing script — evaluating logic flow, efficiency, and correctness. Interactive; works alongside the FileMaker debugger.                                                               | "review this script", "check the logic in X script"                                      |
-| **library-lookup** | Searches the curated snippet library for reusable fmxmlsnippet code matching the current task. Used proactively by AI before writing significant logic, and on direct request.                                        | "use the HTTP request script", "add a timeout loop", "is there a library item for this?" |
-| **fm-debug**       | Debug FileMaker scripts by analyzing runtime state                                                                                                                                                                    | "debug this script", "analyze the runtime output", "why is this script failing?"         |
-| **menu-lookup**    | Locate custom menus and menu sets in xml_parsed                                                                                                                                                                       | "find the edit menu", "show the custom menu set", "look up menu by name"                 |
-| **multi-script-scaffold** | Scaffold interdependent multi-script systems using placeholder technique                                                                                                                                       | "scaffold a multi-script workflow", "set up related scripts", "build script system"      |
+**Note:** Skill use is available only to CLI/IDE editors. They are not used by the webviewer feature.
+
+| Skill                     | What it does                                                                                                                               | Example triggers                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+|                           | **Script workflows**                                                                                                                       |                                                                            |
+| **script-lookup**         | Locates a script in the parsed XML export by ID or name, resolving to the paired human-readable and Save-As-XML files                      | "review script ID 123", "show me the invoice script"                       |
+| **script-preview**        | Generates a human-readable step outline for review and iteration before XML is generated                                                   | "preview the script", "outline the steps", "draft the logic"               |
+| **script-review**         | Code reviews an existing script and its full call tree — evaluates error handling, structure, naming, performance, and cross-script issues | "review this script", "check the logic in X script"                        |
+| **script-refactor**       | Analyzes an existing script and produces an improved version while preserving observable behavior                                          | "refactor this script", "clean up script", "optimize script"               |
+| **script-debug**          | Systematic debugging — reproduce the issue, isolate the failure, form a hypothesis, verify with runtime data, produce a fix                | "debug this", "script not working", "wrong output"                         |
+| **script-test**           | Generates a companion verification script that exercises a target script with known inputs and asserts expected outputs                    | "test this script", "write a test", "prove this works"                     |
+| **multi-script-scaffold** | Scaffolds interdependent multi-script systems using the Untitled Placeholder Technique                                                     | "scaffold a multi-script workflow", "build script system"                  |
+| **implementation-plan**   | Structured planning before script creation — decomposes requirements, identifies dependencies, surfaces FM-specific constraints            | "plan this", "decompose requirements", "plan before coding"                |
+|                           | **Analysis**                                                                                                                               |                                                                            |
+| **trace**                 | Traces references to a FileMaker object across the entire solution — usage reports, impact analysis, and dead object scans                 | "where is this field used?", "what breaks if I rename X?", "unused fields" |
+| **extract-erd**           | Derives a true ERD (Mermaid diagram) from a solution by analyzing table occurrences, relationships, and fields                             | "extract ERD", "map the schema", "show the database structure"             |
+| **fm-debug**              | Captures runtime state by instrumenting scripts with debug output — Tier 1 (manual) or Tier 3 (autonomous)                                 | "debug this script", "analyze the runtime output", "why is this failing?"  |
+|                           | **Layout and UI**                                                                                                                          |                                                                            |
+| **layout-spec**           | Conducts a design conversation and produces a written layout specification — object list, field bindings, portal config, button wiring     | "layout spec", "spec out layout", "what objects should this layout have?"  |
+| **layout-design**         | Generates FileMaker layout objects, previews in the webviewer, iterates with the developer, then produces XML2 or HTML output              | "design layout", "create layout objects", "build layout"                   |
+| **webviewer-build**       | Generates a complete web application inside a FileMaker Web Viewer — self-contained HTML/CSS/JS with FM bridge scripts                     | "web viewer", "webviewer app", "HTML in FileMaker"                         |
+| **menu-lookup**           | Locates custom menus and menu sets in xml_parsed, extracts the real UUIDs required for paste operations                                    | "find the edit menu", "show the custom menu set", "look up menu"           |
+|                           | **Schema and data**                                                                                                                        |                                                                            |
+| **schema-plan**           | Designs a data model from a natural-language description — produces a Mermaid ERD and FM-specific model with TOs and relationships         | "design schema", "plan data model", "create ERD"                           |
+| **schema-build**          | Creates and modifies FileMaker schema via OData REST calls — tables, fields, and relationship specifications                               | "build schema", "create tables", "create fields"                           |
+| **data-seed**             | Generates realistic seed/test data and loads it into a live solution via OData                                                             | "seed data", "test data", "populate solution"                              |
+| **data-migrate**          | Moves records from an external source (CSV, JSON, SQL) into a live solution via OData with field mapping and type coercion                 | "migrate data", "import records", "load CSV"                               |
+|                           | **Utility**                                                                                                                                |                                                                            |
+| **library-lookup**        | Searches the curated snippet library for reusable fmxmlsnippet code matching the current task                                              | "use the HTTP request script", "add a timeout loop"                        |
 
 # Objectives
 
 The goals of this project are to provide the guidance and context needed by agentic processes for creating reliable scripts and other FileMaker related code that can be taken from AI back into FileMaker Pro.
 
-## Design Philosophy: Step-level editing, not whole-script generation
+## Design Philosophy
 
-The primary unit of work in this project is the **individual script step**, not the full script. Iterating on whole scripts is impractical because FileMaker has no diff/merge and every paste adds new steps to what is already in the script. Working at the step level is much faster and far less destructive or duplicative.
+The project supports both **whole-script generation** and **step-level editing**, but step-level iteration is the more common workflow. FileMaker has no diff/merge — every paste adds new steps to what is already in the script. Working at the step level is faster and less destructive, especially when modifying existing scripts.
 
 Most of a developer's script work (creation, updates, optimizations, and debugging) happens within `agent/sandbox/`. This is the shared workspace for both the developer and AI. When working on an existing script, reference it by name using the editor's file search; AI will copy it into the sandbox as needed.
 
@@ -146,7 +168,9 @@ agentic-fm/
 │   ├── catalogs/            # Step catalog — structured step definitions
 │   ├── context/             # Pre-extracted index files (generated by fmcontext.sh)
 │   ├── sandbox/             # Work area for AI-generated scripts (output)
-│   ├── scripts/             # Utility scripts (validation, XML conversion, clipboard)
+│   ├── config/              # automation.json, removals.json (gitignored credentials)
+│   ├── debug/               # Runtime debug output from Agentic-fm Debug script
+│   ├── scripts/             # Toolchain scripts (clipboard, validation, deployment, tracing)
 │   ├── snippet_examples/    # Archival fmxmlsnippet templates (step catalog is primary)
 │   ├── docs/
 │   │   ├── filemaker/       # FileMaker help reference (functions, script steps, errors)
@@ -154,12 +178,7 @@ agentic-fm/
 │   ├── library/             # Proven, reusable fmxmlsnippet patterns
 │   └── xml_parsed/          # Exploded XML from parsed solutions (reference only)
 ├── webviewer/               # Visual script editor (Preact + Monaco)
-└── xml_exports/             # Versioned XML exports organized by solution
-    └── <Solution Name>/
-        ├── 2026-02-08/
-        │   └── Solution.xml
-        └── 2026-02-18/
-            └── ...
+└── xml_exports/             # Versioned XML exports organized by solution (gitignored)
 ```
 
 - **filemaker/** -- FileMaker artifacts to install into your solution, including a pre-built `.fmp12` file for fast script installation. See [filemaker/README.md](filemaker/README.md).
@@ -190,23 +209,26 @@ Each knowledge document captures what an experienced FileMaker developer knows i
 
 **Current topics:**
 
-| Document               | Covers                                                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `found-sets.md`        | Found set attributes, actions on found sets, collecting field values, restoring found sets, snapshot links |
-| `single-pass-loop.md`  | Single-pass loop pattern for structured exit control                                                       |
-| `variables.md`         | Variable scoping, naming conventions, and lifetime considerations                                          |
-| `error-handling.md`    | Error capture patterns, transaction rollback, and server-side compatibility                                |
-| `script-parameters.md` | Passing and parsing script parameters; JSON vs. positional patterns                                        |
-| `disambiguation.md`    | Commonly confused term pairs and non-negotiable structural rules                                           |
-| `dry-coding.md`        | DRY principle in FileMaker scripts — hoisting repeated values into variables                               |
-| `field-references.md`  | Field reference patterns — string-based vs. direct references, script steps vs. functions                  |
-| `json-functions.md`    | Practical guidance for FileMaker's JSON functions, covering common gotchas and correct patterns             |
-| `line-endings.md`      | Line endings and the paragraph character (¶) — CR vs. LF behavior in FileMaker                             |
-| `paste-dependency-order.md` | Correct installation order when pasting fmxmlsnippet objects into a solution                          |
-| `return-delimited-lists.md` | Searching and manipulating return-delimited (¶-separated) lists                                      |
-| `terminology.md`       | FileMaker terminology glossary (redirects to full reference)                                               |
-| `file-operations.md`   | File operation steps — deleting files, path formats, and related behaviors                                 |
-| `script-ids.md`        | Script and object IDs are file-specific — not portable across FileMaker files                              |
+| Document                    | Covers                                                                                                     |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `found-sets.md`             | Found set attributes, actions on found sets, collecting field values, restoring found sets, snapshot links |
+| `single-pass-loop.md`       | Single-pass loop pattern for structured exit control                                                       |
+| `variables.md`              | Variable scoping, naming conventions, and lifetime considerations                                          |
+| `error-handling.md`         | Error capture patterns, transaction rollback, and server-side compatibility                                |
+| `script-parameters.md`      | Passing and parsing script parameters; JSON vs. positional patterns                                        |
+| `error-data-capture.md`     | Single-expression error data capture pattern — capturing error state in one step, not many                 |
+| `disambiguation.md`         | Commonly confused term pairs and non-negotiable structural rules                                           |
+| `dry-coding.md`             | DRY principle in FileMaker scripts — hoisting repeated values into variables                               |
+| `field-references.md`       | Field reference patterns — string-based vs. direct references, script steps vs. functions                  |
+| `json-functions.md`         | Practical guidance for FileMaker's JSON functions, covering common gotchas and correct patterns            |
+| `line-endings.md`           | Line endings and the paragraph character (¶) — CR vs. LF behavior in FileMaker                             |
+| `paste-dependency-order.md` | Correct installation order when pasting fmxmlsnippet objects into a solution                               |
+| `return-delimited-lists.md` | Searching and manipulating return-delimited (¶-separated) lists                                            |
+| `terminology.md`            | FileMaker terminology glossary (redirects to full reference)                                               |
+| `executesql.md`             | ExecuteSQL function guidance — SQL syntax differences, quoting, reserved words, and common gotchas         |
+| `file-operations.md`        | File operation steps — deleting files, path formats, and related behaviors                                 |
+| `script-ids.md`             | Script and object IDs are file-specific — not portable across FileMaker files                              |
+| `custom-menu-corruption.md` | Custom menu `<Unknown>` errors in Recover — configuration issue, not true corruption                       |
 
 A keyword-indexed manifest at `agent/docs/knowledge/MANIFEST.md` enables fast lookup. AI scans it for keyword matches against the current task and reads any matching documents before writing script steps.
 
@@ -216,20 +238,24 @@ A keyword-indexed manifest at `agent/docs/knowledge/MANIFEST.md` enables fast lo
 
 `filemaker/agentic-fm.fmp12` is a pre-built FileMaker file containing the **agentic-fm** script folder group. Open it in FileMaker and copy/paste the script folder into your solution's Script Workspace — this is the fastest installation path. Alternatively, `filemaker/agentic-fm.xml` provides the same scripts in `fmxmlsnippet` format for installation via `clipboard.py`.
 
-| Script                  | Purpose                                                                                                                                                                                                                      |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Get agentic-fm path** | One-time setup. Prompts you to select the agentic-fm repo folder and stores the path in `$$AGENTIC.FM`. All other scripts depend on this global being set.                                                                   |
-| **Explode XML**         | Saves a copy of the current solution as XML and calls `fmparse.sh` via the companion server to archive and explode it into `agent/xml_parsed/`. Run this whenever the solution schema or scripts change.                     |
-| **Push Context**        | Prompts for a task description, calls `Context($task)`, and writes the result directly to `agent/CONTEXT.json`. The generated context includes a `generated_at` timestamp for staleness detection. Run this from whatever layout you are working on before starting an AI scripting session. |
-| **Agentic-fm Debug**    | Posts runtime state JSON to the companion server's `/debug` endpoint, which writes `agent/debug/output.json` for analysis.                                                                                                                                                                   |
-| **AGFMScriptBridge**    | OData entry point — accepts `{ "script": "...", "parameter": "..." }` JSON and dispatches to any named script. Required because FMS 21.x cannot route OData calls with spaces in script names.                                                                                               |
-| **AGFMGoToLayout**      | Navigates FileMaker to a named layout. Used before calling Push Context to switch solution context to a different layout.                                                                                                                                                                     |
+| Script                   | Purpose                                                                                                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Get agentic-fm path**  | One-time setup. Prompts you to select the agentic-fm repo folder and stores the path in `$$AGENTIC.FM`. All other scripts depend on this global being set.                                               |
+| **Push Context**         | Prompts for a task description, calls `Context($task)`, and writes the result directly to `agent/CONTEXT.json`. Run this from whatever layout you are working on before starting an AI session.          |
+| **Explode XML**          | Saves a copy of the current solution as XML and calls `fmparse.sh` via the companion server to archive and explode it into `agent/xml_parsed/`. Run this whenever the solution schema or scripts change. |
+| **Agentic-fm Debug**     | Posts runtime state JSON to the companion server's `/debug` endpoint, which writes `agent/debug/output.json` for analysis.                                                                               |
+| **Agentic-fm Paste**     | Opens a script tab in Script Workspace via MBS `ScriptWorkspace.OpenScript`. Used by Tier 2 deployment.                                                                                                  |
+| **Agentic-fm webviewer** | Starts or stops the agentic-fm webviewer from within FileMaker via the companion server.                                                                                                                 |
+| **Agentic-fm Menu**      | Handles custom menu calls and passes them through to the agentic-fm web viewer via JavaScript.                                                                                                           |
+| **AGFMScriptBridge**     | OData entry point — accepts `{ "script": "...", "parameter": "..." }` JSON and dispatches to any named script. Required because FMS 21.x cannot route OData calls with spaces in script names.           |
+| **AGFMGoToLayout**       | Navigates FileMaker to a named layout. Used before calling Push Context to switch solution context to a different layout.                                                                                |
+| **AGFMEvaluation**       | Evaluates a FileMaker calculation expression server-side and returns the result; optionally navigates to a layout first.                                                                                 |
 
-**Requirement:** The **Explode XML** script communicates with `agent/scripts/companion_server.py` via `Insert from URL`. Start the companion server before running this script (`python3 agent/scripts/companion_server.py`, port 8765). The other two scripts use only native FileMaker steps.
+**Requirement:** **Explode XML**, **Agentic-fm Debug**, and **Agentic-fm webviewer** communicate with `agent/scripts/companion_server.py` via `Insert from URL`. Start the companion server before running these scripts (`python3 agent/scripts/companion_server.py`, port 8765). **Get agentic-fm path**, **Push Context**, and the OData scripts use only native FileMaker steps.
 
 ## Closed-Loop Operation with OData
 
-When a FileMaker file is hosted on FileMaker Server with OData enabled, an AI agent can trigger all three feedback scripts **programmatically** — without any manual developer action:
+When a FileMaker file is hosted on FileMaker Server with OData enabled, an AI agent can trigger the companion scripts **programmatically** — without any manual developer action:
 
 ```bash
 # Refresh context (scoped to a layout) — dispatched through AGFMScriptBridge
@@ -250,11 +276,12 @@ All OData script calls go through `AGFMScriptBridge` because FMS 21.x cannot rou
 This enables a fully autonomous development loop: the agent generates code, reads back what landed in the solution, and refreshes context — all without the developer running a single script manually.
 
 **For full closed-loop operation:**
+
 - Host the FM file on FileMaker Server (local Docker or remote)
 - Enable OData on the file with an account that has the `fmodata` extended privilege
 - Run the companion server (`python3 agent/scripts/companion_server.py`) — the Explode XML script calls it
 
-The three scripts in `filemaker/agentic-fm.xml` are expected to be present in any solution where you want this level of agent autonomy. Think of them as the bridge between the agent and the live FM environment.
+The scripts in `filemaker/agentic-fm.xml` are expected to be present in any solution where you want this level of agent autonomy. Think of them as the bridge between the agent and the live FM environment.
 
 ### Multi-file solutions
 
@@ -264,12 +291,32 @@ FileMaker solutions often separate UI and data across multiple files. Each file 
 {
   "solutions": {
     "MyApp UI": {
-      "odata": { "base_url": "...", "database": "MyApp UI", "username": "...", "password": "...", "script_bridge": "AGFMScriptBridge" },
-      "explode_xml": { "repo_path": "...", "export_path": "...", "companion_url": "http://host.docker.internal:8765" }
+      "odata": {
+        "base_url": "...",
+        "database": "MyApp UI",
+        "username": "...",
+        "password": "...",
+        "script_bridge": "AGFMScriptBridge"
+      },
+      "explode_xml": {
+        "repo_path": "...",
+        "export_path": "...",
+        "companion_url": "http://host.docker.internal:8765"
+      }
     },
     "MyApp Data": {
-      "odata": { "base_url": "...", "database": "MyApp Data", "username": "...", "password": "...", "script_bridge": "AGFMScriptBridge" },
-      "explode_xml": { "repo_path": "...", "export_path": "...", "companion_url": "http://host.docker.internal:8765" }
+      "odata": {
+        "base_url": "...",
+        "database": "MyApp Data",
+        "username": "...",
+        "password": "...",
+        "script_bridge": "AGFMScriptBridge"
+      },
+      "explode_xml": {
+        "repo_path": "...",
+        "export_path": "...",
+        "companion_url": "http://host.docker.internal:8765"
+      }
     }
   }
 }
@@ -364,18 +411,18 @@ With no arguments it validates all files in `agent/sandbox/`. It auto-detects `a
 
 **Checks performed:**
 
-| Check                    | Description                                                                |
-| ------------------------ | -------------------------------------------------------------------------- |
-| Well-formed XML          | File parses as valid XML                                                   |
-| Root element             | Must be `<fmxmlsnippet type="FMObjectList">`                               |
-| No Script wrapper        | Output must not be wrapped in `<Script>` tags                              |
-| Step attributes          | Every `<Step>` has `enable`, `id`, and `name`                              |
-| Paired steps             | If/End If, Loop/End Loop, Open Transaction/Commit Transaction are balanced |
-| Else/Else If ordering    | No Else If after Else, no duplicate Else within an If block                |
-| Known step names         | All step names exist in snippet_examples                                   |
-| Reference cross-check    | Field, layout, and script IDs match CONTEXT.json                           |
-| Context staleness        | Warns if CONTEXT.json is older than 60 minutes; shows layout name at push time |
-| Coding conventions       | Warns on ASCII comparison operators (`<>` → `≠`, `<=` → `≤`, `>=` → `≥`) and variable naming prefix violations |
+| Check                 | Description                                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Well-formed XML       | File parses as valid XML                                                                                       |
+| Root element          | Must be `<fmxmlsnippet type="FMObjectList">`                                                                   |
+| No Script wrapper     | Output must not be wrapped in `<Script>` tags                                                                  |
+| Step attributes       | Every `<Step>` has `enable`, `id`, and `name`                                                                  |
+| Paired steps          | If/End If, Loop/End Loop, Open Transaction/Commit Transaction are balanced                                     |
+| Else/Else If ordering | No Else If after Else, no duplicate Else within an If block                                                    |
+| Known step names      | All step names exist in snippet_examples                                                                       |
+| Reference cross-check | Field, layout, and script IDs match CONTEXT.json                                                               |
+| Context staleness     | Warns if CONTEXT.json is older than 60 minutes; shows layout name at push time                                 |
+| Coding conventions    | Warns on ASCII comparison operators (`<>` → `≠`, `<=` → `≤`, `>=` → `≥`) and variable naming prefix violations |
 
 **Options:**
 
