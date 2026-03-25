@@ -8,8 +8,8 @@ import { AISettings } from '@/ai/settings/AISettings';
 import { LoadScriptDialog } from '@/ui/LoadScriptDialog';
 import { LibraryPanel } from '@/ui/LibraryPanel';
 import type { FMContext } from '@/context/types';
-import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, fetchCustomInstructions, fetchSystemPrompt, validateSnippet, clipboardWrite, writeSandbox, fetchAgentOutput } from '@/api/client';
-import type { StepInfo, AgentOutput } from '@/api/client';
+import { fetchContext, fetchSteps, fetchStepCatalog, fetchSettings, fetchDocs, fetchCustomInstructions, fetchSystemPrompt, validateSnippet, clipboardWrite, writeSandbox, fetchAgentOutput, fetchVersion } from '@/api/client';
+import type { StepInfo, AgentOutput, VersionInfo } from '@/api/client';
 import { AgentOutputPanel } from '@/ui/AgentOutputPanel';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 import { hrToXml, loadCatalog } from '@/converter/hr-to-xml';
@@ -89,6 +89,7 @@ export function App() {
   const [customInstructions, setCustomInstructions] = useState('');
   const [baseSystemPrompt, setBaseSystemPrompt] = useState('');
   const [chatKey, setChatKey] = useState(0);
+  const [updateInfo, setUpdateInfo] = useState<VersionInfo | null>(null);
   const [editorMode, setEditorMode] = useState<'script' | 'calc'>(loadEditorMode);
   const [presetId, setPresetId] = useState(() => loadSavedPresetId());
   const isLightTheme = LIGHT_PRESETS.has(presetId);
@@ -123,6 +124,7 @@ export function App() {
     }).catch(() => {});
     fetchCustomInstructions().then(setCustomInstructions).catch(() => {});
     fetchSystemPrompt().then(setBaseSystemPrompt).catch(() => {});
+    fetchVersion().then(v => { if (v.updateAvailable) setUpdateInfo(v); }).catch(() => {});
   }, []);
 
   // Restore draft on mount — skip if it's just the sample boilerplate
@@ -527,6 +529,39 @@ export function App() {
             <div class="flex justify-end px-4 py-3 border-t border-neutral-700">
               <button
                 onClick={() => setShowInsertWarning(false)}
+                class="px-3 py-1 rounded text-xs bg-blue-700 hover:bg-blue-600 text-white transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {updateInfo && (
+        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-neutral-800 rounded-lg shadow-xl w-96 max-w-[90vw]">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-700">
+              <h2 class="text-sm font-semibold text-neutral-200">Update available</h2>
+              <button
+                onClick={() => setUpdateInfo(null)}
+                class="text-neutral-400 hover:text-neutral-200 text-lg leading-none"
+              >
+                &times;
+              </button>
+            </div>
+            <div class="px-4 py-4 text-xs text-neutral-300 leading-relaxed space-y-2">
+              <p>
+                A new version of agentic-fm is available: <span class="text-blue-400 font-semibold">v{updateInfo.remote}</span> (you have v{updateInfo.local}).
+              </p>
+              <p>
+                Run <code class="bg-neutral-700 px-1.5 py-0.5 rounded text-neutral-200">git pull --ff-only</code> in your agentic-fm folder to update, then restart the server.
+              </p>
+              <p>See <code class="bg-neutral-700 px-1.5 py-0.5 rounded text-neutral-200">UPDATES.md</code> for details.</p>
+            </div>
+            <div class="flex justify-end px-4 py-3 border-t border-neutral-700">
+              <button
+                onClick={() => setUpdateInfo(null)}
                 class="px-3 py-1 rounded text-xs bg-blue-700 hover:bg-blue-600 text-white transition-colors"
               >
                 OK
