@@ -148,6 +148,15 @@ When an error is thrown, the errorTrace has this structure:
 
 As errors propagate through the script chain, each script adds its own entry to the `errorTrace` array. This provides a complete trace from the point of failure to the top-level caller.
 
+## Relationship to Single-Pass Loop
+
+Clew is Taiko's implementation of the single-pass loop pattern described in `agent/docs/knowledge/single-pass-loop.md`. When the Clew custom functions are available in the solution, **always** use Clew instead of the generic pattern. The generic single-pass loop applies only as a conceptual reference or as a fallback in solutions where Clew is not installed.
+
+**Decision hierarchy:**
+
+1. Clew CFs exist in the solution → use Clew (this document)
+2. Clew CFs do NOT exist → use generic single-pass loop (`agent/docs/knowledge/single-pass-loop.md`)
+
 ## Best Practices
 
 ### DO
