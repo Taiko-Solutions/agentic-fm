@@ -1,6 +1,6 @@
 # agentic-fm 🗄️ » 📂 » 🧠
 
-AI-powered script development for FileMaker Pro. Generate, modify, and validate `fmxmlsnippet` code that pastes directly into FileMaker with a high degree of confidence.
+The agentic harness for empowering Claris FileMaker. Analyze solutions, generate/update scripts, design layouts, build schema & more — all through AI that understands your live FileMaker environment.
 
 Visual introduction over at the website [agentic-fm.com](https://agentic-fm.com)
 
