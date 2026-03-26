@@ -705,6 +705,21 @@ function solutionFromContext(agentDir: string): string | undefined {
   } catch { return undefined; }
 }
 
+/** Cached scripts index — avoids re-reading and parsing the file on every search */
+let cachedScriptsIndex: { path: string; mtime: number; rows: string[][] } | null = null;
+
+function getScriptsIndex(main: string, solution: string | undefined): string[][] {
+  const indexPath = path.join(resolveContextDir(main, solution), 'scripts.index');
+  const mtime = fs.statSync(indexPath).mtimeMs;
+  if (cachedScriptsIndex && cachedScriptsIndex.path === indexPath && cachedScriptsIndex.mtime === mtime) {
+    return cachedScriptsIndex.rows;
+  }
+  const data = fs.readFileSync(indexPath, 'utf-8');
+  const rows = parseIndex(data);
+  cachedScriptsIndex = { path: indexPath, mtime, rows };
+  return rows;
+}
+
 /** Search scripts.index for matching scripts */
 function searchScripts(
   _agent: string,
@@ -712,9 +727,7 @@ function searchScripts(
 ): { name: string; id: number; folder: string }[] {
   const main = mainAgentDir();
   const solution = solutionFromContext(main);
-  const indexPath = path.join(resolveContextDir(main, solution), 'scripts.index');
-  const data = fs.readFileSync(indexPath, 'utf-8');
-  const rows = parseIndex(data); // each row: [ScriptName, ScriptID, FolderPath]
+  const rows = getScriptsIndex(main, solution); // each row: [ScriptName, ScriptID, FolderPath]
 
   const isNumeric = /^\d+$/.test(query);
 

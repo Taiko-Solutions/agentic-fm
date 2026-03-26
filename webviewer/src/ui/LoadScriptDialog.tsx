@@ -64,12 +64,17 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
     resultRefs.current = [];
   }, [results]);
 
+  // Minimum characters before triggering a search (numeric queries are exempt — ID lookup)
+  const MIN_SEARCH_CHARS = 3;
+
   // Debounced search
   const handleInput = useCallback((value: string) => {
     setQuery(value);
     setError('');
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!value.trim()) {
+    const trimmed = value.trim();
+    const isNumeric = /^\d+$/.test(trimmed);
+    if (!trimmed || (!isNumeric && trimmed.length < MIN_SEARCH_CHARS)) {
       setResults([]);
       setSearching(false);
       return;
@@ -77,7 +82,7 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
     setSearching(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await searchScripts(value.trim());
+        const res = await searchScripts(trimmed);
         setResults(res);
       } catch (err) {
         setResults([]);
@@ -186,7 +191,7 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
             type="text"
             value={query}
             onInput={(e) => handleInput((e.target as HTMLInputElement).value)}
-            placeholder="Enter script name or ID..."
+            placeholder="Search by name (3+ chars) or script ID..."
             class="w-full bg-neutral-700 text-neutral-200 text-sm rounded px-3 py-2 outline-none placeholder:text-neutral-500 focus:ring-1 focus:ring-blue-500"
             disabled={loading}
           />
@@ -206,7 +211,11 @@ export function LoadScriptDialog({ context, editorContent, onLoad, onContextUpda
             <div class="text-red-400 text-xs py-2">{error}</div>
           )}
 
-          {!loading && !searching && query.trim() && results.length === 0 && !error && (
+          {!loading && !searching && query.trim() && !(/^\d+$/.test(query.trim())) && query.trim().length < MIN_SEARCH_CHARS && (
+            <div class="text-neutral-500 text-xs py-4 text-center">Type at least {MIN_SEARCH_CHARS} characters to search</div>
+          )}
+
+          {!loading && !searching && query.trim() && ((/^\d+$/.test(query.trim())) || query.trim().length >= MIN_SEARCH_CHARS) && results.length === 0 && !error && (
             <div class="text-neutral-500 text-xs py-4 text-center">No scripts found</div>
           )}
 
