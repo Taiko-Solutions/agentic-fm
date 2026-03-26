@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'preact/hooks';
 import * as monaco from 'monaco-editor';
 import { registerFileMakerLanguage, registerCompletionProviders, attachDiagnostics, LANGUAGE_ID } from './language/filemaker-script';
-import { updateConversionDiagnostics } from './language/diagnostics';
+import { updateConversionDiagnostics } from '@/linter/diagnostics-adapter';
 import { editorConfig } from './editor.config';
 import { fetchStepCatalog } from '@/api/client';
 import type { StepCatalogEntry } from '@/converter/catalog-types';

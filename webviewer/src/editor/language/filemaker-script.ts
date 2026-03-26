@@ -2,7 +2,7 @@ import * as monaco from 'monaco-editor';
 import { monarchLanguage, languageConfiguration } from './monarch';
 import { buildMonacoTheme, loadSavedTheme, loadSavedPresetId } from './themes';
 import { createCompletionProvider, createFunctionCompletionProvider, createVariableCompletionProvider, createFieldCompletionProvider } from './completion';
-import { createDiagnosticsProvider } from './diagnostics';
+import { createLintDiagnosticsProvider } from '@/linter/diagnostics-adapter';
 import { loadEditorMode } from './themes';
 import type { StepCatalogEntry } from '@/converter/catalog-types';
 
@@ -49,7 +49,7 @@ export function attachDiagnostics(
   editor: monaco.editor.IStandaloneCodeEditor,
   catalog?: StepCatalogEntry[],
 ): monaco.IDisposable {
-  return createDiagnosticsProvider(editor, catalog ?? []);
+  return createLintDiagnosticsProvider(editor, catalog ?? []);
 }
 
 export { LANGUAGE_ID };
