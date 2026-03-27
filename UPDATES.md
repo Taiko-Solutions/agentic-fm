@@ -1,5 +1,23 @@
 # Keeping agentic-fm Up to Date
 
+## Recent Changes
+
+### Context() custom function v2 (2026-03-27)
+
+**Action required**: Update the `Context()` custom function in your FileMaker solution.
+
+The `Context()` function has been updated to v2 with three fixes:
+
+1. **Tables keyed by TO name** — previously keyed by base table name, causing entries to be overwritten when multiple table occurrences share the same base table. This broke field resolution for the layout's own TO.
+2. **Script/layout names with brackets** — names containing `[` or `]` (e.g. `"Prepare for Distribution [OLD]"`) broke `JSONSetElement`'s path parser, causing the entire scripts or layouts section to be empty `{}`. Now built via string concatenation.
+3. **Version tracking** — output now includes `"context_version": 2` so tools can detect outdated functions.
+
+**How to update**: Copy the updated function from `agent/sandbox/context.fmfn` into your solution's custom function editor, replacing the existing `Context` function. Then run **Push Context** to regenerate `CONTEXT.json`.
+
+**How to tell if you're affected**: If the webviewer status bar shows "Context() outdated — update to v2", or if your `CONTEXT.json` has empty `scripts: {}` or `layouts: {}`, you need to update.
+
+---
+
 agentic-fm is actively maintained. New features, fixes, and FileMaker catalog improvements are added regularly. Because you downloaded the project as a folder of files on your computer, those updates do not reach you automatically — you need to pull them in manually.
 
 This guide walks you through how to know when an update is available and how to apply it, even if you are not familiar with git or the command line.

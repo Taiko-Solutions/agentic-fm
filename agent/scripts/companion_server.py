@@ -259,6 +259,20 @@ class CompanionHandler(BaseHTTPRequestHandler):
 
         output_path = os.path.join(repo_path, "agent", "CONTEXT.json")
 
+        # Check context_version and warn if outdated
+        CONTEXT_VERSION_CURRENT = 2
+        try:
+            ctx_data = json.loads(context_str) if isinstance(context_str, str) else context
+            ctx_version = ctx_data.get("context_version")
+            if ctx_version is None or ctx_version < CONTEXT_VERSION_CURRENT:
+                log.warning(
+                    "CONTEXT.json has context_version=%s (current is %s). "
+                    "Update the Context() custom function in your solution.",
+                    ctx_version, CONTEXT_VERSION_CURRENT,
+                )
+        except (ValueError, TypeError, AttributeError):
+            pass
+
         try:
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             with open(output_path, "w", encoding="utf-8") as f:
