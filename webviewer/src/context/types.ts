@@ -1,6 +1,10 @@
 /** TypeScript types matching agent/CONTEXT.example.json schema */
 
+/** Current expected context_version from the Context() custom function */
+export const CONTEXT_VERSION_CURRENT = 2;
+
 export interface FMContext {
+  context_version?: number;
   solution?: string;
   task?: string;
   generated_at?: string;

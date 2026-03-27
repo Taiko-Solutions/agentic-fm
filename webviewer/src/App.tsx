@@ -464,6 +464,7 @@ export function App() {
         solution={context?.solution}
         layout={context?.current_layout?.name}
         generatedAt={generatedAt}
+        contextVersion={context?.context_version}
         onDetail={statusDetail ? () => setShowStatusDetail(true) : undefined}
       />
 
