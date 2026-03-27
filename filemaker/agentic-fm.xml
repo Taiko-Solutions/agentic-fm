@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <Group groupCollapsed="False" includeInMenu="False" id="277" name="agentic-fm">
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="278" name="Get agentic-fm path">
+  <Group groupCollapsed="False" includeInMenu="False" id="1" name="agentic-fm">
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="2" name="Get agentic-fm path">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Set a global variable used by other scripts to key/value pairs used by agentic-fm.</Text>
       </Step>
@@ -113,7 +113,7 @@
         <Calculation><![CDATA[True]]></Calculation>
       </Step>
     </Script>
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="279" name="Explode XML">
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="3" name="Explode XML">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Push out solution XML to be parsed for AI use.</Text>
       </Step>
@@ -247,7 +247,7 @@
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="1" name="Perform Script">
-        <Script id="278" name="Get agentic-fm path"/>
+        <Script id="2" name="Get agentic-fm path"/>
       </Step>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>
@@ -424,7 +424,7 @@
       <Step enable="True" id="103" name="Exit Script"/>
       <Step enable="True" id="89" name="# (comment)"/>
     </Script>
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="280" name="Push Context">
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="4" name="Push Context">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Push the current layout context to agentic-fm.</Text>
       </Step>
@@ -495,7 +495,7 @@
         <Calculation><![CDATA[not IsEmpty ( $layout )]]></Calculation>
       </Step>
       <Step enable="True" id="1" name="Perform Script">
-        <Script id="288" name="AGFMGoToLayout"/>
+        <Script id="14" name="AGFMGoToLayout"/>
       </Step>
       <Step enable="True" id="70" name="End If"/>
       <Step enable="True" id="89" name="# (comment)"/>
@@ -567,7 +567,7 @@
         <Text>Check for a valid install.</Text>
       </Step>
       <Step enable="True" id="1" name="Perform Script">
-        <Script id="278" name="Get agentic-fm path"/>
+        <Script id="2" name="Get agentic-fm path"/>
       </Step>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>
@@ -762,8 +762,8 @@
       <Step enable="True" id="103" name="Exit Script"/>
       <Step enable="True" id="89" name="# (comment)"/>
     </Script>
-    <Group groupCollapsed="False" includeInMenu="False" id="289" name="OData">
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="288" name="AGFMGoToLayout">
+    <Group groupCollapsed="False" includeInMenu="False" id="13" name="OData">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="14" name="AGFMGoToLayout">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</Text>
         </Step>
@@ -800,7 +800,7 @@
         <Step enable="True" id="6" name="Go to Layout">
           <LayoutDestination value="LayoutNameByCalc"/>
           <Calculation><![CDATA[$layout]]></Calculation>
-          <Layout>
+          <Layout id="0" name="">
             <Calculation><![CDATA[$layout]]></Calculation>
           </Layout>
         </Step>
@@ -813,7 +813,7 @@
         </Step>
         <Step enable="True" id="89" name="# (comment)"/>
       </Script>
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="287" name="AGFMScriptBridge">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="15" name="AGFMScriptBridge">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: OData bridge &#x2014; accepts JSON { script, parameter } and performs the named script</Text>
         </Step>
@@ -907,7 +907,7 @@
 )]]></Calculation>
         </Step>
       </Script>
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="315" name="AGFMEvaluation">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="16" name="AGFMEvaluation">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</Text>
         </Step>
@@ -982,7 +982,7 @@
         <Step enable="True" id="6" name="Go to Layout">
           <LayoutDestination value="LayoutNameByCalc"/>
           <Calculation><![CDATA[$layout]]></Calculation>
-          <Layout>
+          <Layout id="0" name="">
             <Calculation><![CDATA[$layout]]></Calculation>
           </Layout>
         </Step>
@@ -1062,8 +1062,8 @@
         </Step>
       </Script>
     </Group>
-    <Group groupCollapsed="False" includeInMenu="False" id="281" name="Extras">
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="282" name="Agentic-fm webviewer">
+    <Group groupCollapsed="False" includeInMenu="False" id="11" name="Extras">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="9" name="Agentic-fm Webviewer">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: Start or stop the agentic-fm webviewer from within FileMaker.</Text>
         </Step>
@@ -1088,7 +1088,7 @@
         </Step>
         <Step enable="True" id="89" name="# (comment)"/>
         <Step enable="True" id="1" name="Perform Script">
-          <Script id="278" name="Get agentic-fm path"/>
+          <Script id="2" name="Get agentic-fm path"/>
         </Step>
         <Step enable="True" id="68" name="If">
           <Restore state="False"/>
@@ -1399,7 +1399,7 @@
         <Step enable="True" id="89" name="# (comment)"/>
         <Step enable="True" id="103" name="Exit Script"/>
       </Script>
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="283" name="Agentic-fm Menu">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="5" name="Agentic-fm Menu">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: Handle all menu calls from a custom menu and pass through to a web viewer.</Text>
         </Step>
@@ -1432,6 +1432,48 @@
             </P>
           </Parameters>
         </Step>
+        <Step enable="True" id="125" name="Else If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$action = "editor.action.clipboardPasteAction"]]></Calculation>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Handle special case of pasting when clipboard has more than just text.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>WebKit paste fails when rich/binary formats (XMSS, RTF, scrap styles) are on the pasteboard.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Known issue with MBS: If FileMaker objects are copied to the clipboard they won't paste unless switching out of FileMaker and coming back.</Text>
+        </Step>
+        <Step enable="True" id="48" name="Paste">
+          <NoStyle state="True"/>
+          <SelectAll state="True"/>
+          <LinkAvail state="False"/>
+          <Field table="Table" id="13" name="CLIPBOARD"/>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Table::CLIPBOARD]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$text</Name>
+        </Step>
+        <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+          <ObjectName>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </ObjectName>
+          <FunctionName>
+            <Calculation><![CDATA["insertAtEditorCursor"]]></Calculation>
+          </FunctionName>
+          <Parameters Count="1">
+            <P>
+              <Calculation><![CDATA[$text]]></Calculation>
+            </P>
+          </Parameters>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script"/>
         <Step enable="True" id="69" name="Else">
           <Restore state="False"/>
         </Step>
@@ -1451,8 +1493,9 @@
         <Step enable="True" id="70" name="End If"/>
         <Step enable="True" id="89" name="# (comment)"/>
         <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="89" name="# (comment)"/>
       </Script>
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="291" name="Agentic-fm Paste">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="18" name="Agentic-fm Paste">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: Open a script tab in Script Workspace. Used by Tier 2 deployment via companion /trigger.</Text>
         </Step>
@@ -1525,7 +1568,7 @@
 )]]></Calculation>
         </Step>
       </Script>
-      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="284" name="Agentic-fm Debug">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="10" name="Agentic-fm Debug">
         <Step enable="True" id="89" name="# (comment)">
           <Text>PURPOSE: Write runtime debug state to agent/debug/output.json for agent inspection.</Text>
         </Step>
@@ -1620,9 +1663,10 @@
 		[ "response"  ; $response  ; JSONString ]
 	) ; JSONRaw ]
 )]]></Calculation>
-          <Script id="284" name="Agentic-fm Debug"/>
+          <Script id="10" name="Agentic-fm Debug"/>
         </Step>
       </Script>
     </Group>
+    <Group groupCollapsed="False" includeInMenu="False" id="19" name="Tests"/>
   </Group>
 </fmxmlsnippet>

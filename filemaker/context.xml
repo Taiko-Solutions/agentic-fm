@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <fmxmlsnippet type="FMObjectList">
-  <CustomFunction id="1" functionArity="1" visible="True" parameters="task" name="Context">
-    <Calculation><![CDATA[/*
+    <CustomFunction id="1" functionArity="1" visible="True" parameters="task" name="Context">
+        <Calculation><![CDATA[/*
  * Context ( task )
  *
  * Generates a JSON context document for AI script generation.
@@ -71,7 +71,7 @@ Let ( [
             ~to  = If ( ~sep > 0 ; Left ( ~fld ; ~sep - 1 ) ; "" )
         ] ;
             If (
-                ~to <> "" and IsEmpty ( FilterValues ( ~_tos ; ~to ) ) ;
+				~to ≠ "" and IsEmpty ( FilterValues ( ~_tos ; ~to ) ) ;
                 ~_tos & ¶ & ~to ;
                 ~_tos
             )
@@ -84,7 +84,10 @@ Let ( [
        Build tables JSON
        For each unique TO: query FileMaker_Fields for all fields,
        map SQL types to FileMaker types, and assemble:
-       { "BaseTableName": { id, to, to_id, fields: { ... } } }
+       { "TOName": { id, base_table, to, to_id, fields: { ... } } }
+
+       Keyed by TO name (not base table name) so that multiple TOs
+       sharing the same base table each get their own entry.
        =================================================================== */
 
     ~tablesJSON = While ( [
@@ -157,7 +160,7 @@ Let ( [
                         [ "type" ; ~fmType ; JSONString ]
                     ) ;
                     ~fieldObj = If (
-                        ~fclass <> "Normal" and ~fclass <> "" ;
+						~fclass ≠ "Normal" and ~fclass ≠ "" ;
                         JSONSetElement ( ~fieldObj ; "fieldtype" ; ~fclass ; JSONString ) ;
                         ~fieldObj
                     )
@@ -170,13 +173,16 @@ Let ( [
 
             /* Build table object */
             ~tObj = JSONSetElement ( "{}" ;
-                [ "id"     ; ~btId      ; JSONNumber ] ;
-                [ "to"     ; ~toName    ; JSONString ] ;
-                [ "to_id"  ; ~toId      ; JSONNumber ] ;
-                [ "fields" ; ~fieldsObj ; JSONObject ]
+                [ "id"         ; ~btId      ; JSONNumber ] ;
+                [ "base_table" ; ~btName    ; JSONString ] ;
+                [ "to"         ; ~toName    ; JSONString ] ;
+                [ "to_id"      ; ~toId      ; JSONNumber ] ;
+                [ "fields"     ; ~fieldsObj ; JSONObject ]
             )
         ] ;
-            JSONSetElement ( ~_tResult ; ~btName ; ~tObj ; JSONObject )
+            /* Key by TO name — unique, prevents overwrites when
+               multiple TOs share the same base table */
+            JSONSetElement ( ~_tResult ; ~toName ; ~tObj ; JSONObject )
         )
     ] ;
         ~_tResult
@@ -208,6 +214,10 @@ Let ( [
     /* ===================================================================
        Scripts JSON: { "ScriptName": { "id": N }, ... }
        Includes all scripts in the file.
+
+       Built via string concatenation rather than JSONSetElement to avoid
+       issues with script names containing characters that JSONSetElement
+       interprets as path operators ([ ] . " \).
        =================================================================== */
 
     ~sNames = ScriptNames ( ~fn ) ;
@@ -216,27 +226,36 @@ Let ( [
     ~scriptsJSON = While ( [
         ~_sCount  = ValueCount ( ~sNames ) ;
         ~_si      = 0 ;
-        ~_sResult = "{}"
+        ~_sPairs  = ""
     ] ;
         ~_si < ~_sCount ;
     [
         ~_sCount  = ~_sCount ;
         ~_si      = ~_si + 1 ;
-        ~_sResult = Let ( [
+        ~_sPairs  = Let ( [
             ~sName = GetValue ( ~sNames ; ~_si ) ;
-            ~sId   = GetValue ( ~sIds ; ~_si )
+            ~sId   = GetValue ( ~sIds ; ~_si ) ;
+			/* Escape the only character that would break a JSON string
+			   value: a double quote. Backslashes are theoretically possible
+			   but essentially never appear in FM script names.
+               Char(34) = double quote, Char(92) = backslash. */
+            ~escaped = Substitute ( ~sName ;
+                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;
+                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]
+            ) ;
+            ~q = Char ( 34 ) ;
+            ~pair = ~q & ~escaped & ~q & ":{" & ~q & "id" & ~q & ":" & ~sId & "}"
         ] ;
             If ( not IsEmpty ( ~sName ) ;
-                JSONSetElement ( ~_sResult ;
-                    ~sName ;
-                    JSONSetElement ( "{}" ; "id" ; ~sId ; JSONNumber ) ;
-                    JSONObject
+                If ( IsEmpty ( ~_sPairs ) ;
+                    ~pair ;
+                    ~_sPairs & "," & ~pair
                 ) ;
-                ~_sResult
+                ~_sPairs
             )
         )
     ] ;
-        ~_sResult
+        "{" & ~_sPairs & "}"
     ) ;
 
     /* ===================================================================
@@ -250,27 +269,34 @@ Let ( [
     ~layoutsJSON = While ( [
         ~_lCount  = ValueCount ( ~layNames ) ;
         ~_li      = 0 ;
-        ~_lResult = "{}"
+        ~_lPairs  = ""
     ] ;
         ~_li < ~_lCount ;
     [
         ~_lCount  = ~_lCount ;
         ~_li      = ~_li + 1 ;
-        ~_lResult = Let ( [
+        ~_lPairs  = Let ( [
             ~lName = GetValue ( ~layNames ; ~_li ) ;
-            ~lId   = GetValue ( ~layIds ; ~_li )
+            ~lId   = GetValue ( ~layIds ; ~_li ) ;
+            /* Escape characters that would break a JSON string value.
+               Char(34) = double quote, Char(92) = backslash. */
+            ~escaped = Substitute ( ~lName ;
+                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;
+                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]
+            ) ;
+            ~q = Char ( 34 ) ;
+            ~pair = ~q & ~escaped & ~q & ":{" & ~q & "id" & ~q & ":" & ~lId & "}"
         ] ;
             If ( not IsEmpty ( ~lName ) ;
-                JSONSetElement ( ~_lResult ;
-                    ~lName ;
-                    JSONSetElement ( "{}" ; "id" ; ~lId ; JSONNumber ) ;
-                    JSONObject
+                If ( IsEmpty ( ~_lPairs ) ;
+                    ~pair ;
+                    ~_lPairs & "," & ~pair
                 ) ;
-                ~_lResult
+                ~_lPairs
             )
         )
     ] ;
-        ~_lResult
+        "{" & ~_lPairs & "}"
     ) ;
 
     /* ===================================================================
@@ -335,14 +361,14 @@ Let ( [
         ~_oi     = ~_oi + 1 ;
         ~_oIdx   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;
                        If (
-                           not IsEmpty ( ~n ) and ~n <> "<" and ~n <> ">" ;
+		                   not IsEmpty ( ~n ) and ~n ≠ "<" and ~n ≠ ">" ;
                            ~_oIdx + 1 ;
                            ~_oIdx
                        )
                    ) ;
         ~_oArr   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;
                        If (
-                           not IsEmpty ( ~n ) and ~n <> "<" and ~n <> ">" ;
+		                   not IsEmpty ( ~n ) and ~n ≠ "<" and ~n ≠ ">" ;
                            JSONSetElement ( ~_oArr ; ~_oIdx - 1 ; ~n ; JSONString ) ;
                            ~_oArr
                        )
@@ -355,9 +381,21 @@ Let ( [
        Assemble final JSON
        =================================================================== */
 
+    /* ISO 8601 UTC timestamp for staleness detection */
+    ~ts = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) ;
+    ~generatedAt =
+        Year ( ~ts ) & "-" &
+        Right ( "0" & Month ( ~ts ) ; 2 ) & "-" &
+        Right ( "0" & Day ( ~ts ) ; 2 ) & "T" &
+        Right ( "0" & Hour ( ~ts ) ; 2 ) & ":" &
+        Right ( "0" & Minute ( ~ts ) ; 2 ) & ":" &
+        Right ( "0" & Seconds ( ~ts ) ; 2 ) & "Z" ;
+
     ~json = JSONSetElement ( "{}" ;
+        [ "context_version"           ; 2                    ; JSONNumber ] ;
         [ "solution"                  ; ~fn                  ; JSONString ] ;
         [ "task"                      ; task                 ; JSONString ] ;
+        [ "generated_at"              ; ~generatedAt         ; JSONString ] ;
         [ "current_layout.name"       ; ~layoutName          ; JSONString ] ;
         [ "current_layout.id"         ; ~layoutId            ; JSONNumber ] ;
         [ "current_layout.base_to"    ; ~layoutTO            ; JSONString ] ;
@@ -373,5 +411,5 @@ Let ( [
 ] ;
     ~json
 )]]></Calculation>
-  </CustomFunction>
+    </CustomFunction>
 </fmxmlsnippet>
