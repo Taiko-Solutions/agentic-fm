@@ -1,0 +1,92 @@
+{
+  "_comment": "Taiko Solutions — FMLint overrides. Estas reglas sobreescriben los defaults de agent/fmlint/fmlint.config.json",
+
+  "rules": {
+
+    "N001": {
+      "enabled": true,
+      "severity": "warning",
+      "_comment": "Taiko usa operadores Unicode (≠, ≤, ≥) como estándar"
+    },
+
+    "N002": {
+      "severity": "warning",
+      "allow_repetition_suffix": true,
+      "patterns": {
+        "$$~": { "regex": "^\\$\\$~[A-Z][A-Z0-9._]*$", "label": "$$~ALL_CAPS" },
+        "$$":  { "regex": "^\\$\\$[A-Z][a-zA-Z0-9]*$",  "label": "$$PascalCase" },
+        "$_":  { "regex": "^\\$_[A-Z][a-zA-Z0-9]*$",     "label": "$_PascalCase" },
+        "~":   { "regex": "^~[a-z][a-zA-Z0-9]*$",         "label": "~camelCase" },
+        "$":   { "regex": "^\\$[A-Z][a-zA-Z0-9]*$",       "label": "$PascalCase" }
+      },
+      "_comment": "Taiko usa $PascalCase, $$PascalCase y $_PascalCase (temporales)"
+    },
+
+    "N003": {
+      "severity": "info",
+      "boolean_prefixes": ["is", "has", "can", "should", "will", "did", "was", "needs", "allows"],
+      "_comment": "Prefijos booleanos en inglés — los nombres de variable son PascalCase pero los prefijos booleanos se mantienen"
+    },
+
+    "D001": {
+      "keyword": "Propósito:",
+      "case_sensitive": false,
+      "severity": "warning",
+      "_comment": "Taiko documenta en español. El header usa 'Propósito:' en lugar de 'PURPOSE:'"
+    },
+
+    "D002": {
+      "enabled": false,
+      "_comment": "Taiko no usa el patrón $README con Insert Text deshabilitado"
+    },
+
+    "D003": {
+      "min_steps": 30,
+      "severity": "info",
+      "_comment": "Separadores de sección Taiko usan formato de 3 líneas (---, NOMBRE, #). Umbral más alto por scripts más estructurados"
+    },
+
+    "C003": {
+      "severity": "warning",
+      "extra_known_functions": [
+        "error.Throw",
+        "error.ThrowIf",
+        "error.ThrowIfLast",
+        "error.ThrowIfMissingParam",
+        "error.ThrowIfWrongContext",
+        "error.CreateVarsFromKeys",
+        "error.InSubscript",
+        "error.InSubscriptThrow",
+        "error.DeleteTrace",
+        "error.WasThrown",
+        "error.GetTrace",
+        "json.CreateVars",
+        "json.IsValid",
+        "json.IsErrorTrace",
+        "json.ArrayAddToFront",
+        "Log.Entry",
+        "Log.Data",
+        "Log.Reset",
+        "getScriptEnvironment",
+        "IsRunningOnServer",
+        "SQL.GetTableName",
+        "SQL.GetFieldName",
+        "SQL.GetColumn",
+        "SQL.GetColumn2Fields",
+        "SQL.GetRecordsAsJSON",
+        "SQL.RecordExists",
+        "SQL.GetColumnStatement",
+        "TriggersAreActive",
+        "TriggersDisable",
+        "TriggersEnable",
+        "TriggersReset"
+      ],
+      "_comment": "Custom functions del framework Taiko: Clew (error handling), SQL helpers, Triggers"
+    },
+
+    "R008": {
+      "stale_minutes": 120,
+      "_comment": "2 horas de tolerancia — en desarrollo iterativo el Context se regenera con menos frecuencia"
+    }
+  }
+}
