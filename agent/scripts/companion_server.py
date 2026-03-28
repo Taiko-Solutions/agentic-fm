@@ -205,6 +205,8 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._handle_webviewer_stop()
         elif self.path == "/webviewer/push":
             self._handle_webviewer_push()
+        elif self.path == "/lint":
+            self._handle_lint()
         else:
             self._send_json({"error": "Not found"}, status=404)
 
@@ -331,6 +333,20 @@ class CompanionHandler(BaseHTTPRequestHandler):
             context_str = json.dumps(context, indent=2, ensure_ascii=False)
 
         output_path = os.path.join(repo_path, "agent", "CONTEXT.json")
+
+        # Check context_version and warn if outdated
+        CONTEXT_VERSION_CURRENT = 2
+        try:
+            ctx_data = json.loads(context_str) if isinstance(context_str, str) else context
+            ctx_version = ctx_data.get("context_version")
+            if ctx_version is None or ctx_version < CONTEXT_VERSION_CURRENT:
+                log.warning(
+                    "CONTEXT.json has context_version=%s (current is %s). "
+                    "Update the Context() custom function in your solution.",
+                    ctx_version, CONTEXT_VERSION_CURRENT,
+                )
+        except (ValueError, TypeError, AttributeError):
+            pass
 
         try:
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -627,6 +643,54 @@ class CompanionHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
+
+    def _handle_lint(self):
+        """Lint FileMaker code via FMLint engine.
+
+        POST /lint
+        Body: { "content": "...", "format": "xml"|"hr"|null, "tier": 1|2|3|null,
+                "disable": ["N003", ...] }
+        Returns: LintResult as JSON
+        """
+        try:
+            body = json.loads(self._read_body())
+        except (json.JSONDecodeError, ValueError):
+            self._send_json({"error": "Invalid JSON body"}, status=400)
+            return
+
+        content = body.get("content", "")
+        if not content:
+            self._send_json({"error": "Missing 'content' field"}, status=400)
+            return
+
+        fmt = body.get("format")
+        tier = body.get("tier")
+        disabled = body.get("disable", [])
+
+        try:
+            # Resolve project root from this script's location
+            here = os.path.dirname(os.path.abspath(__file__))
+            project_root = os.path.join(here, "..", "..")
+
+            sys.path.insert(0, project_root)
+            from agent.fmlint import lint
+
+            config = {}
+            if disabled:
+                config["disable"] = disabled
+            if tier is not None:
+                config["max_tier"] = tier
+
+            result = lint(
+                content,
+                fmt=fmt,
+                project_root=project_root,
+                config=config,
+            )
+            self._send_json(result.to_dict())
+        except Exception as e:
+            logging.exception("FMLint error")
+            self._send_json({"error": str(e)}, status=500)
 
     def _read_body(self) -> bytes:
         length = int(self.headers.get("Content-Length", 0))

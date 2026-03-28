@@ -1,4 +1,14 @@
-# 🚀 agentic-fm Quickstart
+# agentic-fm 🗄️ » 📂 » 🧠 Quickstart
+
+## ⚡ Fastest way to get started
+
+Clone the repo, open it in your AI coding tool, and prompt:
+
+> **"Help me set up agentic-fm"**
+
+The `/setup` skill detects what's already configured, checks each dependency, and walks you through the remaining steps interactively — no need to read ahead. Everything below is the manual reference if you prefer to do it yourself.
+
+---
 
 ## 🔀 Two ways to work
 
