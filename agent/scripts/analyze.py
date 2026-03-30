@@ -6,10 +6,10 @@ Reads pre-indexed data (index files, xref, layout summaries, sanitized scripts)
 and produces a structured solution profile. Never reads raw xml_parsed XML.
 
 Usage:
-  python3 agent/scripts/analyze.py -s "FM_Quickstart_v26_0_1"
-  python3 agent/scripts/analyze.py -s "FM_Quickstart_v26_0_1" --format markdown
-  python3 agent/scripts/analyze.py -s "FM_Quickstart_v26_0_1" --deep
-  python3 agent/scripts/analyze.py -s "FM_Quickstart_v26_0_1" --ensure-prerequisites
+  python3 agent/scripts/analyze.py -s "Solution_Name_Here"
+  python3 agent/scripts/analyze.py -s "Solution_Name_Here" --format markdown
+  python3 agent/scripts/analyze.py -s "Solution_Name_Here" --deep
+  python3 agent/scripts/analyze.py -s "Solution_Name_Here" --ensure-prerequisites
   python3 agent/scripts/analyze.py --list-extensions
 
 Options:
@@ -31,6 +31,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -93,6 +94,41 @@ PROJECT_ROOT = SCRIPT_DIR.parent.parent  # agent/scripts/ -> project root
 
 CONTEXT_DIR = PROJECT_ROOT / "agent" / "context"
 XML_PARSED_DIR = PROJECT_ROOT / "agent" / "xml_parsed"
+
+# ---------------------------------------------------------------------------
+# Status output
+# ---------------------------------------------------------------------------
+
+_STATUS_JSON = False  # Set via --status-json flag
+_T0 = 0.0  # Analysis start time
+
+
+def _status(phase, event="start", **kwargs):
+    """Emit a status message. JSONL to stderr when --status-json, else print()."""
+    elapsed = round(time.monotonic() - _T0, 4) if _T0 else 0
+    if _STATUS_JSON:
+        msg = {"status": f"phase_{event}", "phase": phase, "t": elapsed}
+        msg.update(kwargs)
+        print(json.dumps(msg), file=sys.stderr)
+    else:
+        if event == "start":
+            print(f"  {kwargs.get('label', phase)}...")
+        elif event == "end":
+            dt = kwargs.get("elapsed", 0)
+            items = kwargs.get("items")
+            extra = f" ({items} items)" if items else ""
+            print(f"    {dt:.3f}s{extra}")
+        elif event == "info":
+            print(f"  {kwargs.get('label', '')}")
+        elif event == "complete":
+            print(f"\n==> Analysis complete. ({elapsed:.3f}s)")
+            phases = kwargs.get("phases", {})
+            if phases and _STATUS_JSON:
+                pass  # Already emitted per-phase
+            elif phases:
+                print("  Phase timing:")
+                for p, t in phases.items():
+                    print(f"    {p:.<30s} {t:.3f}s")
 
 
 # ---------------------------------------------------------------------------
@@ -510,7 +546,7 @@ def detect_naming_conventions(fields_index):
 
 
 # ---------------------------------------------------------------------------
-# Script analysis
+# Script file cache
 # ---------------------------------------------------------------------------
 
 def find_script_files(solution_name):
@@ -521,13 +557,66 @@ def find_script_files(solution_name):
     return sorted(scripts_dir.rglob("*.txt"))
 
 
+def load_script_cache(solution_name, scripts_index):
+    """Load all script files once. Returns list of dicts (preserving per-file iteration).
+
+    Each entry: {"name": str, "path": Path, "text": str, "lines": list,
+                 "line_count": int, "is_empty": bool, "calls": list,
+                 "layout_refs": list, "has_insert_from_url": bool,
+                 "has_send_mail": bool, "has_export_records": bool,
+                 "has_import_records": bool}
+    """
+    scripts_by_id = {s["id"]: s for s in scripts_index}
+    script_files = find_script_files(solution_name)
+    cache = []
+
+    for script_path in script_files:
+        # Resolve script name
+        script_id = extract_script_id_from_filename(script_path.name)
+        if script_id and script_id in scripts_by_id:
+            script_name = scripts_by_id[script_id]["name"]
+        else:
+            script_name = script_path.stem.rsplit(" - ID ", 1)[0]
+
+        try:
+            with open(script_path, "r", encoding="utf-8") as f:
+                text = f.read()
+        except (OSError, UnicodeDecodeError):
+            continue
+
+        lines = text.strip().split("\n")
+        non_empty_lines = [l for l in lines if l.strip()]
+
+        cache.append({
+            "name": script_name,
+            "path": script_path,
+            "text": text,
+            "lines": lines,
+            "line_count": len(lines),
+            "is_empty": len(non_empty_lines) == 0,
+            "calls": RE_PERFORM_SCRIPT.findall(text),
+            "layout_refs": RE_LAYOUT_REF.findall(text),
+            "has_insert_from_url": bool(RE_INSERT_FROM_URL.search(text)),
+            "has_send_mail": bool(RE_SEND_MAIL.search(text)),
+            "has_export_records": bool(RE_EXPORT_RECORDS.search(text)),
+            "has_import_records": bool(RE_IMPORT_RECORDS.search(text)),
+        })
+
+    return cache
+
+
+# ---------------------------------------------------------------------------
+# Script analysis
+# ---------------------------------------------------------------------------
+
+
 def extract_script_id_from_filename(filename):
     """Extract script ID from filename like 'Contact - Navigate To - ID 71.txt'."""
     match = re.search(r'ID (\d+)\.txt$', filename)
     return match.group(1) if match else None
 
 
-def analyze_scripts(solution_name, scripts_index, deep=False):
+def analyze_scripts(solution_name, scripts_index, script_cache, deep=False):
     """Analyze scripts: inventory, call chains, and optionally deep metrics."""
     # Build inventory from index
     scripts_by_id = {s["id"]: s for s in scripts_index}
@@ -544,10 +633,9 @@ def analyze_scripts(solution_name, scripts_index, deep=False):
         for folder, names in sorted(by_folder.items())
     }
 
-    # --- Call chain extraction from sanitized scripts ---
+    # --- Call chain extraction from cached scripts ---
     call_graph = {}  # script_name -> [called_script_names]
     script_line_counts = {}
-    script_files = find_script_files(solution_name)
 
     # Deep mode accumulators
     deep_metrics = None
@@ -560,27 +648,14 @@ def analyze_scripts(solution_name, scripts_index, deep=False):
             "nesting": {"max_depth": 0, "avg_depth": 0, "depths": []},
         }
 
-    for script_path in script_files:
-        script_id = extract_script_id_from_filename(script_path.name)
-        # Find script name from index
-        script_name = None
-        if script_id and script_id in scripts_by_id:
-            script_name = scripts_by_id[script_id]["name"]
-        else:
-            # Fallback: derive from filename
-            script_name = script_path.stem.rsplit(" - ID ", 1)[0]
+    for info in script_cache:
+        script_name = info["name"]
+        text = info["text"]
+        lines = info["lines"]
+        script_line_counts[script_name] = info["line_count"]
 
-        try:
-            with open(script_path, "r", encoding="utf-8") as f:
-                text = f.read()
-        except (OSError, UnicodeDecodeError):
-            continue
-
-        lines = text.strip().split("\n")
-        script_line_counts[script_name] = len(lines)
-
-        # Extract Perform Script calls
-        calls = RE_PERFORM_SCRIPT.findall(text)
+        # Extract Perform Script calls (pre-computed in cache)
+        calls = info["calls"]
         if calls:
             call_graph[script_name] = calls
 
@@ -669,7 +744,7 @@ def analyze_scripts(solution_name, scripts_index, deep=False):
 
     result = {
         "total_scripts": len(scripts_index),
-        "total_files_analyzed": len(script_files),
+        "total_files_analyzed": len(script_cache),
         "folders": folder_tree,
         "call_graph_edges": sum(len(v) for v in call_graph.values()),
         "call_graph": [
@@ -817,26 +892,23 @@ def analyze_custom_functions(solution_name):
     functions = {}
     all_cf_names = set()
 
-    # First pass: collect names
+    # First pass: collect names and read all content
+    cf_data = []  # (name, id, text) — single pass I/O
     for cf_path in cf_files:
-        # Filename: "FunctionName - ID 123.txt"
         name = cf_path.stem.rsplit(" - ID ", 1)[0]
         all_cf_names.add(name)
-
-    # Second pass: analyze dependencies
-    for cf_path in cf_files:
-        name = cf_path.stem.rsplit(" - ID ", 1)[0]
         cf_id = None
         id_match = re.search(r'ID (\d+)$', cf_path.stem)
         if id_match:
             cf_id = id_match.group(1)
-
         try:
             with open(cf_path, "r", encoding="utf-8") as f:
                 text = f.read()
         except (OSError, UnicodeDecodeError):
             continue
+        cf_data.append((name, cf_id, text))
 
+    for name, cf_id, text in cf_data:
         # Count parameters (look for function signature pattern)
         param_match = re.match(r'^(\w+)\s*\((.*?)\)', text, re.DOTALL)
         param_count = 0
@@ -845,11 +917,11 @@ def analyze_custom_functions(solution_name):
             if params:
                 param_count = len([p.strip() for p in params.split(";") if p.strip()])
 
-        # Find references to other custom functions
-        deps = []
-        for other_name in all_cf_names:
-            if other_name != name and other_name in text:
-                deps.append(other_name)
+        # Find references to other custom functions (substring match)
+        deps = sorted(
+            other_name for other_name in all_cf_names
+            if other_name != name and other_name in text
+        )
 
         line_count = len(text.strip().split("\n"))
 
@@ -880,20 +952,29 @@ def analyze_custom_functions(solution_name):
 
 
 def _find_cf_chains(functions):
-    """Find the longest dependency chains in custom functions."""
+    """Find the longest dependency chains in custom functions.
+
+    Uses memoized DFS with cycle detection instead of exponential visited.copy().
+    """
     if not functions:
         return []
 
-    def _chain_depth(name, visited=None):
-        if visited is None:
-            visited = set()
-        if name in visited or name not in functions:
+    PENDING = -1  # Sentinel: currently being computed (cycle detection)
+    memo = {}  # name -> depth (memoized result)
+
+    def _chain_depth(name):
+        if name in memo:
+            return max(memo[name], 0)  # PENDING (-1) -> 0
+        if name not in functions:
             return 0
-        visited.add(name)
+        memo[name] = PENDING  # Mark as in-progress
         deps = functions[name].get("dependencies", [])
         if not deps:
+            memo[name] = 1
             return 1
-        return 1 + max(_chain_depth(d, visited.copy()) for d in deps)
+        depth = 1 + max(_chain_depth(d) for d in deps)
+        memo[name] = depth
+        return depth
 
     chains = [(name, _chain_depth(name)) for name in functions]
     chains.sort(key=lambda x: x[1], reverse=True)
@@ -904,7 +985,8 @@ def _find_cf_chains(functions):
 # Layout analysis
 # ---------------------------------------------------------------------------
 
-def analyze_layouts(solution_name, solution_dir, layouts_index, scripts_index):
+def analyze_layouts(solution_name, solution_dir, layouts_index, scripts_index,
+                    script_cache=None):
     """Analyze layouts: inventory, classification, portal usage."""
     # Organize by base TO
     by_base_to = collections.defaultdict(list)
@@ -958,14 +1040,19 @@ def analyze_layouts(solution_name, solution_dir, layouts_index, scripts_index):
 
     # Detect orphaned layouts (not referenced by any script)
     script_referenced_layouts = set()
-    for script_path in find_script_files(solution_name):
-        try:
-            with open(script_path, "r", encoding="utf-8") as f:
-                text = f.read()
-            for match in RE_LAYOUT_REF.findall(text):
-                script_referenced_layouts.add(match)
-        except (OSError, UnicodeDecodeError):
-            continue
+    if script_cache is not None:
+        for info in script_cache:
+            for ref in info["layout_refs"]:
+                script_referenced_layouts.add(ref)
+    else:
+        for script_path in find_script_files(solution_name):
+            try:
+                with open(script_path, "r", encoding="utf-8") as f:
+                    text = f.read()
+                for match in RE_LAYOUT_REF.findall(text):
+                    script_referenced_layouts.add(match)
+            except (OSError, UnicodeDecodeError):
+                continue
 
     layout_names = set(l["name"] for l in layouts_index)
     orphaned = sorted(layout_names - script_referenced_layouts)
@@ -1014,7 +1101,8 @@ def _walk_layout_objects(obj, layout_name, portal_usage, button_wiring, field_co
 # Integration points
 # ---------------------------------------------------------------------------
 
-def analyze_integrations(solution_name, value_lists_index, scripts_index):
+def analyze_integrations(solution_name, value_lists_index, scripts_index,
+                        script_cache=None):
     """Analyze external data sources, value lists, and external script calls."""
     # External data sources
     eds_dir = XML_PARSED_DIR / "external_data_sources" / solution_name
@@ -1026,24 +1114,36 @@ def analyze_integrations(solution_name, value_lists_index, scripts_index):
     # Value lists
     vl_by_source = collections.Counter(vl["source_type"] for vl in value_lists_index)
 
-    # External calls from scripts (lightweight grep)
+    # External calls from scripts (use cache if available)
     external_call_scripts = collections.defaultdict(list)
-    for script_path in find_script_files(solution_name):
-        try:
-            with open(script_path, "r", encoding="utf-8") as f:
-                text = f.read()
-        except (OSError, UnicodeDecodeError):
-            continue
+    if script_cache is not None:
+        for info in script_cache:
+            script_name = info["name"]
+            for flag, label in [
+                ("has_insert_from_url", "Insert from URL"),
+                ("has_send_mail", "Send Mail"),
+                ("has_export_records", "Export Records"),
+                ("has_import_records", "Import Records"),
+            ]:
+                if info[flag]:
+                    external_call_scripts[label].append(script_name)
+    else:
+        for script_path in find_script_files(solution_name):
+            try:
+                with open(script_path, "r", encoding="utf-8") as f:
+                    text = f.read()
+            except (OSError, UnicodeDecodeError):
+                continue
 
-        script_name = script_path.stem.rsplit(" - ID ", 1)[0]
-        for pattern, label in [
-            (RE_INSERT_FROM_URL, "Insert from URL"),
-            (RE_SEND_MAIL, "Send Mail"),
-            (RE_EXPORT_RECORDS, "Export Records"),
-            (RE_IMPORT_RECORDS, "Import Records"),
-        ]:
-            if pattern.search(text):
-                external_call_scripts[label].append(script_name)
+            script_name = script_path.stem.rsplit(" - ID ", 1)[0]
+            for pattern, label in [
+                (RE_INSERT_FROM_URL, "Insert from URL"),
+                (RE_SEND_MAIL, "Send Mail"),
+                (RE_EXPORT_RECORDS, "Export Records"),
+                (RE_IMPORT_RECORDS, "Import Records"),
+            ]:
+                if pattern.search(text):
+                    external_call_scripts[label].append(script_name)
 
     return {
         "external_data_sources": external_sources,
@@ -1106,7 +1206,7 @@ def detect_multi_file(solution_name):
 # ---------------------------------------------------------------------------
 
 def analyze_health(solution_dir, fields_index, scripts_index, layouts_index,
-                   relationships_index, to_index):
+                   relationships_index, to_index, script_cache=None):
     """Compute health metrics from xref and index data."""
     xref = load_xref_index(solution_dir)
 
@@ -1157,15 +1257,20 @@ def analyze_health(solution_dir, fields_index, scripts_index, layouts_index,
 
     # Empty scripts (0-1 lines)
     empty_scripts = []
-    for script_path in find_script_files(solution_dir.name):
-        try:
-            with open(script_path, "r", encoding="utf-8") as f:
-                lines = [l for l in f.read().strip().split("\n") if l.strip()]
-            if len(lines) == 0:
-                name = script_path.stem.rsplit(" - ID ", 1)[0]
-                empty_scripts.append(name)
-        except (OSError, UnicodeDecodeError):
-            continue
+    if script_cache is not None:
+        for info in script_cache:
+            if info["is_empty"]:
+                empty_scripts.append(info["name"])
+    else:
+        for script_path in find_script_files(solution_dir.name):
+            try:
+                with open(script_path, "r", encoding="utf-8") as f:
+                    lines = [l for l in f.read().strip().split("\n") if l.strip()]
+                if len(lines) == 0:
+                    name = script_path.stem.rsplit(" - ID ", 1)[0]
+                    empty_scripts.append(name)
+            except (OSError, UnicodeDecodeError):
+                continue
 
     result.update({
         "dead_fields": {
@@ -1234,6 +1339,10 @@ def ensure_prerequisites(solution_name, solution_dir):
 
 def build_profile(solution_name, deep=False):
     """Build the complete solution profile."""
+    global _T0
+    _T0 = time.monotonic()
+    phase_times = {}
+
     solution_dir = CONTEXT_DIR / solution_name
 
     if not solution_dir.exists():
@@ -1241,47 +1350,96 @@ def build_profile(solution_name, deep=False):
         print(f"  Expected: {solution_dir}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"==> Analyzing solution: {solution_name}")
+    _status("init", "info", label=f"==> Analyzing solution: {solution_name}")
 
     # Load all index files
+    t = time.monotonic()
     fields_index = load_fields_index(solution_dir)
     relationships_index = load_relationships_index(solution_dir)
     to_index = load_table_occurrences_index(solution_dir)
     scripts_index = load_scripts_index(solution_dir)
     layouts_index = load_layouts_index(solution_dir)
     value_lists_index = load_value_lists_index(solution_dir)
+    phase_times["index_loading"] = round(time.monotonic() - t, 4)
 
-    print(f"  Loaded: {len(fields_index)} fields, {len(to_index)} TOs, "
-          f"{len(scripts_index)} scripts, {len(layouts_index)} layouts, "
-          f"{len(relationships_index)} relationships, {len(value_lists_index)} value lists")
+    _status("loading", "info",
+            label=f"  Loaded: {len(fields_index)} fields, {len(to_index)} TOs, "
+                  f"{len(scripts_index)} scripts, {len(layouts_index)} layouts, "
+                  f"{len(relationships_index)} relationships, "
+                  f"{len(value_lists_index)} value lists")
+
+    # Load script cache once (eliminates 3x redundant file reads)
+    _status("script_cache", "start", label="Loading script files...")
+    t = time.monotonic()
+    script_cache = load_script_cache(solution_name, scripts_index)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["script_cache"] = dt
+    _status("script_cache", "end", elapsed=dt, items=len(script_cache))
 
     # Analyze each domain
-    print("  Analyzing data model...")
+    _status("data_model", "start", label="Analyzing data model...")
+    t = time.monotonic()
     data_model = analyze_data_model(fields_index, to_index, relationships_index)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["data_model"] = dt
+    _status("data_model", "end", elapsed=dt)
 
-    print("  Detecting naming conventions...")
+    _status("naming", "start", label="Detecting naming conventions...")
+    t = time.monotonic()
     conventions = detect_naming_conventions(fields_index)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["naming"] = dt
+    _status("naming", "end", elapsed=dt)
 
-    print("  Analyzing scripts...")
-    scripts = analyze_scripts(solution_name, scripts_index, deep=deep)
+    _status("scripts", "start", label="Analyzing scripts...")
+    t = time.monotonic()
+    scripts = analyze_scripts(solution_name, scripts_index, script_cache,
+                              deep=deep)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["scripts"] = dt
+    _status("scripts", "end", elapsed=dt, items=len(script_cache))
 
-    print("  Analyzing custom functions...")
+    _status("custom_functions", "start", label="Analyzing custom functions...")
+    t = time.monotonic()
     custom_functions = analyze_custom_functions(solution_name)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["custom_functions"] = dt
+    _status("custom_functions", "end", elapsed=dt,
+            items=custom_functions.get("total", 0))
 
-    print("  Analyzing layouts...")
-    layouts = analyze_layouts(solution_name, solution_dir, layouts_index, scripts_index)
+    _status("layouts", "start", label="Analyzing layouts...")
+    t = time.monotonic()
+    layouts = analyze_layouts(solution_name, solution_dir, layouts_index,
+                              scripts_index, script_cache=script_cache)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["layouts"] = dt
+    _status("layouts", "end", elapsed=dt, items=layouts["total"])
 
-    print("  Analyzing integrations...")
-    integrations = analyze_integrations(solution_name, value_lists_index, scripts_index)
+    _status("integrations", "start", label="Analyzing integrations...")
+    t = time.monotonic()
+    integrations = analyze_integrations(solution_name, value_lists_index,
+                                        scripts_index,
+                                        script_cache=script_cache)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["integrations"] = dt
+    _status("integrations", "end", elapsed=dt)
 
-    print("  Detecting multi-file references...")
+    _status("multi_file", "start", label="Detecting multi-file references...")
+    t = time.monotonic()
     multi_file = detect_multi_file(solution_name)
+    dt = round(time.monotonic() - t, 4)
+    phase_times["multi_file"] = dt
+    _status("multi_file", "end", elapsed=dt)
 
-    print("  Computing health metrics...")
+    _status("health", "start", label="Computing health metrics...")
+    t = time.monotonic()
     health = analyze_health(
         solution_dir, fields_index, scripts_index, layouts_index,
-        relationships_index, to_index,
+        relationships_index, to_index, script_cache=script_cache,
     )
+    dt = round(time.monotonic() - t, 4)
+    phase_times["health"] = dt
+    _status("health", "end", elapsed=dt)
 
     # Extension availability
     extensions_used = [
@@ -1320,7 +1478,7 @@ def build_profile(solution_name, deep=False):
         "health": health,
     }
 
-    print(f"\n==> Analysis complete.")
+    _status("complete", "complete", phases=phase_times)
     return profile
 
 
@@ -1756,8 +1914,8 @@ def main():
         help="Solution name (as it appears in agent/context/)",
     )
     parser.add_argument(
-        "--format", choices=["json", "markdown", "html"], default="json",
-        help="Output format (default: json)",
+        "--format", choices=["json", "markdown", "html", "all"], default="all",
+        help="Output format: json, markdown, html, or all (default: all)",
     )
     parser.add_argument(
         "--deep", action="store_true",
@@ -1772,11 +1930,20 @@ def main():
         help="Show available optional dependencies and exit",
     )
     parser.add_argument(
+        "--status-json", action="store_true",
+        help="Emit structured JSONL status to stderr (for agent consumption)",
+    )
+    parser.add_argument(
         "-o", "--output",
-        help="Output path override",
+        help="Output path override (single-format modes only)",
     )
 
     args = parser.parse_args()
+
+    # Enable structured status output
+    global _STATUS_JSON
+    if args.status_json:
+        _STATUS_JSON = True
 
     if args.list_extensions:
         print("Optional extensions for analyze.py:")
@@ -1817,37 +1984,44 @@ def main():
     sandbox_dir = PROJECT_ROOT / "agent" / "sandbox"
     sandbox_dir.mkdir(parents=True, exist_ok=True)
 
+    # Determine which formats to write
     if args.output:
-        output_path = Path(args.output)
-    elif args.format == "markdown":
-        output_path = sandbox_dir / f"{args.solution} - solution-profile.md"
-    elif args.format == "html":
-        output_path = sandbox_dir / f"{args.solution} - solution-profile.html"
+        # Single output path override — use the requested format (or json)
+        formats_to_write = [args.format if args.format != "all" else "json"]
+    elif args.format == "all":
+        formats_to_write = ["json", "markdown", "html"]
     else:
-        output_path = sandbox_dir / f"{args.solution} - solution-profile.json"
+        formats_to_write = [args.format]
+        # Always include JSON alongside markdown/html
+        if args.format in ("markdown", "html") and "json" not in formats_to_write:
+            formats_to_write.append("json")
 
-    # Write output
-    if args.format == "markdown":
-        content = format_markdown(profile)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"  Markdown: {output_path}")
-    elif args.format == "html":
-        content = format_html(profile)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"  HTML: {output_path}")
-    else:
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(profile, f, indent=2, ensure_ascii=False)
-        print(f"  JSON: {output_path}")
+    base_name = f"{args.solution} - solution-profile"
 
-    # Also write JSON when markdown/html is requested (profile is always useful)
-    if args.format in ("markdown", "html"):
-        json_path = sandbox_dir / f"{args.solution} - solution-profile.json"
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(profile, f, indent=2, ensure_ascii=False)
-        print(f"  JSON: {json_path}")
+    for fmt in formats_to_write:
+        if args.output and fmt == formats_to_write[0]:
+            output_path = Path(args.output)
+        elif fmt == "markdown":
+            output_path = sandbox_dir / f"{base_name}.md"
+        elif fmt == "html":
+            output_path = sandbox_dir / f"{base_name}.html"
+        else:
+            output_path = sandbox_dir / f"{base_name}.json"
+
+        if fmt == "markdown":
+            content = format_markdown(profile)
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            print(f"  Markdown: {output_path}")
+        elif fmt == "html":
+            content = format_html(profile)
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            print(f"  HTML: {output_path}")
+        else:
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(profile, f, indent=2, ensure_ascii=False)
+            print(f"  JSON: {output_path}")
 
 
 if __name__ == "__main__":
