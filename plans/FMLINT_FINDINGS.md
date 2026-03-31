@@ -102,6 +102,16 @@ CONTEXT.json is scoped to a single layout. Scripts that navigate to a different 
 
 R001 now detects `Go to Layout` steps that navigate away from the current CONTEXT.json layout and stops validating field references after that point. R009 (previously a stub) emits an INFO diagnostic at the scope boundary explaining that field references past this point cannot be validated, with a fix_hint suggesting Push Context on the target layout.
 
+### C006 catches an LLM-specific failure mode
+
+C006 (html-entities-in-calc) is the first rule designed to catch a mistake that AI agents make but human developers essentially never would. The agent confuses two XML contexts: `<Text>` elements where `&lt;`/`&gt;` are required (no CDATA wrapper), and `<Calculation><![CDATA[...]]></Calculation>` blocks where operators must be literal because CDATA is not entity-decoded. The result is calculations containing the literal text `&gt;` instead of the `>` operator — syntactically broken in FileMaker.
+
+The reported entities included `&ge;` and `&le;`, which are HTML entities (not even standard XML — XML only defines `&lt;`, `&gt;`, `&amp;`, `&quot;`, `&apos;`). This confirms the root cause is probabilistic model behavior applying web-encoding intuition, not a deterministic code path in the tooling. The step catalog's Insert Text notes — which correctly document entity encoding for `<Text>` elements — may prime the model to over-apply encoding in CDATA blocks.
+
+C006 reuses the `NON_CALC_STEPS` exclusion set and `_strip_strings()` helper, so it correctly skips `<Text>` content (where entities are valid) and ignores entities inside quoted strings (e.g., `"Items &gt; 10"` as a literal string value).
+
+**Lesson:** Agentic linting needs rules that target AI failure modes, not just human ones. LLMs confuse encoding contexts in ways a developer with FileMaker experience never would.
+
 ### B001 (error-capture-paired) redesigned for real-world usage
 
 The original B001 used a step-count lookahead (default: 10 steps) to check that `Set Error Capture [On]` was followed by `Get(LastError)`. This produced false positives in two common patterns: (1) error capture at the top of a script with error checks many steps later, and (2) intentional silent failure where the developer enables error capture specifically to suppress dialogs with no intent to check.
@@ -147,7 +157,7 @@ Both implementations were run against all 600 scripts. Results for overlapping r
 | S008 | 0 | 0 |
 | Errors | 3 | 3 |
 
-C002 (unbalanced parens) has been ported to TypeScript and should be added to future parity runs.
+C002 (unbalanced parens) and C006 (HTML entities in calcs) have been ported to TypeScript and should be added to future parity runs.
 
 ---
 
@@ -163,7 +173,7 @@ The config system validates rule IDs, severity strings, boolean fields, numeric 
 
 ### Why the TS linter is a subset, not a full port
 
-The TypeScript linter runs in the browser on every keystroke (debounced 300ms). It must be fast and small. Only tier 1 rules that provide immediate feedback are implemented: block pairing (S005/S006/S007), known steps (S008), unclosed strings (C001), unbalanced parens (C002), purpose comment (D001), and unicode operators (N001).
+The TypeScript linter runs in the browser on every keystroke (debounced 300ms). It must be fast and small. Only tier 1 rules that provide immediate feedback are implemented: block pairing (S005/S006/S007), known steps (S008), unclosed strings (C001), unbalanced parens (C002), HTML entities in calcs (C006), purpose comment (D001), and unicode operators (N001).
 
 Tier 2 (references) and tier 3 (live eval) require server-side data (CONTEXT.json, OData) and are accessed via the companion server's `POST /lint` endpoint when needed.
 
@@ -191,7 +201,7 @@ The config file and the conventions doc are intentionally separate systems. `COD
 
 ### Medium impact
 
-4. **TypeScript rule coverage.** The TS linter doesn't implement N002, N003–N007, B001–B005, D002–D003, or C003. These are available server-side via `POST /lint`. The next most impactful TS addition would be N002 (variable naming) for immediate convention feedback during editing.
+4. **TypeScript rule coverage.** The TS linter doesn't implement N002, N003–N007, B001–B005, D002–D003, or C003. (C006 was added to TS alongside the Python implementation.) These are available server-side via `POST /lint`. The next most impactful TS addition would be N002 (variable naming) for immediate convention feedback during editing.
 
 5. **No auto-fix capability yet.** The `fix_hint` field is informational only. A future version could support `--fix` to auto-apply safe fixes (e.g., replacing `<>` with `≠` for N001).
 
