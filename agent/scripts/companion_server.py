@@ -183,6 +183,8 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._handle_pending_get()
         elif self.path == "/webviewer/status":
             self._handle_webviewer_status()
+        elif self.path == "/clipboard":
+            self._handle_clipboard_read()
         elif self.path.startswith("/preview/"):
             layout_name = self.path[len("/preview/"):]
             self._handle_preview_get(layout_name)
@@ -471,6 +473,35 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._send_json({"success": False, "error": "osascript not found — is this macOS?"}, status=500)
         except Exception as exc:
             log.exception("Trigger handler error: %s", exc)
+            self._send_json({"success": False, "error": str(exc)}, status=500)
+
+    def _handle_clipboard_read(self):
+        """Read FM objects from the macOS clipboard and return as XML."""
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        clipboard_py = os.path.join(script_dir, "clipboard.py")
+
+        try:
+            result = subprocess.run(
+                ["python3", clipboard_py, "read"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                log.info("Clipboard read succeeded")
+                self._send_json({"success": True, "xml": result.stdout})
+            else:
+                error = result.stderr.strip() or "No FileMaker objects on clipboard"
+                log.warning("Clipboard read failed: %s", error)
+                self._send_json(
+                    {"success": False, "error": error},
+                    status=404 if "No FileMaker" in error else 500,
+                )
+        except subprocess.TimeoutExpired:
+            self._send_json(
+                {"success": False, "error": "Clipboard read timed out"},
+                status=500,
+            )
+        except Exception as exc:
+            log.exception("Clipboard read error: %s", exc)
             self._send_json({"success": False, "error": str(exc)}, status=500)
 
     def _handle_clipboard(self):
@@ -840,7 +871,7 @@ def main():
 
     log.info("companion_server v%s listening on %s:%d", VERSION, BIND_HOST, port)
     threading.Thread(target=_check_for_updates, daemon=True).start()
-    log.info("Endpoints: GET /health  GET /webviewer/status  GET /preview/<name>  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop  POST /webviewer/push  POST /preview/<name>")
+    log.info("Endpoints: GET /health  GET /clipboard  GET /webviewer/status  GET /preview/<name>  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop  POST /webviewer/push  POST /preview/<name>")
     log.info("Press Ctrl-C to stop.")
 
     try:
