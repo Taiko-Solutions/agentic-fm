@@ -183,6 +183,9 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._handle_pending_get()
         elif self.path == "/webviewer/status":
             self._handle_webviewer_status()
+        elif self.path.startswith("/preview/"):
+            layout_name = self.path[len("/preview/"):]
+            self._handle_preview_get(layout_name)
         else:
             self._send_json({"error": "Not found"}, status=404)
 
@@ -207,6 +210,9 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._handle_webviewer_push()
         elif self.path == "/lint":
             self._handle_lint()
+        elif self.path.startswith("/preview/"):
+            layout_name = self.path[len("/preview/"):]
+            self._handle_preview_post(layout_name)
         else:
             self._send_json({"error": "Not found"}, status=404)
 
@@ -640,6 +646,80 @@ class CompanionHandler(BaseHTTPRequestHandler):
             log.exception("Failed to write agent output: %s", exc)
             self._send_json({"success": False, "error": str(exc)}, status=500)
 
+    def _handle_preview_get(self, layout_name: str):
+        """
+        Serve a layout HTML preview.
+
+        GET /preview/<layout_name>
+        Returns: text/html — the preview file, a fallback from .agent-output.json,
+                 or a placeholder message.
+        """
+        here = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(here))
+
+        # Look for agent/sandbox/{layout_name}_web.html
+        html_path = os.path.join(repo_root, "agent", "sandbox", f"{layout_name}_web.html")
+        if os.path.isfile(html_path):
+            try:
+                with open(html_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                self._send_html(content)
+                return
+            except OSError as exc:
+                log.warning("Could not read preview file %s: %s", html_path, exc)
+
+        # Fall back to agent/config/.agent-output.json
+        output_json_path = os.path.join(repo_root, "agent", "config", ".agent-output.json")
+        if os.path.isfile(output_json_path):
+            try:
+                with open(output_json_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                content = data.get("content", "")
+                if content:
+                    self._send_html(content)
+                    return
+            except (OSError, json.JSONDecodeError) as exc:
+                log.warning("Could not read .agent-output.json: %s", exc)
+
+        # Placeholder
+        self._send_html(f"<h2>No preview available for {layout_name}</h2>")
+
+    def _handle_preview_post(self, layout_name: str):
+        """
+        Store a layout HTML preview.
+
+        POST /preview/<layout_name>
+        Body: { "html": "...", "solution": "..." }
+        Returns: { "success": true, "path": "agent/sandbox/{layout_name}_web.html" }
+        """
+        try:
+            body = self._read_body()
+            payload = json.loads(body)
+        except (ValueError, OSError) as exc:
+            self._send_json({"success": False, "error": f"Invalid request: {exc}"}, status=400)
+            return
+
+        html = payload.get("html", "")
+        if not html:
+            self._send_json({"success": False, "error": "Missing required field: html"}, status=400)
+            return
+
+        here = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.dirname(os.path.dirname(here))
+        sandbox_dir = os.path.join(repo_root, "agent", "sandbox")
+        out_path = os.path.join(sandbox_dir, f"{layout_name}_web.html")
+        rel_path = f"agent/sandbox/{layout_name}_web.html"
+
+        try:
+            os.makedirs(sandbox_dir, exist_ok=True)
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(html)
+            log.info("Preview written to %s", out_path)
+            self._send_json({"success": True, "path": rel_path})
+        except Exception as exc:
+            log.exception("Failed to write preview: %s", exc)
+            self._send_json({"success": False, "error": str(exc)}, status=500)
+
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------
@@ -704,6 +784,14 @@ class CompanionHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_html(self, content: str, status: int = 200):
+        body = content.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
 
 # ---------------------------------------------------------------------------
 # Entry point
@@ -752,7 +840,7 @@ def main():
 
     log.info("companion_server v%s listening on %s:%d", VERSION, BIND_HOST, port)
     threading.Thread(target=_check_for_updates, daemon=True).start()
-    log.info("Endpoints: GET /health  GET /webviewer/status  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop  POST /webviewer/push")
+    log.info("Endpoints: GET /health  GET /webviewer/status  GET /preview/<name>  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop  POST /webviewer/push  POST /preview/<name>")
     log.info("Press Ctrl-C to stop.")
 
     try:

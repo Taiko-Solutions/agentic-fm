@@ -20,6 +20,10 @@ Do this **once per session**, not on every prompt. If the check fails (no networ
 
 If `PROJECT.md` exists at the project root, read it at session start. It contains local-only context: meta-project notes, toolchain details, and `external_tools/` documentation. Its absence is normal — it is gitignored and will not be present in collaborator environments.
 
+## Documentation Audience
+
+- When writing docs for this project, default audience is END-USERS who download the repo as a tool, NOT collaborative developers/contributors, unless explicitly told otherwise.
+
 # Overview
 
 This project is designed to create FileMaker objects — primarily scripts and calculations — in the clipboard-supported fmxmlsnippet format. Developers reference and use the HR (human-readable) format for scripts. The following folders are used.
@@ -185,22 +189,22 @@ grep -A 60 '"name": "Step Name"' "agent/catalogs/step-catalog-en.json"
 | `blockPair`   | Matching step partners and role (`open`/`middle`/`close`)                                                                                    |
 | `notes`       | Behavioral context sub-keys                                                                                                                  |
 | `snippetFile` | Path to archival snippet_examples file                                                                                                       |
-| `status`      | `"complete"` / `"auto"` / `"unfinished"`                                                                                                    |
+| `status`      | `"complete"` / `"auto"` / `"unfinished"`                                                                                                     |
 
 ### Param types → XML emission
 
-| Type | XML pattern |
-|---|---|
-| `boolean` | `<Element xmlAttr="True\|False"/>` — check `enumValues` for HR labels |
-| `enum` | `<Element xmlAttr="value">` or `<Element>value</Element>` |
-| `calculation` | `<Calculation><![CDATA[expression]]></Calculation>` |
-| `namedCalc` | `<WrapperElement><Calculation><![CDATA[expression]]></Calculation></WrapperElement>` |
-| `text` | `<Element>literal text</Element>` |
-| `field` | `<Field table="TO" id="N" name="FieldName"/>` — resolve from CONTEXT.json |
-| `script` | `<Script id="N" name="ScriptName"/>` — resolve from CONTEXT.json |
-| `layout` | Layout reference — resolve from CONTEXT.json |
-| `findRequests` | See `agent/catalogs/find-requests.md` |
-| `flagElement` | Empty element presence = on, absence = off |
+| Type           | XML pattern                                                                          |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `boolean`      | `<Element xmlAttr="True\|False"/>` — check `enumValues` for HR labels                |
+| `enum`         | `<Element xmlAttr="value">` or `<Element>value</Element>`                            |
+| `calculation`  | `<Calculation><![CDATA[expression]]></Calculation>`                                  |
+| `namedCalc`    | `<WrapperElement><Calculation><![CDATA[expression]]></Calculation></WrapperElement>` |
+| `text`         | `<Element>literal text</Element>`                                                    |
+| `field`        | `<Field table="TO" id="N" name="FieldName"/>` — resolve from CONTEXT.json            |
+| `script`       | `<Script id="N" name="ScriptName"/>` — resolve from CONTEXT.json                     |
+| `layout`       | Layout reference — resolve from CONTEXT.json                                         |
+| `findRequests` | See `agent/catalogs/find-requests.md`                                                |
+| `flagElement`  | Empty element presence = on, absence = off                                           |
 
 ### HR format generation
 
@@ -232,6 +236,7 @@ Custom functions fall into three categories:
 3. **Solution-specific code** — contain references to fields or table occurrences. Before using one, verify the script will be running on a layout whose base TO supports the referenced fields.
 
 When CONTEXT.json includes a `custom_functions` section, prefer it. Otherwise, check:
+
 - `xml_parsed/custom_functions_sanitized/` — human-readable calculation text
 - `xml_parsed/custom_function_calcs/` — XML calculation definitions
 
@@ -246,6 +251,7 @@ The `agent/library` folder is a curated collection of reusable fmxmlsnippet code
 **Proactively** — before writing significant logic, scan the manifest for keyword matches. If found, adapt the library code rather than writing from scratch.
 
 **Integration rules:**
+
 - Extract inner `<Step>` elements only (not the `<Script>` wrapper) unless specifically requested
 - Replace placeholder references with real values from CONTEXT.json
 - Do not remove structural or purpose comments embedded in library code
