@@ -1,6 +1,33 @@
 # Python
 
-Always use `python3` — never bare `python`. macOS does not ship a `python` binary; the system Python is only available as `python3`. No virtual environment is required — all scripts and the `agent/fmlint/` package use the Python standard library only.
+Always use `python3` — never bare `python`. macOS does not ship a `python` binary; the system Python is only available as `python3`. Core scripts and the `agent/fmlint/` package use the Python standard library only — no virtual environment is required for them.
+
+## Virtual environment (optional — skill dependencies)
+
+Some skills (e.g. `icon-swap`) require Python packages beyond the standard library. These are installed in an **optional venv** inside the project folder. The venv is gitignored and does not affect stdlib-only scripts.
+
+**When to set up:** Only when a skill reports missing dependencies (e.g. `fm_svg_convert.py --check-deps` fails). Do not proactively create the venv — prompt the developer first.
+
+**Setup (macOS):**
+```bash
+python3 -m venv agent/.venv
+source agent/.venv/bin/activate
+pip install cairosvg Pillow
+```
+
+**System dependencies (if needed for stroke-to-fill SVG conversion):**
+```bash
+brew install potrace
+```
+
+**Running scripts with the venv:** When the venv exists, use `agent/.venv/bin/python3` instead of bare `python3` for scripts that need the extra packages:
+```bash
+agent/.venv/bin/python3 agent/scripts/fm_svg_convert.py --check-deps
+```
+
+Or activate the venv first: `source agent/.venv/bin/activate`
+
+**Important:** On some macOS configurations, `pip install` to the system Python is blocked by default. The venv approach avoids this entirely. Never suggest `sudo pip install` or `--break-system-packages`.
 
 # Session startup
 
