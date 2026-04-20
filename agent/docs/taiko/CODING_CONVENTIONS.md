@@ -274,7 +274,7 @@ Canonical `<Storage>` block:
 - **Manual field creation in Manage Database**: on the Storage tab, set Indexing language = Spanish.
 - **fmxmlsnippet paste**: include the `<Storage>` block above. FM will honour it on import.
 
-Applies to: `EmpresaNombre`, `DireccionCiudad`, email fields, any multi-valor checkbox (like `TipoEmpresa`), free-text notes, and any other Text-typed field — **no exceptions**.
+Applies to: nombre / razón social, dirección y ciudad, email, teléfono, notas, cualquier checkbox multi-valor, y en general cualquier campo Text — **sin excepciones**.
 
 ---
 

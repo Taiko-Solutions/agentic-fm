@@ -92,7 +92,7 @@ Key points:
 - **`TriggersEnable` antes del `If [error.WasThrown]`** — va en el bloque catch **antes** de la rama de error, para ejecutarse siempre (éxito o error). Si se pone dentro del If WasThrown, en caso de éxito los triggers quedan desactivados para toda la sesión de FM.
 - **Never** use `TriggersReset` in migration scripts — reset es para recovery, no para flujo normal.
 
-Example: `MigrationV08_FusionEmpresas` en la tarea 944.8 (Borneo) — migra 74 Brokers + 7058 Contactos navegando entre 4 layouts; sin `TriggersDisable` cada iteración dispara `OnLayoutEnter` de Clientes, Brokers y Contactos (ralentización inaceptable + riesgo de filtros espurios en foundset).
+Example: a post-deployment migration script that copies records between two tables and populates a bridge table, navigating 4 layouts with thousands of iterations. Without `TriggersDisable`, each iteration fires `OnLayoutEnter` on every layout visited — unacceptable performance penalty + risk of spurious foundset filters from triggered scripts.
 
 ## Best practices
 

@@ -14,7 +14,7 @@ FileMaker maintains a "current record" pointer per TO per window. In theory that
 - `Commit Records` on B may flush relationship caches.
 - `Go to Layout [A]` back + `Go to Record [Next]` — the "Next" is applied correctly in A's foundset, but inside the next iteration when we hop back to B, the cross-TO read of A's fields may still read the **first** record of A's foundset rather than the current one.
 
-Observed in task 944.8 S4 (Borneo post-deploy): the loop over `BRO__Brokers` created 74 records in `CLI__Clientes`, but all 74 copied fields from broker #1 because the cross-TO read `BRO__Brokers::<campo>` from the `Clientes` layout resolved to the first broker, not the iteration's current one. The fix (variables capture) made each record unique immediately.
+Observed in a real post-deploy migration script: the loop over a source table (`SRC__Source`) created N records in a target table (`TGT__Target`), but **all N copies had the same field values** — those of the first source record. The cross-TO read `SRC__Source::<campo>` from the target layout resolved to the first source record, not the iteration's current one. Switching to variables-first capture made each record unique immediately.
 
 ## The pattern
 
@@ -71,7 +71,7 @@ Looks reasonable. Works in trivial tests. **Fails silently in migration-scale lo
 
 - Single-layout loops (no `Go to Layout` inside the Loop) — FM's current-record pointer in the loop's TO is always correct.
 - Loops that only modify fields of A itself — the active record of A is already correct.
-- Related-record access via a proper relationship graph — if `cli_BRO__Brokers` is related to `CLI__Clientes` by a proper FK, `cli_BRO__Brokers::campo` from `Clientes` resolves via the relationship and works correctly. This doc is about **unrelated** cross-TO access.
+- Related-record access via a proper relationship graph — if the target TO is related to the source TO by a proper FK, `rel_SRC__Source::campo` from the target's layout resolves via the relationship and works correctly. This doc is about **unrelated** cross-TO access.
 
 ## Heuristic
 
@@ -81,4 +81,4 @@ If your loop body contains at least **one `Go to Layout` that crosses base table
 
 - `agent/docs/taiko/knowledge/trigger-suppression.md` — pair this pattern with TriggersDisable for any multi-layout loop.
 - `agent/docs/taiko/knowledge/transaction-navigation.md` — navigation constraints within open transactions (complementary).
-- Example: `MigrationV08_FusionEmpresas` in task 944.8 (Borneo). The v5 of the script uses this capture-first pattern for 53 fields per broker.
+- Example: a post-deploy migration script that copies ~50 fields between two tables with UUID preservation uses this capture-first pattern throughout its loop.
