@@ -56,6 +56,44 @@ Set Variable [$!; Value: TriggersEnable]
 Perform Find []
 ```
 
+## Pattern 4: Migration / batch scripts
+
+Migration and one-shot batch scripts (e.g., post-deployment scripts that loop over thousands of records across multiple layouts) **must** wrap the entire work body with `TriggersDisable`/`TriggersEnable`. The layout hops that typically happen in these scripts (`Go to Layout`, `Show All Records`, `Go to Record/Request/Page`) fire `OnLayoutEnter` and `OnRecordLoad` triggers at every iteration — without suppression, migration time balloons and side effects (filtering, field updates from triggered scripts) can corrupt the data being migrated.
+
+Canonical structure within a Clew try-block:
+
+```
+Loop                                # Clew pseudo try-catch
+    Set Variable [ $! ; TriggersDisable ]
+
+    # ... guard global idempotencia ...
+    # ... Fase 1: loop sobre tabla A ...
+    # ... Fase 2: loop sobre tabla B, con New Record en tabla C ...
+    # ... Fase 3: loop sobre tabla D, con idempotencia SQL ...
+    # ... Fase 4: marcar DONE ...
+
+    Exit Loop If [ True ]
+End Loop
+
+# CATCH — SIEMPRE reactivar triggers, éxito o error
+Set Variable [ $! ; TriggersEnable ]
+
+If [ error.WasThrown ]
+    Show Custom Dialog [ "Error"; error.GetHint ]
+End If
+
+Go to Layout [ OriginalLayout ]
+Exit Script [ $Resultado ]
+```
+
+Key points:
+
+- **`$!` (bit-bucket Taiko)** — variable nombre intencionalmente fuera de `$camelCase`. fmlint advierte con WARN `N002` pero es falso positivo en este patrón; ignorar.
+- **`TriggersEnable` antes del `If [error.WasThrown]`** — va en el bloque catch **antes** de la rama de error, para ejecutarse siempre (éxito o error). Si se pone dentro del If WasThrown, en caso de éxito los triggers quedan desactivados para toda la sesión de FM.
+- **Never** use `TriggersReset` in migration scripts — reset es para recovery, no para flujo normal.
+
+Example: `MigrationV08_FusionEmpresas` en la tarea 944.8 (Borneo) — migra 74 Brokers + 7058 Contactos navegando entre 4 layouts; sin `TriggersDisable` cada iteración dispara `OnLayoutEnter` de Clientes, Brokers y Contactos (ralentización inaceptable + riesgo de filtros espurios en foundset).
+
 ## Best practices
 
 - **Always pair**: Every `TriggersDisable` must have a matching `TriggersEnable`. Forgetting to re-enable will leave all triggers suppressed for the session.

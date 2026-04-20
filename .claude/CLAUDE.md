@@ -165,6 +165,82 @@ The developer always works in **human-readable (HR) script format**. The agent's
 - The `selfClosing` flag in the catalog indicates `<Step ... />` vs `<Step ...>...</Step>`.
 - XML comments within snippet_examples are for reference only — never include them in output.
 
+> **CRITICAL — Parameter element names must match the catalog/snippet_example exactly**
+>
+> FileMaker **silently discards** child elements whose tag name does not match what the step parser expects. The step is imported successfully, but the parameter quietly falls back to its default value. Common bugs:
+>
+> - ❌ `<Step ... name="Set Error Capture"><State state="True"/></Step>` — wrong tag, parameter ignored → `Set Error Capture` ends up OFF (default).
+> - ✅ `<Step ... name="Set Error Capture"><Set state="True"/></Step>` — matches catalog's `xmlElement: "Set"`.
+>
+> Same rule applies to `Allow User Abort` (also uses `<Set state="…"/>`) and any other step with boolean parameters. **Always check the step's snippet_example file** (`agent/snippet_examples/steps/<category>/<Step Name>.xml`) or the catalog's `params[].xmlElement` before hand-writing a step. If the param element is named something unexpected, mirror it verbatim.
+
+> **CRITICAL — `Go to Layout` has its own param structure**
+>
+> Not `ByName`/`Animation`/`Calculation` flat. The step id is `6`, and the destination enum is `LayoutDestination`:
+>
+> ```xml
+> <!-- Layout by literal name from list -->
+> <Step enable="True" id="6" name="Go to Layout">
+>   <LayoutDestination value="SelectedLayout"/>
+>   <Layout id="28" name="Clientes"/>
+> </Step>
+>
+> <!-- Layout by name calculated at runtime -->
+> <Step enable="True" id="6" name="Go to Layout">
+>   <LayoutDestination value="LayoutNameByCalc"/>
+>   <Layout>
+>     <Calculation><![CDATA[$LayoutName]]></Calculation>
+>   </Layout>
+> </Step>
+>
+> <!-- Return to the layout where the script started -->
+> <Step enable="True" id="6" name="Go to Layout">
+>   <LayoutDestination value="OriginalLayout"/>
+> </Step>
+> ```
+>
+> Prefer `OriginalLayout` over capturing `Get(LayoutName)` at the start and restoring it manually.
+
+> **CRITICAL — `New Window` with `Style="Card"` requires the `Styles` bitmask attribute**
+>
+> Without the `Styles="…"` attribute, FileMaker ignores `Style="Card"` and opens the window as `Document` regardless of the other style flags (`DimParentWindow`, `Toolbars`, `MenuBar`, `Close`, `Minimize`, `Maximize`, `Resize`). The `Styles` attribute is a bitmask that encodes the same flags numerically and is what FM actually reads.
+>
+> - ❌ `<NewWndStyles DimParentWindow="Yes" Toolbars="No" MenuBar="No" Style="Card" Close="Yes" Minimize="No" Maximize="No" Resize="No"/>` — opens as **Document**, not Card.
+> - ✅ `<NewWndStyles DimParentWindow="Yes" Toolbars="No" MenuBar="No" Style="Card" Close="Yes" Minimize="No" Maximize="No" Resize="No" Styles="3222339600"/>` — opens as **Card**.
+>
+> Known `Styles` values observed in the wild:
+> - `3222339600` — Card with DimParentWindow=Yes, Toolbars=No, MenuBar=No, Close=Yes, Minimize=No, Maximize=No, Resize=No.
+> - `3606018` — Document with Close=Yes, Minimize=Yes, Maximize=Yes, Resize=Yes.
+>
+> When copying the pattern for a new Card selector, reuse `Styles="3222339600"` verbatim unless the window flags actually differ.
+
+> **CRITICAL — `Go to Record/Request/Page` uses `<RowPageLocation>` and `<Exit>`**
+>
+> The parameters of step id=16 are **NOT** what the HR syntax suggests. The common-sense tag names `<Option value="First"/>` and `<ExitAfterLast state="True"/>` are **silently discarded** by FM — the step imports successfully but with **no parameters**, producing a Go to Record that effectively does nothing. The loops that depend on it go either infinite or iterate only once without advancing.
+>
+> The correct child elements are:
+>
+> - `<RowPageLocation value="First|Last|Previous|Next|By Calculation"/>` — **NOT** `<Option>`.
+> - `<Exit state="True|False"/>` — for the "Exit after last" flag. **NOT** `<ExitAfterLast>`.
+> - `<NoInteract state="True|False"/>` — for "With dialog: off".
+>
+> ```xml
+> <!-- First record, no dialog -->
+> <Step enable="True" id="16" name="Go to Record/Request/Page">
+>   <NoInteract state="True"/>
+>   <RowPageLocation value="First"/>
+> </Step>
+>
+> <!-- Next record, exit loop after last -->
+> <Step enable="True" id="16" name="Go to Record/Request/Page">
+>   <NoInteract state="True"/>
+>   <Exit state="True"/>
+>   <RowPageLocation value="Next"/>
+> </Step>
+> ```
+>
+> The symptom is invisible to fmlint (the step validates fine at the XML schema level) and only manifests at runtime or via visual inspection in FM Pro (you see the step with no parameters in the Script Workspace). Always verify against `agent/snippet_examples/steps/navigation/Go to Record-Request-Page.xml` or grep the step catalog for the exact `xmlElement` names before emitting this step.
+
 # Core workflow
 
 ## Before writing

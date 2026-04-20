@@ -208,7 +208,8 @@ When generating fmxmlsnippet XML, use these real step IDs instead of `id="0"`:
 | `Set Variable` | 141 | Only for void calls like `error.DeleteTrace` |
 | `Perform Script` | 1 | |
 | `Exit Script` | 103 | |
-| `Go to Layout` | 6 | |
+| `Go to Layout` | 6 | Use real layout ID, NOT `id="0"` — FM silently fails to bind on some imports |
+| `Go to Record/Request/Page` | 16 | Children: `<RowPageLocation value="First\|Next\|…"/>` and `<Exit state="True"/>` — see fmxmlsnippet rules |
 | `New Record/Request` | 7 | |
 | `Commit Records/Requests` | 75 | |
 | `Enter Find Mode` | 22 | |
@@ -252,6 +253,28 @@ When generating fmxmlsnippet XML, use these real step IDs instead of `id="0"`:
 - Recommended: < 100 steps
 - Maximum acceptable: < 200 steps
 - If exceeding: split into specialized subscripts
+
+---
+
+## Schema — Text field indexing
+
+**All new Text fields must be configured with `indexLanguage="Spanish"`** (Spanish Modern). This applies regardless of creation channel (OData, manual in Manage Database, or XML paste).
+
+Canonical `<Storage>` block:
+
+```xml
+<Storage autoIndex="True" index="Minimal" indexLanguage="Spanish" global="False" maxRepetition="1"/>
+```
+
+**Why:** the default indexLanguage in FileMaker installations in English is "English" or "Unicode" — this breaks case-insensitive search and diacritic-agnostic sort for Spanish names (accents, Ñ, ordering). Spanish Modern is the Taiko standard.
+
+**How to apply:**
+
+- **OData field creation**: OData does NOT expose `indexLanguage`. After creating the field via OData, open Manage Database in FM Pro and set Storage → Indexing language → Spanish manually. Treat this as a mandatory step before marking the field creation as done.
+- **Manual field creation in Manage Database**: on the Storage tab, set Indexing language = Spanish.
+- **fmxmlsnippet paste**: include the `<Storage>` block above. FM will honour it on import.
+
+Applies to: `EmpresaNombre`, `DireccionCiudad`, email fields, any multi-valor checkbox (like `TipoEmpresa`), free-text notes, and any other Text-typed field — **no exceptions**.
 
 ---
 
