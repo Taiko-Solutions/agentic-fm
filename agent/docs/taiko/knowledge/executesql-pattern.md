@@ -103,15 +103,15 @@ Para comprobar existencia de un registro por un único campo, usar `SQL.GetColum
 
 ```filemaker
 // BIEN — ejecuta la query real
-Insert Calculated Result [ $ExisteEnClientes ;
+Insert Calculated Result [ $Existe ;
     not IsEmpty ( SQL.GetColumn (
-        CLI__Clientes::__kpln__Cliente ;  // columna a seleccionar
-        CLI__Clientes::__kpln__Cliente ;  // campo WHERE
-        $BrokerId                          // valor WHERE
+        SolutionApp__Tabla::PrimaryKey ;  // columna a seleccionar
+        SolutionApp__Tabla::PrimaryKey ;  // campo WHERE
+        $ValorBuscado                      // valor WHERE
     ) )
 ]
 
-If [ not $ExisteEnClientes ]
+If [ not $Existe ]
     # crear registro nuevo
 End If
 ```
@@ -119,11 +119,11 @@ End If
 Para comprobar existencia por **dos** condiciones AND, usar `SQL.GetColumn2Fields`:
 
 ```filemaker
-Insert Calculated Result [ $ExisteCCL ;
+Insert Calculated Result [ $Existe ;
     not IsEmpty ( SQL.GetColumn2Fields (
-        CCL__ContactosClientes::__kpln__ContactoCliente ;
-        CCL__ContactosClientes::_kfln__Contacto ; $ContactoId ;
-        CCL__ContactosClientes::_kfln__Cliente  ; $FkCliente
+        SolutionApp__Bridge::PrimaryKey ;
+        SolutionApp__Bridge::FK_Parent ; $ParentId ;
+        SolutionApp__Bridge::FK_Child  ; $ChildId
     ) )
 ]
 ```
@@ -139,7 +139,7 @@ If [ not $Existe ]
 End If
 ```
 
-**nunca** crean nada porque `$Existe` es siempre `True`. Los bloques se ejecutan sin errores y sin efectos visibles. Detectado en la tarea 944.8 (Borneo) S4 — la Fase 2 del post-deploy no creaba ningún Cliente Broker pese a pasar validaciones y marcar idempotencia DONE.
+**nunca** crean nada porque `$Existe` es siempre `True`. Los bloques se ejecutan sin errores y sin efectos visibles. Detectado en un post-deploy de migración — una fase de creación idempotente no creaba ningún registro pese a pasar todas las validaciones intermedias y marcar la idempotencia final como DONE.
 
 ### ¿Arreglar upstream?
 
