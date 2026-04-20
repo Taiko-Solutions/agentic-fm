@@ -339,6 +339,20 @@ If any entry matches, read the corresponding document and apply its insights dur
 
 Read the appropriate template before generating a new script to ensure the correct structure and conventions are applied.
 
+# Patrones upstream pendientes de validación práctica
+
+La siguiente tabla lista patrones descubiertos en knowledge articles upstream que **aún no se han formalizado** en `agent/docs/taiko/knowledge/`. Antes de generar código, comprobar si la tarea actual hace match con algún **trigger** de la tabla:
+
+- **Si hay match**: sugerir al desarrollador evaluar el patrón como experimento, explicando qué aporta y qué riesgos tiene. **Nunca aplicar silenciosamente.**
+- **Si el desarrollador confirma**: aplicar, medir impacto en el caso concreto, y documentar aprendizaje.
+- **Tras validación exitosa**: mover el patrón a `agent/docs/taiko/knowledge/<nombre>.md` adaptado al estilo Taiko (PascalCase, comentarios en español, integración con Clew) y **retirarlo de esta tabla**.
+
+La tabla representa un **backlog de adopción** — está vacía cuando no hay nada pendiente.
+
+| Patrón | Triggers (contextos donde tiene sentido) | Doc upstream | Notas |
+|---|---|---|---|
+| Retry con backoff exponencial para error 301 | Script PSOS; script programado/schedule; batch sobre found set grande (>50 registros); endpoint Data API/OData que modifica registros; cualquier script sin UI | `agent/docs/knowledge/record-locking.md` §Retry Logic for Transient Locks | Solo para 301 (lock transitorio). **No aplicar a 306** (conflicto real de datos). Complementa `clew-pattern.md` + `utility-transactional.md`. |
+
 # FileMaker and MBS documentation
 
 ## Dash + MCP (preferred)
