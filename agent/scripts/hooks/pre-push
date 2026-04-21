@@ -1,0 +1,104 @@
+#!/bin/bash
+# agentic-fm pre-push hook — máxima protección contra fuga de datos de cliente
+#
+# Bloquea cualquier push (a cualquier remote, en cualquier rama) si algún commit
+# del rango a empujar contiene archivos que NUNCA deben versionarse en ningún git.
+#
+# Patrón de diseño: whitelist-based
+#   Primero se marcan como "sospechosos" los archivos que coincidan con FORBIDDEN_REGEX
+#   Después se quitan los que coincidan con WHITELIST_REGEX (legítimos conocidos)
+#   Lo que queda se bloquea
+#
+# Archivos PROHIBIDOS por defecto:
+#   - xml_exports/                      Exportaciones XML legacy
+#   - agent/xml_parsed/                 XML parseado de soluciones FM
+#   - agent/context/                    Índices generados por fmcontext.sh
+#   - agent/CONTEXT.json                Contexto actual de la tarea
+#   - agent/sandbox/*.xml               Trabajo agéntico en progreso
+#   - agent/config/*.json|*.md          Config de proyecto (credenciales, overrides locales)
+#
+# Archivos EXPLÍCITAMENTE PERMITIDOS (whitelist):
+#   - *.example y *.example.md          Plantillas públicas sin datos reales
+#   - agent/config/fmlint.config.json   Override Taiko del linter (compartido)
+#   - agent/sandbox/script.xml          Placeholder documentado
+#
+# Instalación en un repo:
+#   bash agent/scripts/install-hooks.sh
+#
+# Bypass (emergencia, bajo tu responsabilidad):
+#   git push --no-verify
+
+set -e
+
+REMOTE_NAME="${1:-}"
+REMOTE_URL="${2:-}"
+ZERO_SHA="0000000000000000000000000000000000000000"
+
+FORBIDDEN_REGEX='^(xml_exports/|agent/xml_parsed/|agent/context/|agent/CONTEXT\.json$|agent/sandbox/.*\.xml$|agent/config/.*\.(json|md)$)'
+WHITELIST_REGEX='(\.example(\..*)?$|^agent/config/fmlint\.config\.json$|^agent/sandbox/script\.xml$)'
+
+found_violation=0
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    # Rama eliminada (nada que verificar)
+    if [ "$local_sha" = "$ZERO_SHA" ]; then
+        continue
+    fi
+
+    # Calcular rango de commits a examinar
+    if [ "$remote_sha" = "$ZERO_SHA" ]; then
+        # Rama nueva — examinar commits que no estén en ninguna otra rama remota
+        commits=$(git rev-list "$local_sha" --not --remotes 2>/dev/null || git rev-list "$local_sha")
+    else
+        commits=$(git rev-list "${remote_sha}..${local_sha}")
+    fi
+
+    [ -z "$commits" ] && continue
+
+    # Archivos tocados en todos los commits del rango (deduplicados)
+    files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only -r {} 2>/dev/null | sort -u)
+
+    # Sospechosos = coincide con FORBIDDEN y NO coincide con WHITELIST
+    matches=$(echo "$files" | grep -E "$FORBIDDEN_REGEX" 2>/dev/null | grep -vE "$WHITELIST_REGEX" 2>/dev/null || true)
+
+    if [ -n "$matches" ]; then
+        if [ $found_violation -eq 0 ]; then
+            echo ""
+            echo "❌ PUSH BLOQUEADO — agentic-fm pre-push hook"
+            echo ""
+            echo "Los siguientes archivos están en commits que se van a empujar"
+            echo "y NUNCA deben subirse a ningún git:"
+            echo ""
+        fi
+        echo "  Rama:   $local_ref → $remote_ref"
+        echo "  Remote: $REMOTE_NAME ($REMOTE_URL)"
+        echo "  Archivos:"
+        echo "$matches" | sed 's/^/    /'
+        echo ""
+        found_violation=1
+    fi
+done
+
+if [ $found_violation -eq 1 ]; then
+    echo "Cómo resolver:"
+    echo ""
+    echo "  1. Si los archivos están en el commit más reciente y la rama es tuya:"
+    echo "       git reset --soft HEAD~1"
+    echo "       git restore --staged <archivos-prohibidos>"
+    echo "       git commit -c ORIG_HEAD   # rehacer el commit sin los archivos"
+    echo ""
+    echo "  2. Si los archivos están más atrás en el historial:"
+    echo "       git rebase -i <sha-previo>   # edita/elimina el commit afectado"
+    echo ""
+    echo "  3. Si es un falso positivo (archivo legítimo nuevo que coincide con el patrón):"
+    echo "       añadirlo a WHITELIST_REGEX en agent/scripts/hooks/pre-push"
+    echo "       luego: bash agent/scripts/install-hooks.sh"
+    echo ""
+    echo "  Patrones activos:"
+    echo "    PROHIBIDO: $FORBIDDEN_REGEX"
+    echo "    PERMITIDO: $WHITELIST_REGEX"
+    echo ""
+    exit 1
+fi
+
+exit 0
