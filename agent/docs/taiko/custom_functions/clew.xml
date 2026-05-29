@@ -956,5 +956,185 @@ If(
 )
 <>"? *"]]></Calculation>
     </CustomFunction>
+    <CustomFunction id="200" functionArity="0" visible="True" parameters="" name="error.GetCategory">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+error.GetCategory
+
+PARAMETERS:
+none
+
+HISTORY:
+CREATED on 2026-04-29 by Marco Antonio Pérez <mperez@taikosolutions.com> — Taiko addition (no upstream Marcelo)
+
+PURPOSE:
+Devolver una clasificación textual del error activo, agrupando los códigos _error_* en categorías de alto nivel que los consumidores externos (wrapper Node.js, MCP del agente IA, dialogs FM) pueden mapear a códigos HTTP, mensajes para el usuario o decisiones de retry sin tener que conocer los códigos individuales.
+
+RESULT:
+Un string con la categoría del error activo. Categorías posibles:
+  validation     - error.code es MISSING_REQUIRED_PARAM, MISSING_REQUIRED_VAR, INVALID_PARAM o INVALID_JSON
+  not_found      - error.code es NO_RECORDS_FOUND
+  conflict       - error.code es MULTIPLE_RECORDS_FOUND
+  business_rule  - error.code es FAILED_CONDITION
+  internal       - error.code es INVALID_CONTEXT, UNEXPECTED, MALFORMED_ERROR_OBJECT, un código FM nativo, un código no reconocido, o no hay error activo
+
+ERRORS:
+n/a — esta función nunca falla. Si no puede determinar la categoría, devuelve "internal" como fallback seguro.
+
+NOTES:
+Esta función es la pieza clasificadora del Response Envelope del framework Clew. Está pensada para ser invocada desde error.GetResponse, no directamente. Si la invocas directamente con error.WasThrown = False, recibirás "internal", lo cual es semánticamente incorrecto — usa error.WasThrown primero para discriminar éxito vs error.
+
+Los códigos FM nativos (104, 401, 301, etc.) caen siempre en "internal" en este repo template. Si tu solución necesita categorizar códigos FM nativos de forma específica (por ejemplo, mapear 401 a "not_found" para Perform Find sin resultados), añade la rama correspondiente al Case() abajo dentro de tu solución, no en este repo template.
+
+DEPENDENCIES:
+error.WasThrown, error.GetCode, _error_* constantes
+*/
+Let ([
+  hasError = error.WasThrown ;
+  code = If ( hasError ; error.GetCode ; "" )
+] ;
+  Case (
+    not hasError ; "internal" ;
+    code = _error_MISSING_REQUIRED_PARAM ; "validation" ;
+    code = _error_MISSING_REQUIRED_VAR ; "validation" ;
+    code = _error_INVALID_PARAM ; "validation" ;
+    code = _error_INVALID_JSON ; "validation" ;
+    code = _error_NO_RECORDS_FOUND ; "not_found" ;
+    code = _error_MULTIPLE_RECORDS_FOUND ; "conflict" ;
+    code = _error_FAILED_CONDITION ; "business_rule" ;
+    code = _error_INVALID_CONTEXT ; "internal" ;
+    code = _error_UNEXPECTED ; "internal" ;
+    code = _error_MALFORMED_ERROR_OBJECT ; "internal" ;
+    "internal"
+  )
+)]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="201" functionArity="1" visible="True" parameters="payload" name="error.GetResponse">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+error.GetResponse ( payload )
+
+PARAMETERS:
+payload - el contenido a devolver al consumidor cuando el script termina con éxito. Suele ser lo que la transacción acumula en $Result. Puede ser cualquier tipo: cadena, número, JSON object, JSON array o vacío. Si error.WasThrown = True, el parámetro se ignora.
+
+HISTORY:
+CREATED on 2026-04-29 by Marco Antonio Pérez <mperez@taikosolutions.com> — Taiko addition (no upstream Marcelo)
+
+PURPOSE:
+Producir una envoltura JSON uniforme para que cualquier consumidor (wrapper Node.js, MCP del agente IA, dialog FM, otra solución FM que llame por Data API) pueda discriminar éxito de error sin parsear el contenido. Reemplaza el patrón clásico de doble Exit Script (uno para $Result, otro para error.GetTrace) por un único Exit Script al final de cada transacción Clew de borde.
+
+RESULT:
+Un objeto JSON con uno de estos dos esquemas:
+
+  Éxito ( error.WasThrown = False ):
+    {
+      "ok": true,
+      "data": <payload>
+    }
+
+  Error ( error.WasThrown = True ):
+    {
+      "ok": false,
+      "category": <error.GetCategory>,
+      "code": <error.GetCode>,
+      "hint": <error.GetHint>,
+      "script": <error.GetScriptName>,
+      "trace": <error.GetTrace>     // sólo si $$DEBUG_MODE = "true"
+    }
+
+ERRORS:
+n/a — esta función nunca lanza errores propios. Lee el estado de error existente y construye el envelope.
+
+NOTES:
+- Convención de modo debug: la propiedad "trace" se incluye en el envelope de error sólo si la variable global $$DEBUG_MODE vale "true" (insensible a mayúsculas). Si está vacía o vale otra cosa, el envelope no incluye "trace". Esto evita filtrar el errorTrace completo (con state, parámetros, etc.) a consumidores externos en producción. La variable global se establece en una capa de bootstrap del cliente (típicamente un script de inicialización o un endpoint que la fija al recibir un header de debug).
+
+- Tipos en el envelope: los campos category, code, hint y script se serializan siempre como string para garantizar consistencia de tipo a los consumidores externos. Si error.GetCode devuelve un código FM nativo numérico (p.ej. 401), se convierte a string "401" en el envelope. Si necesitas el tipo nativo, lee error.GetCode directamente.
+
+- Detección de tipo de payload: la función intenta detectar si el payload es JSON válido y, en ese caso, lo serializa como JSONRaw (objeto/array embebido) en lugar de JSONString (texto). Si el payload es texto plano o un valor escalar, se serializa como JSONString. Si el payload está vacío, se serializa como JSONNull.
+
+- IMPORTANTE — sólo para Controllers de borde: usa error.GetResponse SÓLO en scripts que son consumidos directamente por sistemas externos (Data API, OData, MCP, wrapper Node.js). Los subscripts internos llamados con Perform Script deben seguir devolviendo errorTrace/$Result raw, porque error.InSubscript / error.InSubscriptThrow esperan la forma errorTrace y no reconocen el envelope.
+
+- Esta función es la pieza de salida del framework Clew. Su uso reemplaza al patrón final clásico:
+  Antes:
+    If [error.WasThrown]
+      Exit Script [error.GetTrace]
+    End If
+    Exit Script [$Result]
+  Después:
+    Exit Script [error.GetResponse ( $Result )]
+
+DEPENDENCIES:
+error.WasThrown, error.GetCategory, error.GetCode, error.GetHint, error.GetScriptName, error.GetTrace, json.IsValid, $$DEBUG_MODE (variable global, opcional)
+*/
+Let ([
+  isError = error.WasThrown ;
+  debugOn = Lower ( $$DEBUG_MODE ) = "true" ;
+  payloadFlag = Case (
+    IsEmpty ( payload ) ; JSONNull ;
+    json.IsValid ( payload ) ; JSONRaw ;
+    JSONString
+  )
+] ;
+  If (
+    not isError ;
+    JSONSetElement ( "{}"
+      ; [ "ok" ; True ; JSONBoolean ]
+      ; [ "data" ; payload ; payloadFlag ]
+    ) ;
+    Let ([
+      base = JSONSetElement ( "{}"
+        ; [ "ok" ; False ; JSONBoolean ]
+        ; [ "category" ; error.GetCategory ; JSONString ]
+        ; [ "code" ; GetAsText ( error.GetCode ) ; JSONString ]
+        ; [ "hint" ; GetAsText ( error.GetHint ) ; JSONString ]
+        ; [ "script" ; error.GetScriptName ; JSONString ]
+      )
+    ] ;
+      If (
+        debugOn ;
+        JSONSetElement ( base ; "trace" ; error.GetTrace ; JSONRaw ) ;
+        base
+      )
+    )
+  )
+)]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="202" functionArity="0" visible="True" parameters="" name="_clew_VERSION">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+_clew_VERSION
+
+PARAMETERS:
+none
+
+HISTORY:
+CREATED on 2026-04-29 by Marco Antonio Pérez <mperez@taikosolutions.com> — Taiko addition (no upstream Marcelo)
+
+PURPOSE:
+Devolver la versión del framework Clew instalado en la solución, para que cualquier consumidor o script de mantenimiento pueda comprobar qué versión está presente sin inspeccionar las CFs una a una.
+
+RESULT:
+Un string con la versión semver del framework Clew.
+
+VERSIONADO (semver MAYOR.MENOR.PARCHE):
+  MAYOR  - cambios incompatibles en la firma o comportamiento de CFs existentes
+  MENOR  - nuevas CFs o capacidades retrocompatibles (p.ej. v1.1.0 añadió el Response Envelope)
+  PARCHE - correcciones de bugs sin cambio de API
+
+CHANGELOG:
+  1.1.0 - 2026-04-29 - Añadida la capa Response Envelope: error.GetCategory y error.GetResponse
+  1.0.0 -            - Framework Clew base (Marcelo Piñeyro / Soliant) con adaptaciones Taiko (Log.*, getScriptEnvironment, IsRunningOnServer)
+
+ERRORS:
+n/a
+
+NOTES:
+Esta constante es una Taiko addition; el framework upstream de Soliant no la incluye. Al integrar una nueva versión upstream o añadir/retirar CFs, actualizar el CHANGELOG y el valor devuelto.
+
+DEPENDENCIES:
+none
+*/
+"1.1.0"]]></Calculation>
+    </CustomFunction>
   </Group>
 </fmxmlsnippet>

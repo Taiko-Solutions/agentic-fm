@@ -21,9 +21,9 @@ Script: Buscar[Entity].Controller
 8.  # Parámetros Opcionales:
 9.  #   ninguno
 10. # -------------------------------------------------------------------------------------
-11. # Retorna:
-12. #   Éxito: {"campo": valor, "success": true}
-13. #   Error: errorTrace JSON
+11. # Retorna (Response Envelope — Controller de borde):
+12. #   Éxito: { "ok": true, "data": { ...campos... } }
+13. #   Error: { "ok": false, "category": ..., "code": ..., "hint": ..., "script": ... }
 14. # -------------------------------------------------------------------------------------
 15. # Historial:
 16. #   Creado: YYYY-MM-DD Marco Antonio Pérez
@@ -70,13 +70,19 @@ Script: Buscar[Entity].Controller
 57.     Exit Loop If [ True ]
 58. End Loop
 59. #
-60. # BLOQUE CATCH
-61. If [ error.WasThrown ]
-62.     Exit Script [ error.GetTrace ]
-63. End If
-64. #
-65. Exit Script [ $Result ]
+60. # SALIDA — Response Envelope (Controller de borde)
+61. Exit Script [ error.GetResponse ( $Result ) ]
 ```
+
+> **Nota — variante subscript interno:** si este script va a ser llamado por otro vía `Perform Script` (y el caller usa `error.InSubscript` / `error.InSubscriptThrow`), NO uses el envelope. Mantén el final clásico para que el caller reconozca el `errorTrace`:
+> ```
+> 60. # BLOQUE CATCH
+> 61. If [ error.WasThrown ]
+> 62.     Exit Script [ error.GetTrace ]
+> 63. End If
+> 64. #
+> 65. Exit Script [ $Result ]
+> ```
 
 ## Comment formatting rules
 
@@ -95,4 +101,4 @@ See `CODING_CONVENTIONS.md` for the complete XML formatting rules and step ID re
 - Line 34: Context validation is optional — omit for scripts marked as "insensitive".
 - Line 43: `error.ThrowIfLast` checks `Get(LastError)` — use immediately after risky steps.
 - Line 57: The final `Exit Loop If [True]` terminates the loop on success.
-- Line 61-63: The catch block runs only if an error was thrown during the try block.
+- Line 61 (salida): `error.GetResponse ( $Result )` envuelve éxito o error en el Response Envelope uniforme (`{"ok": true, "data": ...}` o `{"ok": false, "category": ..., ...}`). Úsalo **sólo en Controllers de borde** (consumidos por Data API/OData/MCP/Node.js). En subscripts internos mantén el patrón clásico de la nota anterior, porque `error.InSubscript` espera la forma `errorTrace`. Ver `clew-pattern.md` §Response Envelope.
