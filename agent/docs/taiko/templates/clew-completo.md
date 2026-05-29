@@ -27,9 +27,9 @@ Script: [Entity].Controller
 6.  # Parámetros Requeridos:
 7.  #   - paramName (tipo): descripción
 8.  # -------------------------------------------------------------------------------------
-9.  # Retorna:
-10. #   Éxito: {"success": true}
-11. #   Error: errorTrace JSON
+9.  # Retorna (Response Envelope — Controller de borde):
+10. #   Éxito: { "ok": true, "data": { ...campos... } }
+11. #   Error: { "ok": false, "category": ..., "code": ..., "hint": ..., "script": ... }
 12. # -------------------------------------------------------------------------------------
 13. # Historial:
 14. #   Creado: YYYY-MM-DD Marco Antonio Pérez
@@ -85,13 +85,20 @@ Script: [Entity].Controller
 64.     Exit Loop If [ True ]
 65. End Loop
 66. #
-67. # BLOQUE CATCH
-68. If [ error.WasThrown ]
-69.     Exit Script [ error.GetTrace ]
-70. End If
-71. #
-72. Exit Script [ $Result ]
+67. # SALIDA — Response Envelope (Controller de borde)
+68. Exit Script [ error.GetResponse ( $Result ) ]
 ```
+
+> **Nota — variante subscript interno:** este template muestra un Controller que LLAMA subscripts. Si a su vez es llamado por otro script (que use `error.InSubscript` / `error.InSubscriptThrow`), NO uses el envelope: mantén el final clásico para que el caller reconozca el `errorTrace`:
+> ```
+> 67. # BLOQUE CATCH
+> 68. If [ error.WasThrown ]
+> 69.     Exit Script [ error.GetTrace ]
+> 70. End If
+> 71. #
+> 72. Exit Script [ $Result ]
+> ```
+> Regla: el envelope va en el Controller de **borde** (el que consume Data API/OData/MCP/Node.js). Los eslabones intermedios de la cadena de subscripts devuelven `errorTrace` raw.
 
 ## Key patterns explained
 
