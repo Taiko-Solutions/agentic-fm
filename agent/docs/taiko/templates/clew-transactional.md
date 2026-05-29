@@ -232,3 +232,28 @@ Script: [Entity] | Alta Modificar [Entity] {json}
 - **Line 20-29 (Transactional):** The temporary window isolates the transaction context. Skip if `Get(TransactionOpenState)` is already True.
 - **Line 40-44 (Manager):** On error, the card stays open. On success, it calls itself with "Cancelar" to close.
 - **Line 14 (Shadow):** `error.CreateVarsFromKeys` result is intentionally ignored — if there's no parameter, variables are simply empty (which clears the globals).
+
+## Response Envelope y este patrón
+
+El **Transactional Controller** (Script 3) es un **subscript interno**: el Utility Manager lo invoca con `Perform Script` y maneja su error con `error.InSubscript` (línea 40 del Manager). Por eso su salida **NO** usa `error.GetResponse` — debe devolver la forma `errorTrace` (aquí, el objeto compuesto `error.GetTrace` + `result` + `environment`) para que `error.InSubscript` la reconozca. Si le pusieras el envelope `{"ok": false, ...}`, el Manager dejaría de detectar el error.
+
+El **Utility Manager** (Script 1) es Interface y muestra un dialog al usuario — tampoco usa envelope.
+
+**¿Y si una escritura transaccional debe exponerse a un consumidor externo** (MCP del agente IA, Data API, wrapper Node.js)? No metas el envelope dentro del Controller transaccional. Crea un **Controller de borde** delgado que llame al transaccional como subscript y termine con el envelope:
+
+```
+Script: [Entity].Write.Edge.Controller   // capa de borde, sin transacción propia
+
+Allow User Abort [ Off ]
+Set Error Capture [ On ]
+Loop
+    Exit Loop If [ error.CreateVarsFromKeys ( Get ( ScriptParameter ) ; "" ) ]
+    Perform Script [ "[Entity] | Alta Modificar [Entity] {json}" ; Parameter: Get ( ScriptParameter ) ]
+    Insert Calculated Result [ $Result ; Get ( ScriptResult ) ]
+    Exit Loop If [ error.InSubscriptThrow ]
+    Exit Loop If [ True ]
+End Loop
+Exit Script [ error.GetResponse ( $Result ) ]
+```
+
+Así la transacción y su rollback siguen encapsulados en el Controller transaccional, y el envelope se construye una sola vez en el borde. Ver `clew-pattern.md` §Response Envelope → "Cuándo NO usar el envelope".
