@@ -20,6 +20,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -50,6 +51,82 @@ def _read_local_version() -> str:
         return "unknown"
 
 VERSION = _read_local_version()
+
+# ---------------------------------------------------------------------------
+# Path helpers (WSL2 / Windows compatibility)
+# ---------------------------------------------------------------------------
+
+def _wsl_translate_path(path: str) -> str:
+    """Translate FileMaker's Windows-POSIX paths (/C:/...) to WSL2 mount points (/mnt/c/...).
+
+    FileMaker on Windows uses ConvertFromFileMakerPath(...; 1) which produces paths
+    like /C:/Users/... instead of the WSL2 equivalent /mnt/c/Users/...
+    """
+    m = re.match(r"^/([A-Za-z]):(.*)", path)
+    if m:
+        drive = m.group(1).lower()
+        rest = m.group(2)
+        return f"/mnt/{drive}{rest}"
+    return path
+
+
+def _load_automation_config() -> dict:
+    """Load agent/config/automation.json relative to this script, if present."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(here, "..", "config", "automation.json")
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+_automation_config: dict = _load_automation_config()
+
+
+def _resolve_export_path_for_wsl(solution_name: str) -> str:
+    """Resolve the FM export file path when FileMaker sends '?' on WSL2.
+
+    FileMaker on Windows exports via Get(DesktopPath) & Get(FileName) & ".xml".
+    When ConvertFromFileMakerPath fails (returns '?'), we reconstruct the path
+    by querying Windows for the actual Desktop shell folder via PowerShell
+    (handles OneDrive-redirected Desktops), then converting with wslpath.
+
+    Falls back to export_dir_override in automation.json if auto-detection fails.
+    """
+    # Config override takes precedence — skip auto-detection entirely
+    export_dir = _automation_config.get("export_dir_override", "")
+    if export_dir:
+        path = os.path.join(os.path.expanduser(export_dir), f"{solution_name}.xml")
+        log.info("Using export_dir_override from automation.json: %r", path)
+        return path
+
+    # Auto-detect via PowerShell + wslpath (WSL2 only).
+    # GetFolderPath('Desktop') resolves OneDrive-redirected Desktops correctly;
+    # a simple USERPROFILE\Desktop approach misses this common Windows setup.
+    try:
+        r1 = subprocess.run(
+            [
+                "powershell.exe", "-NoProfile", "-Command",
+                "[Environment]::GetFolderPath('Desktop')",
+            ],
+            capture_output=True, text=True, timeout=10,
+        )
+        if r1.returncode == 0:
+            win_desktop = r1.stdout.strip()  # e.g. C:\Users\pchov\OneDrive\Desktop
+            r2 = subprocess.run(
+                ["wslpath", win_desktop],
+                capture_output=True, text=True, timeout=5,
+            )
+            if r2.returncode == 0:
+                wsl_desktop = r2.stdout.strip()  # e.g. /mnt/c/Users/pchov/OneDrive/Desktop
+                path = os.path.join(wsl_desktop, f"{solution_name}.xml")
+                log.info("Auto-detected WSL2 export path via PowerShell+wslpath: %r", path)
+                return path
+    except Exception as exc:
+        log.warning("WSL2 export path auto-detection failed: %s", exc)
+
+    return ""
 
 # ---------------------------------------------------------------------------
 # Webviewer process state (module-level, shared across request threads)
@@ -261,6 +338,65 @@ class CompanionHandler(BaseHTTPRequestHandler):
         # Expand ~ in paths
         repo_path = os.path.expanduser(repo_path)
         export_file_path = os.path.expanduser(export_file_path)
+
+        # Translate Windows-POSIX paths (/C:/...) to WSL2 mount points (/mnt/c/...).
+        # FileMaker on Windows uses ConvertFromFileMakerPath(...; 1) which produces
+        # paths like /C:/Users/... that are invalid in WSL2.
+        export_file_path = _wsl_translate_path(export_file_path)
+        repo_path = _wsl_translate_path(repo_path)
+
+        # If repo_path is "?" it means FileMaker's ConvertFromFileMakerPath failed —
+        # this happens on WSL2 when the repo lives on the WSL filesystem and FileMaker
+        # on Windows cannot convert the \\wsl.localhost\... UNC path to a POSIX path.
+        # Fall back to repo_path_override from agent/config/automation.json.
+        if repo_path == "?":
+            override = _automation_config.get("repo_path_override", "")
+            if override:
+                repo_path = os.path.expanduser(override)
+                log.info(
+                    "repo_path was '?' — using repo_path_override from automation.json: %r",
+                    repo_path,
+                )
+            else:
+                self._send_json(
+                    {
+                        "success": False,
+                        "exit_code": -1,
+                        "error": (
+                            "repo_path is '?' — FileMaker could not convert the repo path to POSIX "
+                            "(common on WSL2 when the repo is on the WSL filesystem). "
+                            "Add 'repo_path_override' to agent/config/automation.json with the "
+                            "absolute POSIX path to your agentic-fm folder (e.g. /home/user/agentic-fm). "
+                            "See agent/docs/SANDBOXED_ENVIRONMENT.md for details."
+                        ),
+                    },
+                    status=400,
+                )
+                return
+
+        # If export_file_path is "?" FileMaker's ConvertFromFileMakerPath failed to
+        # produce a POSIX path for the Windows Desktop location. Reconstruct it from
+        # the Windows USERPROFILE env var via cmd.exe + wslpath, or from automation.json.
+        if export_file_path == "?":
+            resolved = _resolve_export_path_for_wsl(solution_name)
+            if resolved:
+                export_file_path = resolved
+            else:
+                self._send_json(
+                    {
+                        "success": False,
+                        "exit_code": -1,
+                        "error": (
+                            "export_file_path is '?' — FileMaker could not convert the Desktop path to POSIX "
+                            "and WSL2 auto-detection failed. "
+                            "Add 'export_dir_override' to agent/config/automation.json with the WSL2 path "
+                            "to your Windows Desktop (e.g. \"/mnt/c/Users/<you>/Desktop\"). "
+                            "See agent/docs/SANDBOXED_ENVIRONMENT.md for details."
+                        ),
+                    },
+                    status=400,
+                )
+                return
 
         # Build environment for subprocess
         env = os.environ.copy()
@@ -505,7 +641,7 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._send_json({"success": False, "error": str(exc)}, status=500)
 
     def _handle_clipboard(self):
-        """Accept XML content and write it to the macOS clipboard via clipboard.py."""
+        """Accept XML content and write it to the clipboard via clipboard.py (macOS) or clipboard_win.py (WSL2/Windows)."""
         try:
             body = self._read_body()
             payload = json.loads(body)
@@ -518,9 +654,16 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._send_json({"success": False, "error": "Missing required field: xml"}, status=400)
             return
 
+        import platform
         import tempfile
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        clipboard_py = os.path.join(script_dir, "clipboard.py")
+
+        # On Linux (WSL2), delegate to clipboard_win.py which uses powershell.exe.
+        # On macOS, use the original clipboard.py (osascript / NSPasteboard path).
+        if platform.system() == "Linux":
+            clipboard_py = os.path.join(script_dir, "clipboard_win.py")
+        else:
+            clipboard_py = os.path.join(script_dir, "clipboard.py")
 
         try:
             with tempfile.NamedTemporaryFile(
@@ -541,7 +684,7 @@ class CompanionHandler(BaseHTTPRequestHandler):
             else:
                 log.error("Clipboard write failed: %s", result.stderr)
                 self._send_json(
-                    {"success": False, "error": result.stderr or "clipboard.py returned non-zero"},
+                    {"success": False, "error": result.stderr or "clipboard script returned non-zero"},
                     status=500,
                 )
         except Exception as exc:
