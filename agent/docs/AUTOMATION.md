@@ -52,6 +52,8 @@ Credentials, base URL, and bridge script name are all read from `automation.json
 
 Response shape: `{ "scriptResult": { "code": 0, "resultParameter": "<script result JSON>" } }`
 
+> **⚠ Doble envoltorio en Controllers Clew.** Cuando el script destino es un Controller de borde Clew (devuelve un Response Envelope), `resultParameter` **no es** el envelope directo. Parsea a `{ "result": "<envelope-como-string>", "script": "<nombre>", "success": true }`, y el envelope Clew real (`{ok:true,data:[...]}` | `{ok:false,category,code,hint,script}`) está anidado en `.result` como **string** → requiere un **segundo** `json.loads`. Todo cliente/runner que consuma esta vía debe hacer el doble parseo (referencia: `agent/sandbox/_run_task_list_tests.py`).
+
 ### Key agent-triggered scripts
 
 **Run Explode XML** (refresh `xml_parsed/` after FM schema or script changes):
@@ -67,6 +69,16 @@ Response shape: `{ "scriptResult": { "code": 0, "resultParameter": "<script resu
 2. Call `Push Context` with parameter `{ "task": "<task description>", "repo_path": "...", "companion_url": "..." }` — writes a fresh `agent/CONTEXT.json` scoped to that layout
 
 **Run any solution script**: call `AGFMScriptBridge` directly with `{ "script": "<ScriptName>", "parameter": "<optional>" }` to trigger any named script in the solution.
+
+**Evaluate a calculation on the live FM engine** (debugging — test a calc without touching the FileMaker UI): call `AGFMEvaluation` through the bridge with parameter `{ "expression": "<FileMaker calc>", "layout": "<optional layout>" }`. It evaluates server-side and returns `{ expression, result, error_code, layout, success }` (via the same double-envelope as above). Invaluable for diagnosing calc-level gotchas — e.g. it revealed that `List()` with a single argument returns `?` in Taiko solutions (see `agent/docs/taiko/knowledge/list-single-arg-gotcha.md`).
+
+```python
+inner = json.dumps({"script": "AGFMEvaluation", "parameter": json.dumps({"expression": calc})})
+body  = json.dumps({"scriptParameterValue": inner})
+# ... POST to Script.AGFMScriptBridge ... then:
+outer = json.loads(resp["scriptResult"]["resultParameter"])   # {result, script, success}
+env   = json.loads(outer["result"])                            # {expression, result, error_code, ...}
+```
 
 ### automation.json solution config structure
 
