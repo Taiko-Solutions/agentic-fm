@@ -402,6 +402,7 @@ The `agent/library` folder is a curated collection of reusable fmxmlsnippet code
 - **Debugging**: Use the `fm-debug` skill when a script's behavior cannot be diagnosed from source code alone. Details in `agent/docs/AGENTIC_DEBUG.md`
 - **Function reference**: `agent/docs/filemaker/functions/` — official FM function docs (not guaranteed present). Validate function names against this folder when writing calculations. Do not invent function names.
 - **Schema guidance**: `agent/docs/SCHEMA_GUIDANCE.md` — complete param type → XML mapping reference
+- **Script format converters**: `agent/docs/CONVERTERS.md` — catalogue of every converter between FileMaker script formats (SaXML, HR, fmxmlsnippet) and which tool handles each conversion (e.g. `fm_xml_to_snippet.py`, `snippet_to_hr.py`)
 - **Documentation conventions**: When writing docs, use generic placeholder names (`SolutionApp`, `SolutionData`) instead of real solution names. Exception: when the context is explicitly about a specific solution.
 - **Sandboxed environments**: `agent/docs/SANDBOXED_ENVIRONMENT.md` — setup and operation guide for agents running in sandboxed, containerized, or virtualized environments (Codex, Claude Code, Docker, etc.). Read this if you detect you are not running natively on macOS.
 
