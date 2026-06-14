@@ -69,7 +69,7 @@ This project is designed to create FileMaker objects — primarily scripts and c
 - _CONTEXT.json_ is the primary source of IDs, names, relationships, and other metadata for the current task. See **Context system** below.
 - _context/_ contains pre-extracted index files — a secondary lookup source. See **Context system** below.
 - _xml_parsed/_ is the XML output from the FileMaker solution. See **Context system** below.
-- _catalogs/_ contains the step catalog (`step-catalog-en.json`) — a structured index of all FileMaker script steps with parameter definitions, types, enums, and HR signatures. This is the primary reference for step XML structure.
+- _catalogs/_ contains two catalogs: the step catalog (`step-catalog-en.json`) — structured index of all FileMaker script steps with parameter definitions, types, enums, and HR signatures; and the function catalog (`function-catalog.json`) — index of all 358 FileMaker calculation functions with name and prototype. The step catalog is the primary reference for step XML structure; the function catalog validates function names and signatures in calculations.
 - _snippet_examples/_ is an **archival** reference folder. The step catalog is the single source of truth for step structure. Read snippet_examples only when the catalog's `notes` field is insufficient.
 - _fmlint/_ is the FMLint linter package. Run via `python3 -m agent.fmlint` to validate fmxmlsnippet XML or human-readable scripts.
 
@@ -250,7 +250,7 @@ The developer always works in **human-readable (HR) script format**. The agent's
 1. Read `agent/CONTEXT.json` for the task description and all reference IDs (when present)
 2. Read `agent/docs/CODING_CONVENTIONS.md` — all generated FileMaker code must follow these conventions
 3. Scan `agent/docs/knowledge/MANIFEST.md` for keyword matches against the current task — read and apply matching documents
-4. For scripts: grep the step catalog for each step type used (see **Step catalog** below)
+4. For scripts: grep the step catalog for each step type used (see **Step catalog** below); validate any calculation function name against the function catalog (see **Function catalog** below)
 5. Substitute the specific IDs/names/values from CONTEXT.json
 
 ## After writing
@@ -258,6 +258,7 @@ The developer always works in **human-readable (HR) script format**. The agent's
 **MANDATORY: After writing or updating a file within agent/sandbox/:**
 
 6. Run `python3 -m agent.fmlint agent/sandbox/<filename>` to validate. Fix any ERROR-severity diagnostics before presenting to the user; review WARNING-severity.
+6b. (Optional) Preview the human-readable form of the generated script before deploying: `python3 agent/scripts/snippet_to_hr.py agent/sandbox/<filename>`. Use this to verify logic visually or to show the developer what the script will look like in Script Workspace without pasting.
 7. Deploy using `agent/scripts/deploy.py`. Use the tier appropriate for the situation (see `agent/config/automation.json`). When falling back to Tier 1 (manual paste), present instructions in this exact format:
 
 > The script is on your clipboard. To install it:
@@ -323,6 +324,21 @@ grep -A 60 '"name": "Step Name"' "agent/catalogs/step-catalog-en.json"
 
 - Look up the step by name, use the `hrSignature` field for the parameter format
 - If `hrSignature` is null, fall back to reading the archival snippet_examples file
+
+## Function catalog
+
+`agent/catalogs/function-catalog.json` is the canonical reference for all 358 FileMaker calculation functions. **Never read the full file**. Always grep for the specific function:
+
+```bash
+grep -i '"name": "FunctionName"' agent/catalogs/function-catalog.json -A 1
+```
+
+**When to use:**
+- Before writing any calculation expression — verify the function name exists and use the exact prototype from the catalog
+- When unsure whether a function exists in FileMaker — the catalog is the authoritative list; if it is not here, do not use it
+- To get the correct parameter signature: the `prototype` field shows the exact call syntax
+
+**Do NOT invent function names.** If a function is not in the catalog, use a different approach or ask. Invented function names silently fail in FileMaker calculations.
 
 # Clipboard
 
@@ -427,7 +443,6 @@ La tabla representa un **backlog de adopción** — está vacía cuando no hay n
 
 | Patrón | Triggers (contextos donde tiene sentido) | Doc upstream | Notas |
 |---|---|---|---|
-| Retry con backoff exponencial para error 301 | Script PSOS; script programado/schedule; batch sobre found set grande (>50 registros); endpoint Data API/OData que modifica registros; cualquier script sin UI | `agent/docs/knowledge/record-locking.md` §Retry Logic for Transient Locks | Solo para 301 (lock transitorio). **No aplicar a 306** (conflicto real de datos). Complementa `clew-pattern.md` + `utility-transactional.md`. |
 
 # FileMaker and MBS documentation
 
