@@ -19,6 +19,10 @@ agent/docs/filemaker/error-codes.md
 # Sensitive config (contains solution-specific removal rules)
 agent/config/removals.json
 
+# Claude Code local files (contain machine-specific paths and session state)
+.claude/settings.local.json
+.claude/worktrees/
+
 # Specific files
 PROJECT.md
 *_PRIVATE.md
