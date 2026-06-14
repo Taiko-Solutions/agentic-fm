@@ -518,7 +518,9 @@ def tx_go_to_layout(step) -> str:
     layout_dest  = 'OriginalLayout'
     layout_id    = '0'
     layout_name  = ''
+    layout_calc  = ''
     has_layout   = False
+    has_calc     = False
     animation    = ''
 
     p = param_by_type(step, 'LayoutReferenceContainer')
@@ -526,11 +528,19 @@ def tx_go_to_layout(step) -> str:
         lrc = p.find('LayoutReferenceContainer')
         if lrc is not None:
             lr = lrc.find('LayoutReference')
+            calc = get_calc_text(lrc)
             if lr is not None:
+                # Destino por referencia de lista (id + nombre)
                 layout_dest = 'SelectedLayout'
                 layout_id   = lr.get('id', '0')
                 layout_name = lr.get('name', '')
                 has_layout  = True
+            elif calc:
+                # Destino por cálculo (LayoutReferenceContainer value="3"): nombre de layout calculado.
+                # Sin este caso, Go to Layout quedaba sin <Layout> y no navegaba (escrituras rotas server-side).
+                layout_dest = 'LayoutNameByCalc'
+                layout_calc = calc
+                has_calc    = True
             else:
                 label_el   = lrc.find('Label')
                 label_text = (label_el.text or '').strip() if label_el is not None else ''
@@ -548,6 +558,10 @@ def tx_go_to_layout(step) -> str:
     ]
     if has_layout:
         parts.append(f'{L1}<Layout id="{layout_id}" name="{escape_attr(layout_name)}"/>')
+    elif has_calc:
+        parts.append(f'{L1}<Layout>')
+        parts.append(f'{L2}<Calculation>{cdata(layout_calc)}</Calculation>')
+        parts.append(f'{L1}</Layout>')
     if animation:
         parts.append(f'{L1}<Animation value="{animation}"/>')
     parts.append(f'{S}</Step>')
