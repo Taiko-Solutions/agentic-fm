@@ -1,5 +1,11 @@
 # Propagación de errores entre subscripts Clew — `InSubscript` vs `InSubscriptThrow`
 
+> **¿Cuándo usar este patrón?** Cuando un **Controller de borde** llama a subscripts y quieres que el **Response Envelope** conserve la `category`/`code`/`hint` reales del hijo (en vez de degradarlas a `internal/UNEXPECTED`). Asume que el error del hijo **sí llega** por `Get(ScriptResult)`. Es el problema de *"llega, pero mal resumido"*.
+>
+> **No es este patrón** si el subscript entra en una **transacción que puede hacer `Revert`** (que mata al hijo y vacía `Get(ScriptResult)`) → ahí necesitas el canal global de **[`clew-transactional-dual.md`](clew-transactional-dual.md)** (problema de *"no llega NADA del hijo"*).
+>
+> **Los dos a la vez** solo en un Controller de borde que es transaccional **y** devuelve envelope al exterior (caso poco común).
+
 ## Regla
 
 Cuando un **Controller de borde** (el que termina con `error.GetResponse` y devuelve el Response Envelope) llama a un **subscript interno** vía `Perform Script` y quiere que el error del subscript se refleje en el envelope **con su categoría/código/hint reales**, debe usar:
