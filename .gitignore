@@ -23,6 +23,10 @@ agent/config/removals.json
 .claude/settings.local.json
 .claude/worktrees/
 
+# Backups locales de config (pueden contener credenciales antiguas)
+agent/config/*.bak*
+agent/config/.*.bak*
+
 # Specific files
 PROJECT.md
 *_PRIVATE.md
