@@ -12,7 +12,7 @@ Patrón canónico de script transaccional Clew que se comporta idénticamente se
 - Extiende `clew-pattern.md` (error handling base) añadiendo el eje transaccional y la propagación cross-script vía variable global.
 - Complementa `utility-transactional.md` (Utility Manager + Shadow + Controller para edición UI); ese patrón usa un mecanismo equivalente (`$$TRANSACTION_ERROR` + `transaction.*`). Este documento describe el flujo transaccional **puro** (sin UI) y lo estandariza.
 
-XML fuente de templates: `agent/sandbox/Clew_Template_Dual.xml` y `agent/sandbox/Clew_Template_Orchestrator.xml`.
+Templates versionados (HR + fmxmlsnippet pegable): [`../templates/clew-transactional-dual.md`](../templates/clew-transactional-dual.md) (Worker) y [`../templates/clew-transactional-orchestrator.md`](../templates/clew-transactional-orchestrator.md) (Orchestrator).
 
 ## El problema que resuelve
 
