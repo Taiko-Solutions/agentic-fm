@@ -1,0 +1,18 @@
+services:
+  webviewer:
+    container_name: agentic-fm-webviewer
+    image: node:20-bookworm-slim
+    working_dir: /workspace/webviewer
+    command: >
+      sh -lc "if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ];
+      then npm ci; fi && npm run dev -- --host 0.0.0.0 --port 8080 --strictPort"
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ${AGENTIC_FM_HOST_ROOT:-..}:/workspace
+      - webviewer_node_modules:/workspace/webviewer/node_modules
+    restart: unless-stopped
+
+volumes:
+  webviewer_node_modules:
+
