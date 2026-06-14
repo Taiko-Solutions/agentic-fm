@@ -4,7 +4,7 @@ The Clew pattern is Taiko's standard error handling system for FileMaker. It imp
 
 **NOTE:** This pattern relies on a suite of `error.*` custom functions that must be present in the FileMaker solution. These functions manage an internal error state (errorTrace) that propagates through the script chain.
 
-XML source: `agent/docs/taiko/custom_functions/clew.xml` (40 functions — Clew framework by Marcelo Piñeyro / Soliant Consulting, with Taiko adaptations)
+XML source: `agent/docs/taiko/custom_functions/clew.xml` (43 functions — Clew framework by Marcelo Piñeyro / Soliant Consulting, with Taiko adaptations including the Response Envelope layer)
 
 ## Pseudo Try-Catch Structure
 
@@ -38,15 +38,24 @@ Loop
   Exit Loop If [True]
 End Loop
 
-# --- CATCH BLOCK ---
-If [error.WasThrown]
-  Exit Script [error.GetTrace]
-End If
-
-Exit Script [$Result]
+# --- EXIT (con Response Envelope, para Controllers de borde) ---
+Exit Script [error.GetResponse ( $Result )]
 ```
 
-The `Loop` always executes exactly once. Each `Exit Loop If` acts as a validation gate — if the condition is true (an error was thrown), execution jumps to the catch block. The final `Exit Loop If [True]` ensures the loop terminates on success.
+The `Loop` always executes exactly once. Each `Exit Loop If` acts as a validation gate — if the condition is true (an error was thrown), execution jumps out of the loop. The final `Exit Loop If [True]` ensures the loop terminates on success.
+
+`error.GetResponse ( $Result )` produce un **Response Envelope** uniforme (ver sección abajo): si hubo error, devuelve `{"ok": false, ...}`; si no, devuelve `{"ok": true, "data": $Result}`. Esto sustituye al patrón clásico de doble `Exit Script` (uno para `$Result`, otro para `error.GetTrace`) — un único punto de salida, un único formato para los consumidores.
+
+> **Sólo para Controllers de borde.** Usa `error.GetResponse` en scripts consumidos directamente por sistemas externos (Data API, OData, MCP del agente IA, wrapper Node.js). Los **subscripts internos** llamados con `Perform Script` deben mantener el patrón clásico (devolver `errorTrace`/`$Result` raw), porque `error.InSubscript` / `error.InSubscriptThrow` esperan la forma `errorTrace` y no reconocen el envelope.
+
+> **Patrón clásico (subscripts internos / legado):**
+> ```
+> If [error.WasThrown]
+>   Exit Script [error.GetTrace]
+> End If
+> Exit Script [$Result]
+> ```
+> Es funcionalmente equivalente al envelope cuando el consumidor conoce el formato `errorTrace`. Mantén este patrón en subscripts internos y en scripts existentes que aún no se hayan migrado.
 
 ## Custom Functions
 
@@ -104,6 +113,14 @@ Las funciones Clew tienen dos tipos de segundo parámetro que **NO deben confund
 - `error.GetDescription(errorCode)` — returns the standard description for a given error code.
 - `error.DeleteTrace` — clears the active error. Use when an error has been handled and should not propagate further. **IMPORTANT:** Must be called via `Set Variable` (step id="141"), not `Insert Calculated Result`, because it modifies internal state and returns a void value. Pattern: `Set Variable [$_Void; Value: error.DeleteTrace]`
 
+### Response Envelope (Output)
+
+Las funciones siguientes son una capa Taiko sobre el framework Clew original. Producen una envoltura JSON uniforme para que cualquier consumidor (wrapper Node.js, MCP del agente IA, dialog FM, otra solución FM) discrimine éxito de error sin parsear el contenido.
+
+- `error.GetCategory` — clasifica el error activo en una categoría de alto nivel (`validation`, `not_found`, `conflict`, `business_rule`, `internal`). Pensada para ser invocada desde `error.GetResponse`, no directamente. Si no hay error activo o el código no se reconoce, devuelve `internal` como fallback seguro.
+- `error.GetResponse ( payload )` — construye el Response Envelope completo. Si `error.WasThrown = True`, devuelve el envelope de error; si no, el de éxito con `payload` como `data`. **Es la pieza de salida del framework**: reemplaza al patrón clásico de doble `Exit Script` por un único `Exit Script [error.GetResponse ( $Result )]`. Úsala sólo en Controllers de borde (ver sección Response Envelope).
+- `_clew_VERSION` — constante que devuelve la versión semver del framework Clew instalado (p.ej. `"1.1.0"`). Útil para que consumidores y scripts de mantenimiento comprueben qué versión está presente.
+
 ## Error Constants
 
 These custom functions return fixed string codes:
@@ -120,6 +137,144 @@ These custom functions return fixed string codes:
 | `_error_MULTIPLE_RECORDS_FOUND` | A Perform Find returned more records than expected |
 | `_error_UNEXPECTED` | An unexpected error occurred |
 | `_error_MALFORMED_ERROR_OBJECT` | The errorTrace JSON is malformed |
+
+## Response Envelope
+
+El Response Envelope es la envoltura de salida estándar para cualquier transacción Clew **de borde** — es decir, consumida por un sistema externo (wrapper HTTP, MCP del agente IA, llamada Data API/OData, dialog FM, otra solución FM por subscript). Su objetivo es eliminar el parseo ad-hoc que cada consumidor implementaba para distinguir éxito de error.
+
+### Esquema
+
+**Éxito** ( `error.WasThrown = False` ):
+
+```json
+{
+  "ok": true,
+  "data": <payload>
+}
+```
+
+`<payload>` es lo que la transacción acumula en `$Result`. Puede ser cadena, número, objeto JSON, array JSON o vacío. Se serializa con el flag JSON apropiado (JSONRaw si es JSON válido, JSONString si es texto plano, JSONNull si está vacío).
+
+**Error** ( `error.WasThrown = True` ):
+
+```json
+{
+  "ok": false,
+  "category": "<categoría>",
+  "code": "<código>",
+  "hint": "<frase en español>",
+  "script": "<nombre del script>",
+  "trace": { ... }
+}
+```
+
+`trace` se incluye **sólo si `$$DEBUG_MODE = "true"`** (insensible a mayúsculas). Contiene el `errorTrace` completo que produce `error.GetTrace`. Para no filtrar parámetros, state ni la cadena de subscripts a consumidores externos en producción, en modo no-debug `trace` se omite.
+
+`category`, `code`, `hint` y `script` se serializan siempre como string para garantizar consistencia de tipo a consumidores externos. Los códigos FM nativos numéricos (p.ej. 401) se convierten a string ("401") en el envelope.
+
+### Mapeo de categorías
+
+| Categoría | Códigos `_error_*` que la activan | Significado para el consumidor |
+|-----------|----------------------------------|-------------------------------|
+| `validation` | `MISSING_REQUIRED_PARAM`, `MISSING_REQUIRED_VAR`, `INVALID_PARAM`, `INVALID_JSON` | El input del cliente está mal formado. Mapea a HTTP 400 / 422. |
+| `not_found` | `NO_RECORDS_FOUND` | El recurso solicitado no existe. Mapea a HTTP 404. |
+| `conflict` | `MULTIPLE_RECORDS_FOUND` | Estado inconsistente en los datos (más registros de los esperados). Mapea a HTTP 409. |
+| `business_rule` | `FAILED_CONDITION` | Una regla de negocio rechazó la operación. Mapea a HTTP 422 con mensaje al usuario. |
+| `internal` | `INVALID_CONTEXT`, `UNEXPECTED`, `MALFORMED_ERROR_OBJECT`, códigos FM nativos, códigos no reconocidos, sin error activo | Error interno o inesperado. Mapea a HTTP 500. **No mostrar `hint` al usuario final** salvo en debug. |
+
+> **Por qué `internal` para códigos FM nativos**: en este repo template no asumimos un mapeo fijo para errores FM nativos (104, 401, 301, 306…) porque su semántica depende del contexto de cada solución. Cada solución puede extender `error.GetCategory` localmente añadiendo ramas al `Case()` con los códigos FM que quiera categorizar.
+
+### Convención `$$DEBUG_MODE`
+
+`error.GetResponse` lee la variable global `$$DEBUG_MODE` para decidir si incluye el `trace` en el envelope de error.
+
+| Valor de `$$DEBUG_MODE` | Comportamiento |
+|------------------------|----------------|
+| `"true"` (insensible a mayúsculas: `True`, `TRUE`, `true`) | Incluye `trace` con el errorTrace completo |
+| Vacío | Omite `trace` |
+| Cualquier otro valor | Omite `trace` |
+
+La variable se establece en una capa de bootstrap del cliente (script de inicialización del fichero, endpoint que la fija al recibir un header `X-Debug: true`, o toggle de desarrollador). El framework Clew no la fija ni la limpia automáticamente.
+
+> **Seguridad**: Nunca dejes `$$DEBUG_MODE = "true"` en producción para clientes externos. El errorTrace contiene parámetros de entrada, state del cliente (account name, layout name) y la cadena completa de subscripts — información que no debe filtrarse fuera del entorno de desarrollo.
+
+### Ejemplos
+
+**Éxito con payload simple** (transacción que crea un registro y devuelve el ID):
+
+```
+$Result = "FAC-2026-00042"
+Exit Script [ error.GetResponse ( $Result ) ]
+```
+
+Envelope producido:
+
+```json
+{ "ok": true, "data": "FAC-2026-00042" }
+```
+
+**Éxito con payload JSON** (transacción que devuelve un objeto):
+
+```
+$Result = JSONSetElement ( "{}"
+    ; [ "FacturaID" ; "FAC-2026-00042" ; JSONString ]
+    ; [ "Total" ; 1250 ; JSONNumber ]
+)
+Exit Script [ error.GetResponse ( $Result ) ]
+```
+
+Envelope producido (nota: `data` se embebe como objeto, no como string):
+
+```json
+{
+  "ok": true,
+  "data": { "FacturaID": "FAC-2026-00042", "Total": 1250 }
+}
+```
+
+**Error de validación** (`$ClienteID` no recibido):
+
+```json
+{
+  "ok": false,
+  "category": "validation",
+  "code": "MISSING_REQUIRED_PARAM",
+  "hint": "Missing ClienteID required parameter(s)",
+  "script": "Cliente.Read.Controller"
+}
+```
+
+**Error de validación en modo debug** (`$$DEBUG_MODE = "true"`):
+
+```json
+{
+  "ok": false,
+  "category": "validation",
+  "code": "MISSING_REQUIRED_PARAM",
+  "hint": "Missing ClienteID required parameter(s)",
+  "script": "Cliente.Read.Controller",
+  "trace": {
+    "directionOfTrace": "caller_script_first",
+    "errorTrace": [
+      {
+        "code": "MISSING_REQUIRED_PARAM",
+        "description": "Missing a required parameter",
+        "hint": "Missing ClienteID required parameter(s)",
+        "script": { "name": "Cliente.Read.Controller", "parameter": {} },
+        "state": { "accountName": "Admin", "layoutName": "Clientes" }
+      }
+    ]
+  }
+}
+```
+
+### Cuándo NO usar el envelope
+
+- **Subscripts internos** llamados con `Perform Script`: deben seguir devolviendo `errorTrace` o `$Result` raw. El envelope sólo es la salida hacia consumidores externos. Si un subscript devolviera el envelope, el caller no podría usar `error.InSubscriptThrow` / `error.InSubscript` (que esperan la forma `errorTrace`).
+- **Controllers transaccionales llamados por un Utility Manager** (ver `utility-transactional.md`): el Manager los invoca con `error.InSubscript`, así que el Controller transaccional NO lleva envelope. Si necesitas exponer una escritura transaccional a un consumidor externo, envuelve la llamada en un Controller de borde separado que termine con `error.GetResponse`.
+- **Scripts que no se consumen externamente**: triggers, scripts UI puros, navegación. Mantén el patrón tradicional.
+
+La regla práctica: **sólo los Controllers de borde (llamados por Data API, OData, MCP, o un wrapper Node.js) usan el envelope**. Los Interface scripts y los subscripts internos siguen el patrón clásico.
 
 ## ErrorTrace JSON Format
 
