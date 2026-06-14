@@ -150,3 +150,41 @@ not IsEmpty ( SQL.GetColumn ( WhereField ; WhereField ; WhereValue ) )
 ```
 
 Pendiente abrir PR en [fm-sql-cfs](https://github.com/karbonfm/fm-sql-cfs). Mientras tanto, **prohibido usar `SQL.RecordExists` en código Taiko** — usar `not IsEmpty ( SQL.GetColumn(…) )` o `SQL.GetColumn2Fields(…)`.
+
+---
+
+## ⚠ Parseo de resultados multi-fila: FileMaker recorta caracteres de control finales
+
+Cuando se ejecuta `ExecuteSQL` con separadores de fila/columna **personalizados** (típicamente `Char(30)` para filas y `Char(29)` para columnas, elegidos porque no aparecen en datos reales) y luego se parsea el resultado para construir un array JSON, hay **dos comportamientos de FileMaker** que rompen los enfoques ingenuos:
+
+1. **`ExecuteSQL` NO añade separador de fila final.** Para N filas hay N−1 separadores de fila. El resultado termina con el último valor (o con el separador de columna que precede a una última columna vacía).
+
+2. **FileMaker recorta los caracteres de control finales (`Char(29)`, `Char(30)`, etc.) al asignar una cadena a una variable `$`** (`Insert Calculated Result`/`Set Variable`). Esto es invisible y NO ocurre con variables locales de `Let()` planas (sin `$`), lo que hace el bug especialmente engañoso al depurar con `Evaluate`.
+
+### Síntoma
+
+Se pierde **la última fila** del resultado (o, con una sola fila, se devuelve un array vacío). Trucos como "añadir un `Char(30)` al final y contar separadores" fallan, porque el `Char(30)` añadido se recorta al guardarlo en la `$variable`:
+
+```filemaker
+// MAL — el Char(30) final se recorta al asignar a $Trabajo → cuenta una fila de menos
+Insert Calculated Result [ $Trabajo ; $SqlResult & Char ( 30 ) ]
+Insert Calculated Result [ $NumFilas ; PatternCount ( $Trabajo ; Char ( 30 ) ) ]   // = N-1, no N
+```
+
+Detectado en `task.list` (974, Bloque 3): `del_sprint` devolvía 2 de 3 tareas; la tercera tenía la última columna vacía, así que el resultado terminaba en `Char(29)` y el `Char(30)` añadido desaparecía.
+
+### Patrón correcto
+
+**Contar filas con `PatternCount + 1`** sobre el resultado crudo (los separadores *internos* entre filas no se recortan, sólo los finales), y **extraer la última fila por longitud**, no por separador:
+
+```filemaker
+Insert Calculated Result [ $NumFilas ; If ( IsEmpty ( $SqlResult ) ; 0 ; PatternCount ( $SqlResult ; Char ( 30 ) ) + 1 ) ]
+// Extracción de la fila $Indice (sin depender de un separador final):
+//   ~ini = If ( $Indice = 1 ; 1 ; Position ( $SqlResult ; Char(30) ; 1 ; $Indice - 1 ) + 1 )
+//   ~fin = If ( $Indice = $NumFilas ; Length ( $SqlResult ) + 1 ; Position ( $SqlResult ; Char(30) ; 1 ; $Indice ) )
+//   $Fila = Middle ( $SqlResult ; ~ini ; ~fin - ~ini )
+```
+
+**Columna centinela** para blindar el parseo por columnas: añadir una columna literal no vacía al **final** del `SELECT` (p.ej. `SELECT ..., 'eor' FROM ...`). Así ninguna fila termina en columnas vacías, el separador de la última columna real siempre está presente, y el resultado no termina nunca en un carácter de control que se pueda recortar. La columna centinela se ignora al construir el JSON.
+
+> **Regla práctica:** nunca confíes en un separador final al parsear `ExecuteSQL`. Usa `PatternCount + 1`, extrae la última fila por `Length`, y/o añade una columna centinela `'eor'`.
