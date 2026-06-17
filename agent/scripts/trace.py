@@ -517,6 +517,38 @@ def _walk_layout_json(obj, source_name, to_map, refs):
             _walk_layout_json(item, source_name, to_map, refs)
 
 
+def parse_file_triggers(solution_name):
+    """Parse file-level script triggers from metadata.xml.
+
+    File triggers (OnFirstWindowOpen, OnWindowOpen, OnLastWindowClose, …) bind a
+    script to a file-level event. Such a script has no caller in any script,
+    button or layout — it is invoked by the file itself — so without this it is
+    false-flagged as dead. Emits file → script references.
+    """
+    refs = []
+    meta_path = XML_PARSED_DIR / "_" / solution_name / "metadata.xml"
+    if not meta_path.exists():
+        return refs
+    try:
+        root = ET.parse(meta_path).getroot()
+    except (ET.ParseError, OSError):
+        return refs
+
+    for trig in root.iter("ScriptTrigger"):
+        script_ref = trig.find("ScriptReference")
+        if script_ref is None:
+            continue
+        name = script_ref.get("name", "")
+        if not name:
+            continue
+        event = trig.get("action", "")
+        refs.append(XRef(
+            "file", "File", f"trigger: {event}",
+            "script", name, "",
+        ))
+    return refs
+
+
 def parse_relationships(relationships_index, to_map):
     """Parse relationship join fields as references."""
     refs = []
@@ -681,6 +713,12 @@ def cmd_build(solution_name):
             "      then rebuild the xref index.",
             file=sys.stderr,
         )
+
+    # 4b. File-level script triggers (metadata.xml)
+    print("  Parsing file-level triggers...")
+    file_trig_refs = parse_file_triggers(solution_name)
+    all_refs.extend(file_trig_refs)
+    print(f"    {len(file_trig_refs)} references found")
 
     # 5. Custom functions
     print("  Parsing custom functions...")
@@ -961,8 +999,10 @@ def _get_all_objects(solution_dir, solution_name, obj_type, xrefs):
         all_objects = set()
         for row in scripts_index:
             all_objects.add(row["name"])
-            # Exclude agentic-fm scripts
-            if row.get("folder", "").startswith("agentic-fm"):
+            # Exclude agentic-fm module scripts (OData/companion entry points,
+            # called externally). Match the module folder anywhere in the path —
+            # it is commonly nested, e.g. "Modules/agentic-fm/OData".
+            if "agentic-fm" in row.get("folder", "").lower():
                 system_excluded.add(row["name"])
 
         # Find scripts only on layouts

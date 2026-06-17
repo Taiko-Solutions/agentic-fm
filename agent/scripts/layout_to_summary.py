@@ -448,6 +448,41 @@ def parse_triggers(el):
     return result if result else None
 
 
+def parse_action_script(el):
+    """Direct button-action script wired into this object.
+
+    Covers every button variant — classic <Button>, <GroupedButton> ("Grouped
+    Button" / Popover Button), etc. — whose action runs a script *directly*
+    (<action><ScriptReference>), as opposed to a Perform Script step or a script
+    trigger. parse_button only handles the classic <Button> element, so without
+    this, Grouped/Popover button scripts never reach the summary and their
+    target scripts get false-flagged as dead. Walks this element's own subtree
+    but stops at nested LayoutObject boundaries so it never steals a child
+    object's action. Returns {script, scriptId} or None.
+    """
+    result = []
+
+    def _find(node):
+        for child in node:
+            if result:
+                return
+            if child.tag == "LayoutObject":
+                continue  # belongs to a nested object — parsed separately
+            if child.tag == "action":
+                script_ref = child.find("ScriptReference")
+                if script_ref is not None and script_ref.get("name"):
+                    result.append({
+                        "script": script_ref.get("name"),
+                        "scriptId": int(script_ref.get("id", 0)),
+                    })
+                    return
+            else:
+                _find(child)
+
+    _find(el)
+    return result[0] if result else None
+
+
 def collect_child_objects(el):
     """Nested LayoutObjects belonging directly to this object.
 
@@ -539,6 +574,14 @@ def parse_layout_object(obj_el):
     conditions = parse_conditions(obj_el)
     if conditions:
         summary["conditions"] = conditions
+
+    # Direct button-action script for button variants parse_button doesn't
+    # handle (Grouped Button, Popover Button, …). Guarded so classic <Button>
+    # objects — already handled above — aren't double-counted.
+    if "script" not in summary:
+        action_script = parse_action_script(obj_el)
+        if action_script:
+            summary.update(action_script)
 
     # Object-level script triggers (OnObjectEnter, OnObjectSave, …)
     triggers = parse_triggers(obj_el)
