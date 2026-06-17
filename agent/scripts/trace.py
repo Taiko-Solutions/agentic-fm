@@ -497,10 +497,14 @@ def _walk_layout_json(obj, source_name, to_map, refs):
                     "field", canonical, context,
                 ))
 
-        # Script reference
-        if "script" in obj and isinstance(obj["script"], str):
+        # Script reference (button action or script trigger). Trigger dicts
+        # carry an "event" key (OnObjectSave, OnLayoutKeystroke, …); buttons do
+        # not. A trigger is a live caller — recording it stops trigger-only
+        # scripts from being false-flagged as dead.
+        if "script" in obj and isinstance(obj["script"], str) and obj["script"]:
+            location = f"trigger: {obj['event']}" if obj.get("event") else "button script"
             refs.append(XRef(
-                "layout", source_name, "button script",
+                "layout", source_name, location,
                 "script", obj["script"], "",
             ))
 
@@ -659,9 +663,24 @@ def cmd_build(solution_name):
 
     # 4. Layouts
     print("  Parsing layout summaries...")
+    layouts_dir = solution_dir / "layouts"
+    layout_summaries_missing = not layouts_dir.exists() or not any(layouts_dir.glob("*.json"))
     layout_refs = parse_layouts(solution_dir, solution_name, to_map)
     all_refs.extend(layout_refs)
     print(f"    {len(layout_refs)} references found")
+    if layout_summaries_missing:
+        print(
+            "  ⚠️  WARNING: no layout summaries found at "
+            f"context/{solution_name}/layouts/.\n"
+            "      Layout placements, button scripts and script TRIGGERS are "
+            "therefore MISSING from the xref index.\n"
+            "      Dead-object results will contain false positives "
+            "(trigger-only / layout-only objects look orphaned).\n"
+            "      Generate them first:\n"
+            f"        python3 agent/scripts/layout_to_summary.py --solution \"{solution_name}\"\n"
+            "      then rebuild the xref index.",
+            file=sys.stderr,
+        )
 
     # 5. Custom functions
     print("  Parsing custom functions...")
@@ -816,6 +835,27 @@ def cmd_dead(solution_name, obj_type, verbose):
     """Find unreferenced objects."""
     solution_dir = CONTEXT_DIR / solution_name
     xrefs = load_xref(solution_dir)
+
+    # Reliability guard: dead-object detection for scripts/fields/value_lists
+    # leans on layout references (placements, button scripts, triggers). If the
+    # xref has no layout-sourced refs, those edges are missing and the results
+    # will over-report "dead" objects. Warn loudly rather than mislead a
+    # human about to delete things.
+    if obj_type in ("scripts", "fields", "value_lists"):
+        has_layout_refs = any(ref.source_type == "layout" for ref in xrefs)
+        if not has_layout_refs:
+            print(
+                "⚠️  WARNING: xref.index contains NO layout references — "
+                f"'{obj_type}' dead results are UNRELIABLE.\n"
+                "    Layout placements, button scripts and script triggers are "
+                "missing, so trigger-only / layout-only objects will be "
+                "falsely flagged as dead.\n"
+                "    Regenerate layout summaries and rebuild before trusting "
+                "this output:\n"
+                f"      python3 agent/scripts/layout_to_summary.py --solution \"{solution_name}\"\n"
+                f"      python3 agent/scripts/trace.py build -s \"{solution_name}\"\n",
+                file=sys.stderr,
+            )
 
     # Build set of all referenced objects by type
     referenced = set()
