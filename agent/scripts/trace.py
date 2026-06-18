@@ -1041,7 +1041,7 @@ def _get_all_objects(solution_dir, solution_name, obj_type, xrefs):
             canonical = f"{row['table']}::{row['field']}"
             all_objects.add(canonical)
 
-            label = match_module(row["field"], "", modules)
+            label = match_module(row["field"], "", modules) or match_module(row["table"], "", modules)
             if label:
                 module_objects[canonical] = label
 
