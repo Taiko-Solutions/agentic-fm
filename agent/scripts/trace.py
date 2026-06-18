@@ -39,6 +39,7 @@ PROJECT_ROOT = SCRIPT_DIR.parent.parent  # agent/scripts/ → project root
 
 CONTEXT_DIR = PROJECT_ROOT / "agent" / "context"
 XML_PARSED_DIR = PROJECT_ROOT / "agent" / "xml_parsed"
+CONFIG_DIR = PROJECT_ROOT / "agent" / "config"
 
 
 # ---------------------------------------------------------------------------
@@ -902,7 +903,7 @@ def cmd_dead(solution_name, obj_type, verbose):
             referenced.add(ref.ref_name)
 
     # Build set of all objects of this type
-    all_objects, on_layout, system_excluded = _get_all_objects(
+    all_objects, on_layout, system_excluded, module_objects = _get_all_objects(
         solution_dir, solution_name, obj_type, xrefs,
     )
 
@@ -913,9 +914,12 @@ def cmd_dead(solution_name, obj_type, verbose):
     high = []
     medium = []
     low = []
+    module = []
 
     for obj in sorted(unreferenced):
-        if obj in system_excluded:
+        if obj in module_objects:
+            module.append(obj)
+        elif obj in system_excluded:
             low.append(obj)
         elif obj in on_layout:
             medium.append(obj)
@@ -941,6 +945,12 @@ def cmd_dead(solution_name, obj_type, verbose):
             print(f"  {obj} \u2014 on layout: {layout_str}")
         print()
 
+    if module:
+        print(f"MODULE — installed tool objects, invoked externally — NOT dead ({len(module)}):")
+        for obj in module:
+            print(f"  {obj} — {module_objects[obj]}")
+        print()
+
     if verbose and low:
         print(f"LOW CONFIDENCE — excluded by heuristics ({len(low)}):")
         for obj in low:
@@ -948,9 +958,12 @@ def cmd_dead(solution_name, obj_type, verbose):
         print()
 
     total = len(all_objects)
-    print(f"Summary: {len(high)} high, {len(medium)} medium"
-          f"{f', {len(low)} low' if verbose else ''} "
-          f"unused out of {total} total {obj_type}")
+    parts = [f"{len(high)} high", f"{len(medium)} medium"]
+    if verbose:
+        parts.append(f"{len(low)} low")
+    tail = f" + {len(module)} module (live)" if module else ""
+    print(f"Summary: {', '.join(parts)} unused{tail} "
+          f"out of {total} total {obj_type}")
 
 
 def _dead_ref_type(obj_type):
@@ -965,10 +978,61 @@ def _dead_ref_type(obj_type):
     return mapping.get(obj_type, obj_type)
 
 
+def load_modules():
+    """Load installed-module definitions.
+
+    Modules are third-party tools (agentic-fm, InspectorPro, OttoFMS, …) whose
+    objects are live but have no inbound references *inside* the solution — they
+    are invoked externally (OData / fmurlscript / a companion app) or managed by
+    the module itself. We surface them separately so they are never mistaken for
+    the solution's own dead code.
+
+    Definitions come from the shipped defaults (``modules.json.example``),
+    overlaid by the developer's optional ``modules.json`` (merged by ``label``,
+    so a user file does not need to re-declare the agentic-fm default).
+    """
+    by_label = {}
+    for filename in ("modules.json.example", "modules.json"):
+        path = CONFIG_DIR / filename
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        for entry in data.get("modules", []):
+            label = entry.get("label")
+            if label:
+                by_label[label] = entry  # later file (user) overrides by label
+    return list(by_label.values())
+
+
+def match_module(name, folder, modules):
+    """Return the matching module's label for (name, folder), else None.
+
+    Matching is by object NAME first (folder-independent): an exact name match
+    or a registered name prefix. ``folder_contains`` is a secondary hint for
+    tools that live in a known folder. A match on ANY signal tags the object.
+    """
+    folder_l = (folder or "").lower()
+    for mod in modules:
+        if name in mod.get("name_exact", []):
+            return mod["label"]
+        for prefix in mod.get("name_prefixes", []):
+            if prefix and name.startswith(prefix):
+                return mod["label"]
+        for token in mod.get("folder_contains", []):
+            if token and token.lower() in folder_l:
+                return mod["label"]
+    return None
+
+
 def _get_all_objects(solution_dir, solution_name, obj_type, xrefs):
-    """Get all objects, layout-only objects, and system-excluded objects."""
+    """Get all objects, plus layout-only, system-excluded and module objects."""
     system_excluded = set()
     on_layout = {}  # {obj_name: [layout_names]}
+    module_objects = {}  # {obj_name: module_label}
+    modules = load_modules()
 
     if obj_type == "fields":
         fields_index = load_fields_index(solution_dir)
@@ -976,6 +1040,10 @@ def _get_all_objects(solution_dir, solution_name, obj_type, xrefs):
         for row in fields_index:
             canonical = f"{row['table']}::{row['field']}"
             all_objects.add(canonical)
+
+            label = match_module(row["field"], "", modules)
+            if label:
+                module_objects[canonical] = label
 
             # System exclusions
             if row["field"] in SYSTEM_FIELDS:
@@ -999,11 +1067,9 @@ def _get_all_objects(solution_dir, solution_name, obj_type, xrefs):
         all_objects = set()
         for row in scripts_index:
             all_objects.add(row["name"])
-            # Exclude agentic-fm module scripts (OData/companion entry points,
-            # called externally). Match the module folder anywhere in the path —
-            # it is commonly nested, e.g. "Modules/agentic-fm/OData".
-            if "agentic-fm" in row.get("folder", "").lower():
-                system_excluded.add(row["name"])
+            label = match_module(row["name"], row.get("folder", ""), modules)
+            if label:
+                module_objects[row["name"]] = label
 
         # Find scripts only on layouts
         for ref in xrefs:
@@ -1014,20 +1080,35 @@ def _get_all_objects(solution_dir, solution_name, obj_type, xrefs):
 
     elif obj_type == "custom_functions":
         cf_names = build_cf_names(solution_name)
-        all_objects = {cf["name"] for cf in cf_names}
+        all_objects = set()
+        for cf in cf_names:
+            all_objects.add(cf["name"])
+            label = match_module(cf["name"], "", modules)
+            if label:
+                module_objects[cf["name"]] = label
 
     elif obj_type == "layouts":
         layouts_index = load_layouts_index(solution_dir)
-        all_objects = {row["name"] for row in layouts_index}
+        all_objects = set()
+        for row in layouts_index:
+            all_objects.add(row["name"])
+            label = match_module(row["name"], row.get("folder", ""), modules)
+            if label:
+                module_objects[row["name"]] = label
 
     elif obj_type == "value_lists":
         vl_index = load_value_lists_index(solution_dir)
-        all_objects = {row["name"] for row in vl_index}
+        all_objects = set()
+        for row in vl_index:
+            all_objects.add(row["name"])
+            label = match_module(row["name"], "", modules)
+            if label:
+                module_objects[row["name"]] = label
 
     else:
         all_objects = set()
 
-    return all_objects, on_layout, system_excluded
+    return all_objects, on_layout, system_excluded, module_objects
 
 
 # ---------------------------------------------------------------------------
