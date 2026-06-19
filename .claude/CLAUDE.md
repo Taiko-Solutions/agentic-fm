@@ -456,6 +456,19 @@ When the Dash MCP server is available, use it to look up FileMaker and MBS Plugi
 
 When Dash MCP is available, there is no need to run `agent/docs/filemaker/fetch_docs.py` or to consult the local `agent/docs/filemaker/` directory.
 
+## Claris official LLM docs (online complement)
+
+Claris publishes its full help knowledge base as LLM-ready markdown, updated continuously:
+
+- `https://help.claris.com/llms.txt` — index of topics with links. Small; fetch this first to locate the right page.
+- `https://help.claris.com/llms-full.txt` — the entire help KB inlined (~1.9 MB). Fetch with a targeted query, never the whole file.
+
+Retrieve these with `WebFetch`. Use them as a **complement** to Dash, not a replacement:
+
+- **Dash stays primary** for fast, offline, structured lookup of function syntax, script step options, and error codes.
+- **Reach for the Claris source** when Dash lacks a topic, when you need conceptual or behavioral documentation, or for the newest FileMaker 2025/2026 features whose Dash docsets may be stale or missing — it is the official, current source.
+- Network-dependent: skip when offline and fall back to bundled docs below.
+
 ## Bundled docs (fallback)
 
 If Dash MCP is not available, the project can generate local documentation files using `agent/docs/filemaker/fetch_docs.py`. See the README for details. These files are gitignored and must be generated locally.
