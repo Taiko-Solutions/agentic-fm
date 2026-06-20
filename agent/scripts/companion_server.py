@@ -212,7 +212,12 @@ class CompanionHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def do_GET(self):
-        _touch_activity()
+        # /health is a liveness probe — used by monitors and the status-bar
+        # marker, which poll it continuously. It must NOT count as activity, or
+        # that polling would keep the idle watchdog from ever firing and defeat
+        # the auto-shutdown. Every other endpoint is real work and does count.
+        if self.path != "/health":
+            _touch_activity()
         if self.path == "/health":
             self._handle_health()
         elif self.path == "/pending":
