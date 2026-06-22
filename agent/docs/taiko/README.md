@@ -58,6 +58,18 @@ Human-readable script templates in `scripts_sanitized` format (numbered, indente
 | `clew-completo.md` | Complete Clew with all subscript scenarios (InSubscriptThrow, InSubscript, DeleteTrace) |
 | `clew-transactional.md` | Utility Manager + Initialize Shadow + Transactional Controller |
 
+### proofkit/
+
+Knowledge base for using **ProofKit** — React web viewers over FileMaker with a typed Data API client, the local bridge, and single-file deploy. A different domain from the FM-script knowledge in `knowledge/`. Start at `proofkit/README.md`.
+
+| File | Description |
+|------|-------------|
+| `README.md` | Index of the folder, what ProofKit is, the moving parts, and provenance |
+| `architecture.md` | Mental model: the 4 pieces (typegen, zod schema, bridge, fmFetch+callback), data flow, glossary, dev vs. production |
+| `gotchas.md` | The 11 field-report findings as actionable patterns — most disguise themselves as network errors |
+| `troubleshooting.md` | Ordered diagnostic ladder for "won't load / infinite spinner" + symptom→cause→action table |
+| `conventions.md` | Taiko preventive habits + project-start checklist (`clearOldFiles: false`, serialize reads, timeout wrapper, exact web-viewer name, security) |
+
 ### UPSTREAM_IMPROVEMENTS.md
 
 Instructions and a reusable CLAUDE.md section for solution-specific repos. When included, the AI will detect tool improvements during normal development and log proposals to `agent/UPSTREAM_PROPOSALS.md` — without ever leaking solution-specific data. The developer reviews proposals periodically and applies them to this template repo.
