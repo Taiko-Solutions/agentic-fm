@@ -8,6 +8,17 @@ El conocimiento aquí no es teórico: nace de un **informe de campo real** (ver 
 
 ---
 
+## Alcance: qué stack de ProofKit cubren estos docs
+
+ProofKit tiene varias piezas. Estos documentos cubren **solo el stack del Web Viewer**, que es del que trata el informe de campo:
+
+- **Cubierto aquí — stack Web Viewer:** `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen`, el bridge local (`localhost:1365`) y el ciclo `fmFetch` → callback. Es decir, una app **React que corre dentro de un Web Viewer de FileMaker**.
+- **NO cubierto aquí — cliente OData:** `@proofkit/fmodata` es un cliente OData tipado que corre **en Node** y habla con el endpoint OData de FileMaker por **HTTP plano**. No hay Web Viewer, ni bridge, ni callback. La mayoría de los gotchas de aquí (F2, F3, F5, F6, F9) **no aplican** a `fmodata`; solo transfieren conceptualmente el *drift de esquema* y los *timeouts* (que en HTTP se manejan distinto).
+
+> Antes de aplicar un patrón de esta carpeta, confirma qué stack usa el proyecto: mira `package.json`. Si la dependencia es `@proofkit/fmodata` y no ves `@proofkit/webviewer`/`fmdapi`/`typegen` ni un `proofkit-typegen.config.jsonc`, estás en el stack OData — estos docs no aplican (todavía).
+
+---
+
 ## Las piezas, de un vistazo
 
 ProofKit conecta una app React (dentro de un Web Viewer) con FileMaker a través de un puente local:
