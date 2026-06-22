@@ -1,25 +1,31 @@
 # ProofKit — base de conocimiento Taiko
 
-Esta carpeta recoge cómo Taiko entiende y usa **ProofKit** para construir interfaces web modernas (React) dentro de un **Web Viewer de FileMaker**, con cliente de datos tipado y deploy de un solo archivo.
+Esta carpeta recoge cómo Taiko entiende y usa **ProofKit**. Para Taiko, ProofKit son **dos vías** (mapa completo de acceso a FileMaker en [`../fm-access.md`](../fm-access.md)):
 
-A diferencia de `../knowledge/` —que documenta *gotchas de scripts FileMaker* (Clew, transacciones, ExecuteSQL)—, esta carpeta cubre un **dominio distinto**: el toolchain web-viewer / cliente tipado / bridge. Por eso vive aparte, igual que `../custom_functions/` y `../templates/`.
+- **Vía 1 — ProofKit MCP (connector):** consultar el archivo FileMaker **en vivo** (estructura puntual, SQL, valores) con mucha más facilidad. Es el uso **principal hoy**. → [`mcp-connector.md`](mcp-connector.md)
+- **Vía 3 — stack Web Viewer:** app React **dentro de un Web Viewer**, con cliente tipado y deploy de un solo archivo. **Aparcada** (cuesta avanzar). → el resto de esta carpeta.
 
-El conocimiento aquí no es teórico: nace de un **informe de campo real** (ver *Procedencia*) y está escrito en el formato del repo — "comportamientos que una IA (o un dev) acertaría mal", con síntoma, causa real y fix preventivo.
+Ambas comparten el mismo bridge local (`localhost:1365`) pero se usan de forma muy distinta. A diferencia de `../knowledge/` —*gotchas de scripts FileMaker*—, esto es otro dominio (connector + toolchain web), por eso vive aparte, igual que `../custom_functions/` y `../templates/`.
 
----
-
-## Alcance: qué stack de ProofKit cubren estos docs
-
-ProofKit tiene varias piezas. Estos documentos cubren **solo el stack del Web Viewer**, que es del que trata el informe de campo:
-
-- **Cubierto aquí — stack Web Viewer:** `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen`, el bridge local (`localhost:1365`) y el ciclo `fmFetch` → callback. Es decir, una app **React que corre dentro de un Web Viewer de FileMaker**.
-- **NO cubierto aquí — cliente OData:** `@proofkit/fmodata` es un cliente OData tipado que corre **en Node** y habla con el endpoint OData de FileMaker por **HTTP plano**. No hay Web Viewer, ni bridge, ni callback. La mayoría de los gotchas de aquí (F2, F3, F5, F6, F9) **no aplican** a `fmodata`; solo transfieren conceptualmente el *drift de esquema* y los *timeouts* (que en HTTP se manejan distinto).
-
-> Antes de aplicar un patrón de esta carpeta, confirma qué stack usa el proyecto: mira `package.json`. Si la dependencia es `@proofkit/fmodata` y no ves `@proofkit/webviewer`/`fmdapi`/`typegen` ni un `proofkit-typegen.config.jsonc`, estás en el stack OData — estos docs no aplican (todavía).
+El conocimiento de la Vía 3 no es teórico: nace de un **informe de campo real** (ver *Procedencia*) y está escrito en el formato del repo — "comportamientos que una IA (o un dev) acertaría mal", con síntoma, causa real y fix preventivo.
 
 ---
 
-## Las piezas, de un vistazo
+## Alcance: qué cubre esta carpeta
+
+- **Vía 1 — ProofKit MCP:** [`mcp-connector.md`](mcp-connector.md). El uso principal hoy: consultar FileMaker en vivo vía el connector.
+- **Vía 3 — Web Viewer:** `architecture.md` + `gotchas.md` + `troubleshooting.md` + `conventions.md`, derivados del field report. Stack `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen`, bridge + `fmFetch`/callback.
+
+Fuera de esta carpeta:
+- **Vía 2 — OData:** `@proofkit/fmodata` o Soliant `fm-odata-client` (cliente OData en Node, HTTP plano, para herramientas web externas). Vivirá en `../../odata/`. **No hay bridge ni callback**, así que la mayoría de los gotchas del Web Viewer (F2, F3, F5, F6, F9) **no aplican**; solo transfieren *drift de esquema* y *timeouts* (que en HTTP se manejan distinto).
+
+> Antes de aplicar un patrón del **Web Viewer**, confirma el stack en `package.json`: si ves `@proofkit/fmodata`/`fm-odata-client` (y no `@proofkit/webviewer`/`typegen` ni `proofkit-typegen.config.jsonc`), estás en OData — los gotchas del Web Viewer no aplican.
+
+---
+
+## Las piezas del Web Viewer (Vía 3), de un vistazo
+
+> Esto describe el stack del **Web Viewer**. Para la Vía 1 (MCP), ve a [`mcp-connector.md`](mcp-connector.md).
 
 ProofKit conecta una app React (dentro de un Web Viewer) con FileMaker a través de un puente local:
 
@@ -45,7 +51,8 @@ Detalle completo en [`architecture.md`](architecture.md).
 
 | Doc | Léelo cuando… |
 |-----|---------------|
-| [`architecture.md`](architecture.md) | Necesites el modelo mental: las 4 piezas, el flujo de datos, el glosario, y dev vs. producción. **Empieza aquí.** |
+| [`mcp-connector.md`](mcp-connector.md) | **(Vía 1 — lo principal hoy)** Vayas a consultar FileMaker en vivo vía el connector MCP: qué tools, sus **límites** (timeout en soluciones grandes como Bendita), y cuándo usar MCP vs. el explode/sanitized de agentic-fm. |
+| [`architecture.md`](architecture.md) | **(Vía 3 — Web Viewer)** Necesites el modelo mental del Web Viewer: las 4 piezas, el flujo `fmFetch`→callback, el glosario, dev vs. producción. |
 | [`gotchas.md`](gotchas.md) | Vayas a construir o depurar un Web Viewer ProofKit. Los 11 hallazgos del informe como patrones accionables, agrupados por tema. |
 | [`troubleshooting.md`](troubleshooting.md) | Algo "no carga", hay spinner infinito, o fallos intermitentes. Escalera de diagnóstico ordenada. |
 | [`conventions.md`](conventions.md) | Arranques un proyecto ProofKit Taiko o revises uno existente. Hábitos preventivos + checklist. |
