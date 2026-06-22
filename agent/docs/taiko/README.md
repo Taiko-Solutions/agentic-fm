@@ -13,6 +13,10 @@ The AI reads these documents in addition to the standard project docs. The prior
 
 ## Contents
 
+### fm-access.md
+
+The map of how agentic-fm reaches FileMaker — **three independent rails**: (1) ProofKit MCP (live querying, primary today), (2) OData (automate/do + external tools), (3) ProofKit Web Viewer (UI, parked). Contains the key division of labor for **structure lookups**: the on-disk "explode" (`*.index`, `scripts_sanitized/`, `xml_parsed/`) is primary and authoritative for large solutions; ProofKit MCP is the live, surgical complement (it times out on bulk structure of big solutions like Bendita). Read this first to situate everything else.
+
 ### CODING_CONVENTIONS.md
 
 Taiko naming standards, script structure preferences, language rules, and author metadata. Overrides specific sections of the base conventions (variables use PascalCase instead of camelCase, comments in Spanish, Insert Calculated Result preferred over Set Variable, etc.).
@@ -60,11 +64,12 @@ Human-readable script templates in `scripts_sanitized` format (numbered, indente
 
 ### proofkit/
 
-Knowledge base for using **ProofKit** — React web viewers over FileMaker with a typed Data API client, the local bridge, and single-file deploy. A different domain from the FM-script knowledge in `knowledge/`. Start at `proofkit/README.md`.
+Knowledge base for **ProofKit**, which for Taiko spans two rails: **Rail 1 — the MCP connector** (querying the live FileMaker file — primary use today) and **Rail 3 — the Web Viewer stack** (React UI inside FileMaker — parked). Both share the local bridge but are used very differently. A different domain from the FM-script knowledge in `knowledge/`. Start at `proofkit/README.md`; see `../fm-access.md` for how these fit with OData (Rail 2).
 
 | File | Description |
 |------|-------------|
-| `README.md` | Index of the folder, what ProofKit is, the moving parts, and provenance |
+| `README.md` | Index of the folder, the two rails, and provenance |
+| `mcp-connector.md` | **Rail 1 (primary):** the MCP connector for live FileMaker querying — tools, limits (times out on bulk structure of large solutions like Bendita), and when to use MCP vs. the on-disk explode/sanitized |
 | `architecture.md` | Mental model: the 4 pieces (typegen, zod schema, bridge, fmFetch+callback), data flow, glossary, dev vs. production |
 | `gotchas.md` | The 11 field-report findings as actionable patterns — most disguise themselves as network errors |
 | `troubleshooting.md` | Ordered diagnostic ladder for "won't load / infinite spinner" + symptom→cause→action table |
