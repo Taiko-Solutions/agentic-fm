@@ -9,6 +9,8 @@ agent/sandbox/
 .cursor/in-development/
 external_tools/
 plug-in/
+plans/converter-benchmark/
+.claude/autoresearch/
 
 # Generated Claris documentation (copyright Claris International Inc.)
 # Run agent/docs/filemaker/fetch_docs.py to generate locally.
@@ -32,6 +34,10 @@ agent/config/fmlint.config.json
 agent/config/layout-signals.json
 docker-compose.override.yml
 project.env
+tags
+.mcp.json
+.claude/settings.json
+.claude/settings.local.json
 
 # macOS
 .DS_Store
