@@ -445,6 +445,57 @@ La tabla representa un **backlog de adopción** — está vacía cuando no hay n
 | Patrón | Triggers (contextos donde tiene sentido) | Doc upstream | Notas |
 |---|---|---|---|
 
+# Metodología de desarrollo — Superpowers (Taiko)
+
+> Esta sección gobierna CÓMO se aborda el trabajo. Las convenciones de código Taiko (`agent/docs/taiko/CODING_CONVENTIONS.md`) y el resto de este CLAUDE.md siguen mandando sobre el QUÉ y el formato del XML. Superpowers aporta el proceso; aquí se define cómo se adapta a FileMaker. Jerarquía: instrucciones de Marco > este contrato > skills de Superpowers > comportamiento por defecto.
+
+## Cuándo aplica (umbral por alcance estructural)
+
+Antes de empezar, clasifica la tarea:
+
+| PROCESO COMPLETO (brainstorm → plan → casos → review) | DIRECTO (sin proceso) |
+|---|---|
+| Toca **≥2 scripts o custom functions** | 1 script/CF aislado |
+| **Cambia el esquema** (tablas, campos) | Bugfix puntual |
+| Crea un **módulo o funcionalidad nueva** | Refactor cosmético / consulta |
+
+Si dudas, pregunta. Marco puede forzar el proceso completo en cualquier tarea ("pásalo por proceso completo"), aunque sea pequeña.
+
+## Qué skills de Superpowers se usan
+
+| Skill | Uso en FileMaker |
+|---|---|
+| `brainstorming` | Sí, en tareas de alcance estructural. Para auditar una solución existente antes de diseñar, usa el skill `Solution-Analysis`. |
+| `writing-plans` | Sí. Plan de las piezas a crear (CF, scripts Controller/Transaccional, triggers) y su orden. |
+| `systematic-debugging` | Sí, ante cualquier fallo. **La técnica FM es el skill `Skill-Debug`** (instrumentar → companion `/debug` → `output.json`). El proceso de 4 fases lo pone Superpowers; la herramienta la pone Skill-Debug. |
+| `requesting-code-review` | Sí, antes de dar por buena una pieza: revisa el XML contra el spec y contra `CODING_CONVENTIONS.md`. |
+
+**NO se usan en FileMaker:** `test-driven-development` (red-green literal — ver abajo), `using-git-worktrees`, `subagent-driven-development`.
+
+## Verificación (sustituye al TDD red-green)
+
+FileMaker no tiene tests unitarios. **No se aplica el ciclo red-green ni la regla de "borrar el código escrito antes del test".** En su lugar, en toda tarea de alcance estructural:
+
+1. **Antes de generar el script**, escribe los **casos de aceptación**: entrada concreta → salida esperada. Ej.: `ValidarNIF("12345678Z") → válido`; `…("12345678A") → inválido`; `…("") → inválido`.
+2. Genera el script siguiendo las convenciones Taiko.
+3. Impórtalo en FileMaker y **verifica esos casos**. Apóyate en el skill `script-test` para generar el script de verificación con esos inputs/outputs.
+4. Un caso que falla = no está hecho. Corrige y vuelve a verificar.
+
+## Dónde viven los artefactos
+
+El proceso vive en el repo (se propaga). Los artefactos de cada solución viven en el **vault** de Obsidian — nunca se versionan en el repo de cliente:
+
+| Artefacto | Ubicación en el vault |
+|---|---|
+| Spec / diseño | `Proyectos/.../[proyecto]/00-Especificacion.md` |
+| Decisiones | `01-Decisiones-Tomadas.md` |
+| Casos de aceptación | dentro del spec |
+| Registro al cerrar | `Changelog-Agentic.md` |
+
+## Detalle
+
+El flujo completo paso a paso está en `agent/docs/taiko/knowledge/superpowers-workflow.md` (escaneable por keywords: feature, diseño, plan, módulo, refactor).
+
 # FileMaker and MBS documentation
 
 ## Dash + MCP (preferred)
