@@ -972,6 +972,48 @@
     "helpUrl": null
   },
   {
+    "name": "Configure Persistent Data",
+    "id": 238,
+    "category": "control",
+    "snippetFile": "control/Configure Persistent Data.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "Name",
+        "type": "text",
+        "hrLabel": null,
+        "required": true,
+        "notes": "Literal text key for the persistent data entry; cannot be empty."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Instance ID",
+        "wrapperElement": "InstanceId",
+        "required": false,
+        "notes": "Optional; multiple entries can share a Name, distinguished by Instance ID."
+      },
+      {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": "Delete Entry",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "flagStyle": true,
+        "notes": "True = delete the entry (omit Value); False = set/update. Mutually exclusive with Value."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Value",
+        "wrapperElement": "Value",
+        "required": false,
+        "notes": "Set mode only. Mutually exclusive with Delete Entry (Option state=True)."
+      }
+    ]
+  },
+  {
     "name": "Configure Prompt Template",
     "id": 226,
     "category": "artificial intelligence",
@@ -1986,7 +2028,7 @@
         "type": "complex",
         "hrLabel": null,
         "required": false,
-        "notes": "QueryType 'Query' \u2192 HR 'SQL Text:' with <Query> child. QueryType 'Calculation' \u2192 HR 'Calculated SQL Text:' with <QueryCalc><Calculation> child. ODBC dsn/UserName/password config incomplete \u2014 needs ODBC setup to test fully."
+        "notes": "QueryType 'Query' → HR 'SQL Text:' with <Query> child. QueryType 'Calculation' → HR 'Calculated SQL Text:' with <QueryCalc><Calculation> child. ODBC dsn/UserName/password config incomplete — needs ODBC setup to test fully."
       }
     ],
     "hrSignature": "Execute SQL [ With dialog: {On|Off} ; {SQL Text: {text}|Calculated SQL Text: {calc}} ]",
@@ -4164,7 +4206,10 @@
         "xmlAttr": "state",
         "required": false,
         "defaultValue": "False",
-        "enumValues": ["On", "Off"]
+        "enumValues": [
+          "On",
+          "Off"
+        ]
       },
       {
         "xmlElement": "FlushType",
@@ -4173,7 +4218,11 @@
         "xmlAttr": "value",
         "required": false,
         "defaultValue": "Always",
-        "enumValues": ["Always", "Minimum", "Defer"]
+        "enumValues": [
+          "Always",
+          "Minimum",
+          "Defer"
+        ]
       }
     ],
     "hrSignature": "Loop [ Collapsed: {Off|On} ; Flush: {Always|Minimum|Defer} ]",
@@ -5022,7 +5071,7 @@
         "hrLabel": "Prompt Template Name",
         "parentElement": "LLMCreateFind",
         "required": false,
-        "note": "XML element name unconfirmed \u2014 likely <PromptTemplateName><Calculation/></PromptTemplateName> inside LLMCreateFind"
+        "note": "XML element name unconfirmed — likely <PromptTemplateName><Calculation/></PromptTemplateName> inside LLMCreateFind"
       }
     ],
     "hrSignature": "[ Account Name: <name> ; Model: <model> ; Prompt: <prompt> ; Get: <Found Set | Found Set as JSON | Find Request as JSON> ; Parameters: <params> ; Response Target: <field or variable> ; Prompt Template Name: <name> ]",
@@ -5548,7 +5597,7 @@
         "hrLabel": "Save result",
         "parentElement": "LLMSemanticFind",
         "required": false,
-        "note": "Contains a Field element \u2014 dual-format: <Field table=\"\" id=\"0\" name=\"\"/> for field refs, or <Field></Field> for variables. Variable form requires <Text/> at step level before the outer Field (Target field)."
+        "note": "Contains a Field element — dual-format: <Field table=\"\" id=\"0\" name=\"\"/> for field refs, or <Field></Field> for variables. Variable form requires <Text/> at step level before the outer Field (Target field)."
       }
     ],
     "hrSignature": "[ Query by: <Natural language | Vector data | Image> ; Account Name: <name> ; Embedding Model: <model> ; Text: <text> ; Record set: <All records | Current found set> ; Target field: <field> ; Return count: <n> ; Cosine similarity condition: <condition> ; Cosine similarity value: <value> ; Save result: <field or variable> ]",
@@ -5591,7 +5640,7 @@
           "Embedded": "From list",
           "Reference": "By JSON data"
         },
-        "note": "Mirrors OptionsSelectionType \u2014 not a separate HR param"
+        "note": "Mirrors OptionsSelectionType — not a separate HR param"
       },
       {
         "xmlElement": "Field",
@@ -5745,7 +5794,7 @@
         "type": "complex",
         "hrLabel": null,
         "required": false,
-        "note": "Stored print configuration. PlatformData CDATA contains platform-specific binary data generated by FileMaker \u2014 cannot be authored by hand."
+        "note": "Stored print configuration. PlatformData CDATA contains platform-specific binary data generated by FileMaker — cannot be authored by hand."
       }
     ],
     "hrSignature": "[ Restore: <printer name> ; With dialog: <On/Off> ]",
@@ -5784,7 +5833,7 @@
         "type": "complex",
         "hrLabel": null,
         "required": false,
-        "note": "Stored page setup configuration. Attributes: PageOrientation (Portrait|Landscape), ScaleFactor, PrintableHeight, PrintableWidth, paper margins. PlatformData CDATA contains platform-specific binary data generated by FileMaker \u2014 cannot be authored by hand."
+        "note": "Stored page setup configuration. Attributes: PageOrientation (Portrait|Landscape), ScaleFactor, PrintableHeight, PrintableWidth, paper margins. PlatformData CDATA contains platform-specific binary data generated by FileMaker — cannot be authored by hand."
       }
     ],
     "hrSignature": "[ Restore ; With dialog: <On/Off> ]",
@@ -6193,7 +6242,7 @@
         "hrLabel": "Error Code",
         "wrapperElement": "ErrorCode",
         "required": false,
-        "note": "Custom error code for Get(LastError); must be 5000\u20135499"
+        "note": "Custom error code for Get(LastError); must be 5000–5499"
       },
       {
         "xmlElement": "Calculation",
@@ -6201,7 +6250,7 @@
         "hrLabel": "Error Message",
         "wrapperElement": "ErrorMessage",
         "required": false,
-        "note": "Custom message for Get(LastErrorDetail); requires ErrorCode in range 5000\u20135499"
+        "note": "Custom message for Get(LastErrorDetail); requires ErrorCode in range 5000–5499"
       }
     ],
     "hrSignature": "[ Condition: <calc> ; Error Code: <calc> ; Error Message: <calc> ]",
@@ -7304,12 +7353,12 @@
           "Deutsch (Alte Regeln)",
           "Deutsch (Neue Regeln)",
           "Schweizerdeutsch",
-          "Espa\u00f1ol",
-          "Fran\u00e7ais",
+          "Español",
+          "Français",
           "Italiano",
           "Nederlands",
-          "Portugu\u00eas (Brasil)",
-          "Portugu\u00eas (Portugal)",
+          "Português (Brasil)",
+          "Português (Portugal)",
           "Svenska"
         ],
         "note": "Special characters encoded as XML entities in XML output"
@@ -8098,7 +8147,10 @@
         "required": false,
         "defaultValue": "True",
         "invertedHr": true,
-        "enumValues": ["On", "Off"]
+        "enumValues": [
+          "On",
+          "Off"
+        ]
       },
       {
         "xmlElement": "DontEncodeURL",
@@ -8107,7 +8159,10 @@
         "xmlAttr": "state",
         "required": false,
         "defaultValue": "False",
-        "enumValues": ["On", "Off"]
+        "enumValues": [
+          "On",
+          "Off"
+        ]
       },
       {
         "xmlElement": "SelectAll",
@@ -8116,7 +8171,10 @@
         "xmlAttr": "state",
         "required": false,
         "defaultValue": "True",
-        "enumValues": ["On", "Off"]
+        "enumValues": [
+          "On",
+          "Off"
+        ]
       },
       {
         "xmlElement": "VerifySSLCertificates",
@@ -8125,7 +8183,10 @@
         "xmlAttr": "state",
         "required": false,
         "defaultValue": "False",
-        "enumValues": ["On", "Off"]
+        "enumValues": [
+          "On",
+          "Off"
+        ]
       },
       {
         "xmlElement": "Flow",
@@ -8302,5 +8363,451 @@
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/write-to-data-file.html"
+  },
+  {
+    "name": "Flush Web Viewer Cookies",
+    "id": 237,
+    "category": "miscellaneous",
+    "snippetFile": "miscellaneous/Flush Web Viewer Cookies.xml",
+    "selfClosing": false,
+    "params": [],
+    "hrSignature": "Flush Web Viewer Cookies",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/flush-web-viewer-cookies.html"
+  },
+  {
+    "name": "Cancel PDF",
+    "id": 247,
+    "category": "pdf files",
+    "snippetFile": "pdf files/Cancel PDF.xml",
+    "selfClosing": false,
+    "params": [],
+    "hrSignature": "Cancel PDF",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/cancel-pdf.html"
+  },
+  {
+    "name": "Create PDF",
+    "id": 243,
+    "category": "pdf files",
+    "snippetFile": "pdf files/Create PDF.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "Restore",
+        "type": "boolean",
+        "hrLabel": "Restore",
+        "xmlAttr": "state",
+        "flagStyle": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "state=True applies the stored PDF options"
+      },
+      {
+        "xmlElement": "CreatePDFFile",
+        "type": "complex",
+        "hrLabel": null,
+        "required": false,
+        "notes": "Contains Document (Title, Subject, Author, Keywords, Pages), Security, and View child elements — same structure as Save Records as PDF's PDFOptions."
+      }
+    ],
+    "hrSignature": "[ <Restore> ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/create-pdf.html"
+  },
+  {
+    "name": "Append PDF",
+    "id": 244,
+    "category": "pdf files",
+    "snippetFile": "pdf files/Append PDF.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "state=True when a source password (OpenPassword) is specified"
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "text",
+        "hrLabel": null,
+        "required": false,
+        "notes": "Source file path (PDFSaveType=File)"
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Source",
+        "required": false,
+        "notes": "Source container (PDFSaveType=Target): <Field table=\"\" id=\"0\" name=\"\"/> for a field, or <Text/><Field>$variable</Field> for a variable."
+      },
+      {
+        "xmlElement": "PDFSaveType",
+        "type": "text",
+        "hrLabel": "From",
+        "parentElement": "AppendPDFFile",
+        "required": true,
+        "enumValues": [
+          "File",
+          "Target"
+        ],
+        "notes": "Source discriminator. File = path source; Target = container source (UI label \"Source\")."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Password",
+        "wrapperElement": "OpenPassword",
+        "parentElement": "AppendPDFFile",
+        "required": false,
+        "notes": "Password for an encrypted source PDF (File mode)."
+      }
+    ],
+    "hrSignature": "[ From: <File|Target> ; <path>|Source: <container> ; Password: <calc> ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/append-pdf.html"
+  },
+  {
+    "name": "Open PDF",
+    "id": 246,
+    "category": "pdf files",
+    "snippetFile": "pdf files/Open PDF.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "state=True when a source password (OpenPassword) is specified"
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "text",
+        "hrLabel": null,
+        "required": false,
+        "notes": "Source file path (PDFSaveType=File)"
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Source",
+        "required": false,
+        "notes": "Source container (PDFSaveType=Target): <Field table=\"\" id=\"0\" name=\"\"/> for a field, or <Text/><Field>$variable</Field> for a variable."
+      },
+      {
+        "xmlElement": "PDFSaveType",
+        "type": "text",
+        "hrLabel": "From",
+        "parentElement": "OpenPDFFile",
+        "required": true,
+        "enumValues": [
+          "File",
+          "Target"
+        ],
+        "notes": "Source discriminator. File = path source; Target = container source (UI label \"Source\")."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Password",
+        "wrapperElement": "OpenPassword",
+        "parentElement": "OpenPDFFile",
+        "required": false,
+        "notes": "Password for an encrypted source PDF (both modes)."
+      }
+    ],
+    "hrSignature": "[ From: <File|Target> ; <path>|Source: <container> ; Password: <calc> ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/open-pdf.html"
+  },
+  {
+    "name": "Close PDF",
+    "id": 245,
+    "category": "pdf files",
+    "snippetFile": "pdf files/Close PDF.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "CreateDirectories",
+        "type": "boolean",
+        "hrLabel": "Create folders",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "hrEnumValues": {
+          "True": "On",
+          "False": "Off"
+        },
+        "notes": "Create new folders in the output path (File mode)."
+      },
+      {
+        "xmlElement": "AutoOpen",
+        "type": "boolean",
+        "hrLabel": "Automatically open",
+        "xmlAttr": "state",
+        "flagStyle": true,
+        "required": false,
+        "defaultValue": "False"
+      },
+      {
+        "xmlElement": "CreateEmail",
+        "type": "boolean",
+        "hrLabel": "Create email",
+        "xmlAttr": "state",
+        "flagStyle": true,
+        "required": false,
+        "defaultValue": "False"
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "text",
+        "hrLabel": null,
+        "required": false,
+        "notes": "Output file path (PDFSaveType=File)"
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Target",
+        "required": false,
+        "notes": "Destination container (PDFSaveType=Target): <Field table=\"\" id=\"0\" name=\"\"/> for a field, or <Text/><Field>$variable</Field> for a variable."
+      },
+      {
+        "xmlElement": "PDFSaveType",
+        "type": "text",
+        "hrLabel": "Save to",
+        "parentElement": "ClosePDFFile",
+        "required": true,
+        "enumValues": [
+          "File",
+          "Target"
+        ],
+        "notes": "Destination discriminator. File = path; Target = container."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Filename",
+        "wrapperElement": "PDFName",
+        "parentElement": "ClosePDFFile",
+        "required": false,
+        "notes": "Stored filename when saving to a container (Target mode)."
+      }
+    ],
+    "hrSignature": "[ Save to: <File|Target> ; <path>|Target: <container> ; Filename: <calc> ; Create folders: <On/Off> ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/close-pdf.html"
+  },
+  {
+    "name": "Print PDF",
+    "id": 242,
+    "category": "pdf files",
+    "snippetFile": "pdf files/Print PDF.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "NoInteract",
+        "type": "boolean",
+        "hrLabel": "With dialog",
+        "xmlAttr": "state",
+        "invertedHr": true,
+        "required": false,
+        "defaultValue": "False",
+        "hrEnumValues": {
+          "True": "Off",
+          "False": "On"
+        }
+      },
+      {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "state=True when stored print options (PrintSettings) are attached"
+      },
+      {
+        "xmlElement": "UsePrintOptionsFromEnabled",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "state=True reads print options from a container (PrintSettings/UsePrintOptionsFrom)"
+      },
+      {
+        "xmlElement": "SavePrintOptionsToEnabled",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "state=True saves print options to a container (PrintSettings/SavePrintOptionsTo)"
+      },
+      {
+        "xmlElement": "Restore",
+        "type": "boolean",
+        "hrLabel": "Restore",
+        "xmlAttr": "state",
+        "flagStyle": true,
+        "required": false,
+        "defaultValue": "False"
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "text",
+        "hrLabel": null,
+        "required": false,
+        "notes": "Source PDF path (File mode); Source-mode container ref not captured."
+      },
+      {
+        "xmlElement": "PrintSettings",
+        "type": "complex",
+        "hrLabel": null,
+        "required": false,
+        "notes": "Stored print configuration (same shape as the native Print step). Carries SavePrintOptionsTo/UsePrintOptionsFrom (Field), Password (Calculation), SaveType, and machine-specific PlatformData CDATA — cannot be authored by hand."
+      }
+    ],
+    "hrSignature": "[ <Restore> ; With dialog: <On/Off> ; <path> ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/print-pdf.html"
+  },
+  {
+    "name": "Insert Image Caption",
+    "id": 241,
+    "category": "artificial intelligence",
+    "snippetFile": "artificial intelligence/Insert Image Caption.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Account Name",
+        "wrapperElement": "AccountName",
+        "parentElement": "LLMEmbedding",
+        "required": true
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Model",
+        "wrapperElement": "Model",
+        "parentElement": "LLMEmbedding",
+        "required": true
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Input",
+        "wrapperElement": "InputText",
+        "parentElement": "LLMEmbedding",
+        "required": true,
+        "notes": "Expression returning the image data in container format (serialized as InputText)."
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Target",
+        "required": false,
+        "notes": "Target sibling outside LLMEmbedding: <Field table=\"\" id=\"0\" name=\"\"/> for a field, or <Text/><Field>$variable</Field> for a variable. When omitted, uses active field."
+      }
+    ],
+    "hrSignature": "[ Account Name: calc ; Model: calc ; Input: calc ; Target: Table::Field| ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/insert-image-caption.html"
+  },
+  {
+    "name": "Insert Image Captions in Found Set",
+    "id": 240,
+    "category": "artificial intelligence",
+    "snippetFile": "artificial intelligence/Insert Image Captions in Found Set.xml",
+    "selfClosing": false,
+    "params": [
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Account Name",
+        "wrapperElement": "AccountName",
+        "parentElement": "LLMBulkEmbedding",
+        "required": true
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Model",
+        "wrapperElement": "Model",
+        "parentElement": "LLMBulkEmbedding",
+        "required": true
+      },
+      {
+        "xmlElement": "Field",
+        "type": "field",
+        "hrLabel": "Source Field",
+        "parentElement": "LLMBulkEmbedding",
+        "required": false,
+        "notes": "Source container field inside LLMBulkEmbedding"
+      },
+      {
+        "xmlElement": "Field",
+        "type": "field",
+        "hrLabel": "Target Field",
+        "required": false,
+        "notes": "Target field as sibling outside LLMBulkEmbedding. When omitted, uses active field."
+      },
+      {
+        "xmlElement": "Overwrite",
+        "type": "flagElement",
+        "hrLabel": "Replace target contents",
+        "parentElement": "LLMBulkEmbedding",
+        "required": false,
+        "notes": "Flag element: present = on, absent = off"
+      },
+      {
+        "xmlElement": "ContinueOnError",
+        "type": "flagElement",
+        "hrLabel": "Continue on error",
+        "parentElement": "LLMBulkEmbedding",
+        "required": false,
+        "notes": "Flag element: present = on, absent = off"
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Parameters",
+        "wrapperElement": "Parameters",
+        "parentElement": "LLMBulkEmbedding",
+        "required": false,
+        "notes": "JSON: MaxRecPerCall (1-500, default 20), MaxRetryPerWorker (1-100, default 5), RetryOnError (0|1, default 1)."
+      }
+    ],
+    "hrSignature": "[ Account Name: calc ; Model: calc ; Source Field: Table::Field ; Target Field: Table::Field ; Replace target contents ; Continue on error ; Parameters: calc ]",
+    "monacoSnippet": null,
+    "blockPair": null,
+    "status": "complete",
+    "helpUrl": "https://help.claris.com/en/pro-help/content/insert-image-captions-in-found-set.html"
   }
 ]
