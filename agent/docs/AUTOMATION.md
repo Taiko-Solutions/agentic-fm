@@ -20,9 +20,10 @@ The companion server is also the single detection broker for the optional commer
 - `server` — `{ reachable, base, token, remote }`. The address and bearer token come from the plug-in's `preferences.json` (`remoteAccessPort` default `8766`, `remoteAccessToken`); remote access must be enabled for a stable port+token.
 - `license` — `{ status, licensed, daysRemaining?, … }` for the optional lapsed-license nudge.
 - `solutions[]` — indexed solutions (`{ key, name, catalog, files, parsed_at }`) so the agent can match the current solution before routing understanding/context.
+- `discover` — the plug-in's **self-describing endpoint suite**, brokered from its token-free `GET /api/discover`. This is the live, license-gated catalog (full suite when usable, a shrunk list + `purchaseUrl` when locked). The agent reads this to **choose** endpoints for the task rather than assuming a fixed set — the integration never hardcodes the plug-in's API surface.
 - `repoPath` / `catalogBaseUrl` / `gates` — surfaced from `preferences.json` when present (workspace binding, catalog source, the plug-in's own mutation-confirmation gates).
 
-The companion resolves `usable` by probing the plug-in's token-free `GET /api/health` and caches the verdict ~60 s. Detection only — nothing here makes any OSS feature depend on the plug-in; when the plug-in is absent or not usable the block reports it and the agent stays on the OSS path.
+The companion resolves `usable` by probing the plug-in's token-free `GET /api/health`, brokers `GET /api/discover`, and caches the result ~60 s. Detection only — nothing here makes any OSS feature depend on the plug-in; when the plug-in is absent or not usable the block reports it and the agent stays on the OSS path.
 
 ### Optional plug-in proxy (`/plugin/<path>`)
 

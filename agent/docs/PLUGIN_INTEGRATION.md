@@ -48,6 +48,7 @@ Read the `plugin` block:
     "usable": true,                       // the ONLY field you route on
     "server": { "reachable": true, "base": "http://127.0.0.1:8766", "token": "..." },
     "license": { "status": "trial", "daysRemaining": 13 },
+    "discover": { /* live, license-gated endpoint suite — see below */ },
     "solutions": [
       { "key": "<uuid>", "name": "CustomApp", "catalog": "/Users/.../<key>/",
         "files": ["CustomApp.fmp12"], "parsed_at": "..." }
@@ -58,6 +59,13 @@ Read the `plugin` block:
 
 The companion derives this by stat-ing the plug-in's macOS Application Support tree (the *installed?* precondition), reading the address + bearer token published in `preferences.json`, then probing the plug-in's token-free `GET /api/health` for the `licensed` / `licenseStatus` verdict.
 The verdict is cached ~60 s, so repeated `/health` hits are cheap.
+
+**Choose endpoints from the live suite — `/api/discover` is authoritative.**
+Do not assume a fixed set of endpoints.
+The companion brokers the plug-in's self-describing `GET /api/discover` into `plugin.discover` — the live, license-gated catalog of everything the plug-in currently offers (the full suite when usable; a shrunk list + `purchaseUrl` when locked).
+Read it and pick the endpoint that fits the task at hand.
+The tables in §3 and §4 below are an **illustrative orientation**, not the contract — when `discover` advertises a capability the tables don't mention (for example, reading a script and then generating + applying an **fmpatch** entirely through endpoints), prefer what `discover` reports.
+This keeps the integration from hardcoding — or rotting against — the plug-in's evolving API surface.
 
 **Reaching the plug-in.**
 Direct access is the baseline: once you have `plugin.server.base` + `token`, call the plug-in's API directly with `Authorization: Bearer <token>`.
@@ -85,19 +93,23 @@ At session start (once):
   │    not active/trial)                  the plug-in enforces it; never route to the plug-in here.
   └─ plugin.usable == true          → PLUGIN-PREFERRED MODE (below).
 
-PLUGIN-PREFERRED MODE — per operation:
+PLUGIN-PREFERRED MODE — read plugin.discover, then pick the endpoint that fits.
+  The lines below are an ILLUSTRATIVE orientation; /api/discover is authoritative.
+  Each OSS fallback in [brackets] is what to use if the plug-in path fails or the
+  capability is not advertised.
   Understand solution / refs / impact / orphans / analysis
-     → plugin Discovery (/api/discovery/*)         [fallback: trace.py / xml_parsed grep]
+     → discovery endpoints (e.g. /api/discovery/*)  [fallback: trace.py / xml_parsed grep]
   Resolve IDs / context
-     → plugin /api/context                          [fallback: CONTEXT.json + *.index]
+     → live context endpoint (e.g. /api/context)    [fallback: CONTEXT.json + *.index]
   Author a script
-     → emit HR; /api/hr-to-xml                      [fallback: hand-author fmxmlsnippet]
+     → emit HR; convert via the advertised HR→XML    [fallback: hand-author fmxmlsnippet]
   Validate
-     → /api/validate-hr + /api/eval                 [fallback: python3 -m agent.fmlint]
-  Install a script
-     → /api/ui/script/create|insert                 [fallback: clipboard.py + deploy.py tiers]
+     → validate-HR + live eval endpoints             [fallback: python3 -m agent.fmlint]
+  Install / modify a script
+     → choose from the advertised script-write suite  [fallback: clipboard.py + deploy.py tiers]
+       (create new, insert steps, or read-then-fmpatch — whatever discover offers)
   Run / debug
-     → /api/performscript + /api/eval               [fallback: deploy.py /trigger]
+     → perform-script + eval endpoints               [fallback: deploy.py /trigger]
   Custom menu UUIDs            → menu-lookup skill (OSS, both modes)
   Step structure lookup        → step-catalog grep  (OSS, both modes)
 
@@ -121,6 +133,8 @@ Three rules keep this safe:
 
 ## 4. Capability overlap matrix — which tool, when
 
+**Illustrative orientation only — the live, authoritative suite is `plugin.discover` (`GET /api/discover`).**
+The plug-in endpoints named below are representative examples; always reconcile against what `discover` actually advertises before calling.
 "Plug-in path" assumes the `usable` verdict has been confirmed.
 
 | Operation | OSS path (always available) | Plug-in path (preferred when usable) | Why prefer plug-in |
@@ -131,7 +145,7 @@ Three rules keep this safe:
 | Solution-wide analysis | `solution-analysis` skill over exploded XML | `/api/discovery/query` (health/security/perf/duplicates/folder/spelling) | Indexed query vs. multi-MB grep |
 | Author a script | Hand-write `fmxmlsnippet` from step catalog | Emit HR `fm` block → `/api/hr-to-xml` | Agent writes what the developer reads; conversion + ID resolution is the plug-in's job |
 | Validate a script | `python3 -m agent.fmlint` | `/api/validate-hr` + `/api/eval` (live calc verify) | Catches errors against the developer's actual FM version |
-| Install a script | `clipboard.py write` → `deploy.py` Tier 1/2/3 → (often) manual ⌘V | `/api/ui/script/create` / `/api/ui/script/insert` | Zero keystrokes, precise line targeting, no clipboard pollution |
+| Install / modify a script | `clipboard.py write` → `deploy.py` Tier 1/2/3 → (often) manual ⌘V | the advertised script-write suite — create new, insert steps, or read-then-`fmpatch` | Zero keystrokes, precise line targeting, no clipboard pollution |
 | Run / debug a script | `deploy.py` `/trigger` (AppleScript) | `/api/performscript` + `/api/eval` | Closed-loop over HTTP, single-flight, target-drift guarded |
 | Move objects via clipboard | `clipboard.py` (binary class detect) | `/api/clipboard/*` (snapshot store, suspend/resume gate) | Preserves the developer's own clipboard history |
 

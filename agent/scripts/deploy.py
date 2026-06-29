@@ -657,6 +657,19 @@ def deploy(
     companion_url = config.get("companion_url", "http://local.hub:8765").rstrip("/")
     fm_app_name = config.get("fm_app_name", "FileMaker Pro")
 
+    # Plug-in awareness (no hardcoded endpoints). When the plug-in is usable,
+    # the zero-keystroke install path is for the agent to pick a script-write
+    # endpoint from the plug-in's /api/discover suite (see PLUGIN_INTEGRATION.md
+    # — e.g. create new, insert steps, or read-then-fmpatch). This CLI stays the
+    # OSS clipboard fallback; surface the steer once and continue.
+    if _check_plugin(companion_url).get("usable"):
+        print(
+            "(AgenticFM plug-in is usable — for a zero-keystroke install, choose a "
+            "script-write endpoint from its /api/discover suite per "
+            "agent/docs/PLUGIN_INTEGRATION.md. Continuing on the OSS clipboard path.)",
+            file=sys.stderr,
+        )
+
     # Auto-resolve target file if not provided
     if target_file is None:
         target_file = _resolve_target_file(config)

@@ -198,6 +198,19 @@ def _probe_plugin() -> dict:
         block["license"] = {"status": "unknown", "licensed": False}
         block["usable"] = False
 
+    # Broker the plug-in's self-describing endpoint suite. GET /api/discover is
+    # token-free (exempt) and returns the *live*, license-gated catalog: the
+    # full endpoint suite when usable, a shrunk list + purchaseUrl when locked.
+    # The OSS agent reads this to choose endpoints for the task at hand rather
+    # than assuming a fixed set — so the integration never hardcodes (or rots
+    # against) the plug-in's API surface. Surfaced even when not usable so the
+    # locked-state purchaseUrl is available for the lapsed-license nudge.
+    if block["server"].get("reachable"):
+        try:
+            block["discover"] = _plugin_http_get_json(f"{base}/api/discover", timeout=3)
+        except Exception:
+            pass
+
     block["solutions"] = _plugin_enumerate_solutions()
     return block
 
