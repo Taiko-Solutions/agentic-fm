@@ -67,6 +67,13 @@ Read it and pick the endpoint that fits the task at hand.
 The tables in §3 and §4 below are an **illustrative orientation**, not the contract — when `discover` advertises a capability the tables don't mention (for example, reading a script and then generating + applying an **fmpatch** entirely through endpoints), prefer what `discover` reports.
 This keeps the integration from hardcoding — or rotting against — the plug-in's evolving API surface.
 
+**The seam.**
+The companion owns and implements the OSS surface (explode, context, clipboard, trigger, static `fmlint`).
+It does **not** reimplement plug-in capabilities — it *advertises* them via `plugin.discover` and can optionally proxy them.
+What the plug-in "owns" is therefore not a fixed list in this repo; it is whatever `/api/discover` reports at runtime.
+The plug-in's API can evolve freely; the OSS only ever learns about it through the broker.
+The three coexistence states fall out of this directly, and are the first branches of the decision tree in §3: companion unreachable (pure OSS, manual paste) → plug-in absent or not usable (pure OSS automation tiers) → plug-in usable (plugin-preferred mode).
+
 **Reaching the plug-in.**
 Direct access is the baseline: once you have `plugin.server.base` + `token`, call the plug-in's API directly with `Authorization: Bearer <token>`.
 For constrained environments (e.g. a container that can reach the companion but not the plug-in's port), the companion also exposes a thin pass-through: `GET|POST {companion}/plugin/<path>` forwards to the plug-in's `/<path>` with the token injected, and returns `502` when the plug-in is not usable.
