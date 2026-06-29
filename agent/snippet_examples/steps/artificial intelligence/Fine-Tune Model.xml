@@ -21,3 +21,11 @@
     </FineTuneLLM>
   </Step>
 </fmxmlsnippet>
+<!-- Option state: "False" when no table selected or TrainingFile source. "True" when table explicitly selected for DataTable source. Not shown in HR. -->
+<!-- All named calcs (AccountName, FineTuneBaseModelName, Parameters) are inside <FineTuneLLM>. -->
+<!-- DataSource: "DataTable" (HR: Table) | "TrainingFile" (HR: File). -->
+<!-- For DataTable: <UniversalPathList type="Embedded"/>, <Table id="" name=""/> sibling (HR: quoted table name). -->
+<!-- For TrainingFile: <UniversalPathList type="Reference">$path</UniversalPathList>. No <Table> element. -->
+<!-- Completion Field: <Field> INSIDE <FineTuneLLM> (HR: Completion Field). Field ref only (table/id/name). DataTable source only. -->
+<!-- Response Target: <Field> SIBLING of FineTuneLLM (HR: Response Target). Dual format: field ref (table/id/name) or variable (<Field>$variable</Field> with <Text/>). Both formats support repetition attribute. -->
+<!-- Parameters calc is optional, inside <FineTuneLLM>. -->

@@ -21,6 +21,7 @@
 <!-- MaxDuration state: "True" with a direct <Calculation> child (seconds) | "False". StartImmediately state: "True" | "False". -->
 <!-- Barcode: ScanFrom, then (ScanFrom type="Camera" ⇒ Camera/Resolution/LightMode) or (ScanFrom type="Field" ⇒ a <Field> source ref), then Barcodes. -->
 <!-- ScanFrom type: "Camera" | "Field". Barcodes types: numeric bitmask. "4194303" (0x3FFFFF) = all 22 types enabled. -->
+<!-- Barcode types (bit positions): Code 39, Code 93, Code 128, EAN-8, EAN-13, EAN/UPC Composite, GS1 2-Digit Add-On, GS1 5-Digit Add-On, GS1 DataBar Expanded, GS1 DataBar (RSS), Interleaved 2 of 5, ISBN-10 (from EAN-13), ISBN-13 (from EAN-13), QR Code, UPC-A, UPC-E, Codabar, PDF417, ITF-14, Aztec, Data Matrix, GS1 DataBar Limited. -->
 <!-- Signature: Title (Calculation), Message (Calculation), Prompt (Calculation), Presentation. -->
 <!-- Presentation choice: "Full Screen" | "Overlay" | "Embedded". Falls back to Overlay if container too small. -->
 <!-- FileMaker Go only; not supported on Pro, WebDirect, Server, Cloud, Data API, or CWP. -->

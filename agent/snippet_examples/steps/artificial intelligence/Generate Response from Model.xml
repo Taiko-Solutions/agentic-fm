@@ -60,3 +60,14 @@
     </LLMRequestWithTools>
   </Step>
 </fmxmlsnippet>
+<!-- All named calcs are inside <LLMRequestWithTools>. -->
+<!-- Boolean flags (siblings): Set=Agentic mode, Stream=Stream flag, SelectAll=ToolDefinitions present, Option=Parameters present, LinkAvail=Messages present, Restore=WebScript present. -->
+<!-- Set state: "True" enables agentic mode (HR: Agentic mode shown). -->
+<!-- Stream state: "True" enables streaming (HR: Stream shown). -->
+<!-- Response: <Field> sibling of LLMRequestWithTools. Dual format: field ref (table/id/name) or variable (<Field>$variable</Field> with <Text/>). Supports repetition. HR: Response. -->
+<!-- Tool Calls from Model: <Field type="ToolCalls"> inside LLMRequestWithTools. Variable only. HR: Tool Calls from Model. -->
+<!-- Messages: <Field type="Messages"> inside LLMRequestWithTools. Variable only. HR: Messages. -->
+<!-- Save Message History To: <SlidingWindowVariable> (variable name) + <SlidingWindowVariableRepetition><Calculation> (repetition, shown as [rep] in HR). HR: Save Message History To. -->
+<!-- Message History Count: <SlidingWindowMessageCount><Calculation>. HR: Message History Count. -->
+<!-- WebScript: contains ObjectName (HR: Web Viewer), FunctionName (HR: Function Name), and optional WebScriptParameters with Count and P/Calculation children. -->
+<!-- UniversalPathList: type="Embedded" for basic, type="Reference" when Temperature present. -->
