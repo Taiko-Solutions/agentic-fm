@@ -43,12 +43,12 @@ except Exception:
 
 
 # --- Config ---
-DOCSET_GEN = Path(
-    "/Users/marcoperez/Library/Application Support/Dash/Docset Generator/FileMaker Data API Guide/"
+DOCSET_GEN = Path.home() / (
+    "Library/Application Support/Dash/Docset Generator/FileMaker Data API Guide/"
     "FileMaker Data API Guide.docset"
 )
-DOCSET_DEST = Path(
-    "/Users/marcoperez/Library/Application Support/Dash/DocSets/FileMaker Data API Guide.docset"
+DOCSET_DEST = Path.home() / (
+    "Library/Application Support/Dash/DocSets/FileMaker Data API Guide.docset"
 )
 
 BASE_URL = "https://help.claris.com/en/data-api-guide/content/"
