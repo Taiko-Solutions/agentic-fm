@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "proofkit-mcp": {
+      "command": "proofkit-mcp",
+      "args": []
+    }
+  }
+}
