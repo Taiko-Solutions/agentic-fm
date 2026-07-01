@@ -4,6 +4,8 @@ Esta sección debe incluirse en el CLAUDE.md de cada repo de solución para habi
 
 Copiar la sección de abajo en el `.cursor/AGENTS.md` (o `.claude/CLAUDE.md`) de la solución.
 
+> **"Upstream" aquí = la plantilla Taiko (rama `taiko`), NUNCA petrowsky.** Hay dos niveles (ver `.claude/CLAUDE.md` → "Propagación de reglas y actualizaciones (Taiko)"): un proyecto cliente **sube** mejoras a la rama `taiko`; el repo **base** Taiko es el único que trata con petrowsky (traer novedades de `main` y proponer PRs). Desde un proyecto cliente **nunca** se contribuye a petrowsky ni se hace el chequeo de actualización contra `origin/main` — ese proyecto se actualiza trayendo la rama `taiko`.
+
 ---
 
 ## Contenido para copiar
