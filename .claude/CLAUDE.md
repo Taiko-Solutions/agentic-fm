@@ -43,6 +43,8 @@ If the result is greater than `0`, pause and notify the user before proceeding:
 
 Do this **once per session**, not on every prompt. If the check fails (no network, not a git repo, etc.), skip it silently and continue.
 
+> **(Taiko) Solo repo base.** Este chequeo contra `origin/main` es el mecanismo del repo **base** agentic-fm (origen petrowsky). En un **repo de proyecto cliente NO aplica**: esos repos se actualizan trayendo la **rama `taiko`** del repo base (`git pull <remoto-taiko> taiko` → merge a la rama del proyecto), nunca `origin/main`, y no proponen PRs a petrowsky. Ver "Propagación de reglas y actualizaciones (Taiko)".
+
 ## Environment detection
 
 Also at session start, check if you are running in a sandboxed or non-macOS environment:
@@ -503,6 +505,26 @@ The `agent/library` folder is a curated collection of reusable fmxmlsnippet code
 `agent/docs/taiko/CODING_CONVENTIONS.md` contains Taiko-specific conventions that **OVERRIDE** the base conventions above. Read this file FIRST — it takes priority. For anything not defined in the Taiko conventions, fall back to the base `agent/docs/CODING_CONVENTIONS.md`.
 
 Key overrides: PascalCase variables (`$ClienteID` not `$invoiceTotal`), comments in Spanish, `Insert Calculated Result` preferred over `Set Variable`, script naming with `.Controller` suffix, three-layer architecture naming.
+
+# Propagación de reglas y actualizaciones (Taiko)
+
+Modelo de **dos niveles**. La dirección importa:
+
+```
+  petrowsky/agentic-fm            (origen open source)
+        ▲  PRs selectivos   │  git pull main → merge a taiko
+        │  (SOLO repo base)  ▼
+  Taiko-Solutions/agentic-fm · rama taiko   (base del equipo)
+        ▲  mejoras suben     │  git pull taiko → merge a la rama del proyecto
+        │                    ▼
+  Repo de proyecto cliente         (consume taiko)
+```
+
+**Reglas:**
+
+1. **En un repo de proyecto cliente, el flujo hacia petrowsky NO aplica.** La única fuente de actualizaciones es la **rama `taiko`** del repo base (`git pull <remoto-taiko> taiko` → merge a la rama del proyecto). No hagas el chequeo de "agentic-fm update available" contra `origin/main`, no `git pull --ff-only` de main, y **no propongas PRs a petrowsky**. Petrowsky lo gestiona **exclusivamente** el repo base Taiko.
+2. **Las mejoras suben a `taiko`.** Si en un proyecto cliente detectas una mejora en la **capa de herramientas/reglas** (knowledge, convenciones, custom functions, utilidades de `agent/scripts/`, templates, snippet_examples, library), **regístrala para que suba a la rama `taiko`** — nunca directa a petrowsky, y **nunca con datos de cliente**. Mecanismo y qué NUNCA sube: `agent/docs/taiko/UPSTREAM_IMPROVEMENTS.md` (log en `agent/UPSTREAM_PROPOSALS.md`; el mantenedor del repo base lo aplica a `taiko`).
+3. **Petrowsky solo desde el repo base.** Traer novedades de petrowsky (`git pull main` → merge a `taiko`) y proponer PRs a petrowsky son operaciones **exclusivas del repo base Taiko**, jamás de un proyecto cliente.
 
 # Taiko Solutions knowledge base
 
