@@ -312,13 +312,16 @@ Accepts a JSON payload of runtime debug state and writes it to `agent/debug/outp
 
 ## Security
 
-**This project is designed exclusively for local development.** It assumes you are working on your own machine, behind a firewall, on a private network. It is not hardened for production use, multi-user environments, or any network-accessible deployment. Do not use it on a public network or expose any part of it to the internet.
+**This project is designed exclusively for local development.** It assumes you are working on your own machine, on a private, firewalled network. It is not hardened for production use, multi-user environments, or internet-facing deployment. Never forward the companion port to a public interface or expose any part of it to the internet.
 
-The server binds exclusively to `127.0.0.1` (localhost) by default. It is not reachable from other machines on the network — only processes running on the same machine can connect. No authentication is implemented, which is acceptable because the attack surface is limited to local processes already running under the same user account.
+The `/explode` and `/trigger` endpoints execute arbitrary shell scripts and AppleScript with the permissions of the user who started the server, and **no authentication is implemented**. The bind address therefore defines the entire attack surface — choose it deliberately.
 
-Do not change `BIND_HOST` to `0.0.0.0` or expose the server through a reverse proxy. The `/explode` endpoint executes arbitrary shell scripts with the permissions of the user who started the server.
+**Choosing `COMPANION_BIND_HOST`:**
 
-> **Note for Docker users:** When running the agent in a container, `COMPANION_BIND_HOST=0.0.0.0` is required so the container can reach the host-side server. This is still safe as long as the host machine is on a private, firewalled network — the port should never be forwarded to a public interface.
+- **`127.0.0.1` (default)** — safest. Only processes on the same machine can connect. Use this whenever the companion is consumed solely by a local agent and no remote machine needs to reach it.
+- **`0.0.0.0` (all interfaces)** — required when a *remote* host must reach the companion running on your workstation: a remote FileMaker Server that triggers an "Explode XML" or deploy script over the network, or an agent running inside a Docker container. This is acceptable **only** when every network that can route to the port is private and trusted — an RFC 1918 LAN or an authenticated overlay such as Tailscale. Because there is no auth, anyone who can reach the port can run arbitrary code on the machine, so the port must **never** be reachable from the public internet or an untrusted/guest network. If you ever work from such a network, set `COMPANION_BIND_HOST` back to `127.0.0.1`.
+
+When the companion binds to `0.0.0.0`, `companion_url` in `automation.json` can stay `http://localhost:8765` for the local agent, while remote callers (a remote FMS, a container) reach the same server by the machine's hostname or LAN/Tailscale IP.
 
 ---
 
