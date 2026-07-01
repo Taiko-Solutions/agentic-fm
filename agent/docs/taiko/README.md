@@ -29,6 +29,14 @@ Curated documents describing Taiko's architectural patterns and development deci
 | `logging-system.md` | Error logging to Log table with retry capability |
 | `executesql-pattern.md` | Resilient ExecuteSQL pattern with SQL.Get* functions |
 | `transaction-navigation.md` | Navigation strategies within open transactions |
+| `superpowers-workflow.md` | Superpowers development process for structural-scope tasks |
+| `combined-workflow.md` | How agentic-fm + Superpowers + ProofKit work as one whole |
+
+### fm-access.md & proofkit/
+
+`fm-access.md` is the canonical map of the **three ways** agentic-fm reaches FileMaker: ProofKit MCP (live query), OData (automation), and ProofKit Web Viewer (web UI — the default web engine). The `proofkit/` folder details ProofKit usage: `mcp-connector.md` (live query tools), `webviewer-build.md` (building web interfaces), `architecture.md`, `gotchas.md`, `troubleshooting.md`, `conventions.md`. Gating: ProofKit tools require `connectedFiles` to return a file; otherwise the static explode/CONTEXT.json path is used. See `knowledge/combined-workflow.md` for the unified methodology.
+
+The ProofKit MCP server travels with this branch via the repo-root `.mcp.json` (command `proofkit-mcp`, resolved on PATH). Each developer needs the ProofKit app installed and the plugin loaded in the FileMaker file.
 
 ### custom_functions/
 
