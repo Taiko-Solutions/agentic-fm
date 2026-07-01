@@ -181,6 +181,21 @@ class LiveEvalError(LintRule):
                     ),
                     line=line,
                 ))
+            elif str(result.get("result", "")).strip() == "?":
+                # AGFMEvaluation reports success even when the engine returns "?"
+                # (unknown custom function, missing reference, or a feature the
+                # host server does not support). EvaluationError only catches
+                # syntax errors, so guard the "?" sentinel here as a hard failure.
+                diags.append(Diagnostic(
+                    rule_id=self.rule_id,
+                    severity=self.default_severity,
+                    message=(
+                        f'Calculation evaluated to "?" in FileMaker engine — '
+                        f"likely an unknown custom function, missing reference, "
+                        f"or unsupported feature: {calc_text[:80]}"
+                    ),
+                    line=line,
+                ))
 
         return diags
 
