@@ -11,7 +11,7 @@ Este script:
 
 Uso recomendado:
   python3 populate_dash_dsidx.py \
-    --docset "/Users/marcoperez/Library/Application Support/Dash/Docset Generator/FileMaker Pro 2025/FileMaker Pro 2025.docset"
+    --docset "~/Library/Application Support/Dash/Docset Generator/FileMaker Pro 2025/FileMaker Pro 2025.docset"
 
 Requisitos:
   python3 -m pip install beautifulsoup4

@@ -5,7 +5,7 @@ Objetivo: eliminar elementos de navegación/UI que añaden ruido y dejar el cont
 
 Uso (ejemplo):
   python3 clean_dash_docset_html.py \
-    --root "/Users/marcoperez/Library/Application Support/Dash/Docset Generator/FileMaker Pro 2025/FileMaker Pro 2025.docset/Contents/Resources/Documents"
+    --root "~/Library/Application Support/Dash/Docset Generator/FileMaker Pro 2025/FileMaker Pro 2025.docset/Contents/Resources/Documents"
 
 Requisitos:
   python3 -m pip install beautifulsoup4

@@ -17,7 +17,7 @@ Este script:
 
 Uso:
   python3 populate_dash_dsidx_odata.py \
-    --docset "/Users/marcoperez/Library/Application Support/Dash/Docset Generator/FileMaker OData Guide/FileMaker OData Guide.docset"
+    --docset "~/Library/Application Support/Dash/Docset Generator/FileMaker OData Guide/FileMaker OData Guide.docset"
 
 Requisitos:
   python3 -m pip install beautifulsoup4

@@ -22,7 +22,7 @@ Este script hace 3 pasos:
 
 Uso:
   python3 build_odata_docset_manual.py \
-    --docset "/Users/marcoperez/Library/Application Support/Dash/Docset Generator/FileMaker OData Guide/FileMaker OData Guide.docset"
+    --docset "~/Library/Application Support/Dash/Docset Generator/FileMaker OData Guide/FileMaker OData Guide.docset"
 
 Requisitos:
   python3 -m pip install beautifulsoup4
@@ -52,8 +52,8 @@ except Exception:
     raise
 
 
-DEFAULT_DOCSET = (
-    "/Users/marcoperez/Library/Application Support/Dash/Docset Generator/FileMaker OData Guide/"
+DEFAULT_DOCSET = os.path.expanduser(
+    "~/Library/Application Support/Dash/Docset Generator/FileMaker OData Guide/"
     "FileMaker OData Guide.docset"
 )
 BASE_URL = "https://help.claris.com/en/odata-guide/content/"
