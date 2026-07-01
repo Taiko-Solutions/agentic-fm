@@ -526,6 +526,17 @@ Modelo de **dos niveles**. La dirección importa:
 2. **Las mejoras suben a `taiko`.** Si en un proyecto cliente detectas una mejora en la **capa de herramientas/reglas** (knowledge, convenciones, custom functions, utilidades de `agent/scripts/`, templates, snippet_examples, library), **regístrala para que suba a la rama `taiko`** — nunca directa a petrowsky, y **nunca con datos de cliente**. Mecanismo y qué NUNCA sube: `agent/docs/taiko/UPSTREAM_IMPROVEMENTS.md` (log en `agent/UPSTREAM_PROPOSALS.md`; el mantenedor del repo base lo aplica a `taiko`).
 3. **Petrowsky solo desde el repo base.** Traer novedades de petrowsky (`git pull main` → merge a `taiko`) y proponer PRs a petrowsky son operaciones **exclusivas del repo base Taiko**, jamás de un proyecto cliente.
 
+# Ejecución local por defecto (Taiko)
+
+**Por defecto, todo agentic-fm corre en local.** El desarrollador trabaja con el archivo abierto en **FileMaker Pro en su Mac**; el companion server escucha en `127.0.0.1:8765` y todas las llamadas (Explode XML, Push Context, deploy, clipboard, debug) van por `localhost`. **FileMaker Server no interviene** y no necesita alcanzar el companion.
+
+**La ruta FileMaker Server → companion es opt-in.** El modo server-side/headless (automatización disparada por OData contra la solución alojada, companion en `0.0.0.0`, un FMS remoto alcanzando el equipo del desarrollador) se activa **solo bajo petición directa del desarrollador**. Mientras no lo pida explícitamente:
+
+- Asume **ejecución local** (`localhost`, FM Pro abierto en el Mac). No la propongas, no preguntes por ella, no la asumas.
+- No sugieras cambiar el bind del companion a `0.0.0.0` ni configurar acceso remoto desde FileMaker Server.
+
+Si el equipo cambia de política, se cambia **esta regla en el repo** — no se decide por conversación.
+
 # Taiko Solutions knowledge base
 
 `agent/docs/taiko/knowledge/` contains Taiko-specific architectural patterns and development decisions. These define how Taiko builds FileMaker solutions — error handling (Clew pattern), three-layer architecture, transactional editing, and logging.
