@@ -7,6 +7,7 @@ agent/sandbox/
 .private/
 .venv/
 .cursor/in-development/
+.claude/worktrees/
 external_tools/
 plans/
 plug-in/
@@ -28,6 +29,7 @@ Prompt.md
 agent/library/
 agent/config/removals.json
 agent/config/automation.json
+agent/config/modules.json
 agent/config/.autosave.json
 agent/config/.layout-prefs.json
 agent/config/.custom-instructions.md

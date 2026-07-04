@@ -39,6 +39,10 @@ DEFAULT_PORT = 8765
 BIND_HOST = os.environ.get("COMPANION_BIND_HOST", "127.0.0.1")
 REMOTE_VERSION_URL = "https://raw.githubusercontent.com/petrowsky/agentic-fm/main/version.txt"
 
+# Idle auto-shutdown: seconds with no requests before the server exits.
+# 0 disables it (always-on) — the default, so existing behaviour is unchanged.
+DEFAULT_IDLE_TIMEOUT = int(os.environ.get("COMPANION_IDLE_TIMEOUT", "0"))
+
 # Read version from version.txt at the repo root
 def _read_local_version() -> str:
     try:
@@ -317,6 +321,37 @@ def _run_command_streaming(cmd, *, cwd, env, label):
 
 
 # ---------------------------------------------------------------------------
+# Idle activity tracking
+# ---------------------------------------------------------------------------
+
+_last_activity = time.monotonic()
+_activity_lock = threading.Lock()
+
+
+def _touch_activity() -> None:
+    global _last_activity
+    with _activity_lock:
+        _last_activity = time.monotonic()
+
+
+def _seconds_since_activity() -> float:
+    with _activity_lock:
+        return time.monotonic() - _last_activity
+
+
+def _idle_watchdog(server, idle_timeout: int) -> None:
+    """Shut the server down after idle_timeout seconds with no requests."""
+    check_interval = min(30, idle_timeout)
+    while True:
+        time.sleep(check_interval)
+        idle = _seconds_since_activity()
+        if idle >= idle_timeout:
+            log.info("Idle for %.0fs (timeout %ds) — shutting down.", idle, idle_timeout)
+            server.shutdown()  # unblocks serve_forever() in the main thread
+            return
+
+
+# ---------------------------------------------------------------------------
 # Threading HTTP server (handles concurrent requests)
 # ---------------------------------------------------------------------------
 
@@ -340,6 +375,12 @@ class CompanionHandler(BaseHTTPRequestHandler):
     # ------------------------------------------------------------------
 
     def do_GET(self):
+        # /health is a liveness probe — used by monitors and the status-bar
+        # marker, which poll it continuously. It must NOT count as activity, or
+        # that polling would keep the idle watchdog from ever firing and defeat
+        # the auto-shutdown. Every other endpoint is real work and does count.
+        if self.path != "/health":
+            _touch_activity()
         if self.path == "/health":
             self._handle_health()
         elif self.path == "/pending":
@@ -357,6 +398,7 @@ class CompanionHandler(BaseHTTPRequestHandler):
             self._send_json({"error": "Not found"}, status=404)
 
     def do_POST(self):
+        _touch_activity()
         if self.path == "/explode":
             self._handle_explode()
         elif self.path == "/context":
@@ -1079,17 +1121,45 @@ def parse_args():
         default=DEFAULT_PORT,
         help=f"Port to listen on (default: {DEFAULT_PORT})",
     )
+    parser.add_argument(
+        "--idle-timeout",
+        type=int,
+        default=DEFAULT_IDLE_TIMEOUT,
+        help=(
+            "Seconds of inactivity before the server shuts itself down. "
+            f"0 disables auto-shutdown (always-on). Default: {DEFAULT_IDLE_TIMEOUT} "
+            "(override with COMPANION_IDLE_TIMEOUT)."
+        ),
+    )
     return parser.parse_args()
+
+
+def _shutdown_cleanup(server):
+    server.server_close()
+    with _webviewer_lock:
+        if _webviewer_proc is not None and _webviewer_proc.poll() is None:
+            try:
+                pgid = os.getpgid(_webviewer_proc.pid)
+                os.killpg(pgid, signal.SIGTERM)
+                log.info("Stopped webviewer (process group %d)", pgid)
+            except Exception as exc:
+                log.warning("Failed to stop webviewer on shutdown: %s", exc)
 
 
 def main():
     args = parse_args()
     port = args.port
+    idle_timeout = args.idle_timeout
 
     server = ThreadingHTTPServer((BIND_HOST, port), CompanionHandler)
 
     log.info("companion_server v%s listening on %s:%d", VERSION, BIND_HOST, port)
     threading.Thread(target=_check_for_updates, daemon=True).start()
+    if idle_timeout > 0:
+        log.info("Idle auto-shutdown: %ds with no requests.", idle_timeout)
+        threading.Thread(target=_idle_watchdog, args=(server, idle_timeout), daemon=True).start()
+    else:
+        log.info("Idle auto-shutdown: disabled (always-on).")
     log.info("Endpoints: GET /health  GET /clipboard  GET /webviewer/status  GET /preview/<name>  GET|POST /plugin/<path>  POST /explode  POST /context  POST /clipboard  POST /trigger  POST /debug  POST /webviewer/start  POST /webviewer/stop  POST /webviewer/push  POST /preview/<name>")
     log.info("Press Ctrl-C to stop.")
 
@@ -1097,15 +1167,8 @@ def main():
         server.serve_forever()
     except KeyboardInterrupt:
         log.info("Shutting down.")
-        server.server_close()
-        with _webviewer_lock:
-            if _webviewer_proc is not None and _webviewer_proc.poll() is None:
-                try:
-                    pgid = os.getpgid(_webviewer_proc.pid)
-                    os.killpg(pgid, signal.SIGTERM)
-                    log.info("Stopped webviewer (process group %d)", pgid)
-                except Exception as exc:
-                    log.warning("Failed to stop webviewer on shutdown: %s", exc)
+    finally:
+        _shutdown_cleanup(server)
 
 
 if __name__ == "__main__":
