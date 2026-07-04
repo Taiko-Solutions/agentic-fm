@@ -3038,7 +3038,7 @@
   },
   {
     "name": "Go to Next Field",
-    "id": 5,
+    "id": 4,
     "category": "navigation",
     "snippetFile": "navigation/Go to Next Field.xml",
     "selfClosing": true,
@@ -3155,7 +3155,7 @@
   },
   {
     "name": "Go to Previous Field",
-    "id": 4,
+    "id": 5,
     "category": "navigation",
     "snippetFile": "navigation/Go to Previous Field.xml",
     "selfClosing": true,
