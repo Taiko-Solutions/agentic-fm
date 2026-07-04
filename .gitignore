@@ -7,6 +7,7 @@ agent/sandbox/
 .private/
 .venv/
 .cursor/in-development/
+.claude/worktrees/
 external_tools/
 plans/
 plug-in/
