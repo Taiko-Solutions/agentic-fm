@@ -38,6 +38,7 @@ FORBIDDEN_REGEX='^(xml_exports/|agent/xml_parsed/|agent/context/|agent/CONTEXT\.
 WHITELIST_REGEX='(\.example(\..*)?$|^agent/config/fmlint\.config\.json$|^agent/sandbox/script\.xml$)'
 
 found_violation=0
+all_pushed_files=""
 
 while read -r local_ref local_sha remote_ref remote_sha; do
     # Rama eliminada (nada que verificar)
@@ -57,6 +58,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
     # Archivos tocados en todos los commits del rango (deduplicados)
     files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only -r {} 2>/dev/null | sort -u)
+    all_pushed_files="$all_pushed_files
+$files"
 
     # Sospechosos = coincide con FORBIDDEN y NO coincide con WHITELIST
     matches=$(echo "$files" | grep -E "$FORBIDDEN_REGEX" 2>/dev/null | grep -vE "$WHITELIST_REGEX" 2>/dev/null || true)
@@ -99,6 +102,27 @@ if [ $found_violation -eq 1 ]; then
     echo "    PERMITIDO: $WHITELIST_REGEX"
     echo ""
     exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Sanity checks de artefactos críticos (catálogos JSON, conversor, fmlint)
+#
+# Si el push toca alguno de estos artefactos, corre agent/scripts/ci_checks.py
+# (validación JSON de catálogos + tests del conversor + tests de fmlint).
+# Evita que llegue a taiko un catálogo roto (caso real: coma faltante que
+# invalidó todo el step-catalog) o un conversor que pierde parámetros.
+# ---------------------------------------------------------------------------
+
+CRITICAL_REGEX='^(agent/catalogs/.*\.json$|agent/scripts/fm_xml_to_snippet\.py$|agent/scripts/snippet_to_hr\.py$|agent/fmlint/)'
+
+if echo "$all_pushed_files" | grep -qE "$CRITICAL_REGEX" 2>/dev/null; then
+    echo "🔎 pre-push: el push toca artefactos críticos — corriendo sanity checks…"
+    if ! python3 agent/scripts/ci_checks.py; then
+        echo ""
+        echo "❌ PUSH BLOQUEADO — sanity checks fallidos (agent/scripts/ci_checks.py)"
+        echo "   Arregla los fallos y reintenta. Bypass de emergencia: git push --no-verify"
+        exit 1
+    fi
 fi
 
 exit 0
