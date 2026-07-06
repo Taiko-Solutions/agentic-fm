@@ -20,6 +20,7 @@ Requiere `connectedFiles` con archivo conectado (Vía 1, [mcp-connector.md](mcp-
 2. **`layout_metadata { layouts: "" }`** — lista layouts; elige los que la app necesita. Los prefijados `API`/`dapi` suelen estar diseñados para acceso programático. **Descubrimiento de esquema por layouts** (no SQL/DDL aquí).
 3. **`setup_proofkit_project { targetPath }`** — devuelve el comando CLI de scaffold. Por defecto `init .` en el directorio actual.
 4. **El agente corre el comando** → scaffold React + Vite + Tailwind + shadcn/ui + TanStack Query + TypeGen.
+   - **4b. Copia [CLAUDE-webapp.md](CLAUDE-webapp.md) como `CLAUDE.md` a la raíz del proyecto scaffoldeado** y rellena el bloque "Este proyecto". Así las sesiones de trabajo dentro de la app web cargan SOLO las reglas web (ligeras) y no arrastran el stack fmxmlsnippet/steps/Clew del repo padre — que ahí es ruido.
 5. **Instala las skills de ProofKit** (comando que devuelve `setup_proofkit_project`) y sigue su guía para typegen y desarrollo.
 6. **CRUD siempre con `data_api_orchestrator`** (valida campos contra layout antes de ejecutar).
 7. **Regenera typegen** cuando cambie el metadata de un layout ([conventions.md](conventions.md)).

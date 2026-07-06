@@ -2,6 +2,18 @@
 
 > Cómo Taiko usa ProofKit **de forma principal hoy**: un plugin/connector en FileMaker que deja al agente **consultar el archivo en vivo** (estructura puntual, SQL, valores). Es la **Vía 1** de [../fm-access.md](../fm-access.md). Comparte el bridge local (`localhost:1365`) con la Vía 3, pero su uso es distinto.
 
+## Vertiente standalone — la Vía 1 vale por sí sola
+
+La consulta viva **NO es solo la antesala de una interfaz web**. Es una herramienta de pleno derecho en cualquier tarea, exista o no una app ProofKit en juego:
+
+- **Durante la autoría fmxmlsnippet** — confirmar que un campo/TO/valor existe AHORA antes de referenciarlo (`execute_filemaker_sql`, `table_metadata`), sin re-exportar contexto.
+- **Exploración de datos en chat** — preguntas del desarrollador sobre sus datos ("¿cuántas peticiones activas?", "muéstrame los brokers sin contacto"), resúmenes, prototipos de informe.
+- **Verificación post-deploy** — tras desplegar un script y ejecutarlo, comprobar con SQL que los datos cambiaron como se esperaba (cierra el bucle del skill `script-test` sin abrir FM).
+- **Debugging** — leer el valor vivo de un campo/global mientras se diagnostica, complementando `fm-debug`.
+- **ERD scoped** — `display_erd_diagram` de unas TOs concretas para razonar una relación sin cargar el explode.
+
+Si la sesión no toca interfaces, usa esta vertiente con total normalidad: gating `connectedFiles` → consulta → sigue con tu flujo (fmxmlsnippet/OData). Los límites siguen aplicando: puntual y quirúrgico, nunca volcado masivo de estructura.
+
 **Antes de operar:** `connectedFiles` debe devolver el/los archivo(s). Si devuelve `[]`, corre el script *"Connect to MCP"* en FileMaker (ver *Ciclo de vida*).
 
 ## Para qué brilla (en vivo y quirúrgico)

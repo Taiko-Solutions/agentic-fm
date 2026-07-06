@@ -450,7 +450,7 @@ Read the appropriate template before generating a new script to ensure the corre
 
 Taiko toca FileMaker por **tres vías** (mapa canónico: `agent/docs/taiko/fm-access.md`):
 
-- **Vía 1 · ProofKit MCP** — ver en vivo (SQL, metadata, valores, ERD). Capa de frescura sobre el explode/CONTEXT.json. Detalle: `agent/docs/taiko/proofkit/mcp-connector.md`.
+- **Vía 1 · ProofKit MCP** — ver en vivo (SQL, metadata, valores, ERD). Capa de frescura sobre el explode/CONTEXT.json **y herramienta de pleno derecho por sí sola** — exploración de datos en chat, verificación puntual durante autoría, comprobación post-deploy, debugging — exista o no una interfaz web en la tarea. Detalle: `agent/docs/taiko/proofkit/mcp-connector.md` (§ *Vertiente standalone*).
 - **Vía 2 · OData** — hacer/automatizar (AGFMScriptBridge; skills `schema-build`/`data-migrate`/`data-seed`).
 - **Vía 3 · ProofKit Web Viewer** — construir interfaces web. **Motor web por defecto** de Taiko. Detalle: `agent/docs/taiko/proofkit/webviewer-build.md`.
 
@@ -459,7 +459,7 @@ Taiko toca FileMaker por **tres vías** (mapa canónico: `agent/docs/taiko/fm-ac
 1. **Gating.** Antes de cualquier herramienta ProofKit (Vías 1 y 3), llama a `connectedFiles`. Si devuelve `[]` o falla, cae al flujo estático (explode, CONTEXT.json, OData) **sin bloquear**. agentic-fm nunca depende de ProofKit para funcionar.
 2. **Estructura: manda el explode.** Estructura amplia/completa → explode/sanitized (`agent/xml_parsed/`, `context/*.index`), sin timeout. ProofKit MCP solo para preguntas **puntuales y en vivo** — nunca volcado masivo (timeout en soluciones grandes, p. ej. Bendita).
 3. **Reparto de autoría.** agentic-fm autora scripts/cálculos/esquema (fmxmlsnippet/OData); ProofKit v2 **no** edita scripts/esquema, solo construye UI web y lee/escribe datos (Data API). Complementarios.
-4. **Interfaces web: proactivo con guardarraíles.** Cuando una tarea encaje con una UI web (listados, dashboards, interacciones ricas), **propón** una interfaz ProofKit — mencionando los guardarraíles (`agent/docs/taiko/proofkit/gotchas.md`). Motor por defecto ProofKit; el skill `webviewer-build` solo como excepción (HTML trivial o sin conexión ProofKit).
+4. **Interfaces web: proactivo con guardarraíles.** Cuando una tarea encaje con una UI web (listados, dashboards, interacciones ricas), **propón** una interfaz ProofKit — mencionando los guardarraíles (`agent/docs/taiko/proofkit/gotchas.md`). Motor por defecto ProofKit; el skill `webviewer-build` solo como excepción (HTML trivial o sin conexión ProofKit). **Al scaffoldear, copia `agent/docs/taiko/proofkit/CLAUDE-webapp.md` como `CLAUDE.md` del proyecto web**: las sesiones de UI cargan solo las reglas web (ligeras), sin el stack fmxmlsnippet del repo padre.
 5. **Metodología combinada.** El flujo unificado agentic-fm + Superpowers + ProofKit está en `agent/docs/taiko/knowledge/combined-workflow.md` (indexado en el MANIFEST, escaneable por keywords).
 
 El servidor MCP `proofkit-mcp` viaja con la rama vía `.mcp.json` (comando `proofkit-mcp`, resuelto por PATH). Prerequisito por desarrollador: app ProofKit instalada + plugin cargado en el archivo + script *"Connect to MCP"* corrido en la sesión.
