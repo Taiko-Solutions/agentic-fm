@@ -1344,6 +1344,128 @@ def tx_go_to_related_record(step) -> str:
     return '\n'.join(parts)
 
 
+def tx_open_transaction(step) -> str:
+    enable, sid = step_attrs(step)
+    # SaXML Boolean type → (snippet element, default)
+    skip_auto = 'False'
+    skip_val  = 'False'
+    ess_force = 'False'
+    restore   = 'False'
+
+    for p in all_params(step):
+        b = p.find('Boolean')
+        if b is None:
+            continue
+        btype = b.get('type', '')
+        val   = b.get('value', 'False')
+        if btype == 'Skip auto-enter options':
+            skip_auto = val
+        elif btype == 'Skip data entry validation':
+            skip_val = val
+        elif btype == 'Override ESS locking conflicts':
+            ess_force = val
+        elif btype == 'Collapsed':
+            restore = val
+
+    # Element order per snippet example: Option, ESSForceCommit,
+    # SkipAutoEntry, Restore (differs from HR display order).
+    return (
+        f'{S}<Step enable="{enable}" id="{sid}" name="Open Transaction">\n'
+        f'{L1}<Option state="{skip_val}"/>\n'
+        f'{L1}<ESSForceCommit state="{ess_force}"/>\n'
+        f'{L1}<SkipAutoEntry state="{skip_auto}"/>\n'
+        f'{L1}<Restore state="{restore}"/>\n'
+        f'{S}</Step>'
+    )
+
+
+def tx_perform_script_on_server(step) -> str:
+    enable, sid = step_attrs(step)
+    wait        = 'True'
+    script_id   = None
+    script_name = ''
+    by_name_calc = ''
+    param_calc   = ''
+
+    for p in all_params(step):
+        ptype = p.get('type', '')
+        if ptype == 'Boolean':
+            b = p.find('Boolean')
+            if b is not None and b.get('type') == 'Wait for completion':
+                wait = b.get('value', 'True')
+        elif ptype == 'List':
+            lst = p.find('List')
+            if lst is not None:
+                sr = lst.find('ScriptReference')
+                if sr is not None:
+                    script_id   = sr.get('id', '0')
+                    script_name = sr.get('name', '')
+                else:
+                    # Specified: By name — script name is a calculation
+                    by_name_calc = get_calc_text(lst)
+        elif ptype == 'Parameter':
+            inner = p.find('Parameter')
+            if inner is not None:
+                param_calc = get_calc_text(inner)
+
+    parts = [f'{S}<Step enable="{enable}" id="{sid}" name="Perform Script on Server">']
+    if by_name_calc:
+        parts += [
+            f'{L1}<Calculated>',
+            f'{L2}<Calculation>{cdata(by_name_calc)}</Calculation>',
+            f'{L1}</Calculated>',
+        ]
+    parts.append(f'{L1}<WaitForCompletion state="{wait}"/>')
+    if param_calc:
+        parts.append(f'{L1}<Calculation>{cdata(param_calc)}</Calculation>')
+    if script_id is not None:
+        parts.append(f'{L1}<Script id="{script_id}" name="{escape_attr(script_name)}"/>')
+    parts.append(f'{S}</Step>')
+    return '\n'.join(parts)
+
+
+def tx_revert_transaction(step) -> str:
+    enable, sid = step_attrs(step)
+    option        = 'False'
+    cond_calc     = ''
+    err_code_calc = ''
+    err_msg_calc  = ''
+
+    for p in all_params(step):
+        ptype = p.get('type', '')
+        if ptype == 'Boolean':
+            b = p.find('Boolean')
+            # Boolean type="Condition" (id 256) → <Option state>.
+            # Boolean type="Error Code" (id 512) has no element of its own:
+            # the presence of <ErrorCode>/<ErrorMessage> wrappers carries it.
+            if b is not None and b.get('type') == 'Condition':
+                option = b.get('value', 'False')
+        elif ptype == 'Condition':
+            cond_calc = get_calc_text(p)
+        elif ptype == 'ErrorCode':
+            err_code_calc = get_calc_text(p)
+        elif ptype == 'ErrorMessage':
+            err_msg_calc = get_calc_text(p)
+
+    parts = [
+        f'{S}<Step enable="{enable}" id="{sid}" name="Revert Transaction">',
+        f'{L1}<Option state="{option}"/>',
+    ]
+    for wrapper, calc in (
+        ('Condition', cond_calc),
+        ('ErrorCode', err_code_calc),
+        ('ErrorMessage', err_msg_calc),
+    ):
+        if calc:
+            parts += [
+                f'{L1}<{wrapper}>',
+                f'{L2}<Calculation>{cdata(calc)}</Calculation>',
+                f'{L1}</{wrapper}>',
+            ]
+    parts.append(f'{S}</Step>')
+    return '\n'.join(parts)
+
+
 def tx_insert_from_url(step) -> str:
     enable, sid = step_attrs(step)
     no_interact = 'True'
@@ -1779,6 +1901,9 @@ TRANSLATORS = {
     'Insert Calculated Result': tx_insert_calculated_result,
     'Insert Text':             tx_insert_text,
     'Insert from URL':         tx_insert_from_url,
+    'Open Transaction':        tx_open_transaction,
+    'Revert Transaction':      tx_revert_transaction,
+    'Perform Script on Server': tx_perform_script_on_server,
     'Open URL':                tx_open_url,
     'Go to Object':            tx_go_to_object,
     'Go to Related Record':    tx_go_to_related_record,
