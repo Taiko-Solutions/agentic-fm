@@ -18,7 +18,15 @@ if ! REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
 fi
 
 HOOKS_SRC="$REPO_ROOT/agent/scripts/hooks"
-HOOKS_DST="$REPO_ROOT/.git/hooks"
+
+# Resolver el directorio git COMÚN (soporta git worktrees, donde .git es un
+# fichero puntero y los hooks viven en el .git del repo principal).
+GIT_COMMON_DIR="$(git rev-parse --git-common-dir 2>/dev/null || echo "$REPO_ROOT/.git")"
+case "$GIT_COMMON_DIR" in
+    /*) : ;;                                   # ya es absoluto
+    *) GIT_COMMON_DIR="$REPO_ROOT/$GIT_COMMON_DIR" ;;  # relativo al cwd del repo
+esac
+HOOKS_DST="$GIT_COMMON_DIR/hooks"
 
 if [ ! -d "$HOOKS_SRC" ]; then
     echo "❌ No se encuentra $HOOKS_SRC"

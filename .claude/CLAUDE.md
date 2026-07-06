@@ -195,160 +195,31 @@ The developer always works in **human-readable (HR) script format**. The agent's
 - The `selfClosing` flag in the catalog indicates `<Step ... />` vs `<Step ...>...</Step>`.
 - XML comments within snippet_examples are for reference only — never include them in output.
 
-> **CRITICAL — Parameter element names must match the catalog/snippet_example exactly**
+> **CRITICAL — Param fidelity is machine-enforced by fmlint (X001–X003)**
 >
-> FileMaker **silently discards** child elements whose tag name does not match what the step parser expects. The step is imported successfully, but the parameter quietly falls back to its default value. Common bugs:
+> FileMaker **silently discards** param child elements whose tag doesn't match what the step expects — the step imports fine but the parameter falls back to its default. fmlint's param-fidelity rules (`agent/fmlint/rules/param_fidelity.py`) validate every `<Step>` against the catalog's `params[].xmlElement` and `discriminator`, so **running `python3 -m agent.fmlint` (mandatory step 6) catches this class mechanically**:
 >
-> - ❌ `<Step ... name="Set Error Capture"><State state="True"/></Step>` — wrong tag, parameter ignored → `Set Error Capture` ends up OFF (default).
-> - ✅ `<Step ... name="Set Error Capture"><Set state="True"/></Step>` — matches catalog's `xmlElement: "Set"`.
+> | Trap | Rule |
+> |---|---|
+> | Unknown param element — e.g. `<State>` on Set Error Capture (must be `<Set>`); `<Option>`/`<ExitAfterLast>` on Go to Record (must be `<RowPageLocation>`/`<Exit>`) | X001 |
+> | Param without its discriminator — e.g. `<Layout>` without `<LayoutDestination>` on Go to Layout / New Window → FM silently ignores the layout ref | X002 |
+> | `Style="Card"` without the `Styles` bitmask (opens as Document; use `Styles="3222339600"`) · `<FileReference>` nested inside `<Script>` or missing `<UniversalPathList>` (cross-file ref doesn't resolve) | X003 |
 >
-> Same rule applies to `Allow User Abort` (also uses `<Set state="…"/>`) and any other step with boolean parameters. **Always check the step's snippet_example file** (`agent/snippet_examples/steps/<category>/<Step Name>.xml`) or the catalog's `params[].xmlElement` before hand-writing a step. If the param element is named something unexpected, mirror it verbatim.
+> Full examples and correct forms: `agent/docs/taiko/knowledge/silent-discard-params.md`.
 
-> **CRITICAL — `Go to Layout` has its own param structure**
+> **CRITICAL — `List()` must end with a `""` terminator (Taiko convention)**
 >
-> Not `ByName`/`Animation`/`Calculation` flat. The step id is `6`, and the destination enum is `LayoutDestination`:
->
-> ```xml
-> <!-- Layout by literal name from list -->
-> <Step enable="True" id="6" name="Go to Layout">
->   <LayoutDestination value="SelectedLayout"/>
->   <Layout id="28" name="Clientes"/>
-> </Step>
->
-> <!-- Layout by name calculated at runtime -->
-> <Step enable="True" id="6" name="Go to Layout">
->   <LayoutDestination value="LayoutNameByCalc"/>
->   <Layout>
->     <Calculation><![CDATA[$LayoutName]]></Calculation>
->   </Layout>
-> </Step>
->
-> <!-- Return to the layout where the script started -->
-> <Step enable="True" id="6" name="Go to Layout">
->   <LayoutDestination value="OriginalLayout"/>
-> </Step>
-> ```
->
-> Prefer `OriginalLayout` over capturing `Get(LayoutName)` at the start and restoring it manually.
+> `List ( "x" )` with a single argument throws a parser error on paste (the calc ends up commented out `/*…*/`). Always terminate: `List ( "accion" ; "" )`. Apply uniformly in `$REQUIRED` lists and calls inside `error.CreateVarsFromKeys` / `error.ThrowIfMissingParam` / `error.ThrowIfMissingVar`.
 
-> **CRITICAL — `New Window` with `Style="Card"` requires the `Styles` bitmask attribute**
+> **CRITICAL — Internal layout `name` ≠ exported filename**
 >
-> Without the `Styles="…"` attribute, FileMaker ignores `Style="Card"` and opens the window as `Document` regardless of the other style flags (`DimParentWindow`, `Toolbars`, `MenuBar`, `Close`, `Minimize`, `Maximize`, `Resize`). The `Styles` attribute is a bitmask that encodes the same flags numerically and is what FM actually reads.
->
-> - ❌ `<NewWndStyles DimParentWindow="Yes" Toolbars="No" MenuBar="No" Style="Card" Close="Yes" Minimize="No" Maximize="No" Resize="No"/>` — opens as **Document**, not Card.
-> - ✅ `<NewWndStyles DimParentWindow="Yes" Toolbars="No" MenuBar="No" Style="Card" Close="Yes" Minimize="No" Maximize="No" Resize="No" Styles="3222339600"/>` — opens as **Card**.
->
-> Known `Styles` values observed in the wild:
-> - `3222339600` — Card with DimParentWindow=Yes, Toolbars=No, MenuBar=No, Close=Yes, Minimize=No, Maximize=No, Resize=No.
-> - `3222274064` — Card with DimParentWindow=Yes, Toolbars=No, MenuBar=No, Close=No, Minimize=No, Maximize=No, Resize=No (forces user to use Cancel/Save buttons; no chrome close).
-> - `3606018` — Document with Close=Yes, Minimize=Yes, Maximize=Yes, Resize=Yes.
->
-> When copying the pattern for a new Card selector, reuse `Styles="3222339600"` verbatim unless the window flags actually differ.
-
-> **CRITICAL — `Go to Record/Request/Page` uses `<RowPageLocation>` and `<Exit>`**
->
-> The parameters of step id=16 are **NOT** what the HR syntax suggests. The common-sense tag names `<Option value="First"/>` and `<ExitAfterLast state="True"/>` are **silently discarded** by FM — the step imports successfully but with **no parameters**, producing a Go to Record that effectively does nothing. The loops that depend on it go either infinite or iterate only once without advancing.
->
-> The correct child elements are:
->
-> - `<RowPageLocation value="First|Last|Previous|Next|By Calculation"/>` — **NOT** `<Option>`.
-> - `<Exit state="True|False"/>` — for the "Exit after last" flag. **NOT** `<ExitAfterLast>`.
-> - `<NoInteract state="True|False"/>` — for "With dialog: off".
->
-> ```xml
-> <!-- First record, no dialog -->
-> <Step enable="True" id="16" name="Go to Record/Request/Page">
->   <NoInteract state="True"/>
->   <RowPageLocation value="First"/>
-> </Step>
->
-> <!-- Next record, exit loop after last -->
-> <Step enable="True" id="16" name="Go to Record/Request/Page">
->   <NoInteract state="True"/>
->   <Exit state="True"/>
->   <RowPageLocation value="Next"/>
-> </Step>
-> ```
->
-> The symptom is invisible to fmlint (the step validates fine at the XML schema level) and only manifests at runtime or via visual inspection in FM Pro (you see the step with no parameters in the Script Workspace). Always verify against `agent/snippet_examples/steps/navigation/Go to Record-Request-Page.xml` or grep the step catalog for the exact `xmlElement` names before emitting this step.
-
-> **CRITICAL — `Perform Script` cross-file requires `<FileReference>` sibling with `<UniversalPathList>`**
->
-> When a `Perform Script` (step id 1) calls a script in another FileMaker file, the `<FileReference>` element must be a **sibling** of `<Calculation>` and `<Script>` — NOT nested inside `<Script>`. It also requires a `<UniversalPathList>` child element with the value `file:<FilenameWithoutExtension>`.
->
-> - ❌ Wrong (nested inside `<Script>`, no UniversalPathList) — FM imports the step but the script reference does not resolve ("guión desconocido" in Script Workspace):
->   ```xml
->   <Step enable="True" id="1" name="Perform Script">
->     <Calculation><![CDATA[$param]]></Calculation>
->     <Script id="1363" name="ContactosClientes | Alta Modificar ContactoCliente {json}">
->       <FileReference id="10" name="Controlador"/>
->     </Script>
->   </Step>
->   ```
-> - ✅ Correct (sibling with UniversalPathList):
->   ```xml
->   <Step enable="True" id="1" name="Perform Script">
->     <FileReference id="10" name="Controlador">
->       <UniversalPathList>file:Borneo-Controller</UniversalPathList>
->     </FileReference>
->     <Calculation><![CDATA[$param]]></Calculation>
->     <Script id="1363" name="ContactosClientes | Alta Modificar ContactoCliente {json}"/>
->   </Step>
->   ```
->
-> The `FileReference id` and `name` match the external data source entry in the caller file (visible in **File > Manage > External Data Sources…**). The `UniversalPathList` payload is `file:<basename>` where `<basename>` is the external file's name without `.fmp12`. For same-file `Perform Script`, omit the `<FileReference>` entirely — just `<Calculation>` + `<Script>`.
->
-> fmlint does not catch this: the XML is schema-valid and deploys via MBS; the symptom is purely runtime (the script reference shows as unknown in FM Pro).
-
-> **CRITICAL — `List()` requires at least two arguments**
->
-> FileMaker's `List ( value1 ; value2 ; … )` function throws a parser error when invoked with a single argument. The Taiko convention is to **always terminate the argument list with `""`** even when only one real value is needed:
->
-> - ❌ `List ( "action" )` — parser error, calculation shows `/*List ( "action" )*/` (commented-out) after paste.
-> - ✅ `List ( "action" ; "" )` — one-element list with an empty terminator.
-> - ✅ `List ( "modo" ; "returnScript" ; "" )` — multi-element list with the same terminator pattern for consistency.
->
-> The trailing empty string is idempotent (an empty line is appended but later consumed by `error.ThrowIfMissingParam` which only checks non-empty entries). Apply this terminator uniformly in `$REQUIRED` lists and any `List ( … )` call inside `error.CreateVarsFromKeys` / `error.ThrowIfMissingParam` / `error.ThrowIfMissingVar`.
-
-> **CRITICAL — `New Window` requires explicit `<LayoutDestination>` before `<NewWndStyles>`**
->
-> Without `<LayoutDestination value="SelectedLayout"/>` (or `LayoutNameByCalc`, etc.) as the **first** child of the Step, FM defaults to `CurrentLayout` and **silently ignores** the `<Layout id name>` even when present and well-formed. The sanitized output shows `Layout: ""` (empty). Same gotcha as `Go to Layout`. Apply at the very top of the Step, before `<NewWndStyles>`:
->
-> ```xml
-> <Step enable="True" id="122" name="New Window">
->   <LayoutDestination value="SelectedLayout"/>
->   <NewWndStyles .../>
->   <Name><Calculation><![CDATA["..."]]></Calculation></Name>
->   <Layout id="X" name="LayoutNameReal"/>
-> </Step>
-> ```
-
-> **CRITICAL — Layout `name` attribute uses ONE underscore even if filename uses TWO**
->
-> The internal layout `name` may differ from the path FM's exporter writes to `xml_parsed/`. Example: the exporter writes `Utility__Peticiones - ID 295.xml` (TWO underscores) but the layout's actual internal `name` is `Utility_Peticiones` (ONE underscore). Mismatched names produce silent failures everywhere they appear:
->
-> - In fmxmlsnippet `<Layout name="..."/>` — FM may not resolve the layout reference.
-> - In **runtime calculations** like `Get(LayoutName)` checks, button params (`layoutVolver`), or `Go to Layout [by name]` — the comparison fails and execution falls through silently.
->
-> Verify against `agent/context/<solution>/layouts.index` — the **first column** is the real internal `name`:
->
-> ```
-> Utility_Peticiones|295|Utility_Peticiones|1065559|Utilities
-> ```
->
-> Always use the first column in `<Layout name="..."/>` and in any runtime literal that compares to a layout name. Prefer `Get ( LayoutName )` over hardcoded literals — it's resilient to renames and avoids this class of bug entirely.
->
-> Real-world manifestation in 944.9 (Borneo): the Broker selector's `layoutVolver` was hardcoded to `"Utility__Peticiones"` (two underscores). After selecting a broker, `Go to Layout` failed silently → user got stuck on the SelectorClientesNuevo layout with the back button apparently dead. Fix: use `Get ( LayoutName )` instead of literals.
+> The exporter may write `Utility__Peticiones - ID 295.xml` (TWO underscores) when the layout's internal `name` is `Utility_Peticiones` (ONE). Mismatches fail silently in `<Layout name>` refs AND in runtime literals (`Get(LayoutName)` checks, button params). Always verify against the **first column** of `agent/context/<solution>/layouts.index`, and prefer `Get ( LayoutName )` over hardcoded literals. (Real case: Borneo 944.9, dead back button.)
 
 > **CRITICAL — Utility shadow `AsJSON` calc must use storage `Global`, not unstored**
 >
-> The Taiko Utility pattern stores shadow data in **global** fields and exposes them as `<Tabla>::AsJSON`. **`AsJSON` itself must also be a global storage calc** — not a normal unstored calc. Otherwise it evaluates in the context of the *current layout's table occurrence*, and **returns `{}` when consumed from a different layout** (e.g. a Utility_Contactos shadow read from a Utility_Peticiones card).
->
-> Symptom: shadow fields visibly contain values in the input layout, but `<TablaUtility>::AsJSON` returns `{}` from any other context. The Manager merges `{}`, the Controller's `IsEmpty` checks pass through unexpectedly, and downstream `error.ThrowIfMissingParam` fires on fields that "should be there".
->
-> Fix in FM: open `Manage Database` → field → **Storage Options** → check **"Use global storage"**. Apply to **every Utility's AsJSON field** uniformly.
->
-> Discovered in 944.9 (Borneo) when refactoring Utility_Peticiones to delegate sub-objects (`contacto`, `contactoCliente`) to Utility_Contactos and Utility_ContactosClientes. The bug looked like a Manager merge issue but was actually the AsJSON storage type. Document affected files in 01-Decisiones-Tomadas.md of any solution applying this pattern.
+> As a normal unstored calc, `AsJSON` evaluates in the current layout's TO context and **returns `{}` when read from another layout** — the Manager merges `{}` and downstream checks pass through silently. Fix in FM: Manage Database → field → Storage Options → **"Use global storage"**, uniformly on **every** Utility's AsJSON field. (Discovered in Borneo 944.9; document affected files in the solution's 01-Decisiones-Tomadas.md.)
+
+
 
 # Core workflow
 
