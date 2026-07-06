@@ -18,7 +18,16 @@ python3 agent/scripts/companion_server.py
 
 # Custom port
 python3 agent/scripts/companion_server.py --port 9000
+
+# Auto-shut down after 45 minutes (2700s) with no requests
+python3 agent/scripts/companion_server.py --idle-timeout 2700
 ```
+
+### Idle auto-shutdown
+
+By default the server runs until you stop it (`Ctrl-C`, `launchctl unload`, etc.). Pass `--idle-timeout <seconds>` (or set the `COMPANION_IDLE_TIMEOUT` environment variable) to have it wind down on its own after a stretch with no requests. This is handy when the server is started per work session — a launchd job at login, or a Claude Code `SessionStart` hook — and you'd rather it not sit resident overnight.
+
+A value of `0` (the default) disables auto-shutdown, so existing always-on setups are unaffected. Any incoming request resets the timer, so the server never stops mid-task.
 
 Startup log output:
 

@@ -67,6 +67,22 @@ python3 agent/scripts/check_embedded_agfm.py
 
 It compares the embedded objects (from `agent/xml_parsed/`) against the bundled reference and reports `OK` / `STALE` / `MISSING` per object. If it finds any `STALE` or `MISSING` object, notify the user that the solution's embedded agentic-fm code is out of date and should be re-deployed from `filemaker/`. It exits `0` and prints "nothing to check" when no solution is exploded — in that case, skip silently. Do this **once per session**.
 
+## Plug-in detection (optional enhancement)
+
+Also at session start, ask the companion server whether the optional AgenticFM plug-in is present and **usable**. The companion is the single detection broker — one call answers it:
+
+```bash
+curl -s --max-time 5 http://local.hub:8765/health
+```
+
+Read the `plugin` block in the response:
+
+- `plugin.usable == true` — the plug-in is installed, reachable, **and** licensed (`status ∈ {active, trial}`). Read `agent/docs/PLUGIN_INTEGRATION.md` and enter **plugin-preferred mode**: prefer the plug-in for understanding/context, authoring, validation, and install, with the OSS path as the fallback (full routing table in that doc).
+- `plugin.installed == true` but `usable == false` — installed but the license/trial has lapsed or the server is down. Stay on the **pure OSS path**. At most **once per session**, you may surface the gentle lapsed-license nudge described in `PLUGIN_INTEGRATION.md` (§10.4). Never block or degrade the OSS workflow.
+- block absent / `installed == false` / companion unreachable — pure OSS path, no nudge.
+
+Gate on `usable`, never on `installed`. Do this **once per session**, not per prompt. If the check fails for any reason, skip it silently and continue — the OSS workflow never depends on the plug-in.
+
 # Local development context
 
 If `PROJECT.md` exists at the project root, read it at session start. It contains local-only context: meta-project notes, toolchain details, and `external_tools/` documentation. Its absence is normal — it is gitignored and will not be present in collaborator environments.
