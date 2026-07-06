@@ -13,13 +13,13 @@ Herramientas del servidor MCP `proofkit-mcp`, para preguntas **concretas y fresc
 - **`layout_metadata`** — campos/portales que **un** layout expone ahora (ideal para verificar drift de ese layout, y schema discovery para apps web).
 - **`table_metadata`, `get_relation_info`, `get_value_list_info`, `get_script_names`** — metadatos puntuales.
 - **`get_filemaker_ddl_schema`** — DDL, pero **solo de las TOs seleccionadas** (no de toda la solución).
-- **`data_api_orchestrator`** — CRUD con validación de campos contra layout (cuidado con permisos; cruza al lado "hacer").
+- **`data_api_orchestrator`** — CRUD sobre la Data API. Opera **por layouts**, que **acotan** los campos disponibles; la validación de esquema es en cliente (zod sobre el resultado), no una comprobación previa de campos. Cuidado con permisos; cruza al lado "hacer".
 - **`display_erd_diagram`** — ERD interactivo a partir de TOs.
 - **`get_fm_mcp_guide`** — guía oficial (`overview` / `tool-catalog` / `workflows` / `troubleshooting`).
 
 ## Límites reales (lo que NO debe hacer)
 
-ProofKit MCP tiene límites en la **introspección de estructura** y, en soluciones grandes, **hace timeout**. Caso real: **Bendita** (solución muy grande).
+ProofKit MCP tiene límites en la **introspección de estructura** y, en soluciones grandes, **hace timeout** (**observación de campo Taiko** — caso **Bendita**, solución muy grande; **no** documentado por ProofKit, pero contrastado en la práctica).
 
 - ❌ **No** lo uses para volcar estructura **completa/amplia** de una solución grande.
 - ❌ **No** pidas DDL de muchas TOs a la vez — selecciona las que necesitas.
@@ -39,11 +39,25 @@ El guide oficial distingue dos modos y **no mezclar herramientas**:
 ## Ciclo de vida y seguridad
 
 - **Reconexión tras reiniciar FileMaker.** `connectedFiles` devuelve `[]` hasta correr de nuevo *"Connect to MCP"*; no hay auto-reconexión. Diagnóstico: `curl -s http://localhost:1365/connectedFiles`.
-- **Enhanced Security.** Con seguridad reforzada activada, una conexión nueva pide aprobación temporal (por sesión y archivo, idle hasta 1 h). Por defecto el connector puede venir con *Enhanced Security: off* — cualquier proceso local que alcance el puerto hereda acceso. En máquinas compartidas o de cliente, **valora activar la aprobación explícita**.
+- **Seguridad del connector.** *(Observación / doc del plugin — la doc pública de ProofKit no describe un "Enhanced Security"; su modelo documentado es la **seguridad heredada de FileMaker**: cuentas, privilegios y reglas de acceso.)* Empíricamente, una conexión nueva puede pedir aprobación temporal (por sesión y archivo); por defecto el connector puede venir sin aprobación explícita, y cualquier proceso local que alcance el puerto hereda acceso. En máquinas compartidas o de cliente, **valora activar la aprobación explícita**.
 
 ## Relación con el sistema de contexto
 
 ProofKit MCP **no sustituye** a `CONTEXT.json` ni al explode: los **complementa** con frescura. `CONTEXT.json` sigue siendo la fuente scoped lista-para-pegar; el explode, la estructura completa. MCP entra para confirmar el estado **vivo** de un punto concreto sin re-exportar todo.
+
+## Reparto con el plug-in AgenticFM (si está `usable`)
+
+Desde la incorporación de la capa de plug-in comercial **AgenticFM** (detección en `AGENTS.md` → *Plug-in detection*; routing en [../../PLUGIN_INTEGRATION.md](../../PLUGIN_INTEGRATION.md)) hay **dos** capas de acceso en vivo. No compiten: se reparten por dominio.
+
+- **Plug-in AgenticFM = "lógica viva".** Entender scripts/refs/impacto, resolver IDs/contexto de autoría, HR→XML, validar cálculos, instalar/ejecutar/depurar scripts. Vía preferente **de la parte de autoría** cuando `plugin.usable == true`.
+- **ProofKit MCP = "datos + web vivo".** Valores/SQL, metadata de esquema (layout/table/relation/DDL/ERD) y Data API para construir la UI web. El plug-in **no** toca este dominio (`PLUGIN_INTEGRATION.md` no menciona Data API, OData ni web viewer).
+
+**Dos gatings independientes al arrancar**, que no se solapan:
+
+- `connectedFiles` → habilita ProofKit (Vía 1 MCP + Vía 3 Web Viewer).
+- companion `/health` → `plugin.usable` → habilita el plug-in AgenticFM.
+
+Una sesión puede tener uno, otro, ambos o ninguno. Regla práctica: *"¿dónde se usa este script / qué se rompe si renombro X?"* → plug-in (o `trace.py`/explode); *"¿qué datos hay / ERD / SQL / construir vista web?"* → ProofKit.
 
 ## Prerequisito de instalación (para que "viaje" con la rama)
 

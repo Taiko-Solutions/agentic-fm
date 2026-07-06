@@ -17,7 +17,7 @@
 |---|---|
 | **typegen** (`@proofkit/typegen`) | Genera esquema TS + cliente por cada layout — una "foto" congelada de los campos del layout. Regenerar tras tocar campos. |
 | **esquema zod** | Contrato estricto que valida los datos en runtime; si falta un campo, **rechaza toda la lectura**. |
-| **bridge** | Servicio local HTTP+WebSocket (`localhost:1365`) que une Web Viewer y FileMaker. Mismo puente que la Vía 1. |
+| **bridge** | En **desarrollo** (`fmBridge` / FM MCP daemon): servicio local HTTP+WebSocket en `localhost:1365` (mismo daemon que la Vía 1). En **runtime desplegado** (Web Viewer dentro de FM) **no hay puerto ni socket**: la ida-vuelta es `FileMaker.PerformScriptWithOption` + *Perform JavaScript in Web Viewer* (callback), en proceso. |
 | **fmFetch + callback** | La petición sale por `fmFetch`; el resultado vuelve por *Perform JavaScript in Web Viewer*. La promesa solo resuelve cuando vuelve el callback. |
 
 **Frase clave:** la mayoría de los fallos viven en la frontera **fmFetch / callback / validación de esquema**. Cuando algo falle, sospecha de aquí — **no** de "la red". El síntoma típico (spinner infinito) casi nunca es un problema de red real.
@@ -28,4 +28,4 @@ React + TypeScript + Vite + Tailwind + shadcn/ui + TanStack Query + TypeGen. Ver
 
 ## Estado y procedencia
 
-Vía 3 estuvo **aparcada** por la fragilidad del puente (field report de **Eikonsys — Ibrahim Bittar**, 2026-06-16, sobre una solución de 1.300+ layouts). **Ahora está reactivada como motor web por defecto**, pero se construye **con guardarraíles**: los 11 hallazgos son de aplicación obligatoria. Ver [gotchas.md](gotchas.md), [troubleshooting.md](troubleshooting.md) y [conventions.md](conventions.md).
+Vía 3 estuvo **aparcada** por la fragilidad del puente (field report de **Eikonsys — Ibrahim Bittar**, 2026-06-16, sobre una solución de 1.300+ layouts). **Ahora está reactivada como motor web por defecto**, pero se construye **con guardarraíles**: los hallazgos de [gotchas.md](gotchas.md) son de aplicación obligatoria. Ver [gotchas.md](gotchas.md), [troubleshooting.md](troubleshooting.md) y [conventions.md](conventions.md).

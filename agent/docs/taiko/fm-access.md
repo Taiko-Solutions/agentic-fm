@@ -9,7 +9,7 @@ agentic-fm accede a FileMaker por **tres vías independientes**. No son variante
 |-----|----------------------|-------------|--------|
 | **1 · ProofKit MCP** | "¿Qué hay AHORA en el archivo?" (ver, en vivo) | servidor MCP `proofkit-mcp` (bridge `localhost:1365`) | **Primaria** para frescura/verificación puntual → [proofkit/mcp-connector.md](proofkit/mcp-connector.md) |
 | **2 · OData** | "Haz / cambia / automatiza esto" | FMS OData + `AGFMScriptBridge`; skills `schema-build`, `data-migrate`, `data-seed` | En uso |
-| **3 · ProofKit Web Viewer** | "Construye una UI web dentro de FileMaker" | `@proofkit/webviewer` + `fmdapi` + `typegen` | **Activa — motor web por defecto** (con guardarraíles) → [proofkit/webviewer-build.md](proofkit/webviewer-build.md) |
+| **3 · ProofKit Web Viewer** | "Construye una UI web dentro de FileMaker" | `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen` | **Activa — motor web por defecto** (con guardarraíles) → [proofkit/webviewer-build.md](proofkit/webviewer-build.md) |
 
 > ⚠️ La "Web Viewer ProofKit" (Vía 3) **no** es el webviewer/editor Monaco de agentic-fm. Para ese, ver `agent/docs/` del webviewer embebido.
 
@@ -25,6 +25,19 @@ ProofKit (MCP y Web Viewer) requiere el plugin instalado en el archivo **y** el 
 - Falla/lanza → el plugin no está cargado: cae a la vía estática (explode/CONTEXT.json) y avisa.
 
 **Nunca bloquees el trabajo por ausencia de ProofKit.** Si no está conectado, el flujo OSS de agentic-fm (explode, CONTEXT.json, OData) sigue siendo suficiente.
+
+---
+
+## Otra capa viva: el plug-in AgenticFM (no confundir con ProofKit)
+
+Desde la actualización que incorpora la capa de plug-in comercial **AgenticFM** (detección en `AGENTS.md` → *Plug-in detection*; routing completo en [../PLUGIN_INTEGRATION.md](../PLUGIN_INTEGRATION.md)) hay **dos** mecanismos de acceso en vivo, con **gatings independientes** y dominios disjuntos:
+
+| Capa viva | Gating | Dominio | Preferente para |
+|---|---|---|---|
+| **Plug-in AgenticFM** | companion `/health` → `plugin.usable` | **Lógica / autoría** | Entender scripts/refs/impacto, resolver IDs/contexto, HR→XML, validar cálculos, instalar/ejecutar scripts |
+| **ProofKit MCP** (Vía 1) | `connectedFiles` | **Datos + web** | Valores/SQL, metadata de esquema, ERD, Data API, construir UI web (Vía 3) |
+
+No compiten: el plug-in **no** toca Data API/OData/web viewer; ProofKit **no** edita scripts/esquema. Una sesión puede tener uno, otro, ambos o ninguno. Si ambos gatings fallan → flujo estático OSS (explode/CONTEXT.json/OData), sin bloquear.
 
 ---
 
@@ -57,7 +70,7 @@ Esto encaja **encima** del *Lookup decision tree* de agentic-fm (`CONTEXT.json` 
 
 ## Diseñar para reemplazar
 
-Todo esto es un **puente hasta que Claris publique su plugin avanzado definitivo**. Mantén el acceso OData tras un **wrapper Taiko fino**, para que cambiar `@proofkit/fmodata` → `fm-odata-client` → (futuro) Claris sea tocar **un archivo**, no cada herramienta.
+Todo esto es un **puente hasta que Claris publique su plugin avanzado definitivo**. Ya existe una capa de plug-in comercial **AgenticFM** que cubre la parte de **scripts/autoría** en vivo (ver arriba), pero **no** el dominio datos/web, que sigue siendo de ProofKit. Mantén el acceso a datos tras un **wrapper Taiko fino**, para que cambiar entre `@proofkit/fmdapi` (Data API) / `@proofkit/fmodata` (OData) → (futuro) plugin Claris sea tocar **un archivo**, no cada herramienta.
 
 ## Ficheros relacionados (repo)
 

@@ -29,6 +29,23 @@ Requiere `connectedFiles` con archivo conectado (Vía 1, [mcp-connector.md](mcp-
 
 Aplica el **checklist de arranque** de [conventions.md](conventions.md) desde el paso 4.
 
+## Rendimiento y agilidad (aprovéchalo — es lo que hace ágil el conjunto)
+
+- **Batching por defecto.** El `WebViewerAdapter` de `@proofkit/fmdapi` agrupa las lecturas Data API concurrentes (ventana ~16 ms) en una sola script call. **Dispara las lecturas juntas; no las serialices** — serializar mata el batching. Requiere **add-on ≥ 3.0**, `@proofkit/webviewer ≥ 3.2`, `@proofkit/fmdapi ≥ 5.2` (con versiones viejas cae al camino directo, sin batching, y va lento **sin error**).
+- **Paginación acotada.** `listAll()` / `findAll()` paginan con `read` acotado (nunca cargan found sets ilimitados en variables FM). **Tunea el tamaño de página** (25/50/100/250/500) según ancho de layout, portales y contenedores; en local suele pesar más que el batch.
+- **Detalle en 1 request.** Modela la pantalla de detalle como **una** lectura Data API que trae padre + líneas + relacionados vía relaciones, en vez de N lecturas.
+- **Initial props (pull).** Bootstrap fiable (usuario, record ID, ruta) pidiéndolo por `fmFetch` al montar; no lo inyectes por HTML ni desde `OnRecordLoad` (se pierde por carrera). Evita el flash de UI vacía.
+- **Caché con TanStack Query** (ya en el stack): dedupe, refresh en background e invalidación tras writes.
+- **Canal FM→WebViewer.** Además de `fmFetch` (WV→FM), tienes `initWebViewerCommands` / `callFMScript` (con `FMScriptOption`) para que FileMaker dispare funciones en la app.
+
+## Deploy: elige método según migraciones
+
+`deploy_html` usa por defecto **Embedded** (el código va como *dato* en el archivo FM). Trade-off Taiko relevante: **Embedded no sobrevive a una migración de datos** (importar datos a un archivo nuevo pierde el Web Viewer). Alternativas documentadas: **Store code in a script** (sobrevive migraciones), **Hosted** (servidor web) o **Downloaded** (híbrido self-updating), y un script post-deploy de OttoFMS. Decide según si la solución hace migraciones.
+
+## Ventaja de la Data API en Web Viewer (vs Vía 2 OData)
+
+La Data API vía `Execute Data API` **no requiere autenticación** (corre como el usuario logueado), **funciona offline** y **funciona aunque la Data API esté desactivada en el servidor**. Es un argumento fuerte para ProofKit como motor web por defecto frente a OData/Otto (Vía 2), que sí piden credenciales/servidor.
+
 ## Límite de ProofKit v2
 
 ProofKit v2 se centra **exclusivamente** en la codificación de apps Web Viewer. **No** edita scripts, tablas, campos, layouts ni value lists de FileMaker — eso es terreno de **agentic-fm** (autoría vía fmxmlsnippet / OData). Son complementarios: ProofKit construye la UI y lee/escribe datos; agentic-fm construye la lógica y el esquema.

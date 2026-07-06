@@ -26,6 +26,7 @@ Regla de oro: **agentic-fm autora, ProofKit ve y construye UI, Superpowers orden
 ### 3 · Implementar
 - Lógica / cálculos / esquema / menús → **agentic-fm** (convenciones Taiko, patrones Clew / 3 capas / transaccional).
 - Interfaz web → **ProofKit** (motor por defecto; skill `webviewer-build` solo como excepción).
+- **Rendimiento del conjunto:** deja que el `WebViewerAdapter` agrupe las lecturas (batching por defecto; **no** serialices), pagina acotado y tunea el tamaño de página. Detalle en [../proofkit/webviewer-build.md](../proofkit/webviewer-build.md) y [../proofkit/conventions.md](../proofkit/conventions.md).
 - Ambas partes pueden convivir en una misma funcionalidad: el script Controller (agentic-fm) + la vista (ProofKit) hablando por Data API/bridge.
 
 ### 4 · Verificar
@@ -52,6 +53,8 @@ Regla de oro: **agentic-fm autora, ProofKit ve y construye UI, Superpowers orden
 ## Gating y degradación elegante
 
 ProofKit (Vías 1 y 3) exige `connectedFiles` con archivo conectado. Si no está, **cae al flujo estático** (explode, CONTEXT.json, OData) sin bloquear. agentic-fm nunca depende de ProofKit para funcionar.
+
+**Dos gatings independientes.** Además de `connectedFiles` (ProofKit), la capa de plug-in comercial **AgenticFM** se gatea con companion `/health` → `plugin.usable` (routing en [../../PLUGIN_INTEGRATION.md](../../PLUGIN_INTEGRATION.md)). Se reparten por dominio — **plug-in = lógica/autoría viva; ProofKit = datos + web vivo** — y ambos degradan al flujo estático OSS si su gating falla. Nada bloquea.
 
 ## Ver también
 
