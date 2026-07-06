@@ -131,6 +131,8 @@ Multiple sources of context are available about the FileMaker solution. Always s
 
 **When CONTEXT.json does not exist or is stale**, ask the developer to navigate to the relevant layout in FileMaker and run the **Push Context** script. This script prompts for a task description, calls the `Context()` custom function, and writes the result directly to `agent/CONTEXT.json`.
 
+> **(Taiko) Refresh automatizable — intenta la vía agéntica antes de pedir el manual.** Si hay automatización disponible (bloque `odata` en `automation.json` para Tier 3, o companion activo para Tier 2), el agente puede refrescar el contexto él mismo: `python3 agent/scripts/refresh_context.py --task "…" [--layout X] [--yes]` — encadena `AGFMGoToLayout` + `Push Context` y espera el `CONTEXT.json` fresco. **Confirma SIEMPRE con el desarrollador antes de disparar** (regla de AUTOMATION.md; tras su OK, pasa `--yes`). El refresh manual queda como fallback si no hay vía o falla.
+
 ## Index files (secondary)
 
 `agent/context/{solution}/*.index` files are pipe-delimited lookup tables covering the entire solution. Use these when CONTEXT.json does not contain the needed object. Each file has a header comment documenting the column format.
