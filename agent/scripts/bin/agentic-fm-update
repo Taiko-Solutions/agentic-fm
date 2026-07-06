@@ -1,0 +1,89 @@
+#!/bin/bash
+# Actualizar runtime único del companion desde un repo agentic-fm
+# Uso:
+#   agentic-fm-update                 # usa el repo actual si es válido; si no, usa ~/GITs/agentic-fm
+#   agentic-fm-update /ruta/al/repo   # fuerza repo fuente
+
+set -euo pipefail
+
+RUNTIME="$HOME/Library/Application Support/agentic-fm-services/runtime"
+DEFAULT_REPO="$HOME/GITs/agentic-fm"
+SOURCE_REPO="${1:-}"
+
+is_valid_repo() {
+    local repo="$1"
+    [[ -f "$repo/version.txt" && -f "$repo/agent/scripts/companion_server.py" && -d "$repo/webviewer" ]]
+}
+
+if [[ -z "$SOURCE_REPO" ]]; then
+    if is_valid_repo "$PWD"; then
+        SOURCE_REPO="$PWD"
+    else
+        SOURCE_REPO="$DEFAULT_REPO"
+    fi
+fi
+
+SOURCE_REPO="${SOURCE_REPO/#\~/$HOME}"
+
+if ! is_valid_repo "$SOURCE_REPO"; then
+    echo "❌ Repo inválido: $SOURCE_REPO"
+    echo "Uso: agentic-fm-update /ruta/al/repo/agentic-fm"
+    exit 1
+fi
+
+if [[ -d "$SOURCE_REPO/.git" ]]; then
+    BRANCH="$(git -C "$SOURCE_REPO" branch --show-current 2>/dev/null || true)"
+    if [[ -n "$BRANCH" ]]; then
+        case "$BRANCH" in
+            proyecto)
+                echo "⚠️  Rama 'proyecto' detectada: arquitectura ANTIGUA (derogada)."
+                echo "   Migra el repo con el prompt del vault: Prompts/Actualizar-Repo-Existente."
+                echo "   Se omite git pull automático."
+                ;;
+            taiko)
+                echo "📥 Actualizando repo fuente (origin/taiko)..."
+                git -C "$SOURCE_REPO" pull --ff-only origin taiko || true
+                ;;
+            main)
+                echo "⚠️  Rama main detectada. Se omite git pull automático por política."
+                ;;
+            *)
+                echo "📥 Actualizando repo fuente ($BRANCH)..."
+                git -C "$SOURCE_REPO" pull --ff-only origin "$BRANCH" || true
+                ;;
+        esac
+    fi
+fi
+
+echo "🔄 Parando companion..."
+pkill -f "companion_server.py --port 8765" >/dev/null 2>&1 || true
+sleep 1
+
+echo "📦 Copiando $SOURCE_REPO → runtime (sin .git ni datos de cliente)..."
+rm -rf "$RUNTIME"
+mkdir -p "$RUNTIME"
+rsync -a \
+    --exclude '.git' \
+    --exclude 'agent/xml_parsed' \
+    --exclude 'agent/context' \
+    --exclude 'agent/CONTEXT.json' \
+    --exclude 'agent/sandbox' \
+    --exclude 'agent/config' \
+    --exclude 'xml_exports' \
+    --exclude 'node_modules' \
+    --exclude '.claude/worktrees' \
+    "$SOURCE_REPO/" "$RUNTIME/"
+
+echo "🚀 Arrancando companion..."
+BIND_HOST="${COMPANION_BIND_HOST:-127.0.0.1}"
+COMPANION_BIND_HOST="$BIND_HOST" nohup python3 "$RUNTIME/agent/scripts/companion_server.py" --port 8765 > /tmp/companion_server.log 2>&1 &
+sleep 2
+
+if curl -fsS http://127.0.0.1:8765/health >/dev/null 2>&1; then
+    echo "✅ Runtime actualizado desde: $SOURCE_REPO"
+    echo "   Versión runtime: $(cat "$RUNTIME/version.txt" 2>/dev/null || echo '?')"
+    echo "   Health: $(curl -fsS http://127.0.0.1:8765/health)"
+else
+    echo "❌ Error arrancando companion. Ver /tmp/companion_server.log"
+    exit 1
+fi

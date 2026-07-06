@@ -1,0 +1,69 @@
+#!/bin/bash
+# Arrancar servicios agentic-fm (companion + webviewer opcional)
+# Ejecutar manualmente al inicio de sesión de trabajo.
+#
+# Bind host — POLÍTICA LOCAL POR DEFECTO:
+#   El companion escucha en 127.0.0.1 (solo esta máquina). El modo
+#   FMS→companion (bind LAN/todas las interfaces) es OPT-IN: exporta
+#   COMPANION_BIND_HOST (p.ej. 0.0.0.0 o la IP LAN) antes de arrancar.
+#   Ver Guias-FM/Companion-Bind-LAN en el vault.
+#   El healthcheck local se hace siempre por 127.0.0.1.
+
+RUNTIME="$HOME/Library/Application Support/agentic-fm-services/runtime"
+REPO_BASE="$HOME/GITs/agentic-fm"
+CURRENT_REPO="$PWD"
+
+LISTEN_HOST="${COMPANION_BIND_HOST:-127.0.0.1}"
+HEALTH_HOST="127.0.0.1"
+HEALTH_URL="http://${HEALTH_HOST}:8765/health"
+
+is_valid_repo() {
+    local repo="$1"
+    [[ -f "$repo/version.txt" && -f "$repo/agent/scripts/companion_server.py" && -d "$repo/webviewer" ]]
+}
+
+if [[ ! -f "$RUNTIME/agent/scripts/companion_server.py" ]]; then
+    echo "❌ Runtime no encontrado en: $RUNTIME"
+    echo "   Ejecuta: agentic-fm-update /ruta/al/repo/agentic-fm"
+    exit 1
+fi
+
+
+# --- Companion Server ---
+if curl -s "$HEALTH_URL" > /dev/null 2>&1; then
+    echo "✅ Companion ya corriendo en :8765"
+    echo "   $(curl -s "$HEALTH_URL")"
+else
+    echo "🚀 Arrancando Companion Server en ${LISTEN_HOST}:8765..."
+    COMPANION_BIND_HOST="$LISTEN_HOST" nohup python3 "$RUNTIME/agent/scripts/companion_server.py" --port 8765 > /tmp/companion_server.log 2>&1 &
+    sleep 2
+    if curl -s "$HEALTH_URL" > /dev/null 2>&1; then
+        echo "✅ Companion arrancado: $(curl -s "$HEALTH_URL")"
+    else
+        echo "❌ Error arrancando companion. Ver /tmp/companion_server.log"
+    fi
+fi
+
+# --- Comprobar versión ---
+RUNNING_VERSION=$(curl -s "$HEALTH_URL" 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('version','?'))" 2>/dev/null)
+BASE_VERSION=$(cat "$REPO_BASE/version.txt" 2>/dev/null || echo "?")
+CURRENT_VERSION="?"
+if is_valid_repo "$CURRENT_REPO"; then
+    CURRENT_VERSION=$(cat "$CURRENT_REPO/version.txt" 2>/dev/null || echo "?")
+fi
+
+if [ "$RUNNING_VERSION" != "$CURRENT_VERSION" ] && [ "$CURRENT_VERSION" != "?" ]; then
+    echo "⚠️  Companion $RUNNING_VERSION — repo actual tiene $CURRENT_VERSION"
+    echo "   Ejecuta: agentic-fm-update \"$CURRENT_REPO\""
+elif [ "$RUNNING_VERSION" != "$BASE_VERSION" ] && [ "$BASE_VERSION" != "?" ]; then
+    echo "⚠️  Companion $RUNNING_VERSION — repo base tiene $BASE_VERSION"
+    echo "   Ejecuta: agentic-fm-update para actualizar runtime"
+fi
+
+echo ""
+echo "Servicios:"
+echo "  Companion (localhost): http://${HEALTH_HOST}:8765"
+if [[ "$LISTEN_HOST" != "127.0.0.1" ]]; then
+    echo "  Companion (bind opt-in): http://${LISTEN_HOST}:8765"
+fi
+echo "  Webviewer: cd [repo]/webviewer && npm run dev"

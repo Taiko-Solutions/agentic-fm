@@ -1,0 +1,94 @@
+#!/bin/bash
+# Validación manual de políticas antes de un push agentic-fm.
+#
+# Es la segunda red de seguridad (la primera es .gitignore, la tercera es el
+# hook pre-push global en .git/hooks/pre-push).
+#
+# Uso:
+#   agentic-fm-safe-push --check                    # valida sin empujar
+#   agentic-fm-safe-push --check <remote> <branch>
+#   agentic-fm-safe-push --execute                  # valida y empuja
+#   agentic-fm-safe-push --execute <remote> <branch>
+#
+# Política de ramas vigente:
+#   - main   : espejo de upstream, bloqueado para push manual
+#   - taiko  : push a origin (GitHub Taiko) — solo reglas, nunca datos
+#   - *      : feature branches, push a origin por defecto
+
+set -euo pipefail
+
+MODE="check"
+if [[ "${1:-}" == "--execute" ]]; then
+    MODE="execute"
+    shift
+elif [[ "${1:-}" == "--check" ]]; then
+    shift
+fi
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "❌ No estás dentro de un repositorio git."
+    exit 1
+fi
+
+BRANCH="${2:-$(git branch --show-current)}"
+REMOTE="${1:-}"
+
+if [[ -z "$BRANCH" ]]; then
+    echo "❌ No se pudo detectar la rama actual."
+    exit 1
+fi
+
+if [[ -z "$REMOTE" ]]; then
+    case "$BRANCH" in
+        main)
+            echo "❌ Push bloqueado: la rama main es espejo de upstream."
+            echo "   main solo se sincroniza con: git reset --hard upstream/main"
+            exit 1
+            ;;
+        taiko) REMOTE="origin" ;;
+        *)     REMOTE="origin" ;;
+    esac
+fi
+
+if ! git remote get-url "$REMOTE" >/dev/null 2>&1; then
+    echo "❌ Remoto no configurado: $REMOTE"
+    exit 1
+fi
+
+# Patrón de archivos que NUNCA deben versionarse en ningún git
+# (idéntico al del hook pre-push — agent/scripts/hooks/pre-push)
+FORBIDDEN_REGEX='^(xml_exports/|agent/xml_parsed/|agent/context/|agent/CONTEXT\.json$|agent/sandbox/.*\.xml$|agent/config/.*\.(json|md)$)'
+WHITELIST_REGEX='(\.example(\..*)?$|^agent/config/fmlint\.config\.json$|^agent/sandbox/script\.xml$)'
+
+detect_changed_files() {
+    local remote="$1"
+    local branch="$2"
+    if git show-ref --verify --quiet "refs/remotes/${remote}/${branch}"; then
+        git --no-pager diff --name-only "${remote}/${branch}...HEAD"
+    else
+        git --no-pager show --pretty="" --name-only HEAD
+    fi
+}
+
+CHANGED_FILES="$(detect_changed_files "$REMOTE" "$BRANCH")"
+
+# Validar que no hay contenido prohibido en ninguna rama
+FORBIDDEN_MATCHES="$(echo "$CHANGED_FILES" | grep -E "$FORBIDDEN_REGEX" 2>/dev/null | grep -vE "$WHITELIST_REGEX" 2>/dev/null || true)"
+if [[ -n "$FORBIDDEN_MATCHES" ]]; then
+    echo "❌ Push bloqueado en rama $BRANCH: archivos que NUNCA deben versionarse:"
+    echo "$FORBIDDEN_MATCHES" | sed 's/^/   /'
+    echo ""
+    echo "Regla: xml_parsed, CONTEXT.json, sandbox/*.xml, config/*.json, context/"
+    echo "       no se suben a ningún git (ni GitHub ni interno)."
+    echo "Backup del trabajo operativo → Time Machine local."
+    exit 1
+fi
+
+echo "✅ Política validada."
+echo "   Rama:   $BRANCH"
+echo "   Remoto: $REMOTE"
+echo "   Acción recomendada: git push $REMOTE $BRANCH"
+
+if [[ "$MODE" == "execute" ]]; then
+    git push "$REMOTE" "$BRANCH"
+fi
