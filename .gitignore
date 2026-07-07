@@ -177,3 +177,6 @@ $RECYCLE.BIN/
 # Git
 *.orig
 *.rej
+
+# Superpowers brainstorming (mockups locales)
+.superpowers/
