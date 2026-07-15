@@ -489,6 +489,15 @@ def main():
 
     args = parser.parse_args()
 
+    # Harden against PowerShell-string injection: the format prefix is
+    # interpolated into a single-quoted PS string, so restrict it to a safe
+    # charset — a stray "'" could otherwise break out of the string.
+    prefix = getattr(args, 'prefix', None)
+    if prefix is not None and not re.fullmatch(r'[A-Za-z0-9_-]*', prefix):
+        print("ERROR: --format-prefix may only contain letters, digits, '-' and '_'.",
+              file=sys.stderr)
+        sys.exit(1)
+
     if args.cmd == 'write':
         write_to_clipboard(args.input, args.cls, args.prefix)
     elif args.cmd == 'read':
