@@ -35,13 +35,23 @@ from socketserver import ThreadingMixIn
 # Constants
 # ---------------------------------------------------------------------------
 
+# Built-in defaults — the bottom of the resolution chain, used when neither a
+# CLI flag, an env var, nor companion.json supplies a value (so the server always
+# boots). See "Resolution precedence" in plans/COMPANION_CONFIG.md.
+DEFAULT_BIND_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
-BIND_HOST = os.environ.get("COMPANION_BIND_HOST", "127.0.0.1")
-REMOTE_VERSION_URL = "https://raw.githubusercontent.com/petrowsky/agentic-fm/main/version.txt"
-
+DEFAULT_ADVERTISE_HOST = "local.hub"
 # Idle auto-shutdown: seconds with no requests before the server exits.
 # 0 disables it (always-on) — the default, so existing behaviour is unchanged.
-DEFAULT_IDLE_TIMEOUT = int(os.environ.get("COMPANION_IDLE_TIMEOUT", "0"))
+DEFAULT_IDLE_TIMEOUT = 0
+REMOTE_VERSION_URL = "https://raw.githubusercontent.com/petrowsky/agentic-fm/main/version.txt"
+
+# Canonical companion config (agent/config/companion.json). Optional and gitignored;
+# absent/invalid → built-in defaults. It is the single source of truth for the
+# server's bind host/port and the address clients use to reach it.
+COMPANION_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "config", "companion.json"
+)
 
 # Read version from version.txt at the repo root
 def _read_local_version() -> str:
@@ -84,6 +94,11 @@ _pending_lock = threading.Lock()
 # plug-in. When the plug-in is absent or not usable, the block reports it and
 # the agent stays on the pure OSS path.
 
+# NOTE: intentionally a fixed macOS platform path, NOT configurable via companion.json.
+# It has exactly one correct value; only `~` varies, resolving to the macOS user running
+# the companion — which must be the same user running FileMaker + the plug-in. A relocated
+# or cross-user path is a deployment error to document, not a knob. See "Plug-in detection
+# scope" in plans/COMPANION_CONFIG.md.
 APP_SUPPORT_DIR = os.path.expanduser("~/Library/Application Support/AgenticFM")
 _PLUGIN_CACHE_TTL = 60.0  # seconds; plug-in's own license heartbeat is far slower
 _plugin_cache: dict = {}
@@ -1109,26 +1124,62 @@ def _check_for_updates():
         pass  # No network, rate-limited, etc. — fail silently
 
 
+def _first_int(*candidates) -> int:
+    """Return the first candidate coercible to int, skipping None/'' and bad values."""
+    for c in candidates:
+        if c is None or c == "":
+            continue
+        try:
+            return int(c)
+        except (TypeError, ValueError):
+            continue
+    return 0
+
+
+def _load_companion_config() -> dict:
+    """Read the `companion` block from agent/config/companion.json.
+
+    Fail-open: an absent file returns {} silently (the common case); an unreadable
+    or malformed file warns and returns {}. Either way built-in defaults apply and
+    the server still boots. Mirrors deploy.py's _load_config discipline.
+    """
+    try:
+        with open(COMPANION_CONFIG_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError) as exc:
+        log.warning("Could not read companion.json (%s) — using built-in defaults.", exc)
+        return {}
+    comp = data.get("companion") if isinstance(data, dict) else None
+    return comp if isinstance(comp, dict) else {}
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="agentic-fm companion server — exposes fmparse.sh over HTTP for FileMaker.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
+    # Defaults are None so an unset flag falls through to env/companion.json/default
+    # in main()'s resolution; passing the flag pins the value at the top of the chain.
     parser.add_argument(
         "--port",
         type=int,
-        default=DEFAULT_PORT,
-        help=f"Port to listen on (default: {DEFAULT_PORT})",
+        default=None,
+        help=(
+            "Port to listen on. Overrides COMPANION_PORT and companion.json "
+            f"(default: {DEFAULT_PORT})."
+        ),
     )
     parser.add_argument(
         "--idle-timeout",
         type=int,
-        default=DEFAULT_IDLE_TIMEOUT,
+        default=None,
         help=(
             "Seconds of inactivity before the server shuts itself down. "
-            f"0 disables auto-shutdown (always-on). Default: {DEFAULT_IDLE_TIMEOUT} "
-            "(override with COMPANION_IDLE_TIMEOUT)."
+            "0 disables auto-shutdown (always-on). Overrides COMPANION_IDLE_TIMEOUT "
+            f"and companion.json (default: {DEFAULT_IDLE_TIMEOUT})."
         ),
     )
     return parser.parse_args()
@@ -1148,12 +1199,27 @@ def _shutdown_cleanup(server):
 
 def main():
     args = parse_args()
-    port = args.port
-    idle_timeout = args.idle_timeout
+    comp = _load_companion_config()
 
-    server = ThreadingHTTPServer((BIND_HOST, port), CompanionHandler)
+    # Server-bind resolution (highest wins): CLI flag / env var → companion.json → default.
+    bind_host = (
+        os.environ.get("COMPANION_BIND_HOST")
+        or comp.get("bind_host")
+        or DEFAULT_BIND_HOST
+    )
+    port = _first_int(
+        args.port, os.environ.get("COMPANION_PORT"), comp.get("port"), DEFAULT_PORT
+    )
+    idle_timeout = _first_int(
+        args.idle_timeout, os.environ.get("COMPANION_IDLE_TIMEOUT"),
+        comp.get("idle_timeout_seconds"), DEFAULT_IDLE_TIMEOUT,
+    )
+    advertise_host = comp.get("advertise_host") or DEFAULT_ADVERTISE_HOST
 
-    log.info("companion_server v%s listening on %s:%d", VERSION, BIND_HOST, port)
+    server = ThreadingHTTPServer((bind_host, port), CompanionHandler)
+
+    log.info("companion_server v%s listening on %s:%d", VERSION, bind_host, port)
+    log.info("Clients reach it at http://%s:%d (advertise_host).", advertise_host, port)
     threading.Thread(target=_check_for_updates, daemon=True).start()
     if idle_timeout > 0:
         log.info("Idle auto-shutdown: %ds with no requests.", idle_timeout)
