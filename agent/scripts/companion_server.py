@@ -37,7 +37,7 @@ from socketserver import ThreadingMixIn
 
 # Built-in defaults — the bottom of the resolution chain, used when neither a
 # CLI flag, an env var, nor companion.json supplies a value (so the server always
-# boots). See "Resolution precedence" in plans/COMPANION_CONFIG.md.
+# boots). See "Resolution precedence" in agent/docs/COMPANION_SERVER.md.
 DEFAULT_BIND_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 DEFAULT_ADVERTISE_HOST = "local.hub"
@@ -97,8 +97,8 @@ _pending_lock = threading.Lock()
 # NOTE: intentionally a fixed macOS platform path, NOT configurable via companion.json.
 # It has exactly one correct value; only `~` varies, resolving to the macOS user running
 # the companion — which must be the same user running FileMaker + the plug-in. A relocated
-# or cross-user path is a deployment error to document, not a knob. See "Plug-in detection
-# scope" in plans/COMPANION_CONFIG.md.
+# or cross-user path is a deployment error to document, not a knob. See the plug-in
+# detection note in agent/docs/COMPANION_SERVER.md.
 APP_SUPPORT_DIR = os.path.expanduser("~/Library/Application Support/AgenticFM")
 _PLUGIN_CACHE_TTL = 60.0  # seconds; plug-in's own license heartbeat is far slower
 _plugin_cache: dict = {}

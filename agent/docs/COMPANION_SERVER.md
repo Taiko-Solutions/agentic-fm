@@ -48,7 +48,7 @@ Resolution precedence, highest wins:
 - **Server bind** — CLI flag (`--port`) / env var (`COMPANION_BIND_HOST`, `COMPANION_PORT`) → `companion.json` → defaults (`127.0.0.1:8765`).
 - **Client reach** — `COMPANION_URL` env → `companion.json` `advertise_host` + `port` → legacy `automation.json` `companion_url` (deprecation window) → default.
 
-The plug-in's Application Support path is deliberately **not** configurable here — it is a fixed macOS platform location. See "Plug-in detection scope" in `plans/COMPANION_CONFIG.md`.
+The plug-in's Application Support path is deliberately **not** configurable here — it is a fixed macOS platform location with one correct value, resolved against the macOS user running the companion (which must be the same user running FileMaker and the plug-in). A relocated or cross-user path is a deployment error to document, not a config knob.
 
 ### Idle auto-shutdown
 
