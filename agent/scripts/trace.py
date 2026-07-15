@@ -213,11 +213,23 @@ def build_cf_names(solution_name):
     cfs = []
     if not cf_dir.exists():
         return cfs
+    # rglob (not iterdir) so functions nested inside custom-function group
+    # folders (e.g. "Object Functions - ID 53/") are found, not missed.
     for f in cf_dir.rglob("*.txt"):
         # Parse "FuncName - ID NNN.txt"
         m = re.match(r'^(.+?)\s*-\s*ID\s+(\d+)\.txt$', f.name)
-        if m:
-            cfs.append({"name": m.group(1), "id": m.group(2), "path": f})
+        if not m:
+            continue
+        # Skip empty / whitespace-only stubs — these are custom-function group
+        # or folder headers (and separators like "--"), not real functions.
+        # Without this, their names get counted as CFs and then flagged as
+        # dead by the unused-CF scan.
+        try:
+            if not f.read_text(encoding="utf-8").strip():
+                continue
+        except OSError:
+            continue
+        cfs.append({"name": m.group(1), "id": m.group(2), "path": f})
     return cfs
 
 
@@ -383,21 +395,24 @@ def parse_scripts(solution_name, scripts_index, to_map, cf_names):
                 ))
 
             # --- Custom function references in expressions ---
-            if "[" in line or "]" in line:  # Catch both opening and continuation lines
-                for cf in cf_name_set:
-                    # Match CF name with parens (function call) or standalone (zero-param)
-                    pattern = re.compile(
-                        r'(?<![A-Za-z0-9_])'
-                        + re.escape(cf)
-                        + r'(?:\s*\(|(?![A-Za-z0-9_(]))'
-                    )
-                    if pattern.search(line):
-                        step_type = _extract_step_type(stripped)
-                        refs.append(XRef(
-                            "script", source_name,
-                            f"line {line_num}: {step_type}",
-                            "custom_func", cf, "",
-                        ))
+            # Scan every non-blank/non-comment line: a CF call need not contain
+            # "[" (e.g. `Set Variable [ $x ; SQLFieldName ( T::F ) ]` or a bare
+            # continuation line `_x = SQLFieldName( T::F ) ;`), so no bracket
+            # prefilter — it silently dropped real references.
+            for cf in cf_name_set:
+                # Match CF name with parens (function call) or standalone (zero-param)
+                pattern = re.compile(
+                    r'(?<![A-Za-z0-9_])'
+                    + re.escape(cf)
+                    + r'(?:\s*\(|(?![A-Za-z0-9_(]))'
+                )
+                if pattern.search(line):
+                    step_type = _extract_step_type(stripped)
+                    refs.append(XRef(
+                        "script", source_name,
+                        f"line {line_num}: {step_type}",
+                        "custom_func", cf, "",
+                    ))
 
     return refs
 
