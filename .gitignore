@@ -29,6 +29,7 @@ Prompt.md
 agent/library/
 agent/config/removals.json
 agent/config/automation.json
+agent/config/companion.json
 agent/config/modules.json
 agent/config/.autosave.json
 agent/config/.layout-prefs.json

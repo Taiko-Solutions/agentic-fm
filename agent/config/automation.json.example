@@ -1,4 +1,5 @@
 {
+  "_companion_url_note": "DEPRECATED — prefer agent/config/companion.json (companion.advertise_host + companion.port). companion_url is still honored here during the migration window; when companion.json is present it wins.",
   "default_tier": 1,
   "project_tier": 1,
   "auto_save": false,
