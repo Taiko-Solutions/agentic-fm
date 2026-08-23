@@ -66,7 +66,7 @@
       },
       {
         "xmlElement": "PrivilegeSet",
-        "type": "text",
+        "type": "reference",
         "hrLabel": "Privilege Set",
         "required": true
       },
