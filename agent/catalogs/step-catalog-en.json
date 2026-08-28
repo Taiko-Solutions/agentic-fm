@@ -7753,7 +7753,8 @@
         "type": "field",
         "hrLabel": null,
         "required": false,
-        "hrSlot": 0
+        "hrSlot": 0,
+        "notes": "Supports repetition attribute, shown in HR as [rep]."
       }
     ],
     "hrSignature": "[ Table::Field ; value ]",
@@ -8379,17 +8380,21 @@
       },
       {
         "xmlElement": "Restore",
-        "type": "flagBoolean",
-        "hrLabel": "Restore",
+        "type": "boolean",
+        "hrLabel": null,
         "xmlAttr": "state",
+        "hrHidden": true,
         "required": false,
-        "defaultValue": "True"
+        "defaultValue": "True",
+        "note": "Governed companion of SortList (Import/Export Records pattern): FM writes Restore=True iff a sort order is specified (<SortList> present), and DISCARDS a stored SortList at runtime when Restore is False — so a SortList with Restore=False is a dead no-op sort. hrHidden: renders no HR token, its state is derived on emit from whether the SortList carries any sort key. Native copy-back 2026-08-28 (Sort Invoices script + dialog-authored): a specified sort is <Restore state=\"True\"/> + <SortList>."
       },
       {
         "xmlElement": "SortList",
         "type": "fieldList",
         "hrLabel": "Sort",
+        "visibleWhen": { "param": "Restore", "values": ["True"] },
         "fields": [
+          { "key": "BlanksLast", "kind": "attr", "xmlAttr": "BlanksLast", "defaultValue": "False" },
           { "key": "Maintain", "kind": "attr", "xmlAttr": "Maintain", "defaultValue": "True" },
           { "key": "value", "kind": "attr", "xmlAttr": "value", "defaultValue": "True" }
         ],
@@ -8398,7 +8403,7 @@
         "entryAttr": "type",
         "entryAttrDefault": "Ascending",
         "required": false,
-        "notes": "fieldList (Cluster 1): ordered sort keys. Each entry <Sort type=\"Ascending|Descending|Custom\"><PrimaryField><Field/></PrimaryField></Sort>. HR token `Sort: Table::Field=Ascending, ...`. SortList Maintain/value are always-on container attributes."
+        "notes": "fieldList (Cluster 1): ordered sort keys. Each entry <Sort type=\"Ascending|Descending|Custom\"><PrimaryField><Field/></PrimaryField></Sort>. HR token `Sort: Table::Field=Ascending, ...`. Gates the hrHidden Restore companion (visibleWhen): a present sort derives <Restore state=\"True\"/>, its absence <Restore state=\"False\"/>. SortList BlanksLast/Maintain/value are always-on container attributes (FM emits all three; native copy-back 2026-08-28)."
       }
     ],
     "hrSignature": "[ Restore ; With dialog: <On/Off> ]",
