@@ -5582,7 +5582,8 @@
         "hrLabel": null,
         "required": false,
         "omitWhenEmpty": true,
-        "note": "Present-driven: the unspecified target (<Script id=\"0\" name=\"\"/>) is omitted to match FM, which drops the empty <Script> on paste. Listed first to match the advertised hrSignature order (script name is the leading positional token)."
+        "fromFileElement": "FileReference",
+        "note": "Present-driven: the unspecified target (<Script id=\"0\" name=\"\"/>) is omitted to match FM, which drops the empty <Script> on paste. Listed first to match the advertised hrSignature order (script name is the leading positional token). fromFileElement enables the cross-file grammar: FM renders a call into another file as the positional token `\"NAME\" from file: \"FILE\"` (curly-quoted, plus a `Specified: From list` mode label); the converter splits that into a name-only <FileReference name=\"FILE\"/> sibling + name-only <Script name=\"NAME\"/> and re-emits the `from file:` clause on decompile. FM re-resolves the FileReference by name on paste; the cross-file script's binding id lives in the other file (absent from FM's AX HR and the current-file context) so the script shows <unknown> until re-bound — the file + name survive intact. Same-file calls (no `from file:` clause) are unaffected."
       },
       {
         "xmlElement": "Calculation",
@@ -5593,7 +5594,7 @@
         "note": "The script parameter. hrLabel \"Parameter\" makes the label pass claim `Parameter: value` on compile and the calc-label emit print `Parameter:` on decompile; omitWhenEmpty drops the <Calculation> when no parameter is given (mirrors Perform Script on Server id 164)."
       }
     ],
-    "hrSignature": "[ \"ScriptName\" ; Parameter: value ]",
+    "hrSignature": "[ \"ScriptName\" [from file: \"FileName\"] ; Parameter: value ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/perform-script.html"
