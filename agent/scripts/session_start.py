@@ -109,13 +109,28 @@ def check_embedded():
     script = REPO_ROOT / "agent" / "scripts" / "check_embedded_agfm.py"
     if not script.exists():
         return SKIP, "check_embedded_agfm.py no disponible", {}
-    rc, out = _run([sys.executable, str(script)], timeout=60)
-    stale = [l for l in out.splitlines() if "STALE" in l or "MISSING" in l]
-    if rc != 0 or stale:
-        head = "; ".join(stale[:3]) or out.splitlines()[-1] if out else "fallo"
-        return WARN, f"código agentic-fm embebido desactualizado: {head} — redeploy desde filemaker/", {"stale": stale}
-    if "nothing to check" in out.lower():
+    rc, out = _run([sys.executable, str(script), "--json"], timeout=180)
+    try:
+        report = json.loads(out)
+    except (ValueError, TypeError):
+        return WARN, f"chequeo de frescura ilegible (rc={rc})", {}
+
+    objects = report.get("objects") or []
+    if not report.get("checked"):
+        if report.get("explode_present"):
+            # Explode present but unreadable: a fault in the check, not missing data.
+            return WARN, ("el chequeo de frescura no pudo leer el explode — revisa "
+                          "check_embedded_agfm.py, no ignores este aviso"), {}
         return SKIP, "nada que comprobar", {}
+
+    drift = [o["name"] for o in objects
+             if o.get("status") in ("STALE", "MISSING", "UNREADABLE")]
+    if drift:
+        return WARN, (f"deriva en código agentic-fm embebido: {', '.join(drift[:4])} — "
+                      f"revisa el diff (check_embedded_agfm.py --diff) ANTES de repegar: "
+                      f"puede llevar cambios locales deliberados"), {"stale": drift}
+    if any(o.get("status") == "OK~" for o in objects):
+        return OK, "código embebido al día (con ruido conocido del conversor)", {}
     return OK, "código embebido al día", {}
 
 

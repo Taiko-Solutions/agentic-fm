@@ -66,6 +66,9 @@ def main() -> int:
         checks.append(("converter tests", lambda: run_cmd(
             "converter tests",
             [sys.executable, "agent/scripts/test_fm_xml_to_snippet.py"])))
+        checks.append(("freshness check tests", lambda: run_cmd(
+            "freshness check tests",
+            [sys.executable, "agent/scripts/test_check_embedded_agfm.py"])))
         checks.append(("fmlint tests", lambda: run_cmd(
             "fmlint tests",
             [sys.executable, "-m", "unittest", "discover",
