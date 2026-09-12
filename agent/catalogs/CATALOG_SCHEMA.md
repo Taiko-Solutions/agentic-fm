@@ -28,11 +28,10 @@ Each entry is an object with the following top-level keys.
 | `category`      | string         | yes      | The step's palette category (e.g. `"control"`, `"navigation"`). Grouping/discovery aid only.                                                                                                            |
 | `selfClosing`   | boolean        | yes      | `true` → the step emits as `<Step ... />` with no children; `false` → `<Step ...>...children...</Step>`.                                                                                                |
 | `params`        | array          | yes      | Ordered list of parameter objects. See **Parameter objects**. May be empty.                                                                                                                             |
-| `hrSignature`   | string \| null | yes      | A human-readable template showing the HR rendering of the step's parameters. A display/authoring hint, **not** a parse grammar.                                                                         |
+| `hrSignature`   | string \| null | yes      | A human-readable template showing the HR rendering of the step's parameters. A display/authoring hint, **not** a parse grammar. The Monaco editor derives its tab-completion snippet (ordered tab-stops + block scaffold) from this — see `webviewer/src/editor/language/completion.ts` `deriveSnippet`. |
 | `blockPair`     | object \| null | yes      | Non-null only for steps that open/close a block (If/End If, Loop/End Loop, etc.). See **Block pairs**.                                                                                                  |
 | `status`        | string         | yes      | Maintenance state of the entry: `"complete"`, `"auto"`, or `"unfinished"`. Consumers should treat only `"complete"` entries as fully reliable.                                                          |
 | `helpUrl`       | string         | yes      | Link to the step's official documentation. Reference only.                                                                                                                                              |
-| `monacoSnippet` | string \| null | yes      | Editor tab-completion template, or `null`. Editor convenience only; not part of the XML contract.                                                                                                       |
 | `snippetFile`   | string         | no       | Path, relative to the catalog-maintenance corpus, of the reference XML example the entry was derived from. **Maintenance provenance only** — not part of the runtime contract; consumers may ignore it. |
 | `notes`         | string         | no       | Free-text behavioral notes scoped to the whole step (as opposed to a single param).                                                                                                                     |
 
@@ -144,6 +143,13 @@ See **Nested field grammar**.
 | `flagBoolean` | A `boolean` whose HR rendering is flag-style — shown only when "on", omitted otherwise — but which still serializes as an attribute (`xmlAttr`) in XML. |
 
 `flagStyle: true` may also appear on an `enum` to mark that the HR shows the value only for the non-default case (and hides the default), while XML always carries the attribute.
+
+`flagStyle: true` on a `boolean` is the machine-readable form of `flagBoolean`, and it is what the converter actually reads — describing the behavior only in `notes` leaves the parser looking for a `Label: value` token that the bare label never matches, so the orphaned label is handed to the next positional param instead.
+For such a param the HR **presence is the value**: label present = `True`, label absent = `False`.
+`defaultValue` documents FileMaker's default for a freshly added step and must never answer for an absent flag — otherwise a flag defaulting to `True` cannot be switched off from HR at all.
+
+A param FileMaker renders with **no** HR token needs `hrHidden: true` for the same reason: without it the converter emits a stray bare `On`/`Off` and the param can swallow a positional token belonging to a real one.
+Whether a given boolean renders bare, labeled, or not at all is a per-step FileMaker fact — confirm it against FileMaker's own rendering rather than inferring it from `params[]`.
 
 ## The enum key family
 
