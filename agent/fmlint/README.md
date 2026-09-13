@@ -114,7 +114,7 @@ Calculation expression analysis. Tier 1 rules check syntax offline. Tier 3 rules
 |----|----------------|
 | C001 | Unclosed string literal (odd number of `"` in calculation) |
 | C002 | Unbalanced parentheses |
-| C003 | Function name not in built-in FM function list. Custom functions can be added via config (`extra_known_functions`) |
+| C003 | Function name not in built-in FM function list. Custom functions can be added via config (`extra_known_functions`). Namespaced names are matched whole — declare `transaction.SetError`, not `SetError` |
 | C004 | **Tier 3 only.** Calculation fails when evaluated by the live FM engine via AGFMEvaluation over OData |
 | C005 | **Tier 3 only.** Reserved for non-fatal evaluation issues (stub) |
 | C006 | HTML/XML entities (`&gt;`, `&lt;`, `&amp;`, `&ge;`, `&le;`) in calculation expressions — these must be literal operators inside CDATA blocks |
