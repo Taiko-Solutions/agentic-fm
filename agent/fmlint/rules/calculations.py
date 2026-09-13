@@ -221,8 +221,10 @@ class KnownFunction(LintRule):
         "textcolorremove", "sortvalues", "uniquevalues",
     }
 
-    # Regex to find function-call-like patterns: word followed by (
-    _FUNC_CALL_RE = re.compile(r'\b([A-Za-z_]\w*)\s*\(')
+    # Regex to find function-call-like patterns: name followed by (
+    # Dots are part of the name so namespaced custom functions
+    # (e.g. transaction.SetError) are captured whole, not as their suffix.
+    _FUNC_CALL_RE = re.compile(r'(?<![\w.])([A-Za-z_][\w.]*\w|[A-Za-z_])\s*\(')
 
     # Names to skip (not functions, but look like them)
     _SKIP = {"and", "or", "not", "xor", "true", "false"}
