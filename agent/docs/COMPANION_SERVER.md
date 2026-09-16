@@ -361,6 +361,20 @@ Upstream guidance: do not set `bind_host` (`companion.json`) or `COMPANION_BIND_
 
 When the companion binds to `0.0.0.0`, `companion_url` in `automation.json` can stay `http://localhost:8765` for the local agent, while remote callers (a remote FMS, a container) reach the same server by the machine's hostname or LAN/Tailscale IP.
 
+**Loopback binding.** When the bind host is a loopback address (`127.0.0.1`, `localhost` or
+`::1` — the default), the companion listens on **both** `127.0.0.1` and `::1`. Clients that
+resolve `localhost` to IPv6 first (FileMaker's *Insert from URL* does) therefore always reach the
+companion and never another process that happens to hold `::1` on the same port.
+
+If either address is already in use, the companion **refuses to start** and logs which process
+holds the port, e.g.:
+
+    Port 8765 is not free on every address the companion needs — refusing to start:
+      [::1]:8765 (Address already in use) — in use by Python (pid 4242)
+
+Stop that process, or choose another port in `companion.json`, and start the companion again.
+Non-loopback binds (such as the opt-in `0.0.0.0`) keep a single socket.
+
 ---
 
 ## FileMaker integration
