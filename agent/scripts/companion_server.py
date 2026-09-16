@@ -32,6 +32,8 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 
+from companion_bind import ServerGroup, bind_targets, build_servers, port_conflicts
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -1359,9 +1361,18 @@ def main():
     )
     advertise_host = comp.get("advertise_host") or DEFAULT_ADVERTISE_HOST
 
-    server = ThreadingHTTPServer((bind_host, port), CompanionHandler)
+    targets = bind_targets(bind_host)
+    conflicts = port_conflicts(targets, port)
+    if conflicts:
+        log.error("Port %d is not free on every address the companion needs — refusing to start:", port)
+        for line in conflicts:
+            log.error("  %s", line)
+        log.error("Stop that process (or pick another port in companion.json) and start the companion again.")
+        sys.exit(2)
 
-    log.info("companion_server v%s listening on %s:%d", VERSION, bind_host, port)
+    server = ServerGroup(build_servers(ThreadingHTTPServer, targets, port, CompanionHandler))
+
+    log.info("companion_server v%s listening on %s", VERSION, server.describe())
     log.info("Clients reach it at http://%s:%d (advertise_host).", advertise_host, port)
     threading.Thread(target=_check_for_updates, daemon=True).start()
     if idle_timeout > 0:
