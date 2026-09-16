@@ -7,8 +7,12 @@ Usage:
 
 import socket
 import sys
+import threading
 import unittest
+import urllib.request
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from socketserver import ThreadingMixIn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -85,6 +89,76 @@ class TestPortConflicts(unittest.TestCase):
                 self.assertIn("pid", owner)
         finally:
             squatter.close()
+
+
+class _OkHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = b'{"status": "ok"}'
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+
+class _ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    daemon_threads = True
+
+
+class TestServerGroup(unittest.TestCase):
+
+    def _start_group(self):
+        port = _free_port()
+        targets = cb.bind_targets("127.0.0.1")
+        group = cb.ServerGroup(cb.build_servers(_ThreadingHTTPServer, targets, port, _OkHandler))
+        thread = threading.Thread(target=group.serve_forever, daemon=True)
+        thread.start()
+        return group, thread, port
+
+    def _stop_group(self, group, thread):
+        group.shutdown()
+        group.server_close()
+        thread.join(timeout=5)
+        self.assertFalse(thread.is_alive())
+
+    def test_group_answers_on_ipv4_loopback(self):
+        group, thread, port = self._start_group()
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/health", timeout=5) as r:
+                self.assertEqual(r.status, 200)
+        finally:
+            self._stop_group(group, thread)
+
+    @unittest.skipUnless(cb.ipv6_loopback_available(), "no IPv6 loopback")
+    def test_group_answers_on_ipv6_loopback(self):
+        group, thread, port = self._start_group()
+        try:
+            with urllib.request.urlopen(f"http://[::1]:{port}/health", timeout=5) as r:
+                self.assertEqual(r.status, 200)
+        finally:
+            self._stop_group(group, thread)
+
+    @unittest.skipUnless(cb.ipv6_loopback_available(), "no IPv6 loopback")
+    def test_after_start_the_ipv6_half_is_no_longer_free(self):
+        group, thread, port = self._start_group()
+        try:
+            conflicts = cb.port_conflicts([(socket.AF_INET6, "::1")], port)
+            self.assertEqual(len(conflicts), 1)
+        finally:
+            self._stop_group(group, thread)
+
+    def test_describe_lists_every_address(self):
+        group, thread, port = self._start_group()
+        try:
+            text = group.describe()
+            self.assertIn(f"127.0.0.1:{port}", text)
+            if cb.ipv6_loopback_available():
+                self.assertIn(f"[::1]:{port}", text)
+        finally:
+            self._stop_group(group, thread)
 
 
 if __name__ == "__main__":

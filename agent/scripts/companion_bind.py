@@ -13,6 +13,7 @@ single socket, exactly as before.
 
 import socket
 import subprocess
+import threading
 
 LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
@@ -86,3 +87,65 @@ def port_conflicts(targets: list[tuple[int, str]], port: int) -> list[str]:
                 suffix = f" — in use by {owner}" if owner else ""
                 conflicts.append(f"{_format_address(family, host, port)} ({detail}){suffix}")
     return conflicts
+
+
+class _IPv6Only:
+    """Mixin: IPv6 server socket that does not also accept IPv4-mapped traffic."""
+
+    address_family = socket.AF_INET6
+
+    def server_bind(self):
+        self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
+        super().server_bind()
+
+
+def build_servers(server_cls, targets, port, handler):
+    """Create one bound server per target; close all of them if any bind fails."""
+    servers = []
+    try:
+        for family, host in targets:
+            cls = server_cls
+            if family == socket.AF_INET6:
+                cls = type(f"{server_cls.__name__}IPv6", (_IPv6Only, server_cls), {})
+            servers.append(cls((host, port), handler))
+    except OSError:
+        for server in servers:
+            server.server_close()
+        raise
+    return servers
+
+
+class ServerGroup:
+    """Several servers behind the single-server interface the companion uses."""
+
+    def __init__(self, servers):
+        if not servers:
+            raise ValueError("ServerGroup needs at least one server")
+        self.servers = servers
+        self._threads = []
+
+    def serve_forever(self):
+        for server in self.servers[1:]:
+            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread.start()
+            self._threads.append(thread)
+        self.servers[0].serve_forever()
+
+    def shutdown(self):
+        # Only shut down servers whose loop is running; shutdown() on a server
+        # that never started serve_forever() would block forever.
+        self.servers[0].shutdown()
+        for server, thread in zip(self.servers[1:], self._threads):
+            if thread.is_alive():
+                server.shutdown()
+
+    def server_close(self):
+        for server in self.servers:
+            server.server_close()
+
+    def describe(self):
+        parts = []
+        for server in self.servers:
+            host, port = server.server_address[0], server.server_address[1]
+            parts.append(_format_address(server.address_family, host, port))
+        return ", ".join(parts)
