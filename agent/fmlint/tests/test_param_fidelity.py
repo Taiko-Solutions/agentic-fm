@@ -69,6 +69,32 @@ class ParamFidelityTestCase(unittest.TestCase):
         self.assertEqual(x_diags(result), [],
                          f"clean steps flagged: {[d.message for d in x_diags(result)]}")
 
+    def test_x001_editor_collapse_state_is_allowed(self):
+        # FileMaker adds <DisableStepCollapsed> to EVERY step copied from the
+        # Script Workspace (editor fold state) — it is not a step parameter.
+        result = self.lint(
+            '<Step enable="True" id="207" name="Revert Transaction">'
+            '<Option state="True"/><DisableStepCollapsed state="False"/>'
+            '<Condition><Calculation><![CDATA[$_Check]]></Calculation></Condition>'
+            '<ErrorCode><Calculation><![CDATA[5499]]></Calculation></ErrorCode>'
+            '<ErrorMessage><Calculation><![CDATA[transaction.SetError ( $_ErrorHint )]]>'
+            '</Calculation></ErrorMessage></Step>'
+            '<Step enable="True" id="86" name="Set Error Capture">'
+            '<Set state="True"/><DisableStepCollapsed state="True"/></Step>'
+        )
+        self.assertEqual([d for d in x_diags(result) if d.rule_id == "X001"], [],
+                         f"editor state flagged: {[d.message for d in x_diags(result)]}")
+
+    def test_x001_still_fires_next_to_editor_state(self):
+        # The allowlist must not mask real unknown elements on the same step.
+        result = self.lint(
+            '<Step enable="True" id="86" name="Set Error Capture">'
+            '<DisableStepCollapsed state="False"/><State state="True"/></Step>'
+        )
+        diags = [d for d in x_diags(result) if d.rule_id == "X001"]
+        self.assertEqual(len(diags), 1, f"got: {[d.message for d in diags]}")
+        self.assertIn("State", diags[0].message)
+
     # -- X002: missing discriminator -------------------------------------
 
     def test_x002_go_to_layout_without_destination(self):

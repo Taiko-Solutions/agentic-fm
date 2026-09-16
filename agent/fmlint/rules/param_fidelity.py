@@ -85,6 +85,12 @@ def _entry_is_enforceable(entry) -> bool:
 #     excludes it from params by design.
 GLOBAL_ALLOWED = {"Text", "Animation"}
 
+# Script Workspace editor state, not step parameters. FileMaker adds these to
+# EVERY step when copying to the clipboard (DisableStepCollapsed is the fold
+# state, the fmxmlsnippet counterpart of SaXML's <Boolean type="Collapsed">).
+# They never appear in catalog params and are harmless on paste.
+EDITOR_STATE_ELEMENTS = {"DisableStepCollapsed"}
+
 
 # ---------------------------------------------------------------------------
 # X001 — unknown-param-element
@@ -120,7 +126,7 @@ class UnknownParamElement(LintRule):
             allowed = _allowed_children(entry)
             for child in list(step):
                 tag = child.tag
-                if tag in allowed or tag in GLOBAL_ALLOWED:
+                if tag in allowed or tag in GLOBAL_ALLOWED or tag in EDITOR_STATE_ELEMENTS:
                     continue
                 suggestion = difflib.get_close_matches(tag, sorted(allowed), n=1, cutoff=0.5)
                 hint = None
