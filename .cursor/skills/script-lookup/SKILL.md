@@ -5,6 +5,8 @@ description: Locate a specific FileMaker script in the `agent/xml_parsed/` folde
 
 # Script Lookup
 
+> **(Taiko) MCP first.** If the `agentic-fm-app` MCP is available, resolve the script with it before touching files: `fm_find` (kind `script`, name hint) → `fm_get` (kind `script`, `fm_id`) returns the HR text; use `lines="a-b"` for a range. Only fall back to the file lookup below when you need the SaXML file itself, the MCP is not registered, or a call fails.
+
 Locate a FileMaker script by ID or name, resolving to the paired human-readable and Save-As-XML files. Optimized for minimum tool calls.
 
 **Performance target**: 4 tool calls for ID-based lookups, 5 for name-based.
