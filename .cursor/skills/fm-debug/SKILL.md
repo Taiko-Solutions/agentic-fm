@@ -6,6 +6,8 @@ compatibility: Tier 3 requires the companion server and macOS Accessibility perm
 
 # fm-debug
 
+> **(Taiko) MCP first.** If the `agentic-fm-app` MCP is available, read the script source with `fm_find` → `fm_get` (kind `script`, `lines="a-b"` for the area to instrument) instead of opening `scripts_sanitized/`. Fetch the SaXML file only when generating the instrumented copy needs it.
+
 Debug a FileMaker script by capturing runtime variable state, error codes, and error locations. The agent's level of autonomy depends on the deployment tier configured in `agent/config/automation.json`.
 
 ---
