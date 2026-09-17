@@ -167,3 +167,31 @@ Ran into this deploying agentic-fm against a multi-file solution — seven `.fmp
 - **Descripción**: cuando un script presenta un resultado al desarrollador o al usuario con `Show Custom Dialog`, **el diálogo no permite seleccionar ni copiar el texto**. Si ese resultado es un dato que se va a reutilizar (métricas de auditoría, JSON de diagnóstico, listados de IDs), se pierde: hay que transcribirlo a mano o hacer una captura. Convención propuesta: **publicar siempre el resultado en una o dos variables globales antes de mostrar el diálogo** — `$$<Ambito>` con el JSON y `$$<Ambito>Texto` con el resumen legible — y que el diálogo muestre la variable de texto en lugar de recomponer el mensaje. Así el resultado queda copiable desde el Visor de datos sin cambiar la experiencia. Coste cero (dos `Insert Calculated Result`) y evita que el diálogo sea un callejón sin salida. Candidato a `agent/docs/taiko/CODING_CONVENTIONS.md` (sección "Preferred Script Steps" o una nueva "Presentación de resultados") y a mencionar en los templates `clew-simple.md`.
 - **Archivos afectados**: `agent/docs/taiko/CODING_CONVENTIONS.md`, `agent/docs/taiko/templates/clew-simple.md`
 - **Origen**: Borneo 944 (2026-09-12), `AuditarEstructuraInmuebles.Controller` — Marco tuvo que enviar una captura de pantalla porque el diálogo de la auditoría no dejaba copiar las métricas.
+
+## 2026-09-13 — Library: found set a partir de una lista de IDs (OR con Set Field By Name)
+
+- **Categoría**: library / knowledge
+- **Descripción**: patrón reutilizable para dejar en el found set de cualquier layout los registros de una lista de IDs obtenida por `ExecuteSQL` (p. ej. filtrar por una tabla puente N:M respetando un flag `Activo`): `Enter Find Mode` → bucle con un *find request* por ID (`New Record/Request` desde el 2º) → `Set Field By Name [ $campoId ; "==" & GetValue ( $Ids ; $i ) ]` + criterio opcional de texto en la misma petición → `Perform Find`. Recibir los campos por `GetFieldName` lo hace independiente de la TO del layout (sirve para dos layouts sobre TOs distintas de la misma tabla). Incluir el aviso: el criterio de texto debe ir sobre un campo **almacenado y relleno**; un campo auto-enter nunca evaluado en registros migrados deja la búsqueda vacía sin error.
+- **Archivos afectados**: nuevo item en `agent/library/` + entrada en MANIFEST; mención en `agent/docs/taiko/knowledge/executesql-pattern.md`
+- **Origen**: Borneo 944.11 (2026-09-13), subscript compartido de selector de contactos por empresa activa.
+
+## 2026-09-13 — Knowledge: auditar relaciones multi-predicado tras migrar 1:N → N:M
+
+- **Categoría**: knowledge (taiko)
+- **Descripción**: al sustituir un FK directo (1:N) por una tabla puente (N:M), el FK antiguo queda "congelado" en su primer valor histórico. Además de los scripts que filtran por él, hay que auditar las **relaciones del grafo con más de un predicado** que lo siguen usando como condición adicional (p. ej. `Registro::FKContacto = Contacto::Id` **y** `Registro::FKEmpresa = Contacto::FKEmpresaAntiguo`): el ID se guarda bien pero el campo relacionado se muestra en blanco para los registros nuevos o reasignados. Checklist: `grep` en `relationships.index` de las TOs de la tabla migrada con `Equal+Equal` que referencien el FK antiguo, más layouts/scripts/pivots que las usen.
+- **Archivos afectados**: nuevo `agent/docs/taiko/knowledge/migracion-1n-a-nm-checklist.md` + MANIFEST
+- **Origen**: Borneo 944.11 (2026-09-13): contacto preferente en blanco en Inmuebles y Demandas por relaciones con el FK antiguo como 2ª condición.
+
+## 2026-09-13 — Knowledge/ProofKit: "FileMaker is in a paused state" y conector colgado
+
+- **Categoría**: knowledge (proofkit gotchas)
+- **Descripción**: `execute_filemaker_sql` y demás herramientas ProofKit fallan con *"FileMaker is in a paused state, so scripts cannot execute right now"* cuando el desarrollador tiene un diálogo modal, un script en pausa o el Script Debugger detenido; no es un fallo de conexión. Y si `PK_get_relation_info` devuelve timeout con *"MCP Server Connector window is open but is not responding"*, hay que cerrar esa ventana y relanzar *Connect To ProofKit MCP*. Documentar ambos síntomas con la acción a pedir al desarrollador para no diagnosticar mal.
+- **Archivos afectados**: `agent/docs/taiko/proofkit/gotchas.md`
+- **Origen**: Borneo 944.11 (2026-09-13), varias consultas en vivo interrumpidas.
+
+## 2026-09-13 — Knowledge: obtener el ID de un script recién creado sin explode ni OData
+
+- **Categoría**: knowledge
+- **Descripción**: el placeholder technique necesita el ID del script nuevo antes de generar los `Perform Script` que lo llaman. Si OData no responde y no se quiere relanzar el explode, basta con una expresión en el Visor de datos: `Let ( [ ~n = ScriptNames ( Get ( FileName ) ) ; ~i = ScriptIDs ( Get ( FileName ) ) ] ; While ( [ ~k = 1 ; ~r = "" ] ; ~k ≤ ValueCount ( ~n ) and ~r = "" ; [ ~r = If ( GetValue ( ~n ; ~k ) = "<Nombre>" ; GetValue ( ~i ; ~k ) ; "" ) ; ~k = ~k + 1 ] ; ~r ) )`. `get_script_names` de ProofKit devuelve solo nombres. Añadir al skill `multi-script-scaffold` como vía alternativa.
+- **Archivos afectados**: `.claude/skills/multi-script-scaffold/SKILL.md`, `agent/docs/knowledge/script-ids.md`
+- **Origen**: Borneo 944.11 (2026-09-13), OData con timeout al resolver el ID del subscript compartido.

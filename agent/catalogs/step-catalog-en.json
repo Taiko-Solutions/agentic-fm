@@ -5410,6 +5410,14 @@
     "params": [
       {
         "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "By name",
+        "wrapperElement": "Calculated",
+        "required": false,
+        "note": "By name mode: <Calculated><Calculation>script name</Calculation></Calculated>, emitted BEFORE the parameter <Calculation>. Mutually exclusive with <Script> (by id). Less robust than by id (the reference does not follow a script rename) but required when the target is only known at runtime, as in the selector/router returnScript pattern. Verified in Borneo: SelectorContacto.Seleccionar (925), Contacto.Seleccionado.Router (951)."
+      },
+      {
+        "xmlElement": "Calculation",
         "type": "calculation",
         "hrLabel": null,
         "required": false
@@ -5421,6 +5429,13 @@
         "required": false,
         "omitWhenEmpty": true,
         "note": "Present-driven: the unspecified target (<Script id=\"0\" name=\"\"/>) is omitted to match FM, which drops the empty <Script> on paste."
+      },
+      {
+        "xmlElement": "FileReference",
+        "type": "text",
+        "hrLabel": null,
+        "required": false,
+        "note": "Cross-file call only: direct child of <Step>, sibling of Calculation/Script — NEVER nested inside <Script>. Carries id/name of the caller file's external data source and a <UniversalPathList>file:FileNameWithoutExtension</UniversalPathList> child (rule X003 enforces the shape). Omit entirely for same-file calls."
       }
     ],
     "hrSignature": "[ \"ScriptName\" ; Parameter: value ]",
