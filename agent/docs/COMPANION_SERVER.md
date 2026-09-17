@@ -23,6 +23,33 @@ python3 agent/scripts/companion_server.py --port 9000
 python3 agent/scripts/companion_server.py --idle-timeout 2700
 ```
 
+### Configuration — `agent/config/companion.json`
+
+The host, port, and advertise address are resolved from a single optional file, `agent/config/companion.json` (gitignored — copy `companion.json.example` to create it).
+This is the single source of truth so the server and every client agree on one address.
+The file is optional: absent or malformed, the server falls back to built-in defaults and still boots.
+
+```jsonc
+{
+  "companion": {
+    "bind_host": "127.0.0.1",        // interface the server binds on
+    "port": 8765,                    // server port (single source of truth)
+    "advertise_host": "local.hub",   // host clients dial to reach it (may differ from bind_host)
+    "idle_timeout_seconds": 0        // 0 = never auto-shutdown
+  }
+}
+```
+
+`bind_host` / `port` govern where the server **binds**; `advertise_host` + `port` are what clients (`deploy.py`, tests) **dial**.
+A client can never change how the server binds.
+
+Resolution precedence, highest wins:
+
+- **Server bind** — CLI flag (`--port`) / env var (`COMPANION_BIND_HOST`, `COMPANION_PORT`) → `companion.json` → defaults (`127.0.0.1:8765`).
+- **Client reach** — `COMPANION_URL` env → `companion.json` `advertise_host` + `port` → legacy `automation.json` `companion_url` (deprecation window) → default.
+
+The plug-in's Application Support path is deliberately **not** configurable here — it is a fixed macOS platform location with one correct value, resolved against the macOS user running the companion (which must be the same user running FileMaker and the plug-in). A relocated or cross-user path is a deployment error to document, not a config knob.
+
 ### Idle auto-shutdown
 
 By default the server runs until you stop it (`Ctrl-C`, `launchctl unload`, etc.). Pass `--idle-timeout <seconds>` (or set the `COMPANION_IDLE_TIMEOUT` environment variable) to have it wind down on its own after a stretch with no requests. This is handy when the server is started per work session — a launchd job at login, or a Claude Code `SessionStart` hook — and you'd rather it not sit resident overnight.
@@ -325,12 +352,28 @@ Accepts a JSON payload of runtime debug state and writes it to `agent/debug/outp
 
 The `/explode` and `/trigger` endpoints execute arbitrary shell scripts and AppleScript with the permissions of the user who started the server, and **no authentication is implemented**. The bind address therefore defines the entire attack surface — choose it deliberately.
 
-**Choosing `COMPANION_BIND_HOST`:**
+Upstream guidance: do not set `bind_host` (`companion.json`) or `COMPANION_BIND_HOST` to `0.0.0.0`, or expose the server through a reverse proxy.
+
+**Choosing `bind_host` / `COMPANION_BIND_HOST` (Taiko):** local execution is the default policy — keep `127.0.0.1` unless the developer explicitly opts into the server-side/remote path.
 
 - **`127.0.0.1` (default)** — safest. Only processes on the same machine can connect. Use this whenever the companion is consumed solely by a local agent and no remote machine needs to reach it.
-- **`0.0.0.0` (all interfaces)** — required when a *remote* host must reach the companion running on your workstation: a remote FileMaker Server that triggers an "Explode XML" or deploy script over the network, or an agent running inside a Docker container. This is acceptable **only** when every network that can route to the port is private and trusted — an RFC 1918 LAN or an authenticated overlay such as Tailscale. Because there is no auth, anyone who can reach the port can run arbitrary code on the machine, so the port must **never** be reachable from the public internet or an untrusted/guest network. If you ever work from such a network, set `COMPANION_BIND_HOST` back to `127.0.0.1`.
+- **`0.0.0.0` (all interfaces, explicit opt-in only)** — required when a *remote* host must reach the companion running on your workstation: a remote FileMaker Server that triggers an "Explode XML" or deploy script over the network, or an agent running inside a Docker container. This is acceptable **only** when every network that can route to the port is private and trusted — an RFC 1918 LAN or an authenticated overlay such as Tailscale. Because there is no auth, anyone who can reach the port can run arbitrary code on the machine, so the port must **never** be reachable from the public internet or an untrusted/guest network. If you ever work from such a network, set it back to `127.0.0.1`.
 
 When the companion binds to `0.0.0.0`, `companion_url` in `automation.json` can stay `http://localhost:8765` for the local agent, while remote callers (a remote FMS, a container) reach the same server by the machine's hostname or LAN/Tailscale IP.
+
+**Loopback binding.** When the bind host is a loopback address (`127.0.0.1`, `localhost` or
+`::1` — the default), the companion listens on **both** `127.0.0.1` and `::1`. Clients that
+resolve `localhost` to IPv6 first (FileMaker's *Insert from URL* does) therefore always reach the
+companion and never another process that happens to hold `::1` on the same port.
+
+If either address is already in use, the companion **refuses to start** and logs which process
+holds the port, e.g.:
+
+    Port 8765 is not free on every address the companion needs — refusing to start:
+      [::1]:8765 (Address already in use) — in use by Python (pid 4242)
+
+Stop that process, or choose another port in `companion.json`, and start the companion again.
+Non-loopback binds (such as the opt-in `0.0.0.0`) keep a single socket.
 
 ---
 
