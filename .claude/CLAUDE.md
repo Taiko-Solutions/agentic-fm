@@ -236,7 +236,7 @@ The developer always works in **human-readable (HR) script format**. The agent's
 
 1. Read `agent/CONTEXT.json` for the task description and all reference IDs (when present)
 2. Read `agent/docs/CODING_CONVENTIONS.md` — all generated FileMaker code must follow these conventions
-3. Scan `agent/docs/knowledge/MANIFEST.md` for keyword matches against the current task — read and apply matching documents
+3. Scan `agent/docs/knowledge/MANIFEST.md` for keyword matches against the current task — read and apply matching documents (Taiko: when the `agentic-fm-app` MCP is available, run `kb_search` with the task keywords first and `kb_get` the hits; this also answers "which knowledge applies to X" questions)
 4. For scripts: grep the step catalog for each step type used (see **Step catalog** below); validate any calculation function name against the function catalog (see **Function catalog** below)
 5. Substitute the specific IDs/names/values from CONTEXT.json
 
