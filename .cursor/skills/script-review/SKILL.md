@@ -5,6 +5,8 @@ description: Code review a FileMaker script and its full call tree — all subsc
 
 # Script Review
 
+> **(Taiko) MCP first.** If the `agentic-fm-app` MCP is available, load the script with `fm_find` → `fm_get` (kind `script`) and the call tree with `fm_refs` (direction `out`, `depth` = levels needed) — one call instead of grep + parallel reads. Read subscript bodies with `fm_get`. Fall back to the file steps below when the MCP is not registered or a call fails.
+
 Perform a thorough code review of a FileMaker script and every script it calls. The review covers the full call tree — not just the entry-point script in isolation.
 
 **CRITICAL**: Debugging breakpoints within FileMaker scripts are not a runtime issue. Breakpoints are only active when a developer explicitly invokes the FileMaker debugger. Do not flag them.
