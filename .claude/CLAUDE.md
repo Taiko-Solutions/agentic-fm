@@ -443,6 +443,8 @@ Before writing a script, scan **both** manifests for keyword matches against the
 
 If any entry matches, read the corresponding document and apply its insights during script composition.
 
+**(Taiko) With the `agentic-fm-app` MCP available**, run `kb_search` (scope `all`, or `taiko` / `templates`) with the task keywords instead of reading both manifests in full, then `kb_get` the matching sections. The manifests remain the fallback when the MCP is not registered or a call fails.
+
 ## Taiko script templates
 
 `agent/docs/taiko/templates/` contains human-readable script templates in `scripts_sanitized` format. Use these as structural references when composing Taiko scripts:
