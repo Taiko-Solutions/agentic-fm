@@ -261,7 +261,7 @@ The developer always works in **human-readable (HR) script format**. The agent's
 Two kinds of lookup are needed: **solution-specific references** (layout, field, script IDs) and **step structure** (XML elements and attributes).
 
 1. Does CONTEXT.json have the reference? → Use it directly. Done.
-2. **(Taiko) Is the `agentic-fm-app` MCP available?** → Use it for structural questions: `fm_find` (IDs), `fm_get` (definitions, script lines), `fm_refs` / `fm_impact` (who uses what), `fm_search_code`, `fm_step_schema`, `fm_functions`, `kb_search`. Its answers reflect the last explode (the first line shows the date) and warn when references from other files are not resolved. If it is not registered or a call fails, continue with the file workflow below — never block on it.
+2. **(Taiko) Is the `agentic-fm-app` MCP available?** → Use it for structural questions: `fm_find` (IDs), `fm_get` (definitions, script lines), `fm_refs` / `fm_impact` (who uses what), `fm_search_code`, `fm_step_schema`, `fm_functions`, `kb_search`. Its answers reflect the last explode (the first line shows the date) and warn when references from other files are not resolved. If it is not registered or a call fails, continue with the file workflow below — never block on it. Call tree of a script → ONE `fm_refs direction=out depth=N` call (not `fm_get` per subscript). What calls an external file → `fm_refs kind=data_source name=<file>`.
 3. Is it a step structure question? → Grep the step catalog. Done.
 4. Reference missing from CONTEXT.json? → Search the appropriate `agent/context/{solution}/*.index` file.
 5. Still missing? → Grep `agent/xml_parsed/` as last resort. Never read entire files.
