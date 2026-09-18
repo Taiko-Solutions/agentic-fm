@@ -8519,7 +8519,7 @@
   },
   {
     "name": "Trigger Claris Connect Flow",
-    "id": null,
+    "id": 211,
     "category": "control",
     "snippetFile": "control/Trigger Claris Connect Flow.xml",
     "selfClosing": false,
@@ -8597,7 +8597,7 @@
     "blockPair": null,
     "notes": {
       "behavioral": "Triggers a Claris Connect flow via HTTP. The <Flow> element holds the flow's endpoint URL. The <CURLOptions> element wraps a <Calculation> with cURL option strings (e.g. --request POST --header). The <Text> element captures the response target. NoInteract suppresses the associated dialog — must be True for server-side, WebDirect, and Data API contexts.",
-      "gotchas": "Step ID is not yet confirmed — it is null in this catalog entry. Do not rely on the id field until a real xml_parsed example is found. The <Flow> and <Text> elements in the snippet example both contain placeholder '<unknown>' values indicating the full XML structure for those fields has not been fully reverse-engineered.",
+      "gotchas": "Step ID 211 confirmed by a live FileMaker 26.0.2 round-trip (paste into Script Workspace, copy back, read FM's own <Step id>). The <Flow> and <Text> elements in the snippet example still carry placeholder '<unknown>' values — the full XML structure for those fields has not been reverse-engineered from a captured example.",
       "constraints": "Requires a valid Claris Connect account and a configured flow with an HTTP trigger. VerifySSLCertificates defaults to False — set to True in production for security."
     },
     "status": "auto",
