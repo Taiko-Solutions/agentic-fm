@@ -5,6 +5,8 @@ description: Locate a specific FileMaker custom menu or menu set in `agent/xml_p
 
 # Menu Lookup
 
+> **(Taiko) MCP first.** If the `agentic-fm-app` MCP is available, `fm_menu name=<menu>` returns the menu or menu set UUID, what it calls and who uses it, in one call. The CustomMenuCatalog UUID is not in the explode: take it from a menu copied from FileMaker. Fall back to the file lookup below when the MCP is not registered or a call fails.
+
 Locate a FileMaker custom menu or menu set in the parsed XML export and extract the critical UUIDs required before any menu XML can be created or modified. Without the correct UUIDs, FileMaker silently ignores paste operations.
 
 Resolves using either:
