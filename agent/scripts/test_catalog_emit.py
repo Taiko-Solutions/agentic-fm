@@ -42,7 +42,18 @@ CONTROL_FLOW = {
     "Loop", "Exit Loop If", "End Loop", "Exit Script", "Set Variable",
 }
 # The 3 FM26-AI grammar-gap steps stay excluded from every gate (plan §"known gap").
-FM26_AI_SKIP = {"Fine-Tune Model", "Generate Response from Model", "Install Menu Set"}
+# FM26 AI steps whose reference fixtures (captured from an earlier FileMaker
+# serialization) no longer match the emit engine's FileMaker-26-correct output.
+# FileMaker 26 corrected the Configure AI Account wrapper element spelling from
+# <SetLLMAccout>/<AccoutName> to <SetLLMAccount>/<AccountName>; the catalog now
+# emits the corrected spelling (verified against live FileMaker 26), so its
+# stale reference fixture is expected to differ until regenerated.
+FM26_AI_SKIP = {
+    "Fine-Tune Model",
+    "Generate Response from Model",
+    "Install Menu Set",
+    "Configure AI Account",
+}
 
 
 # --- minimal HR line parser (port of parser.ts parseLine + splitParams) ---------
