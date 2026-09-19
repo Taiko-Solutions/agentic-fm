@@ -729,14 +729,14 @@
     "selfClosing": false,
     "params": [
       {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Account Name",
-        "wrapperElement": "AccountName",
-        "wrapperElementAliases": ["AccoutName"],
-        "parentElement": "SetLLMAccount",
-        "parentElementAliases": ["SetLLMAccout"],
-        "required": false
+        "xmlElement": "VerifySSLCertificates",
+        "type": "boolean",
+        "flagStyle": true,
+        "hrLabel": "Verify SSL Certificates",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "hrSlot": 3
       },
       {
         "xmlElement": "LLMType",
@@ -754,7 +754,19 @@
         "hrEnumValues": {
           "ChatGPT": "OpenAI",
           "Other": "Custom"
-        }
+        },
+        "hrSlot": 1
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Account Name",
+        "wrapperElement": "AccountName",
+        "wrapperElementAliases": ["AccoutName"],
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
+        "required": false,
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -763,16 +775,8 @@
         "wrapperElement": "Endpoint",
         "parentElement": "SetLLMAccount",
         "parentElementAliases": ["SetLLMAccout"],
-        "required": false
-      },
-      {
-        "xmlElement": "VerifySSLCertificates",
-        "type": "boolean",
-        "flagStyle": true,
-        "hrLabel": "Verify SSL Certificates",
-        "xmlAttr": "state",
         "required": false,
-        "defaultValue": "False"
+        "hrSlot": 2
       },
       {
         "xmlElement": "Calculation",
@@ -781,7 +785,8 @@
         "wrapperElement": "AccessAPIKey",
         "parentElement": "SetLLMAccount",
         "parentElementAliases": ["SetLLMAccout"],
-        "required": false
+        "required": false,
+        "hrSlot": 4
       }
     ],
     "hrSignature": "[ Account Name: calc ; Model Provider: option ; Endpoint: calc ; Verify SSL Certificates ; API key: calc ]",
