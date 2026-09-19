@@ -293,3 +293,43 @@ def test_saxml_reading_of_the_gate_wins_over_the_derived_value():
     values[gi] = ""
     blanked = convert_step_with_catalog(entry, disabled, values, resolver)
     assert '<Restore state="True"/>' in blanked  # this sample DOES carry ExportOptions
+
+
+# ---------------------------------------------------------------------------
+# Cross-file Perform Script (id 1) — the fromFileElement grammar primitive.
+#
+# FM renders a call into another file as the positional token
+# `"NAME" from file: "FILE"`. A script param that opts into the from-file
+# grammar (``fromFileElement`` set) must split that infix clause into a
+# <FileReference name="FILE"> sibling carrying a
+# <UniversalPathList>file:FILE</UniversalPathList> child, emitted BEFORE a
+# name-only <Script name="NAME"/>. Live-verified against FileMaker (FM26): FM
+# binds the reference by the external-data-source NAME when one exists (the path
+# is ignored, no dialog, no regression) and the path preserves the file name
+# (`from file: "FILE"`, fail-loud + FM's normal locate prompt) when it does not
+# — instead of a name-only reference's silent `from file: ""` drop.
+# ---------------------------------------------------------------------------
+def test_cross_file_perform_script_emits_filereference_with_universal_path_list():
+    by_name, _ = _load()
+    out = _emit_hr(
+        by_name,
+        'Perform Script [ "Sandbox" from file: "QuickStart" ; '
+        "Specified: From list ; Parameter: \"hi\" ]",
+    )
+    # The from-file clause splits off a <FileReference> sibling with a
+    # <UniversalPathList>file:NAME</> child (the display name as path — the only
+    # value available offline).
+    assert '<FileReference name="QuickStart">' in out
+    assert "<UniversalPathList>file:QuickStart</UniversalPathList>" in out
+    # The <Script> keeps ONLY the name (no ` from file:` swallowed in) and is
+    # NOT resolved to a same-file id (the binding lives in the other file).
+    assert '<Script name="Sandbox"/>' in out
+    assert "from file:" not in out  # clause fully consumed, not leaked into a name
+
+
+def test_same_file_perform_script_unaffected_by_from_file_grammar():
+    by_name, _ = _load()
+    out = _emit_hr(by_name, 'Perform Script [ "Sandbox" ; Parameter: "hi" ]')
+    # No `from file:` clause => no FileReference; the <Script> is emitted as usual.
+    assert "<FileReference" not in out
+    assert "<Script " in out
