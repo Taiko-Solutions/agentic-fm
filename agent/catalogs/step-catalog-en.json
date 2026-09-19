@@ -3734,6 +3734,16 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "Internal flag FM always serializes (live copy-back: <Option state=\"False\"/> ahead of LLMEmbedding); renders NO HR token (hrHidden). FM re-canonicalizes it on paste, so the hidden default round-trips (Perform SQL Query by Natural Language / Perform Find precedent)."
+      },
+      {
         "xmlElement": "Field",
         "type": "fieldOrVariable",
         "hrLabel": "Target",
@@ -5438,6 +5448,26 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "DetectVertical",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26 internal flag FM always serializes ahead of RAGSpace (live copy-back: <DetectVertical state=\"False\"/>); renders NO HR token (hrHidden). FM re-canonicalizes on paste, so the hidden default round-trips."
+      },
+      {
+        "xmlElement": "RAGSpaceTokensPerTextChunk",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26 internal flag FM always serializes ahead of RAGSpace (live copy-back: <RAGSpaceTokensPerTextChunk state=\"False\"/>); renders NO HR token (hrHidden). FM re-canonicalizes on paste, so the hidden default round-trips."
+      },
+      {
         "xmlElement": "Stream",
         "type": "boolean",
         "hrLabel": "Stream",
@@ -5741,6 +5771,16 @@
     "snippetFile": "artificial intelligence/Perform Semantic Find.xml",
     "selfClosing": false,
     "params": [
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "enum",
+        "hrLabel": null,
+        "xmlAttr": "type",
+        "hrHidden": true,
+        "required": true,
+        "defaultValue": "Embedded",
+        "note": "FM 26 internal marker FM always serializes ahead of LLMSemanticFind (live copy-back: <UniversalPathList type=\"Embedded\"/>); renders NO HR token (hrHidden). Mirrors Perform SQL Query by Natural Language's UniversalPathList; FM derives it on paste."
+      },
       {
         "xmlElement": "Field",
         "type": "field",
@@ -6718,8 +6758,30 @@
         "type": "flagBoolean",
         "hrLabel": "Include details for analysis tools",
         "xmlAttr": "state",
+        "flagStyle": true,
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "note": "FM renders this bare (flag) when On, nothing when Off (live copy-back: state=True -> 'Include details for analysis tools'). flagStyle."
+      },
+      {
+        "xmlElement": "OutputEntireBinaryData",
+        "type": "boolean",
+        "hrLabel": "Save each layout object's binary data under its node",
+        "xmlAttr": "state",
+        "flagStyle": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26. Bare flag: FM shows the label only when state=True (live copy-back: 'Save each layout object's binary data under its node'), nothing when False. flagStyle."
+      },
+      {
+        "xmlElement": "SpecifyJSONOptions",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26 gate flag FM always serializes (live copy-back: <SpecifyJSONOptions state=\"...\"/>); renders NO HR token (hrHidden). Its True/False state is preserved on round-trip by P7.1 governed-visibility (derived on emit from whether the JSONOptions calc contributed an HR token — Import/Export/Sort Restore precedent), NOT by FM re-canonicalization (live FM keeps whatever state is pasted, unlike Perform SQL's Option). The <SaXML> subtree is emitted by FM regardless of this flag."
       },
       {
         "xmlElement": "UniversalPathList",
@@ -6734,9 +6796,20 @@
         "hrLabel": "Window name",
         "required": true,
         "note": "Window name of the open file to export"
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Specify options as JSON",
+        "wrapperElement": "JSONOptions",
+        "parentElement": "SaXML",
+        "required": false,
+        "omitWhenEmpty": true,
+        "visibleWhen": { "param": "SpecifyJSONOptions", "values": ["True"] },
+        "note": "FM 26. The catalog-options JSON expression, nested <SaXML><JSONOptions><Calculation> (live copy-back). Rendered 'Specify options as JSON: <calc>' only when SpecifyJSONOptions is True (P7.1 governed-visibility: FM shows this token only when the JSON option is on, and derives SpecifyJSONOptions=True on paste from this calc's presence — Import/Export/Sort Restore precedent). omitWhenEmpty: an unconfigured step emits no empty subtree; FM supplies its default catalog JSONSetElement on paste."
       }
     ],
-    "hrSignature": "[ Window name: <calc> ; Destination file: <path> ; <Include details for analysis tools> ]",
+    "hrSignature": "[ <Include details for analysis tools> ; <Save each layout object's binary data under its node> ; Destination file: <path> ; Window name: <calc> ; Specify options as JSON: <calc> ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/save-a-copy-as-xml.html"
@@ -8145,6 +8218,19 @@
         "xmlAttr": "value",
         "required": false,
         "defaultValue": "100",
+        "enumValues": [
+          "25",
+          "50",
+          "75",
+          "100",
+          "150",
+          "200",
+          "300",
+          "400",
+          "ZoomIn",
+          "ZoomOut",
+          "ByCalculation"
+        ],
         "hrEnumValues": {
           "25": "25%",
           "50": "50%",
@@ -8155,11 +8241,22 @@
           "300": "300%",
           "400": "400%",
           "ZoomIn": "Zoom In",
-          "ZoomOut": "Zoom Out"
-        }
+          "ZoomOut": "Zoom Out",
+          "ByCalculation": "By Calculation"
+        },
+        "hrHiddenValues": ["ByCalculation"],
+        "notes": "FM 26 adds ByCalculation: FileMaker renders NO zoom token for it — the percentage calculation appears in that slot instead (live copy-back: `[ Lock: Off ; 75% ]`), so the Calculation companion's presence is what selects it (mirrors Go to Record/Request/Page's ByCalculation). The other values render their own bare token."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "calc",
+        "hrLabel": null,
+        "required": false,
+        "visibleWhen": { "param": "Zoom", "values": ["ByCalculation"] },
+        "notes": "Zoom-percentage calculation (FM 26). Only applies when Zoom is ByCalculation; rendered bare in the zoom slot. FM appends a cosmetic '%' to its own SW display of the calc, which the HR does not reproduce."
       }
     ],
-    "hrSignature": "[ Lock: <On/Off> ; <25%/50%/75%/100%/150%/200%/300%/400%/Zoom In/Zoom Out> ]",
+    "hrSignature": "[ Lock: <On/Off> ; <25%/50%/75%/100%/150%/200%/300%/400%/Zoom In/Zoom Out/calc> ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/set-zoom-level.html"
