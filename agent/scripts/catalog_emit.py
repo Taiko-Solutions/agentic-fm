@@ -1318,9 +1318,46 @@ def convert_step_with_catalog(
                         piece = '    <Layout id="' + str(rid) + '" name="' + esc_xml(rname) + '"/>'
         elif param.type == "script":
             if not param.omit_when_empty or _trim(hr_value):
-                script_name = _unquote(hr_value)
-                sid, sname = resolver.resolve_script(script_name)
-                piece = '    <Script id="' + str(sid) + '" name="' + esc_xml(sname) + '"/>'
+                # Cross-file reference (Perform Script id 1): FM renders a call into
+                # another file as the positional token `"NAME" from file: "FILE"`.
+                # When the catalog opts this script param into the from-file grammar
+                # (``fromFileElement`` set), split that infix clause into a
+                # <FileReference name="FILE"> sibling emitted BEFORE the <Script>,
+                # carrying a <UniversalPathList>file:FILE</> child, and emit the
+                # <Script> NAME-ONLY. FM binds the reference by the external-data-
+                # source NAME when one of that name exists in the destination — the
+                # path is then ignored (even a wrong path binds, no dialog), so an
+                # in-solution cross-file call never regresses. When the destination
+                # does NOT yet reference FILE, the child preserves the file name
+                # (`from file: "FILE"`) and lets FM raise its normal locate prompt
+                # (fail-loud) instead of a name-only reference's silent `from file:
+                # ""` drop. The path uses the display NAME — the only value available
+                # offline; name-binding makes the real filename moot for resolvable
+                # references. The <Script> stays name-only: its binding id lives in
+                # the OTHER file (absent from the current-file context), so resolving
+                # it would bind the WRONG same-file script of the same name; FM shows
+                # it <unknown> until rebound while the file + name survive intact.
+                from_file_element = _raw_str(param.raw, "fromFileElement")
+                file_name = ""
+                script_token = hr_value
+                if from_file_element:
+                    marker = " from file: "
+                    fp = hr_value.find(marker)
+                    if fp != -1:
+                        script_token = _trim(hr_value[:fp])
+                        file_name = _unquote(_trim(hr_value[fp + len(marker):]))
+                script_name = _unquote(script_token)
+                if file_name:
+                    script_xml = '    <Script name="' + esc_xml(script_name) + '"/>'
+                    piece = (
+                        "    <" + from_file_element + ' name="' + esc_xml(file_name) + '">\n'
+                        + "      <UniversalPathList>file:" + esc_xml(file_name)
+                        + "</UniversalPathList>\n    </" + from_file_element + ">\n"
+                        + script_xml
+                    )
+                else:
+                    sid, sname = resolver.resolve_script(script_name)
+                    piece = '    <Script id="' + str(sid) + '" name="' + esc_xml(sname) + '"/>'
         elif param.type in ("text", "name") and (not param.omit_when_empty or _trim(hr_value)):
             quoted, bare = _is_quoted_lone_variable(hr_value)
             emit_value = bare if quoted else hr_value
