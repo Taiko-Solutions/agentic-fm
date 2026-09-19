@@ -732,8 +732,10 @@
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "Account Name",
-        "wrapperElement": "AccoutName",
-        "parentElement": "SetLLMAccout",
+        "wrapperElement": "AccountName",
+        "wrapperElementAliases": ["AccoutName"],
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
         "required": false
       },
       {
@@ -759,7 +761,8 @@
         "type": "namedCalc",
         "hrLabel": "Endpoint",
         "wrapperElement": "Endpoint",
-        "parentElement": "SetLLMAccout",
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
         "required": false
       },
       {
@@ -776,7 +779,8 @@
         "type": "namedCalc",
         "hrLabel": "API key",
         "wrapperElement": "AccessAPIKey",
-        "parentElement": "SetLLMAccout",
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
         "required": false
       }
     ],
@@ -6426,20 +6430,23 @@
         "hrLabel": null,
         "xmlAttr": "value",
         "required": false,
-        "defaultValue": "Calculation",
-        "enumValues": ["CurrentContents", "SerialNumbers", "Calculation"],
+        "defaultValue": "None",
+        "enumValues": ["None", "CurrentContents", "SerialNumbers", "Calculation"],
         "discriminatorValues": {
+          "None": {},
           "CurrentContents": { "hrToken": "Current contents" },
           "SerialNumbers": { "hrToken": "Serial numbers" },
-          "Calculation": { "reveal": ["Calculation"] }
-        }
+          "Calculation": {}
+        },
+        "notes": "None is FileMaker's unconfigured default and renders no HR token (empty discriminator spec). Current contents / Serial numbers render their bare tokens. Calculation also renders no token of its own - the replacement calculation appears in that slot instead (empty spec), and its presence is what selects Calculation on read-back (see the Calculation param's visibleWhen), mirroring Go to Record/Request/Page's ByCalculation."
       },
       {
         "xmlElement": "Calculation",
-        "type": "calculation",
+        "type": "calc",
         "hrLabel": null,
         "required": false,
-        "note": "Revealed only when With=Calculation; rendered bare (no label) as the replacement value. Omitted from XML for the Current contents / Serial numbers branches."
+        "visibleWhen": { "param": "With", "values": ["Calculation"] },
+        "note": "Shown only when With=Calculation; rendered bare (no label) as the replacement value, omitted from XML for the None / Current contents / Serial numbers branches. Its presence in HR is what selects With=Calculation on read-back (With renders no token for Calculation)."
       },
       {
         "xmlElement": "SerialNumbers",
@@ -6450,9 +6457,11 @@
         "fields": [
           { "key": "PerformAutoEnter", "kind": "attr", "xmlAttr": "PerformAutoEnter", "defaultValue": "False" },
           { "key": "UpdateEntryOptions", "kind": "attr", "xmlAttr": "UpdateEntryOptions", "defaultValue": "False" },
-          { "key": "UseEntryOptions", "kind": "attr", "xmlAttr": "UseEntryOptions", "defaultValue": "True" }
+          { "key": "increment", "kind": "attr", "xmlAttr": "increment", "defaultValue": "0" },
+          { "key": "InitialValue", "kind": "attr", "xmlAttr": "InitialValue", "defaultValue": "" },
+          { "key": "UseEntryOptions", "kind": "attr", "xmlAttr": "UseEntryOptions", "defaultValue": "False" }
         ],
-        "notes": "Always-present <SerialNumbers> config attrs. FM never renders them in HR (the 'Serial numbers' HR token comes from the With enum value, not this group). Hidden: emits catalog defaults, never claims an HR token. The auto-enter sub-options are not encoded in FM's HR text, so they are not authorable from HR - the same fidelity FM's own serialization has."
+        "notes": "Always-present <SerialNumbers> config attrs, in FileMaker's serialization order (PerformAutoEnter, UpdateEntryOptions, increment, InitialValue, UseEntryOptions). FM never renders them in HR (the 'Serial numbers' HR token comes from the With enum value, not this group). Hidden: emits catalog defaults, never claims an HR token. The serial start (InitialValue) / increment and the auto-enter sub-options are not encoded in FM's HR text, so they are not authorable from HR and an HR round-trip emits these defaults - the same fidelity FM's own serialization has."
       }
     ],
     "hrSignature": "[ With dialog: <On/Off> ; <Table::Field> ; <calculation | Current contents | Serial numbers> ]",
