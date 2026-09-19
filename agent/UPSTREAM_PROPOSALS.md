@@ -217,3 +217,100 @@ Ran into this deploying agentic-fm against a multi-file solution — seven `.fmp
 - **Fix propuesto**: en el template, pasar `JSONSetElement ( $ErrorTrace ; [ "environment" ; getScriptEnvironment ; JSONRaw ] )` como parámetro de `Create Log Clew` (la CF ya se usa en la salida de éxito). Alternativa: que `Create Log Clew` tome el nombre del script de `errorTrace[0].script.name` y el parámetro de `errorTrace[0].script.parameter` cuando no haya `environment`.
 - **Archivos afectados**: `agent/docs/taiko/templates/clew-transactional-dual.md`, `clew-transactional-orchestrator.md`, `agent/docs/taiko/knowledge/clew-transactional-dual.md`
 - **Origen**: verificación del camino de error de un controlador refactorizado al patrón dual (2026-09-18): el registro de `Log` tenía el trace correcto pero `ScriptName`/`ScriptParameter` vacíos. Patrón genérico del template, sin datos de cliente.
+
+## 2026-07-11 — fmlint: detectar pasos inalcanzables tras Exit Script / Halt Script incondicional
+
+- **Categoría**: fmlint
+- **Descripción**: `Exit Script [ If ( Get ( LastMessageChoice ) = 2 ; "Cancelado" ) ]` en mitad de un script parece una salida condicional pero no lo es: `Exit Script` siempre sale; el `If()` solo condiciona el texto devuelto. Todo paso posterior al mismo nivel de anidamiento es código muerto y el script termina en silencio a mitad de flujo. Propuesta: regla nueva (p. ej. B00x) que marque como WARNING cualquier paso que siga a un `Exit Script` / `Halt Script` habilitado dentro del mismo bloque (mismo nivel de If/Loop), con un hint que sugiera `If [ condición ] → Exit Script → End If`. Sin falsos positivos esperables: un `Exit Script` legítimo al final de una rama no tiene pasos posteriores en su bloque.
+- **Archivos afectados**: `agent/fmlint/rules/` (regla nueva), tests de fmlint
+- **Origen**: proyecto cliente (2026-07-11): dos scripts de prueba generados con este patrón nunca llegaban a su `Perform Script` y la verificación aparentaba estar hecha sin haberse ejecutado; ni fmlint ni la revisión del HR lo detectaron. Sin datos de cliente.
+
+## 2026-07-11 — fm_xml_to_snippet.py: New Window pierde todos sus parámetros
+
+- **Categoría**: script_utility (conversor)
+- **Descripción**: al convertir SaXML→fmxmlsnippet, `New Window` (id 122) se emite autocerrado (`<Step id="122" name="New Window"/>`): se pierden Style, Name, Layout y bounds. El SaXML lo serializa como `Parameter type="WindowReference"` con `<WindowReference><Style/><Name/><LayoutReferenceContainer/><Bounds/><Options/></WindowReference>`, que el conversor no mapea. Pegado así, FileMaker crea una ventana sin nombre en el layout actual; en el patrón transaccional Taiko (`New Window` antes de `Open Transaction`) rompe el `Close Window [ Name: $WindowName ]` posterior y el aislamiento de la transacción, en silencio. Forma de destino: `<LayoutDestination value="SelectedLayout"/>` + `<NewWndStyles Styles="…"/>` + `<Name><Calculation/></Name>` + `<Layout id name/>`. Misma familia que la entrada del 2026-09-08 (parámetros perdidos) y la de `Perform Script` cross-file del 2026-09-18.
+- **Mitigación mientras tanto**: diff round-trip `snippet_to_hr` del snippet convertido contra `scripts_sanitized/` antes de desplegar cualquier script convertido.
+- **Archivos afectados**: `agent/scripts/fm_xml_to_snippet.py`, tests del conversor
+- **Origen**: proyecto cliente (2026-07-11), detectado con un diff round-trip al convertir un script que abre una ventana transaccional con nombre y layout concretos; reconstruido a mano antes de desplegar. Sin datos de cliente.
+
+## 2026-07-11 — deploy.py: `_switch_to_document` elige la ventana por substring y puede desplegar en el archivo equivocado
+
+- **Categoría**: script_utility
+- **Descripción**: `_switch_to_document` selecciona la ventana destino con AppleScript `whose name contains "<target_file>"`. Si el nombre de un archivo es prefijo de otro en la misma solución multi-archivo (p. ej. `SolutionApp` y `SolutionApp-Controller`), el filtro casa con ambos y se pulsa el primero: el deploy Tier 2/3 aterriza en el archivo equivocado **y reporta éxito**. Propuesta: comparar exacto contra el nombre de ventana normalizado (los títulos son `<archivo> (<layout>)`: comparar el prefijo hasta el paréntesis, o `name is` con fallback a `begins with "<archivo> ("`); con 0 o más de 1 candidato, abortar con error explícito. Añadir una verificación posterior (`get name of window 1` debe empezar por el archivo pedido) antes de pegar.
+- **Archivos afectados**: `agent/scripts/deploy.py` (`_switch_to_document`), quizá companion `/trigger`
+- **Origen**: proyecto cliente multi-archivo (2026-07-11): dos scripts desplegados con `--file` se crearon en el archivo controlador con referencias de campo irresolubles; detectado con ProofKit `get_script_names` tras un deploy aparentemente correcto. Sin datos de cliente.
+
+## 2026-07-12 — Knowledge: `List()` no agrega el found set sobre una TO externa en servidor
+
+- **Categoría**: knowledge (taiko)
+- **Descripción**: `List ( TOExterna::Campo )` devuelve solo el valor del registro actual (no el de todo el found set) cuando la TO apunta a una fuente de datos externa (otro archivo FileMaker o ESS) **y** el script corre en servidor (OData/PSOS). En FileMaker Pro con TO local funciona. Síntoma: `Get ( FoundCount )` = N correcto pero `List()` devuelve 1 valor (una notificación a un grupo solo llegaba a 1 de N). Fix: iterar el found set (`Go to Record [ First ]` + Loop acumulando `List ( $Acc ; TO::Campo )` + `Go to Record [ Next ; Exit after last ]`), en el espíritu de `cross-to-pointer-in-loops.md`.
+- **Archivos afectados**: `agent/docs/taiko/knowledge/` (ampliar `cross-to-pointer-in-loops.md` o doc nuevo), `agent/docs/taiko/knowledge/MANIFEST.md`
+- **Origen**: proyecto cliente (2026-07-12), script de notificación ejecutado en servidor. Sin datos de cliente.
+
+## 2026-07-12 — Patrón: modo de envío (produccion/pruebas/off) en el script central de email
+
+- **Categoría**: knowledge (taiko) / template
+- **Descripción**: patrón "email sandbox" para el script central de envío transaccional. Al inicio, dos valores de configuración: `$EmailModo` ∈ {produccion, pruebas, off} y `$EmailDestinoPruebas`. En `pruebas` reescribe `to` al buzón de pruebas, elimina cc/bcc y marca el asunto con `[PRUEBAS]`; el log registra el destinatario real (`[REDIRIGIDO A PRUEBAS → x] destinatario real: …`). En `off` no envía. Si dev y prod son archivos separados, la configuración es por archivo. Resuelve "ir a producción sin enviar correos reales todavía" y las pruebas del cliente sin molestar a usuarios reales. Sustituye el antipatrón de fijar un destinatario de prueba en cada script emisor.
+- **Archivos afectados**: `agent/docs/taiko/knowledge/` o `agent/docs/taiko/templates/`, MANIFEST
+- **Origen**: proyecto cliente (2026-07-12), script central de email transaccional. Sin datos de cliente.
+
+## 2026-07-14 — step-catalog: `Perform Script` no declara `<Calculated>` (By name) ni `<FileReference>` (cross-file) → falsos positivos X001
+
+- **Categoría**: catalog / fmlint
+- **Descripción**: la entrada `Perform Script` (id 1) solo declara `Script` y `Calculation`. `_allowed_children()` de `param_fidelity.py` construye los hijos válidos desde `params[]` (más `GLOBAL_ALLOWED = {Text, Animation}`), así que X001 marca como descarte silencioso dos formas **canónicas y correctas**:
+  - **By name**: `<Calculated><Calculation>nombre</Calculation></Calculated>` antes del `<Calculation>` del parámetro (verificado por round-trip: el explode muestra `<List name="By name" value="2">`).
+  - **Cross-file**: `<FileReference id name><UniversalPathList>…</UniversalPathList></FileReference>`, la misma forma que documenta `silent-discard-params.md` (§ X003) y que X003 valida. X001 la rechaza de plano, así que ningún `Perform Script` cross-file pasa el linter sin `--disable X001`.
+  Reproducido en `taiko` (2026-09-19) con un snippet mínimo: dos FAIL X001. El coste no es solo ruido: X001 caza descartes reales y acostumbrarse a ignorarla en este paso desarma la defensa.
+- **Fix propuesto**: añadir a `params[]` de `Perform Script` `{"xmlElement": "Calculation", "type": "namedCalc", "hrLabel": "By name", "wrapperElement": "Calculated"}` (mismo modelado que `Add Account`) y el param `FileReference` con su hijo `UniversalPathList`. Revisar `Perform Script on Server` (ya declara `Calculated`; comprobar `FileReference`). Test de regresión en `agent/fmlint/tests/`.
+- **Archivos afectados**: `agent/catalogs/step-catalog-en.json`, `agent/fmlint/tests/`
+- **Origen**: dos proyectos cliente (2026-07-14 y 2026-09-10): un wrapper que llama a un controlador transaccional de otro archivo y callbacks `Perform Script [ By name ]` en selectores y routers. Sin datos de cliente.
+
+## 2026-09-10 — fm_xml_to_snippet.py: `Perform Script [ By name ]` pierde el nombre del script
+
+- **Categoría**: script_utility (conversor)
+- **Descripción**: el SaXML serializa el modo By name como `<Parameter type="List"><List name="By name" value="2"><Calculation>…</Calculation></List></Parameter>` y el conversor emite solo el `<Calculation>` del **parámetro**, sin el `<Calculated>` del nombre: el paso convertido queda sin destino (p. ej. `<Step id="1" name="Perform Script"><Calculation><![CDATA[$asJson]]></Calculation></Step>`, perdida la variable con el nombre del script). Misma familia que `New Window` (2026-07-11) y la referencia cross-file (2026-09-18): parámetros envueltos en un contenedor del SaXML que el conversor no mapea.
+- **Archivos afectados**: `agent/scripts/fm_xml_to_snippet.py`, tests del conversor
+- **Origen**: proyecto cliente (2026-09-10), al buscar la forma canónica del By name para un callback. Sin datos de cliente.
+
+## 2026-09-12 — Convención: publicar los resultados de un script también en variables globales (copiables)
+
+- **Categoría**: convention (taiko)
+- **Descripción**: `Show Custom Dialog` no permite seleccionar ni copiar el texto. Si el resultado se va a reutilizar (métricas de auditoría, JSON de diagnóstico, listas de IDs), hay que transcribirlo o hacer una captura. Convención: publicar siempre el resultado en variables globales antes de mostrar el diálogo (`$$<Ambito>` con el JSON y `$$<Ambito>Texto` con el resumen legible) y que el diálogo muestre la variable de texto. Queda copiable desde el Visor de datos sin cambiar la experiencia; coste cero (dos `Insert Calculated Result`).
+- **Archivos afectados**: `agent/docs/taiko/CODING_CONVENTIONS.md` (sección nueva "Presentación de resultados" o en "Preferred Script Steps"), `agent/docs/taiko/templates/clew-simple.md`
+- **Origen**: proyecto cliente (2026-09-12), script de auditoría cuyas métricas hubo que enviar como captura de pantalla. Sin datos de cliente.
+
+## 2026-09-13 — Library: found set a partir de una lista de IDs (una petición por ID con Set Field By Name)
+
+- **Categoría**: library / knowledge
+- **Descripción**: patrón reutilizable para dejar en el found set de cualquier layout los registros de una lista de IDs obtenida con `ExecuteSQL` (p. ej. filtrar por una tabla puente N:M respetando un flag `Activo`): `Enter Find Mode` → bucle con una petición por ID (`New Record/Request` desde la 2ª) → `Set Field By Name [ $CampoId ; "==" & GetValue ( $Ids ; $i ) ]` + criterio opcional de texto en la misma petición → `Perform Find`. Recibir los campos por `GetFieldName` lo hace independiente de la TO del layout. Aviso: el criterio de texto debe ir sobre un campo **almacenado y relleno**; un campo auto-enter nunca evaluado en registros migrados deja la búsqueda vacía sin error.
+- **Archivos afectados**: item nuevo en `agent/library/` + su índice; mención en `agent/docs/taiko/knowledge/executesql-pattern.md`
+- **Origen**: proyecto cliente (2026-09-13), subscript compartido de selector filtrado por una relación N:M. Sin datos de cliente.
+
+## 2026-09-13 — Knowledge: auditar relaciones multi-predicado tras migrar 1:N → N:M
+
+- **Categoría**: knowledge (taiko)
+- **Descripción**: al sustituir un FK directo (1:N) por una tabla puente (N:M), el FK antiguo queda congelado en su último valor. Además de los scripts que filtran por él, hay que auditar las **relaciones del grafo con más de un predicado** que lo siguen usando como condición adicional (p. ej. `Registro::FKContacto = Contacto::Id` **y** `Registro::FKEmpresa = Contacto::FKEmpresaAntiguo`): el ID se guarda bien, pero el campo relacionado aparece en blanco para registros nuevos o reasignados. Checklist: buscar en `relationships.index` las TOs de la tabla migrada con predicados múltiples que referencien el FK antiguo, más los layouts, scripts y cálculos que usen esas TOs (con el MCP: `fm_refs` / `fm_impact`).
+- **Archivos afectados**: `agent/docs/taiko/knowledge/migracion-1n-a-nm-checklist.md` (nuevo) + MANIFEST
+- **Origen**: proyecto cliente (2026-09-13): un contacto relacionado aparecía en blanco en dos módulos por relaciones con el FK antiguo como segunda condición. Sin datos de cliente.
+
+## 2026-09-13 — ProofKit gotchas: "FileMaker is in a paused state" y conector que no responde
+
+- **Categoría**: knowledge (proofkit)
+- **Descripción**: `execute_filemaker_sql` y el resto de herramientas ProofKit fallan con *"FileMaker is in a paused state, so scripts cannot execute right now"* cuando el desarrollador tiene un diálogo modal abierto, un script en pausa o el Script Debugger detenido: no es un fallo de conexión. Y si una herramienta devuelve timeout con *"MCP Server Connector window is open but is not responding"*, hay que cerrar esa ventana y relanzar *Connect To ProofKit MCP*. Documentar ambos síntomas con la acción que hay que pedir al desarrollador.
+- **Archivos afectados**: `agent/docs/taiko/proofkit/gotchas.md`
+- **Origen**: proyecto cliente (2026-09-13), varias consultas en vivo interrumpidas. Sin datos de cliente.
+
+## 2026-09-13 — Knowledge: obtener el ID de un script recién creado sin explode ni OData
+
+- **Categoría**: knowledge
+- **Descripción**: la técnica de placeholders necesita el ID del script nuevo antes de generar los `Perform Script` que lo llaman. Si OData no responde y no se quiere relanzar el explode, basta con una expresión en el Visor de datos: `Let ( [ ~n = ScriptNames ( Get ( FileName ) ) ; ~i = ScriptIDs ( Get ( FileName ) ) ] ; While ( [ ~k = 1 ; ~r = "" ] ; ~k ≤ ValueCount ( ~n ) and ~r = "" ; [ ~r = If ( GetValue ( ~n ; ~k ) = "<Nombre>" ; GetValue ( ~i ; ~k ) ; "" ) ; ~k = ~k + 1 ] ; ~r ) )`. `get_script_names` de ProofKit devuelve solo nombres. Añadirlo al skill `multi-script-scaffold` como vía alternativa.
+- **Archivos afectados**: `.claude/skills/multi-script-scaffold/SKILL.md`, `agent/docs/knowledge/script-ids.md`
+- **Origen**: proyecto cliente (2026-09-13), OData con timeout al resolver el ID de un subscript. Sin datos de cliente.
+
+## 2026-07-01 — fmparse.sh no borra el `.txt` legible de una custom function sensible (layout multi-BD) — **severidad alta**
+
+- **Categoría**: script_utility / seguridad
+- **Descripción**: en el paso "Remove sensitive items", `fmparse.sh` busca las custom functions a eliminar en `custom_function_calcs/`, `custom_function_stubs/` y `custom_functions_sanitized/$SOLUTION_NAME`. En el explode multi-BD de `taiko` la carpeta con el texto legible es `custom_functions/$SOLUTION_NAME` (no existe `custom_functions_sanitized/`), así que un re-explode **deja en claro el `.txt`** de una CF listada en `removals.json` (p. ej. una CF que devuelve una API key). Los scripts sí se limpian bien. `.claude/CLAUDE.md` (sección "Custom functions") también nombra `custom_functions_sanitized/` como ruta del texto legible.
+- **Fix propuesto**: añadir `"$XML_PARSED_DIR/custom_functions/$SOLUTION_NAME"` a `_search_dirs` de `custom_function` (manteniendo `custom_functions_sanitized/` por compatibilidad con el layout plano) y corregir la ruta en `.claude/CLAUDE.md`. La otra mitad de la propuesta original (`check_embedded_agfm.py` sin glob recursivo) ya está aplicada en `taiko` (entrada del 2026-09-08).
+- **Archivos afectados**: `fmparse.sh`, `.claude/CLAUDE.md`
+- **Origen**: setup en un repo cliente con 3 bases de datos en un solo clon (2026-07-01): la auditoría de `removals.json` detectó que la limpieza de CFs no cubría la carpeta real. Verificado en `taiko` el 2026-09-19. Sin datos de cliente.
