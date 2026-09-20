@@ -372,7 +372,7 @@
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"199\" name=\"Rename File\">\n    <UniversalPathList>$path</UniversalPathList>\n    <Calculation><![CDATA[\"new_name\"]]></Calculation>\n  </Step>\n</fmxmlsnippet>"
   },
   "files/Save a Copy as XML.xml": {
-    "hr": "Save a Copy as XML [ Include details for analysis tools: On ; $path ; Get ( WindowName ) ]",
+    "hr": "Save a Copy as XML [ Include details for analysis tools ; $path ; Get ( WindowName ) ]",
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"3\" name=\"Save a Copy as XML\">\n    <Option state=\"True\"/>\n    <UniversalPathList>$path</UniversalPathList>\n    <Calculation><![CDATA[Get ( WindowName )]]></Calculation>\n  </Step>\n</fmxmlsnippet>"
   },
   "files/Save a Copy as.xml": {
@@ -440,7 +440,7 @@
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"154\" name=\"Sort Records by Field\">\n    <SortRecordsByField value=\"SortAscending\"/>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n  </Step>\n</fmxmlsnippet>"
   },
   "found sets/Sort Records.xml": {
-    "hr": "Sort Records [ With dialog: Off ; Restore: On ; Sort: =Ascending ]",
+    "hr": "Sort Records [ With dialog: Off ; Sort: =Ascending ]",
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"39\" name=\"Sort Records\">\n    <NoInteract state=\"True\"/>\n    <Restore state=\"True\"/>\n    <SortList Maintain=\"True\" value=\"True\">\n      <Sort type=\"Ascending\">\n        <PrimaryField>\n          <Field table=\"\" id=\"0\" name=\"\"/>\n        </PrimaryField>\n      </Sort>\n    </SortList>\n  </Step>\n</fmxmlsnippet>"
   },
   "found sets/Unsort Records.xml": {
