@@ -426,6 +426,28 @@ def _resolve_enum_xml_value(param: StepParam, hr_value: str) -> str:
     return (param.default_value or "") if hr_value == "" else hr_value
 
 
+def _param_visible_hr(entry: CatalogEntry, values: list[str], param: StepParam) -> bool:
+    """HR->XML counterpart of catalog_grammar.param_visible: whether ``param`` passes
+    its ``visibleWhen`` gate given the sibling param's resolved value from the parsed
+    HR ``values``. An enum sibling's HR token is resolved to its FM XML value
+    (so "Custom" -> "Other" is compared against the value the gate lists); any other
+    sibling uses its raw HR value; empty falls back to the sibling's default. An
+    unresolved gate reference is inert (visible), so a catalog typo degrades to
+    always-emit. Symmetric with param_visible so both directions agree."""
+    vw = param.visible_when
+    if vw is None or not vw.param:
+        return True
+    for i, q in enumerate(entry.params):
+        if param_key(q) != vw.param:
+            continue
+        raw = values[i] if i < len(values) else ""
+        v = _resolve_enum_xml_value(q, raw) if q.type == "enum" else raw
+        if v == "":
+            v = q.default_value or ""
+        return v in vw.values
+    return True
+
+
 def _resolve_bool_state(param: StepParam, hr_value: str) -> str:
     state = param.default_value if param.default_value else "False"
     if hr_value != "":
@@ -1237,6 +1259,24 @@ def convert_step_with_catalog(
 
         if gov_handled:
             pass  # piece already decided (a value or intentionally empty)
+        elif (
+            param.type == "boolean"
+            and param.visible_when is not None
+            and param.visible_when.param
+            and param.omit_when_empty
+        ):
+            # P7.3 governed-visibility boolean: a boolean whose PRESENCE (not just
+            # value) is governed by a sibling enum's value declares a ``visibleWhen``
+            # gate — the generic "governed by another param's enum value" primitive,
+            # symmetric with the XML->HR param_visible skip and the discriminator-
+            # revealed omit. When the gate value is not met FileMaker omits the
+            # element ENTIRELY (confirmed live: Configure AI Account drops
+            # <VerifySSLCertificates> for every LLMType except "Other"); when met it
+            # emits with the normal flag-style presence semantics. Opt-in via
+            # omitWhenEmpty. Benefits any step of this shape, not just #212.
+            if _param_visible_hr(entry, values, param):
+                piece = _emit_boolean(param, hr_value)
+            # else: gate not met -> omit entirely (piece stays "")
         elif param.type == "boolean":
             if pi in implied_bool:
                 attr = param.xml_attr or "state"

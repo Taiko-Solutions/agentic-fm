@@ -736,6 +736,8 @@
         "xmlAttr": "state",
         "required": false,
         "defaultValue": "False",
+        "omitWhenEmpty": true,
+        "visibleWhen": { "param": "LLMType", "values": ["Other"] },
         "hrSlot": 3
       },
       {
