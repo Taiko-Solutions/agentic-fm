@@ -44,7 +44,7 @@
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"222\" name=\"Configure Regression Model\">\n    <LLMTrain>\n      <LLMTrainAction>LLMTrainTrainModel</LLMTrainAction>\n      <LLMAlgorithm>LLMTrainAlgForest</LLMAlgorithm>\n      <LLMTrainModelName>\n        <Calculation><![CDATA[\"model_name\"]]></Calculation>\n      </LLMTrainModelName>\n    </LLMTrain>\n  </Step>\n</fmxmlsnippet>"
   },
   "artificial intelligence/Fine-Tune Model.xml": {
-    "hr": "Fine-Tune Model [ Account Name: \"account\" ; Base Model: \"model\" ; Training Data: Table ; Products::Name ; Parameters: \"Fine-Tune-Parameters\" ]",
+    "hr": "Fine-Tune Model [ Account Name: \"account\" ; Base Model: \"model\" ; Training Data: Table ; Completion Field: Products::Name ; Response Target: $response_target ; Parameters: \"Fine-Tune-Parameters\" ]",
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"213\" name=\"Fine-Tune Model\">\n    <Option state=\"True\"/>\n    <UniversalPathList type=\"Embedded\"/>\n    <Text/>\n    <Table id=\"1065097\" name=\"Products\"/>\n    <Field>$response_target</Field>\n    <FineTuneLLM>\n      <AccountName>\n        <Calculation><![CDATA[\"account\"]]></Calculation>\n      </AccountName>\n      <FineTuneBaseModelName>\n        <Calculation><![CDATA[\"model\"]]></Calculation>\n      </FineTuneBaseModelName>\n      <Parameters>\n        <Calculation><![CDATA[\"Fine-Tune-Parameters\"]]></Calculation>\n      </Parameters>\n      <DataSource>DataTable</DataSource>\n      <Field table=\"Products\" id=\"30\" name=\"Name\"/>\n    </FineTuneLLM>\n  </Step>\n</fmxmlsnippet>"
   },
   "artificial intelligence/Generate Response from Model.xml": {

@@ -2536,7 +2536,7 @@
         "xmlAttr": "state",
         "required": false,
         "defaultValue": "False",
-        "notes": "Emitted first, matching FM's serialization order. Renders no HR token of its own; FM shows the training table and Completion Field only when True. FM does NOT re-canonicalize it from content — handed False with a real <Table> it kept False and wiped the table to id 0 — so the converter derives the state from whether the gated table carries an HR token. The Completion Field cannot be gated as well until this step's two colliding <Field> params get distinct keys (deferred: adhoc-2026-09-19-finetune-model-field-depth-param-key)."
+        "notes": "Emitted first, matching FM's serialization order. Renders no HR token of its own; FM shows the training table and Completion Field only when True. FM does NOT re-canonicalize it from content — handed False with a real <Table> it kept False and wiped the table to id 0 — so the converter derives the state from whether the gated table carries an HR token. The Completion Field is now scoped to <FineTuneLLM> via parentElement while the Response Target reads at step level, so the two <Field> params no longer collide."
       },
       {
         "xmlElement": "UniversalPathList",
@@ -2557,12 +2557,12 @@
       },
       {
         "xmlElement": "Field",
-        "type": "field",
+        "type": "fieldOrVariable",
         "hrLabel": "Response Target",
         "required": false,
         "omitWhenEmpty": true,
         "hrSlot": 5,
-        "notes": "Sibling of FineTuneLLM, emitted before the wrapper (matching FM). Dual format: field ref (table/id/name with repetition) or variable (<Field repetition='n'>$variable</Field> with <Text/>). omitWhenEmpty: present-driven so the unconfigured target emits no <Field>. Read-back of the variable form + disambiguation from the parented Completion <Field> is deferred to adhoc-2026-09-19-finetune-model-field-depth-param-key (needs the parentElement-keyed param-key primitive)."
+        "notes": "Sibling of FineTuneLLM, emitted before the wrapper (matching FM). Dual format: field ref (table/id/name with repetition) or variable (<Text/> marker + <Field repetition='n'>$variable</Field>). Uses the fieldOrVariable grammar (not the bare `field` type) so it reads BOTH the field-ref and the variable text-form and renders WITH its label; base/parentElement scoping already disambiguates it from the parented Completion <Field> at a different depth. omitWhenEmpty: present-driven so the unconfigured target emits no <Field>. Live-verified against FM 26.0.2 copy-back (adhoc-2026-09-19-finetune-model-field-depth-param-key)."
       },
       {
         "xmlElement": "Calculation",
@@ -2610,12 +2610,12 @@
       },
       {
         "xmlElement": "Field",
-        "type": "field",
+        "type": "fieldOrVariable",
         "hrLabel": "Completion Field",
         "parentElement": "FineTuneLLM",
         "required": false,
         "hrSlot": 4,
-        "notes": "Inside <FineTuneLLM>. Field ref only (table/id/name). DataTable source only."
+        "notes": "Inside <FineTuneLLM>. Field ref only (table/id/name) in practice; DataTable source only. Uses the fieldOrVariable grammar (not the bare `field` type) so it renders WITH its label; parentElement=FineTuneLLM scopes the read to the wrapper, disambiguating it from the top-level Response Target <Field>. Live-verified against FM 26.0.2 copy-back."
       }
     ],
     "hrSignature": "Fine-Tune Model [ Account Name: {calc} ; Base Model: {calc} ; Training Data: {Table|File} ; {table|path} ; Completion Field: {field} ; Response Target: {field|$variable} ; Parameters: {calc} ]",
