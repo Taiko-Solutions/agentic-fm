@@ -4406,9 +4406,12 @@
         "defaultValue": "Always",
         "enumValues": [
           "Always",
-          "Minimum",
+          "Min",
           "Defer"
-        ]
+        ],
+        "hrEnumValues": {
+          "Min": "Minimum"
+        }
       }
     ],
     "hrSignature": "Loop [ Collapsed: {Off|On} ; Flush: {Always|Minimum|Defer} ]",
