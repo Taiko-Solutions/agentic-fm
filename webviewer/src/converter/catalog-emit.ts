@@ -697,17 +697,25 @@ function emitFieldOrVariable(
     if (rawBool(param.raw, 'emitEmptyDefault')) return '    <Field table="" id="0" name=""/>';
     return '';
   }
+  // A typed same-element child (typeAttr/typeValue) carries its fixed
+  // discriminator attribute on the <Field …> open tag — FM's variable-only
+  // <Field type="Messages">/<Field type="ToolCalls"> children of one wrapper.
+  // Generic, driven entirely by the catalog. Mirrors the C++/Python converters.
+  const typeAttr = rawStr(param.raw, 'typeAttr');
+  const typeAttrStr = typeAttr
+    ? ` ${typeAttr}="${escXml(rawStr(param.raw, 'typeValue'))}"`
+    : '';
   if (isVariable(hrValue)) {
     const trimmed = trim(hrValue);
     let out = '';
     if (!precededByTextElement) out += '    <Text/>\n';
-    out += `    <Field>${escXml(trimmed)}</Field>`;
+    out += `    <Field${typeAttrStr}>${escXml(trimmed)}</Field>`;
     return out;
   }
   let out = '';
   if (rawBool(param.raw, 'textMarker') && !precededByTextElement) out += '    <Text/>\n';
   const resolved = resolver.resolveField(hrValue);
-  out += `    <Field table="${escXml(resolved.table)}" id="${resolved.fieldId}" name="${escXml(resolved.fieldName)}"/>`;
+  out += `    <Field${typeAttrStr} table="${escXml(resolved.table)}" id="${resolved.fieldId}" name="${escXml(resolved.fieldName)}"/>`;
   return out;
 }
 

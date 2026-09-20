@@ -789,19 +789,31 @@ def _emit_field_or_variable(
         if _raw_bool(param.raw, "emitEmptyDefault"):
             return '    <Field table="" id="0" name=""/>'
         return ""
+    # A typed same-element child (typeAttr/typeValue) carries its fixed
+    # discriminator attribute on the <Field …> open tag — FM's variable-only
+    # <Field type="Messages">/<Field type="ToolCalls"> children of one wrapper.
+    # Generic, driven entirely by the catalog. Mirrors the C++ converter.
+    type_attr = param.raw.get("typeAttr") or ""
+    type_attr_str = (
+        ' ' + type_attr + '="' + esc_xml(param.raw.get("typeValue") or "") + '"'
+        if type_attr
+        else ""
+    )
     if _is_variable(hr_value):
         trimmed = _trim(hr_value)
         out = ""
         if not preceded_by_text_element:
             out += "    <Text/>\n"
-        out += "    <Field>" + esc_xml(trimmed) + "</Field>"
+        out += "    <Field" + type_attr_str + ">" + esc_xml(trimmed) + "</Field>"
         return out
     out = ""
     if _raw_bool(param.raw, "textMarker") and not preceded_by_text_element:
         out += "    <Text/>\n"
     table, fid, fname = resolver.resolve_field(hr_value)
     out += (
-        '    <Field table="'
+        '    <Field'
+        + type_attr_str
+        + ' table="'
         + esc_xml(table)
         + '" id="'
         + str(fid)

@@ -2633,6 +2633,84 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates Parameters. FM re-canonicalizes to True when content present on paste."
+      },
+      {
+        "xmlElement": "SelectAll",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates Tool Definitions / Tool Calls from Model. FM re-derives on paste."
+      },
+      {
+        "xmlElement": "Stream",
+        "type": "boolean",
+        "hrLabel": "Stream",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False"
+      },
+      {
+        "xmlElement": "Set",
+        "type": "boolean",
+        "hrLabel": "Agentic mode",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "True"
+      },
+      {
+        "xmlElement": "LinkAvail",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates Messages. FM re-derives on paste."
+      },
+      {
+        "xmlElement": "Restore",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates the WebScript group. FM re-derives on paste."
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "enum",
+        "hrLabel": null,
+        "xmlAttr": "type",
+        "hrHidden": true,
+        "required": true,
+        "defaultValue": "Embedded",
+        "enumValues": [
+          "Embedded",
+          "Reference"
+        ],
+        "notes": "FM26 internal path marker; renders no HR token (hrHidden). FM re-derives Embedded/Reference on paste. Mirrors Perform Semantic Find / Perform SQL Query by Natural Language."
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Response",
+        "textMarker": true,
+        "required": false,
+        "notes": "Sibling of LLMRequestWithTools. Dual format: field ref or $variable (with the <Text/> marker). Supports repetition."
+      },
+      {
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "Account Name",
@@ -2657,29 +2735,6 @@
         "required": false
       },
       {
-        "xmlElement": "Set",
-        "type": "boolean",
-        "hrLabel": "Agentic mode",
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "True"
-      },
-      {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Response",
-        "required": false,
-        "notes": "Sibling of LLMRequestWithTools. Dual format: field ref or variable with <Text/>. Supports repetition."
-      },
-      {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Tool Calls from Model",
-        "parentElement": "LLMRequestWithTools",
-        "required": false,
-        "notes": "Inside LLMRequestWithTools with type='ToolCalls'. Variable only."
-      },
-      {
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "Instructions",
@@ -2689,19 +2744,34 @@
       },
       {
         "xmlElement": "Field",
-        "type": "field",
+        "type": "fieldOrVariable",
         "hrLabel": "Messages",
         "parentElement": "LLMRequestWithTools",
+        "typeAttr": "type",
+        "typeValue": "Messages",
         "required": false,
         "notes": "Inside LLMRequestWithTools with type='Messages'. Variable only."
       },
       {
         "xmlElement": "SlidingWindowVariable",
-        "type": "complex",
+        "type": "name",
         "hrLabel": "Save Message History To",
         "parentElement": "LLMRequestWithTools",
         "required": false,
-        "notes": "Variable name as text content. Repetition via sibling <SlidingWindowVariableRepetition><Calculation>."
+        "omitWhenEmpty": true,
+        "notes": "Variable name as text content of <SlidingWindowVariable>. Omitted when unset (no empty element leaks into a minimal step)."
+      },
+      {
+        "xmlElement": "SlidingWindowVariable/@IncludeToolCalls",
+        "type": "enum",
+        "hrLabel": "Include Tool Calls",
+        "xmlAttr": "IncludeToolCalls",
+        "flagStyle": true,
+        "parentElement": "LLMRequestWithTools",
+        "enumValues": ["0", "1"],
+        "defaultValue": "0",
+        "required": false,
+        "notes": "FM's IncludeToolCalls flag on <SlidingWindowVariable> (0/1). Emitted as an attribute on that element via the generic Elem/@attr grammar; bare HR flag when set."
       },
       {
         "xmlElement": "Calculation",
@@ -2714,8 +2784,8 @@
       {
         "xmlElement": "Calculation",
         "type": "namedCalc",
-        "hrLabel": "Temperature",
-        "wrapperElement": "Temperature",
+        "hrLabel": "Message History Repetition",
+        "wrapperElement": "SlidingWindowVariableRepetition",
         "parentElement": "LLMRequestWithTools",
         "required": false
       },
@@ -2728,12 +2798,22 @@
         "required": false
       },
       {
-        "xmlElement": "Stream",
-        "type": "boolean",
-        "hrLabel": "Stream",
-        "xmlAttr": "state",
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Tool Calls from Model",
+        "parentElement": "LLMRequestWithTools",
+        "typeAttr": "type",
+        "typeValue": "ToolCalls",
         "required": false,
-        "defaultValue": "False"
+        "notes": "Inside LLMRequestWithTools with type='ToolCalls'. Variable only."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Temperature",
+        "wrapperElement": "Temperature",
+        "parentElement": "LLMRequestWithTools",
+        "required": false
       },
       {
         "xmlElement": "Calculation",
@@ -2760,54 +2840,15 @@
         "required": false
       },
       {
-        "xmlElement": "Option",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
+        "xmlElement": "WebScriptParameters",
+        "type": "parametersList",
+        "hrLabel": "Web Viewer Parameters",
+        "parentElement": "LLMRequestWithTools/WebScript",
         "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Parameters. Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "SelectAll",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Tool Definitions (and Tool Calls from Model). Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "LinkAvail",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Save Message History To (the sliding-window group). Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "Restore",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Web Viewer / Function Name (the WebScript group). Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "UniversalPathList",
-        "type": "complex",
-        "hrLabel": null,
-        "required": false,
-        "notes": "Serialized among the leading boolean flags in the reference example (type='Reference'). Mirrors the Fine-Tune Model param; not shown in HR."
+        "notes": "FM's <WebScriptParameters Count><P><Calculation> argument list for the Web Viewer call."
       }
     ],
-    "hrSignature": "Generate Response from Model [ Account Name: {calc} ; Model: {calc} ; User Prompt: {calc} ; Agentic mode ; Response: {field|$variable} ; Tool Calls from Model: {$variable} ; Instructions: {calc} ; Messages: {$variable} ; Save Message History To: {$variable} ; Message History Count: {calc} ; Temperature: {calc} ; Tool Definitions: {calc} ; Stream ; Parameters: {calc} ; Web Viewer: {$object} ; Function Name: {calc} ]",
+    "hrSignature": "Generate Response from Model [ Stream ; Agentic mode ; Response: {field|$variable} ; Account Name: {calc} ; Model: {calc} ; User Prompt: {calc} ; Instructions: {calc} ; Messages: {$variable} ; Save Message History To: {$variable} ; Message History Count: {calc} ; Message History Repetition: {calc} ; Tool Definitions: {calc} ; Tool Calls from Model: {$variable} ; Temperature: {calc} ; Parameters: {calc} ; Web Viewer: {calc} ; Function Name: {calc} ; Web Viewer Parameters: {calc,...} ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": null

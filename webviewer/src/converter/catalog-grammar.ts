@@ -45,6 +45,25 @@ function findChildren(parent: Element | null, name: string): Element[] {
 }
 
 /**
+ * First direct child element named `name` whose attribute `attr` equals `value`
+ * (ElementTree `parent.find("name[@attr='value']")`). Locates one of several
+ * same-element typed children by its discriminator attribute — the typed-child
+ * grammar (a <Field type="Messages"> vs <Field type="ToolCalls"> sibling).
+ */
+function findChildByAttr(
+  parent: Element | null,
+  name: string,
+  attr: string,
+  value: string,
+): Element | null {
+  if (!parent) return null;
+  for (const c of Array.from(parent.children)) {
+    if (c.tagName === name && (c.getAttribute(attr) ?? '') === value) return c;
+  }
+  return null;
+}
+
+/**
  * Text directly inside `el` (ElementTree `.text`). Every text-bearing element in
  * the catalog grammar (Calculation, Text, Name, UniversalPathList, field text) is
  * a leaf, so `textContent` — which decodes entities and includes CDATA content in
@@ -661,8 +680,17 @@ export function computeParamHr(entry: GrammarEntry, step: Element, param: Gramma
       if (val && label) val = label + ': ' + val;
     }
   } else if (ptype === 'fieldOrVariable') {
-    let fieldNode = findChild(base, param.xmlElement);
-    if (fieldNode === null) fieldNode = findChild(base, 'Field');
+    // A typed same-element child (typeAttr/typeValue) is located by its
+    // discriminator attribute rather than by position, so two typed <Field>
+    // siblings under one wrapper never read each other's node.
+    const typeAttr = (param.raw.typeAttr as string) ?? '';
+    let fieldNode: Element | null;
+    if (typeAttr) {
+      fieldNode = findChildByAttr(base, 'Field', typeAttr, (param.raw.typeValue as string) ?? '');
+    } else {
+      fieldNode = findChild(base, param.xmlElement);
+      if (fieldNode === null) fieldNode = findChild(base, 'Field');
+    }
     if (fieldNode !== null) {
       const table = fieldNode.getAttribute('table') ?? '';
       const name = fieldNode.getAttribute('name') ?? '';
@@ -677,8 +705,14 @@ export function computeParamHr(entry: GrammarEntry, step: Element, param: Gramma
   } else if (ptype === 'calc') {
     val = childText(base, 'Calculation');
   } else if (ptype === 'field') {
-    let fieldNode = findChild(base, param.xmlElement);
-    if (fieldNode === null) fieldNode = findChild(base, 'Field');
+    const typeAttr = (param.raw.typeAttr as string) ?? '';
+    let fieldNode: Element | null;
+    if (typeAttr) {
+      fieldNode = findChildByAttr(base, 'Field', typeAttr, (param.raw.typeValue as string) ?? '');
+    } else {
+      fieldNode = findChild(base, param.xmlElement);
+      if (fieldNode === null) fieldNode = findChild(base, 'Field');
+    }
     if (fieldNode !== null) {
       const table = fieldNode.getAttribute('table') ?? '';
       const name = fieldNode.getAttribute('name') ?? '';
