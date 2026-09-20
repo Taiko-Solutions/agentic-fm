@@ -104,13 +104,44 @@ registerXmlToHr({
 });
 
 // --- Loop ---
+// Loop carries two catalog-defined options (step-catalog-en.json id 71):
+//   Collapsed -> <Restore state="True|False"/>  (default Off/False)
+//   Flush     -> <FlushType value="Always|Minimum|Defer"/> (default Always)
+// The XML tokens are the values FileMaker writes (verified against live FM).
+// Both were previously hardcoded, silently discarding a `Flush: Minimum`
+// performance choice (kirk-2026-09-20-D2).
+function splitNamedClause(clause: string): { label: string; value: string } {
+  const pos = clause.indexOf(':');
+  if (pos < 0) return { label: '', value: clause.trim() };
+  return { label: clause.slice(0, pos).trim(), value: clause.slice(pos + 1).trim() };
+}
+
 registerHrToXml({
   stepNames: ['Loop'],
   toXml(line: ParsedLine): string {
+    // line.params is the semicolon-split clause list, e.g.
+    // ['Collapsed: Off', 'Flush: Minimum'].
+    let restore = 'False'; // Collapsed default Off
+    let flush = 'Always'; // Flush default Always
+    for (const clause of line.params) {
+      const { label, value } = splitNamedClause(clause);
+      const lc = label.toLowerCase();
+      if (lc === 'collapsed') {
+        if (value.toLowerCase() === 'on') restore = 'True';
+        else if (value.toLowerCase() === 'off') restore = 'False';
+        // unrecognised: keep the default (no warnings channel in this converter)
+      } else if (lc === 'flush') {
+        const v = value.toLowerCase();
+        if (v === 'always') flush = 'Always';
+        else if (v === 'minimum') flush = 'Minimum';
+        else if (v === 'defer') flush = 'Defer';
+        // unrecognised: keep Always (never substitute a wrong value)
+      }
+    }
     return [
       stepOpen('Loop', !line.disabled),
-      '    <Restore state="False"/>',
-      '    <FlushType value="Always"/>',
+      `    <Restore state="${restore}"/>`,
+      `    <FlushType value="${flush}"/>`,
       '  </Step>',
     ].join('\n');
   },
@@ -118,8 +149,15 @@ registerHrToXml({
 
 registerXmlToHr({
   xmlStepNames: ['Loop'],
-  toHR(): string {
-    return 'Loop';
+  toHR(el: Element): string {
+    const restore = el.querySelector('Restore')?.getAttribute('state') ?? '';
+    const flush = el.querySelector('FlushType')?.getAttribute('value') ?? '';
+    const clauses: string[] = [];
+    // Emit a clause only when non-default; a plain Loop stays bare "Loop".
+    // Order matches the catalog hrSignature: Collapsed, then Flush.
+    if (restore.toLowerCase() === 'true') clauses.push('Collapsed: On');
+    if (flush && flush.toLowerCase() !== 'always') clauses.push(`Flush: ${flush}`);
+    return clauses.length ? `Loop [ ${clauses.join(' ; ')} ]` : 'Loop';
   },
 });
 
