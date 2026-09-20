@@ -945,9 +945,18 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             if val and label:
                 val = label + ": " + val
     elif ptype == "fieldOrVariable":
-        field_node = base.find(param.xml_element)
-        if field_node is None:
-            field_node = base.find("Field")
+        # A typed same-element child (typeAttr/typeValue) is located by its
+        # discriminator attribute rather than by position, so two typed <Field>
+        # siblings under one wrapper never read each other's node.
+        type_attr = param.raw.get("typeAttr")
+        if type_attr:
+            field_node = base.find(
+                "Field[@%s='%s']" % (type_attr, param.raw.get("typeValue", ""))
+            )
+        else:
+            field_node = base.find(param.xml_element)
+            if field_node is None:
+                field_node = base.find("Field")
         if field_node is not None:
             table = field_node.get("table", "")
             name = field_node.get("name", "")
@@ -966,9 +975,15 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
     elif ptype == "calc":
         val = _child_text(base, "Calculation")
     elif ptype == "field":
-        field_node = base.find(param.xml_element)
-        if field_node is None:
-            field_node = base.find("Field")
+        type_attr = param.raw.get("typeAttr")
+        if type_attr:
+            field_node = base.find(
+                "Field[@%s='%s']" % (type_attr, param.raw.get("typeValue", ""))
+            )
+        else:
+            field_node = base.find(param.xml_element)
+            if field_node is None:
+                field_node = base.find("Field")
         if field_node is not None:
             table = field_node.get("table", "")
             name = field_node.get("name", "")
