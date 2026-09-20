@@ -119,8 +119,25 @@ def _render_end_if(step):
 
 
 def _render_loop(step):
-    """Loop — id 71"""
-    return 'Loop', (False, True)
+    """Loop — id 71.
+
+    Two catalog options: Collapsed -> <Restore state="True|False"/> (default
+    Off/False) and Flush -> <FlushType value="Always|Min|Defer"/> (default
+    Always). FileMaker WRITES the Minimum flush as the token "Min" but DISPLAYS
+    "Minimum" in the Script Workspace, so render the display label. Emit a clause
+    only when non-default, so a plain Loop stays bare "Loop".
+    """
+    clauses = []
+    restore = step.find('Restore')
+    if restore is not None and (restore.get('state') or '').lower() == 'true':
+        clauses.append('Collapsed: On')
+    flush_el = step.find('FlushType')
+    flush = (flush_el.get('value') if flush_el is not None else '') or ''
+    if flush and flush.lower() != 'always':
+        label = 'Minimum' if flush.lower() == 'min' else flush
+        clauses.append(f'Flush: {label}')
+    hr = 'Loop [ ' + ' ; '.join(clauses) + ' ]' if clauses else 'Loop'
+    return hr, (False, True)
 
 
 def _render_exit_loop_if(step):

@@ -208,6 +208,11 @@ def tx_loop(step) -> str:
         lst = p.find('List')
         if lst is not None:
             flush = lst.get('name', 'Always')
+    # FileMaker writes the Minimum flush as the token "Min" in fmxmlsnippet while
+    # displaying "Minimum". If the SaXML source carries the display label,
+    # normalise it so the emitted snippet matches the catalog enum value.
+    if flush.lower() == 'minimum':
+        flush = 'Min'
     return (
         f'{S}<Step enable="{enable}" id="{sid}" name="Loop">\n'
         f'{L1}<Restore state="{restore}"/>\n'
