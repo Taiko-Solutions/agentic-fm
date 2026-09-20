@@ -1,7 +1,7 @@
 {
   "accounts/Add Account.xml": {
     "hr": "Add Account [ Authenticate via: FileMaker ; Account Name: \"Account Name\" ; Password: \"Password\" ; Expire password: On ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"134\" name=\"Add Account\">\n    <AddAccount>\n    <AccountType>FileMaker</AccountType>\n    </AddAccount>\n    <AccountName>\n      <Calculation><![CDATA[\"Account Name\"]]></Calculation>\n    </AccountName>\n    <Password>\n      <Calculation><![CDATA[\"Password\"]]></Calculation>\n    </Password>\n    <PrivilegeSet></PrivilegeSet>\n    <ChgPwdOnNextLogin value=\"True\"/>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"134\" name=\"Add Account\">\n    <AddAccount>\n    <AccountType>FileMaker</AccountType>\n    </AddAccount>\n    <AccountName>\n      <Calculation><![CDATA[\"Account Name\"]]></Calculation>\n    </AccountName>\n    <Password>\n      <Calculation><![CDATA[\"Password\"]]></Calculation>\n    </Password>\n    <PrivilegeSet name=\"\"/>\n    <ChgPwdOnNextLogin value=\"True\"/>\n  </Step>\n</fmxmlsnippet>"
   },
   "accounts/Change Password.xml": {
     "hr": "Change Password [ Old Password: \"old\" ; Password: \"new\" ; With dialog: On ]",
@@ -57,7 +57,7 @@
   },
   "artificial intelligence/Insert Embedding.xml": {
     "hr": "Insert Embedding [ Account Name: \"account_name\" ; Embedding Model: \"model\" ; Input: \"input\" ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"215\" name=\"Insert Embedding\">\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    <LLMEmbedding>\n    <AccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AccountName>\n    <Model>\n      <Calculation><![CDATA[\"model\"]]></Calculation>\n    </Model>\n    <InputText>\n      <Calculation><![CDATA[\"input\"]]></Calculation>\n    </InputText>\n    </LLMEmbedding>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"215\" name=\"Insert Embedding\">\n    <Option state=\"False\"/>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    <LLMEmbedding>\n    <AccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AccountName>\n    <Model>\n      <Calculation><![CDATA[\"model\"]]></Calculation>\n    </Model>\n    <InputText>\n      <Calculation><![CDATA[\"input\"]]></Calculation>\n    </InputText>\n    </LLMEmbedding>\n  </Step>\n</fmxmlsnippet>"
   },
   "artificial intelligence/Insert Image Caption.xml": {
     "hr": "Insert Image Caption [ Account Name: \"account_name\" ; Model: \"model\" ; Input: \"input\" ]",
@@ -73,7 +73,7 @@
   },
   "artificial intelligence/Perform RAG Action.xml": {
     "hr": "Perform RAG Action [ RAG Account Name: \"account_name\" ; Space ID: 10 ; Action: Send Prompt ; Prompt: \"prompt\" ; AI Account Name: \"account_name\" ; Model: \"model\" ; Stream: On ; Prompt Template Name: \"template_name\" ; Parameters: \"parameters\" ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"219\" name=\"Perform RAG Action\">\n    <Stream state=\"True\"/>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    <RAGSpace>\n    <RAGAccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </RAGAccountName>\n    <SpaceID>\n      <Calculation><![CDATA[10]]></Calculation>\n    </SpaceID>\n    <RAGSpaceAction>Prompt</RAGSpaceAction>\n    <PromptMessage>\n      <Calculation><![CDATA[\"prompt\"]]></Calculation>\n    </PromptMessage>\n    <AIAccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AIAccountName>\n    <Model>\n      <Calculation><![CDATA[\"model\"]]></Calculation>\n    </Model>\n    <TemplateName>\n      <Calculation><![CDATA[\"template_name\"]]></Calculation>\n    </TemplateName>\n    <Parameters>\n      <Calculation><![CDATA[\"parameters\"]]></Calculation>\n    </Parameters>\n    </RAGSpace>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"219\" name=\"Perform RAG Action\">\n    <DetectVertical state=\"False\"/>\n    <RAGSpaceTokensPerTextChunk state=\"False\"/>\n    <Stream state=\"True\"/>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    <RAGSpace>\n    <RAGAccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </RAGAccountName>\n    <SpaceID>\n      <Calculation><![CDATA[10]]></Calculation>\n    </SpaceID>\n    <RAGSpaceAction>Prompt</RAGSpaceAction>\n    <PromptMessage>\n      <Calculation><![CDATA[\"prompt\"]]></Calculation>\n    </PromptMessage>\n    <AIAccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AIAccountName>\n    <Model>\n      <Calculation><![CDATA[\"model\"]]></Calculation>\n    </Model>\n    <TemplateName>\n      <Calculation><![CDATA[\"template_name\"]]></Calculation>\n    </TemplateName>\n    <Parameters>\n      <Calculation><![CDATA[\"parameters\"]]></Calculation>\n    </Parameters>\n    </RAGSpace>\n  </Step>\n</fmxmlsnippet>"
   },
   "artificial intelligence/Perform SQL Query by Natural Language.xml": {
     "hr": "Perform SQL Query by Natural Language [ Account Name: \"account_name\" ; Model: \"model\" ; Prompt: \"prompt\" ; Options specified: From list ; Action: Query ; Data Tables: From list ; Tables... ]",
@@ -81,7 +81,7 @@
   },
   "artificial intelligence/Perform Semantic Find.xml": {
     "hr": "Perform Semantic Find [ Query by: Natural language ; Account Name: \"account_name\" ; Embedding Model: \"model\" ; Text: \"search text\" ; Return count: 10 ; Cosine similarity condition: greater than ; Record set: Current found set ; Cosine similarity value: \"0.8\" ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"218\" name=\"Perform Semantic Find\">\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    <LLMSemanticFind>\n    <Query type=\"1\"/>\n    <AccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AccountName>\n    <LLMEmbeddingModel>\n      <Calculation><![CDATA[\"model\"]]></Calculation>\n    </LLMEmbeddingModel>\n    <Text>\n      <Calculation><![CDATA[\"search text\"]]></Calculation>\n    </Text>\n    <Count>\n      <Calculation><![CDATA[10]]></Calculation>\n    </Count>\n    <Condition type=\"1\"/>\n    <Records type=\"2\"/>\n    <Threshold>\n      <Calculation><![CDATA[\"0.8\"]]></Calculation>\n    </Threshold>\n    <SaveResult>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    </SaveResult>\n    </LLMSemanticFind>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"218\" name=\"Perform Semantic Find\">\n    <UniversalPathList type=\"Embedded\"/>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    <LLMSemanticFind>\n    <Query type=\"1\"/>\n    <AccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AccountName>\n    <LLMEmbeddingModel>\n      <Calculation><![CDATA[\"model\"]]></Calculation>\n    </LLMEmbeddingModel>\n    <Text>\n      <Calculation><![CDATA[\"search text\"]]></Calculation>\n    </Text>\n    <Count>\n      <Calculation><![CDATA[10]]></Calculation>\n    </Count>\n    <Condition type=\"1\"/>\n    <Records type=\"2\"/>\n    <Threshold>\n      <Calculation><![CDATA[\"0.8\"]]></Calculation>\n    </Threshold>\n    <SaveResult>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n    </SaveResult>\n    </LLMSemanticFind>\n  </Step>\n</fmxmlsnippet>"
   },
   "artificial intelligence/Set AI Call Logging.xml": {
     "hr": "Set AI Call Logging [ Logging: On ; Filename: \"ai_log.txt\" ; Verbose ; Truncate Messages ]",
@@ -109,7 +109,7 @@
   },
   "control/Configure Region Monitor Script.xml": {
     "hr": "Configure Region Monitor Script [ Monitor: iBeacon ; Name: \"monitor name\" ; UUID: \"BA37611E-FB73-4FFD-8FD3-63459D3FF280\" ; Major: 10 // 0-65535 ; Minor: 1 // 0-65535 ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"185\" name=\"Configure Region Monitor Script\">\n    <MonitorType value=\"iBeacon\">\n    <RangeName>\n      <Calculation><![CDATA[\"monitor name\"]]></Calculation>\n    </RangeName>\n    </MonitorType>\n    <Script id=\"0\" name=\"\"/>\n    <Calculation><![CDATA[]]></Calculation>\n    <MonitorType value=\"iBeacon\">\n    <ProximityUUID>\n      <Calculation><![CDATA[\"BA37611E-FB73-4FFD-8FD3-63459D3FF280\"]]></Calculation>\n    </ProximityUUID>\n    <MajorID>\n      <Calculation><![CDATA[10 // 0-65535]]></Calculation>\n    </MajorID>\n    <MinorID>\n      <Calculation><![CDATA[1 // 0-65535]]></Calculation>\n    </MinorID>\n    </MonitorType>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"185\" name=\"Configure Region Monitor Script\">\n    <MonitorType value=\"iBeacon\">\n    <RangeName>\n      <Calculation><![CDATA[\"monitor name\"]]></Calculation>\n    </RangeName>\n    <ProximityUUID>\n      <Calculation><![CDATA[\"BA37611E-FB73-4FFD-8FD3-63459D3FF280\"]]></Calculation>\n    </ProximityUUID>\n    <MajorID>\n      <Calculation><![CDATA[10 // 0-65535]]></Calculation>\n    </MajorID>\n    <MinorID>\n      <Calculation><![CDATA[1 // 0-65535]]></Calculation>\n    </MinorID>\n    </MonitorType>\n  </Step>\n</fmxmlsnippet>"
   },
   "control/Else If.xml": {
     "hr": "Else If [ Get ( LastError ) = 401 ]",
@@ -197,7 +197,7 @@
   },
   "control/Trigger Claris Connect Flow.xml": {
     "hr": "Trigger Claris Connect Flow [ With dialog: Off ; Don't encode URL: Off ; Select entire contents: On ; Verify SSL certificates: Off ; <unknown> ; cURL options: \"--request POST --header \\\"Content-Type: application/json\\\" --data \" ; <unknown> ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"0\" name=\"Trigger Claris Connect Flow\">\n    <NoInteract state=\"True\"/>\n    <DontEncodeURL state=\"False\"/>\n    <SelectAll state=\"True\"/>\n    <VerifySSLCertificates state=\"False\"/>\n    <Flow>&lt;unknown&gt;</Flow>\n    <CURLOptions>\n      <Calculation><![CDATA[\"--request POST --header \\\"Content-Type: application/json\\\" --data \"]]></Calculation>\n    </CURLOptions>\n    <Text>&lt;unknown&gt;</Text>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"211\" name=\"Trigger Claris Connect Flow\">\n    <NoInteract state=\"True\"/>\n    <DontEncodeURL state=\"False\"/>\n    <SelectAll state=\"True\"/>\n    <VerifySSLCertificates state=\"False\"/>\n    <Flow>&lt;unknown&gt;</Flow>\n    <CURLOptions>\n      <Calculation><![CDATA[\"--request POST --header \\\"Content-Type: application/json\\\" --data \"]]></Calculation>\n    </CURLOptions>\n    <Text>&lt;unknown&gt;</Text>\n  </Step>\n</fmxmlsnippet>"
   },
   "editing/Clear.xml": {
     "hr": "Clear [ Select: On ]",
@@ -269,7 +269,7 @@
   },
   "fields/Insert Text.xml": {
     "hr": "Insert Text [ Select ; Target: $variable ; text content ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"61\" name=\"Insert Text\">\n    <SelectAll state=\"True\"/>\n    <Text/>\n    <Field>$variable</Field>\n    <Text>text content</Text>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"61\" name=\"Insert Text\">\n    <SelectAll state=\"True\"/>\n    <Text>text content</Text>\n    <Field>$variable</Field>\n  </Step>\n</fmxmlsnippet>"
   },
   "fields/Insert from Device.xml": {
     "hr": "Insert from Device [ Type: Camera ; Device: Camera=(choice=Back), Resolution=(choice=Full), LightMode=(choice=Auto) ]",
@@ -293,7 +293,7 @@
   },
   "fields/Replace Field Contents.xml": {
     "hr": "Replace Field Contents [ With dialog: Off ; \"value\" ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"91\" name=\"Replace Field Contents\">\n    <NoInteract state=\"True\"/>\n    <Restore state=\"False\"/>\n    <Field table=\"\" id=\"0\" name=\"&quot;value&quot;\"/>\n    <With value=\"Calculation\"/>\n    <Calculation><![CDATA[]]></Calculation>\n    <SerialNumbers PerformAutoEnter=\"False\" UpdateEntryOptions=\"False\" UseEntryOptions=\"True\"/>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"91\" name=\"Replace Field Contents\">\n    <NoInteract state=\"True\"/>\n    <Restore state=\"False\"/>\n    <Field table=\"\" id=\"0\" name=\"&quot;value&quot;\"/>\n    <With value=\"None\"/>\n    <Calculation><![CDATA[]]></Calculation>\n    <SerialNumbers PerformAutoEnter=\"False\" UpdateEntryOptions=\"False\" increment=\"0\" InitialValue=\"\" UseEntryOptions=\"False\"/>\n  </Step>\n</fmxmlsnippet>"
   },
   "fields/Set Field By Name.xml": {
     "hr": "Set Field By Name",
@@ -372,8 +372,8 @@
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"199\" name=\"Rename File\">\n    <UniversalPathList>$path</UniversalPathList>\n    <Calculation><![CDATA[\"new_name\"]]></Calculation>\n  </Step>\n</fmxmlsnippet>"
   },
   "files/Save a Copy as XML.xml": {
-    "hr": "Save a Copy as XML [ Include details for analysis tools: On ; $path ; Get ( WindowName ) ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"3\" name=\"Save a Copy as XML\">\n    <Option state=\"True\"/>\n    <UniversalPathList>$path</UniversalPathList>\n    <Calculation><![CDATA[Get ( WindowName )]]></Calculation>\n  </Step>\n</fmxmlsnippet>"
+    "hr": "Save a Copy as XML [ Include details for analysis tools ; $path ; Get ( WindowName ) ]",
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"3\" name=\"Save a Copy as XML\">\n    <Option state=\"True\"/>\n    <OutputEntireBinaryData state=\"False\"/>\n    <SpecifyJSONOptions state=\"False\"/>\n    <UniversalPathList>$path</UniversalPathList>\n    <Calculation><![CDATA[Get ( WindowName )]]></Calculation>\n  </Step>\n</fmxmlsnippet>"
   },
   "files/Save a Copy as.xml": {
     "hr": "Save a Copy as [ Create folders: On ; Automatically open: Off ; Create email: Off ; copy of current file ; $path ]",
@@ -440,8 +440,8 @@
     "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"154\" name=\"Sort Records by Field\">\n    <SortRecordsByField value=\"SortAscending\"/>\n    <Field table=\"\" id=\"0\" name=\"\"/>\n  </Step>\n</fmxmlsnippet>"
   },
   "found sets/Sort Records.xml": {
-    "hr": "Sort Records [ With dialog: Off ; Restore: On ; Sort: =Ascending ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"39\" name=\"Sort Records\">\n    <NoInteract state=\"True\"/>\n    <Restore state=\"True\"/>\n    <SortList Maintain=\"True\" value=\"True\">\n      <Sort type=\"Ascending\"><PrimaryField><Field table=\"\" id=\"0\" name=\"\"/></PrimaryField></Sort>\n    </SortList>\n  </Step>\n</fmxmlsnippet>"
+    "hr": "Sort Records [ With dialog: Off ; Sort: =Ascending ]",
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"39\" name=\"Sort Records\">\n    <NoInteract state=\"True\"/>\n    <Restore state=\"True\"/>\n    <SortList BlanksLast=\"False\" Maintain=\"True\" value=\"True\">\n      <Sort type=\"Ascending\"><PrimaryField><Field table=\"\" id=\"0\" name=\"\"/></PrimaryField></Sort>\n    </SortList>\n  </Step>\n</fmxmlsnippet>"
   },
   "found sets/Unsort Records.xml": {
     "hr": "Unsort Records",
@@ -845,7 +845,7 @@
   },
   "windows/Set Zoom Level.xml": {
     "hr": "Set Zoom Level [ Lock: Off ; 100% ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"97\" name=\"Set Zoom Level\">\n    <Lock state=\"False\"/>\n    <Zoom value=\"100\"/>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"97\" name=\"Set Zoom Level\">\n    <Lock state=\"False\"/>\n    <Zoom value=\"100\"/>\n    <Calculation><![CDATA[]]></Calculation>\n  </Step>\n</fmxmlsnippet>"
   },
   "windows/Show_Hide Menubar.xml": {
     "hr": "Show/Hide Menubar [ Lock: Off ; Hide ]",
