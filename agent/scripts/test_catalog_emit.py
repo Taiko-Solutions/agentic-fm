@@ -41,18 +41,19 @@ CONTROL_FLOW = {
     "# (comment)", "If", "Else If", "Else", "End If",
     "Loop", "Exit Loop If", "End Loop", "Exit Script", "Set Variable",
 }
-# The 3 FM26-AI grammar-gap steps stay excluded from every gate (plan §"known gap").
+# The FM26-AI grammar-gap steps stay excluded from every gate (plan §"known gap"):
 # FM26 AI steps whose reference fixtures (captured from an earlier FileMaker
 # serialization) no longer match the emit engine's FileMaker-26-correct output.
-# FileMaker 26 corrected the Configure AI Account wrapper element spelling from
-# <SetLLMAccout>/<AccoutName> to <SetLLMAccount>/<AccountName>; the catalog now
-# emits the corrected spelling (verified against live FileMaker 26), so its
-# stale reference fixture is expected to differ until regenerated.
+# Configure AI Account is NO LONGER excluded — its wrapper spelling
+# (<SetLLMAccout>/<AccoutName> -> <SetLLMAccount>/<AccountName>) and its
+# LLMType-governed <VerifySSLCertificates> visibility are now modeled in the
+# catalog and its fixture is regenerated, so it round-trips byte-identical
+# (verified against live FileMaker 26), mirroring the TS byte-identity gate which
+# already includes it.
 FM26_AI_SKIP = {
     "Fine-Tune Model",
     "Generate Response from Model",
     "Install Menu Set",
-    "Configure AI Account",
 }
 
 

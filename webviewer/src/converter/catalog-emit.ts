@@ -297,6 +297,27 @@ function resolveEnumXmlValue(param: GrammarParam, hrValue: string): string {
   return hrValue === '' ? (param.defaultValue ?? '') : hrValue;
 }
 
+// HR->XML counterpart of catalog-grammar's paramVisible: whether `param` passes its
+// `visibleWhen` gate given the sibling param's resolved value from the parsed HR
+// `values`. An enum sibling's HR token is resolved to its FM XML value (so "Custom"
+// -> "Other" is compared against the value the gate lists); any other sibling uses
+// its raw HR value; an empty value falls back to the sibling's default. An
+// unresolved gate reference is inert (visible), so a catalog typo degrades to
+// always-emit. Symmetric with paramVisible so both directions agree.
+function paramVisibleHr(entry: GrammarEntry, values: string[], param: GrammarParam): boolean {
+  const vw = param.visibleWhen;
+  if (vw === null || !vw.param) return true;
+  for (let i = 0; i < entry.params.length; i++) {
+    const q = entry.params[i];
+    if (paramKey(q) !== vw.param) continue;
+    const raw = i < values.length ? values[i] : '';
+    let v = q.type === 'enum' ? resolveEnumXmlValue(q, raw) : raw;
+    if (v === '') v = q.defaultValue || '';
+    return vw.values.includes(v);
+  }
+  return true;
+}
+
 function resolveBoolState(param: GrammarParam, hrValue: string): string {
   let state = param.defaultValue ? param.defaultValue : 'False';
   if (hrValue !== '') {
@@ -1179,6 +1200,24 @@ export function convertStepWithCatalog(
       if (trim(hrValue)) piece = `    <Script id="0" name="${escXml(unquote(hrValue))}"/>`;
     } else if (govHandled) {
       // piece already decided (a value or intentionally empty).
+    } else if (
+      param.type === 'boolean' &&
+      param.visibleWhen !== null &&
+      param.visibleWhen.param &&
+      param.omitWhenEmpty
+    ) {
+      // P7.3 governed-visibility boolean: a boolean whose PRESENCE (not just value)
+      // is governed by a sibling enum's value declares a `visibleWhen` gate — the
+      // generic "governed by another param's enum value" primitive, symmetric with
+      // the XML->HR paramVisible skip and the discriminator-revealed omit. When the
+      // gate value is not met FileMaker omits the element ENTIRELY (confirmed live:
+      // Configure AI Account drops <VerifySSLCertificates> for every LLMType except
+      // "Other"); when met it emits with normal flag-style presence semantics.
+      // Opt-in via omitWhenEmpty. Benefits any step of this shape, not just #212.
+      if (paramVisibleHr(entry, values, param)) {
+        piece = emitBoolean(param, hrValue);
+      }
+      // else: gate not met -> omit entirely (piece stays '').
     } else if (param.type === 'boolean') {
       if (impliedBool.has(pi)) {
         const attr = param.xmlAttr || 'state';

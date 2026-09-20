@@ -25,7 +25,7 @@
   },
   "artificial intelligence/Configure AI Account.xml": {
     "hr": "Configure AI Account [ Account Name: \"account_name\" ; Model Provider: OpenAI ; API key: \"api_key\" ]",
-    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"212\" name=\"Configure AI Account\">\n    <VerifySSLCertificates state=\"False\"/>\n    <LLMType value=\"ChatGPT\"/>\n    <SetLLMAccount>\n    <AccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AccountName>\n    <AccessAPIKey>\n      <Calculation><![CDATA[\"api_key\"]]></Calculation>\n    </AccessAPIKey>\n    </SetLLMAccount>\n  </Step>\n</fmxmlsnippet>"
+    "xml": "<?xml version=\"1.0\"?>\n<fmxmlsnippet type=\"FMObjectList\">\n  <Step enable=\"True\" id=\"212\" name=\"Configure AI Account\">\n    <LLMType value=\"ChatGPT\"/>\n    <SetLLMAccount>\n    <AccountName>\n      <Calculation><![CDATA[\"account_name\"]]></Calculation>\n    </AccountName>\n    <AccessAPIKey>\n      <Calculation><![CDATA[\"api_key\"]]></Calculation>\n    </AccessAPIKey>\n    </SetLLMAccount>\n  </Step>\n</fmxmlsnippet>"
   },
   "artificial intelligence/Configure Machine Learning Model.xml": {
     "hr": "Configure Machine Learning Model [ Operation: Unload ; Name: \"model name\" ]",
