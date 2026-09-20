@@ -1216,6 +1216,22 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Calculation",
+        "type": "calculation",
+        "hrLabel": "Parameter",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 3
+      },
+      {
+        "xmlElement": "Script",
+        "type": "script",
+        "hrLabel": "Script",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 2
+      },
+      {
         "xmlElement": "MonitorType",
         "type": "enum",
         "hrLabel": "Monitor",
@@ -1229,7 +1245,8 @@
         ],
         "hrEnumValues": {
           "GeoLocation": "Geofence"
-        }
+        },
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -1237,19 +1254,8 @@
         "hrLabel": "Name",
         "wrapperElement": "RangeName",
         "parentElement": "MonitorType",
-        "required": false
-      },
-      {
-        "xmlElement": "Script",
-        "type": "script",
-        "hrLabel": "Script",
-        "required": false
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "calculation",
-        "hrLabel": "Parameter",
-        "required": false
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Calculation",
@@ -1257,7 +1263,8 @@
         "hrLabel": "UUID",
         "wrapperElement": "ProximityUUID",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -1265,7 +1272,8 @@
         "hrLabel": "Major",
         "wrapperElement": "MajorID",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 5
       },
       {
         "xmlElement": "Calculation",
@@ -1273,7 +1281,8 @@
         "hrLabel": "Minor",
         "wrapperElement": "MinorID",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "Calculation",
@@ -1281,7 +1290,8 @@
         "hrLabel": "Latitude",
         "wrapperElement": "Latitude",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 7
       },
       {
         "xmlElement": "Calculation",
@@ -1289,7 +1299,8 @@
         "hrLabel": "Longitude",
         "wrapperElement": "Longitude",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 8
       },
       {
         "xmlElement": "Calculation",
@@ -1297,7 +1308,8 @@
         "hrLabel": "Radius",
         "wrapperElement": "Radius",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 9
       }
     ],
     "hrSignature": "[ Monitor: Clear|iBeacon|Geofence ; Name: calc ; Script: script ; Parameter: calc ; UUID: calc ; Major: calc ; Minor: calc ; Latitude: calc ; Longitude: calc ; Radius: calc ]",
@@ -2515,12 +2527,49 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrHidden": true,
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Emitted first, matching FM's serialization order. Renders no HR token of its own; FM shows the training table and Completion Field only when True. FM does NOT re-canonicalize it from content — handed False with a real <Table> it kept False and wiped the table to id 0 — so the converter derives the state from whether the gated table carries an HR token. The Completion Field cannot be gated as well until this step's two colliding <Field> params get distinct keys (deferred: adhoc-2026-09-19-finetune-model-field-depth-param-key)."
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "complex",
+        "hrLabel": null,
+        "required": false,
+        "hrSlot": 3,
+        "notes": "type='Embedded' for DataTable source. type='Reference' for TrainingFile source (with file path)."
+      },
+      {
+        "xmlElement": "Table",
+        "type": "complex",
+        "hrLabel": null,
+        "visibleWhen": { "param": "Option", "values": ["True"] },
+        "required": false,
+        "hrSlot": 3,
+        "notes": "Sibling. For DataTable source only. <Table id='' name=''/> with table id/name. Shown in HR as quoted table name."
+      },
+      {
+        "xmlElement": "Field",
+        "type": "field",
+        "hrLabel": "Response Target",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 5,
+        "notes": "Sibling of FineTuneLLM, emitted before the wrapper (matching FM). Dual format: field ref (table/id/name with repetition) or variable (<Field repetition='n'>$variable</Field> with <Text/>). omitWhenEmpty: present-driven so the unconfigured target emits no <Field>. Read-back of the variable form + disambiguation from the parented Completion <Field> is deferred to adhoc-2026-09-19-finetune-model-field-depth-param-key (needs the parentElement-keyed param-key primitive)."
+      },
+      {
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "Account Name",
         "wrapperElement": "AccountName",
         "parentElement": "FineTuneLLM",
-        "required": false
+        "required": false,
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -2528,7 +2577,17 @@
         "hrLabel": "Base Model",
         "wrapperElement": "FineTuneBaseModelName",
         "parentElement": "FineTuneLLM",
-        "required": false
+        "required": false,
+        "hrSlot": 1
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Parameters",
+        "wrapperElement": "Parameters",
+        "parentElement": "FineTuneLLM",
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "DataSource",
@@ -2544,15 +2603,8 @@
         "hrEnumValues": {
           "DataTable": "Table",
           "TrainingFile": "File"
-        }
-      },
-      {
-        "xmlElement": "Table",
-        "type": "complex",
-        "hrLabel": null,
-        "visibleWhen": { "param": "Option", "values": ["True"] },
-        "required": false,
-        "notes": "Sibling. For DataTable source only. <Table id='' name=''/> with table id/name. Shown in HR as quoted table name."
+        },
+        "hrSlot": 2
       },
       {
         "xmlElement": "Field",
@@ -2560,40 +2612,8 @@
         "hrLabel": "Completion Field",
         "parentElement": "FineTuneLLM",
         "required": false,
+        "hrSlot": 4,
         "notes": "Inside <FineTuneLLM>. Field ref only (table/id/name). DataTable source only."
-      },
-      {
-        "xmlElement": "UniversalPathList",
-        "type": "complex",
-        "hrLabel": null,
-        "required": false,
-        "notes": "type='Embedded' for DataTable source. type='Reference' for TrainingFile source (with file path)."
-      },
-      {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Response Target",
-        "required": false,
-        "omitWhenEmpty": true,
-        "notes": "Sibling of FineTuneLLM. Dual format: field ref (table/id/name with repetition) or variable (<Field repetition='n'>$variable</Field> with <Text/>). omitWhenEmpty: present-driven so the unconfigured target emits no <Field>."
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Parameters",
-        "wrapperElement": "Parameters",
-        "parentElement": "FineTuneLLM",
-        "required": false
-      },
-      {
-        "xmlElement": "Option",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; FM shows the training table and Completion Field only when True. FM does NOT re-canonicalize it from content — handed False with a real <Table> it kept False and wiped the table to id 0 — so the converter derives the state from whether the gated table carries an HR token. The Completion Field cannot be gated as well until this step's two colliding <Field> params get distinct keys."
       }
     ],
     "hrSignature": "Fine-Tune Model [ Account Name: {calc} ; Base Model: {calc} ; Training Data: {Table|File} ; {table|path} ; Completion Field: {field} ; Response Target: {field|$variable} ; Parameters: {calc} ]",
