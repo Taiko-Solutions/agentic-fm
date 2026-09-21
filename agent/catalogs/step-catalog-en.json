@@ -8328,8 +8328,9 @@
         "type": "calc",
         "hrLabel": null,
         "required": false,
+        "omitWhenEmpty": true,
         "visibleWhen": { "param": "Zoom", "values": ["ByCalculation"] },
-        "notes": "Zoom-percentage calculation (FM 26). Only applies when Zoom is ByCalculation; rendered bare in the zoom slot. FM appends a cosmetic '%' to its own SW display of the calc, which the HR does not reproduce."
+        "notes": "Zoom-percentage calculation (FM 26). Only applies when Zoom is ByCalculation; rendered bare in the zoom slot. FM appends a cosmetic '%' to its own SW display of the calc, which the HR does not reproduce. omitWhenEmpty: a preset zoom (100/75/…) carries no calc, and FileMaker writes NO <Calculation> for it (live-verified on FM 26.0.2) — without this the SaXML→snippet path emits a spurious empty <Calculation/>."
       }
     ],
     "hrSignature": "[ Lock: <On/Off> ; <25%/50%/75%/100%/150%/200%/300%/400%/Zoom In/Zoom Out/calc> ]",
