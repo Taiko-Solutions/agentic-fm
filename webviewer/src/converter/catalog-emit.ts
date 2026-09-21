@@ -1276,14 +1276,21 @@ export function convertStepWithCatalog(
       }
     } else if (param.type === 'tableRef') {
       if (!trim(hrValue)) {
-        piece = '    <Table id="" name=""/>';
+        // A present-driven, gated table (Fine-Tune Model's training <Table>,
+        // revealed only in the DataTable branch) opts into omitWhenEmpty and
+        // emits nothing when unset.
+        if (!param.omitWhenEmpty) piece = '    <Table id="" name=""/>';
       } else {
         const rt = resolveTable(unquote(hrValue));
         piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
       }
     } else if (param.type === 'tableOccurrence') {
-      const rt = resolveTable(unquote(hrValue));
-      piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
+      // An unset present-driven TO (omitWhenEmpty) emits no <Table> — matching
+      // FM's TrainingFile form; otherwise the TO always serializes.
+      if (trim(hrValue) || !param.omitWhenEmpty) {
+        const rt = resolveTable(unquote(hrValue));
+        piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
+      }
     } else if (param.type === 'fileReference') {
       if (trim(hrValue)) {
         const [quoted, bare] = isQuotedLoneVariable(hrValue);
