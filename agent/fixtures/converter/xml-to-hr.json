@@ -24,7 +24,7 @@
   "control/Allow User Abort.xml": "Allow User Abort [ Off ]",
   "control/Commit Transaction.xml": "Commit Transaction",
   "control/Configure Local Notification.xml": "Configure Local Notification [ Action: Queue ; Name: \"notification name\" ; Delay: 30 // Number of seconds ; Title: \"title\" ; Body: \"body\" ; Button 1 Label: \"button 1 label\" ; Button 2 Label: \"button 2 label\" ; Button 3 Label: \"button 3 label\" ; Button 1 Foreground: 1 // 1 = foreground, 0 = background ; Button 2 Foreground: 0 // 1 = foreground, 0 = background ; Button 3 Foreground: 0 // 1 = foreground, 0 = background ; Show when app in foreground: 0 // 1 = show, 0 = hide. FileMaker Go only. ]",
-  "control/Configure NFC Reading.xml": "Configure NFC Reading [ $scriptParameter ; Action: Read ; Timeout: 15 ; Continuous Reading: 0 ; Format Result as JSON: 1 ]",
+  "control/Configure NFC Reading.xml": "Configure NFC Reading [ Action: Read ; Parameter: $scriptParameter ; Timeout: 15 ; Continuous Reading: 0 ; Format Result as JSON: 1 ]",
   "control/Configure Persistent Data.xml": "Configure Persistent Data [ persistent_key ; Instance ID: \"instance_id\" ; Value: \"value\" ]",
   "control/Configure Region Monitor Script.xml": "Configure Region Monitor Script [ Monitor: iBeacon ; Name: \"monitor name\" ; UUID: \"BA37611E-FB73-4FFD-8FD3-63459D3FF280\" ; Major: 10 // 0-65535 ; Minor: 1 // 0-65535 ]",
   "control/Else If.xml": "Else If [ Get ( LastError ) = 401 ]",
