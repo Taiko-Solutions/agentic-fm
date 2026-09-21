@@ -2688,7 +2688,8 @@
         "hrHidden": true,
         "required": false,
         "defaultValue": "False",
-        "notes": "Renders no HR token; gates Parameters. FM re-canonicalizes to True when content present on paste."
+        "notes": "Renders no HR token; gates Parameters. FM re-canonicalizes to True when content present on paste.",
+        "hrSlot": 17
       },
       {
         "xmlElement": "SelectAll",
@@ -2698,7 +2699,8 @@
         "hrHidden": true,
         "required": false,
         "defaultValue": "False",
-        "notes": "Renders no HR token; gates Tool Definitions / Tool Calls from Model. FM re-derives on paste."
+        "notes": "Renders no HR token; gates Tool Definitions / Tool Calls from Model. FM re-derives on paste.",
+        "hrSlot": 18
       },
       {
         "xmlElement": "Stream",
@@ -2706,7 +2708,9 @@
         "hrLabel": "Stream",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "hrSlot": 13,
+        "flagStyle": true
       },
       {
         "xmlElement": "Set",
@@ -2714,7 +2718,9 @@
         "hrLabel": "Agentic mode",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "True"
+        "defaultValue": "True",
+        "hrSlot": 3,
+        "flagStyle": true
       },
       {
         "xmlElement": "LinkAvail",
@@ -2724,7 +2730,8 @@
         "hrHidden": true,
         "required": false,
         "defaultValue": "False",
-        "notes": "Renders no HR token; gates Messages. FM re-derives on paste."
+        "notes": "Renders no HR token; gates Messages. FM re-derives on paste.",
+        "hrSlot": 19
       },
       {
         "xmlElement": "Restore",
@@ -2734,7 +2741,8 @@
         "hrHidden": true,
         "required": false,
         "defaultValue": "False",
-        "notes": "Renders no HR token; gates the WebScript group. FM re-derives on paste."
+        "notes": "Renders no HR token; gates the WebScript group. FM re-derives on paste.",
+        "hrSlot": 20
       },
       {
         "xmlElement": "UniversalPathList",
@@ -2744,11 +2752,9 @@
         "hrHidden": true,
         "required": true,
         "defaultValue": "Embedded",
-        "enumValues": [
-          "Embedded",
-          "Reference"
-        ],
-        "notes": "FM26 internal path marker; renders no HR token (hrHidden). FM re-derives Embedded/Reference on paste. Mirrors Perform Semantic Find / Perform SQL Query by Natural Language."
+        "enumValues": ["Embedded", "Reference"],
+        "notes": "FM26 internal path marker; renders no HR token (hrHidden). FM re-derives Embedded/Reference on paste. Mirrors Perform Semantic Find / Perform SQL Query by Natural Language.",
+        "hrSlot": 21
       },
       {
         "xmlElement": "Field",
@@ -2756,7 +2762,8 @@
         "hrLabel": "Response",
         "textMarker": true,
         "required": false,
-        "notes": "Sibling of LLMRequestWithTools. Dual format: field ref or $variable (with the <Text/> marker). Supports repetition."
+        "notes": "Sibling of LLMRequestWithTools. Dual format: field ref or $variable (with the <Text/> marker). Supports repetition.",
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -2764,7 +2771,8 @@
         "hrLabel": "Account Name",
         "wrapperElement": "AccountName",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -2772,7 +2780,8 @@
         "hrLabel": "Model",
         "wrapperElement": "Model",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Calculation",
@@ -2780,7 +2789,8 @@
         "hrLabel": "User Prompt",
         "wrapperElement": "UserPrompt",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 2
       },
       {
         "xmlElement": "Calculation",
@@ -2788,7 +2798,8 @@
         "hrLabel": "Instructions",
         "wrapperElement": "Instructions",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "Field",
@@ -2798,7 +2809,8 @@
         "typeAttr": "type",
         "typeValue": "Messages",
         "required": false,
-        "notes": "Inside LLMRequestWithTools with type='Messages'. Variable only."
+        "notes": "Inside LLMRequestWithTools with type='Messages'. Variable only.",
+        "hrSlot": 7
       },
       {
         "xmlElement": "SlidingWindowVariable",
@@ -2807,19 +2819,21 @@
         "parentElement": "LLMRequestWithTools",
         "required": false,
         "omitWhenEmpty": true,
-        "notes": "Variable name as text content of <SlidingWindowVariable>. Omitted when unset (no empty element leaks into a minimal step)."
+        "notes": "Variable name as text content of <SlidingWindowVariable>. Omitted when unset (no empty element leaks into a minimal step).",
+        "hrSlot": 8
       },
       {
         "xmlElement": "SlidingWindowVariable/@IncludeToolCalls",
         "type": "enum",
-        "hrLabel": "Include Tool Calls",
+        "hrLabel": "Include tool calls in message history",
         "xmlAttr": "IncludeToolCalls",
         "flagStyle": true,
         "parentElement": "LLMRequestWithTools",
         "enumValues": ["0", "1"],
         "defaultValue": "0",
         "required": false,
-        "notes": "FM's IncludeToolCalls flag on <SlidingWindowVariable> (0/1). Emitted as an attribute on that element via the generic Elem/@attr grammar; bare HR flag when set."
+        "notes": "FM's IncludeToolCalls flag on <SlidingWindowVariable> (0/1). Emitted as an attribute on that element via the generic Elem/@attr grammar; bare HR flag when set.",
+        "hrSlot": 10
       },
       {
         "xmlElement": "Calculation",
@@ -2827,7 +2841,8 @@
         "hrLabel": "Message History Count",
         "wrapperElement": "SlidingWindowMessageCount",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 9
       },
       {
         "xmlElement": "Calculation",
@@ -2835,7 +2850,9 @@
         "hrLabel": "Message History Repetition",
         "wrapperElement": "SlidingWindowVariableRepetition",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 22,
+        "hrHidden": true
       },
       {
         "xmlElement": "Calculation",
@@ -2843,7 +2860,8 @@
         "hrLabel": "Tool Definitions",
         "wrapperElement": "ToolDefinitions",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 12
       },
       {
         "xmlElement": "Field",
@@ -2853,7 +2871,8 @@
         "typeAttr": "type",
         "typeValue": "ToolCalls",
         "required": false,
-        "notes": "Inside LLMRequestWithTools with type='ToolCalls'. Variable only."
+        "notes": "Inside LLMRequestWithTools with type='ToolCalls'. Variable only.",
+        "hrSlot": 5
       },
       {
         "xmlElement": "Calculation",
@@ -2861,7 +2880,8 @@
         "hrLabel": "Temperature",
         "wrapperElement": "Temperature",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 11
       },
       {
         "xmlElement": "Calculation",
@@ -2869,7 +2889,8 @@
         "hrLabel": "Parameters",
         "wrapperElement": "Parameters",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 14
       },
       {
         "xmlElement": "Calculation",
@@ -2877,7 +2898,8 @@
         "hrLabel": "Web Viewer",
         "wrapperElement": "ObjectName",
         "parentElement": "LLMRequestWithTools/WebScript",
-        "required": false
+        "required": false,
+        "hrSlot": 15
       },
       {
         "xmlElement": "Calculation",
@@ -2885,7 +2907,8 @@
         "hrLabel": "Function Name",
         "wrapperElement": "FunctionName",
         "parentElement": "LLMRequestWithTools/WebScript",
-        "required": false
+        "required": false,
+        "hrSlot": 16
       },
       {
         "xmlElement": "WebScriptParameters",
@@ -2893,10 +2916,12 @@
         "hrLabel": "Web Viewer Parameters",
         "parentElement": "LLMRequestWithTools/WebScript",
         "required": false,
-        "notes": "FM's <WebScriptParameters Count><P><Calculation> argument list for the Web Viewer call."
+        "notes": "FM's <WebScriptParameters Count><P><Calculation> argument list for the Web Viewer call.",
+        "hrSlot": 23,
+        "hrHidden": true
       }
     ],
-    "hrSignature": "Generate Response from Model [ Stream ; Agentic mode ; Response: {field|$variable} ; Account Name: {calc} ; Model: {calc} ; User Prompt: {calc} ; Instructions: {calc} ; Messages: {$variable} ; Save Message History To: {$variable} ; Message History Count: {calc} ; Message History Repetition: {calc} ; Tool Definitions: {calc} ; Tool Calls from Model: {$variable} ; Temperature: {calc} ; Parameters: {calc} ; Web Viewer: {calc} ; Function Name: {calc} ; Web Viewer Parameters: {calc,...} ]",
+    "hrSignature": "Generate Response from Model [ Account Name: {calc} ; Model: {calc} ; User Prompt: {calc} ; Agentic mode ; Response: {field|$variable} ; Tool Calls from Model: {$variable} ; Instructions: {calc} ; Messages: {$variable} ; Save Message History To: {$variable} ; Message History Count: {calc} ; Include tool calls in message history ; Temperature: {calc} ; Tool Definitions: {calc} ; Stream ; Parameters: {calc} ; Web Viewer: {calc} ; Function Name: {calc} ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": null
