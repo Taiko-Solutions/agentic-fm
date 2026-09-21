@@ -732,7 +732,10 @@ export function computeParamHr(entry: GrammarEntry, step: Element, param: Gramma
     const tableNode = findChild(base, 'Table');
     if (tableNode !== null) {
       const name = tableNode.getAttribute('name') ?? '';
-      if (name) val = !label ? name : label + ': ' + name;
+      // Labeled (Go to Related Record's "From table") renders "Label: name";
+      // label-less (Fine-Tune Model's positional training table) renders the
+      // quoted TO name — the quoted positional spelling FM uses, like `layout`.
+      if (name) val = !label ? '"' + name + '"' : label + ': ' + name;
     }
   } else if (ptype === 'fileReference') {
     const frNode = findChild(base, param.xmlElement);

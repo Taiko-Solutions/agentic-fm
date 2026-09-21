@@ -2549,12 +2549,13 @@
       },
       {
         "xmlElement": "Table",
-        "type": "complex",
+        "type": "tableOccurrence",
         "hrLabel": null,
         "visibleWhen": { "param": "Option", "values": ["True"] },
+        "omitWhenEmpty": true,
         "required": false,
         "hrSlot": 3,
-        "notes": "Sibling. For DataTable source only. <Table id='' name=''/> with table id/name. Shown in HR as quoted table name."
+        "notes": "Sibling. For DataTable source only. <Table id name/> table-occurrence reference, rendered in HR as the quoted TO name (a bare positional token: `Training Data: Table ; \"Invoices\" ;`). Uses the generic tableOccurrence grammar (was type:complex, which rendered/emitted nothing so the token was dropped) — its label-less read yields the quoted TO name and its emit resolves the TO id/name through context. omitWhenEmpty: present-driven, so the TrainingFile branch (no table token) emits no <Table> and derives Option=False via the hrHidden-boolean gate; the DataTable branch's token drives Option=True. visibleWhen Option=True gates the read (configured DataTable stores Option state=True). Live-verified against FM 26.0.2 copy-back (adhoc-2026-09-20-finetune-training-table-hr-token-dropped)."
       },
       {
         "xmlElement": "Field",

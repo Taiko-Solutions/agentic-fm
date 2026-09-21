@@ -1332,13 +1332,20 @@ def convert_step_with_catalog(
                 piece = '    <Field table="' + esc_xml(table) + '" id="' + str(fid) + '" name="' + esc_xml(fname) + '"/>'
         elif param.type == "tableRef":
             if not _trim(hr_value):
-                piece = '    <Table id="" name=""/>'
+                # A present-driven, gated table (Fine-Tune Model's training
+                # <Table>, revealed only in the DataTable branch) opts into
+                # omit_when_empty and emits nothing when unset.
+                if not param.omit_when_empty:
+                    piece = '    <Table id="" name=""/>'
             else:
                 tid, tname = _resolve_table(_unquote(hr_value))
                 piece = '    <Table id="' + str(tid) + '" name="' + esc_xml(tname) + '"/>'
         elif param.type == "tableOccurrence":
-            tid, tname = _resolve_table(_unquote(hr_value))
-            piece = '    <Table id="' + str(tid) + '" name="' + esc_xml(tname) + '"/>'
+            # An unset present-driven TO (omit_when_empty) emits no <Table> —
+            # matching FM's TrainingFile form; otherwise the TO always serializes.
+            if _trim(hr_value) or not param.omit_when_empty:
+                tid, tname = _resolve_table(_unquote(hr_value))
+                piece = '    <Table id="' + str(tid) + '" name="' + esc_xml(tname) + '"/>'
         elif param.type == "fileReference":
             if _trim(hr_value):
                 quoted, bare = _is_quoted_lone_variable(hr_value)
