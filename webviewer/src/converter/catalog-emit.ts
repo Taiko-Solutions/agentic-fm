@@ -376,6 +376,9 @@ function positionalTokenFitsParam(param: GrammarParam, token: string): boolean {
 function rendersBareInHr(param: GrammarParam): boolean {
   if (param.hrBare) return true; // per-param opt-in: FileMaker prints it bare
   if (!param.hrLabel) return true;
+  // Inverse of hrBare: a calc/field/script FileMaker renders WITH its label is
+  // matched by that label, never positionally.
+  if (param.hrLabeled) return false;
   if (param.type === 'calc' || param.type === 'field' || param.type === 'script') return true;
   if (param.type === 'layout') return !param.hrLabel;
   if ((param.type === 'text' || param.type === 'name') && !param.parentElement) return true;

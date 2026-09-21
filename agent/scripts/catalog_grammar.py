@@ -180,6 +180,13 @@ class StepParam:
     hr_slot: int | None = None
     hr_hidden: bool | None = None
     hr_bare: bool | None = None
+    # The exact inverse of ``hr_bare``: render a ``calc``/``field``/``script`` value
+    # WITH its ``hr_label`` prefix and match it by that label, even though those
+    # types print bare/positionally by default. FileMaker labels the same value type
+    # per step (Perform Script's name is bare; Configure Region Monitor Script's is
+    # ``Script: "…"``). Generic across the three bare-by-default value types; needs a
+    # non-empty ``hr_label``. Set only where FM renders the label (verified live).
+    hr_labeled: bool | None = None
     omit_when_empty: bool | None = None
     emit_empty_default: bool | None = None
     # Governing discriminator: string form names a sibling; map form carries branches.
@@ -224,6 +231,7 @@ class StepParam:
             hr_slot=d.get("hrSlot"),
             hr_hidden=d.get("hrHidden"),
             hr_bare=d.get("hrBare"),
+            hr_labeled=d.get("hrLabeled"),
             omit_when_empty=d.get("omitWhenEmpty"),
             emit_empty_default=d.get("emitEmptyDefault"),
             discriminator=d.get("discriminator"),
@@ -974,6 +982,9 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             val = label
     elif ptype == "calc":
         val = _child_text(base, "Calculation")
+        # hr_labeled: FileMaker labels this calc for some steps (inverse of bare).
+        if val and param.hr_labeled and label:
+            val = label + ": " + val
     elif ptype == "field":
         type_attr = param.raw.get("typeAttr")
         if type_attr:
@@ -988,6 +999,9 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             table = field_node.get("table", "")
             name = field_node.get("name", "")
             val = name if not table else table + "::" + name
+            # hr_labeled: label the field where FileMaker does (inverse of bare).
+            if val and param.hr_labeled and label:
+                val = label + ": " + val
     elif ptype in ("tableRef", "tableOccurrence"):
         table_node = base.find("Table")
         if table_node is not None:
@@ -1045,6 +1059,11 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             name = script_node.get("name", "")
             if name:
                 val = '"' + name + '"'
+        # hr_labeled: FileMaker labels the script token for some steps (Configure
+        # Region Monitor Script's "Script:") while others print it bare (Perform
+        # Script). Prefix the label when the catalog opts in. Inverse of the default.
+        if val and param.hr_labeled and label:
+            val = label + ": " + val
     elif ptype in ("text", "name"):
         val = _child_text(base, param.xml_element)
         if val and param.parent_element and label:
