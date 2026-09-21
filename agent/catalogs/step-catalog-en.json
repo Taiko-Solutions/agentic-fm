@@ -807,7 +807,10 @@
         "xmlElement": "Script",
         "type": "script",
         "hrLabel": "Script",
-        "required": false
+        "hrLabeled": true,
+        "omitWhenEmpty": true,
+        "required": false,
+        "hrSlot": 2
       },
       {
         "xmlElement": "Action",
@@ -819,7 +822,8 @@
         "enumValues": [
           "Queue",
           "Clear"
-        ]
+        ],
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -827,7 +831,8 @@
         "hrLabel": "Name",
         "wrapperElement": "Name",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Calculation",
@@ -835,7 +840,8 @@
         "hrLabel": "Delay",
         "wrapperElement": "Delay",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 3
       },
       {
         "xmlElement": "Calculation",
@@ -843,7 +849,8 @@
         "hrLabel": "Title",
         "wrapperElement": "Title",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -851,7 +858,8 @@
         "hrLabel": "Body",
         "wrapperElement": "Body",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 5
       },
       {
         "xmlElement": "Calculation",
@@ -859,7 +867,8 @@
         "hrLabel": "Button 1 Label",
         "wrapperElement": "Button1Label",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "Calculation",
@@ -867,7 +876,8 @@
         "hrLabel": "Button 2 Label",
         "wrapperElement": "Button2Label",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 7
       },
       {
         "xmlElement": "Calculation",
@@ -875,7 +885,8 @@
         "hrLabel": "Button 3 Label",
         "wrapperElement": "Button3Label",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 8
       },
       {
         "xmlElement": "Calculation",
@@ -883,7 +894,8 @@
         "hrLabel": "Button 1 Foreground",
         "wrapperElement": "Button1ForceFgnd",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 9
       },
       {
         "xmlElement": "Calculation",
@@ -891,7 +903,8 @@
         "hrLabel": "Button 2 Foreground",
         "wrapperElement": "Button2ForceFgnd",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 10
       },
       {
         "xmlElement": "Calculation",
@@ -899,7 +912,8 @@
         "hrLabel": "Button 3 Foreground",
         "wrapperElement": "Button3ForceFgnd",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 11
       },
       {
         "xmlElement": "Calculation",
@@ -907,7 +921,8 @@
         "hrLabel": "Show when app in foreground",
         "wrapperElement": "ShowWhenAppInForeground",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 12
       }
     ],
     "hrSignature": "[ Action: Queue|Clear ; Name: calc ; Script: script ; Delay: calc ; Title: calc ; Body: calc ; Button 1 Label: calc ; Button 2 Label: calc ; Button 3 Label: calc ; Button 1 Foreground: calc ; Button 2 Foreground: calc ; Button 3 Foreground: calc ; Show when app in foreground: calc ]",
@@ -970,14 +985,19 @@
       {
         "xmlElement": "Calculation",
         "type": "calculation",
-        "hrLabel": "Script Parameter",
-        "required": false
+        "hrLabel": "Parameter",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 2
       },
       {
         "xmlElement": "Script",
         "type": "script",
         "hrLabel": "Script",
-        "required": false
+        "hrLabeled": true,
+        "omitWhenEmpty": true,
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Action",
@@ -989,7 +1009,8 @@
         "enumValues": [
           "Read",
           "Cancel"
-        ]
+        ],
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -997,7 +1018,8 @@
         "hrLabel": "Timeout",
         "wrapperElement": "Timeout",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 3
       },
       {
         "xmlElement": "Calculation",
@@ -1005,7 +1027,8 @@
         "hrLabel": "Continuous Reading",
         "wrapperElement": "ReadMultiple",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -1013,10 +1036,11 @@
         "hrLabel": "Format Result as JSON",
         "wrapperElement": "JSONOutput",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 5
       }
     ],
-    "hrSignature": "[ Action: Read|Cancel ; Script: script ; Timeout: calc ; Continuous Reading: calc ; Format Result as JSON: calc ]",
+    "hrSignature": "[ Action: Read|Cancel ; Script: script ; Parameter: calc ; Timeout: calc ; Continuous Reading: calc ; Format Result as JSON: calc ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": null
