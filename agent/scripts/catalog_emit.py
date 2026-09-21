@@ -1166,6 +1166,15 @@ def convert_step_with_catalog(
     # G10 attribute-bearing wrapper: a wrapper element may carry an enum value as an
     # attribute (FM serializes <Action value="Queue"> holding children).
     wrapper_attr: dict[str, str] = {}
+    # G10 non-default standalone survival: a wrapper whose enum resolves to a
+    # NON-default value but whose lazy-open group never fires (no child emits)
+    # would otherwise drop the pre-resolved attribute entirely, leaving the step
+    # with no discriminator (FM re-fills the default on paste, losing the authored
+    # value). Remember these in param order and emit them as self-closing
+    # <Wrapper attr="v"/> after the loop if the wrapper never opened. Default-valued
+    # wrappers are intentionally NOT queued: a bare default emits nothing and FM
+    # re-fills the same default on paste, matching FM's own render.
+    g10_standalone: list[tuple[str, str]] = []
     is_wrapper: set[str] = set()
     for p in params:
         segs = _split_path(p.parent_element or "")
@@ -1177,7 +1186,10 @@ def convert_step_with_catalog(
             if v == "":
                 continue
             attr = p.xml_attr or "value"
-            wrapper_attr[p.xml_element] = " " + attr + '="' + esc_xml(v) + '"'
+            attr_str = " " + attr + '="' + esc_xml(v) + '"'
+            wrapper_attr[p.xml_element] = attr_str
+            if v != (p.default_value or ""):
+                g10_standalone.append((p.xml_element, attr_str))
             skip_param[pi] = True
 
     # G11 attribute-on-element: an enum/boolean param whose xmlElement uses "Elem/@attr"
@@ -1256,6 +1268,9 @@ def convert_step_with_catalog(
 
     prev_was_text_element = False
     open_groups: list[str] = []
+    # Wrappers actually opened by an emitting child during the loop, so the
+    # post-loop G10 standalone pass only injects for wrappers that never opened.
+    wrapper_opened: set[str] = set()
 
     for pi in _emit_order(entry):
         param = params[pi]
@@ -1468,12 +1483,22 @@ def convert_step_with_catalog(
             wa = wrapper_attr.get(want[k], "")
             xml += "    <" + want[k] + wa + ">\n"
             open_groups.append(want[k])
+            wrapper_opened.add(want[k])
 
         xml += piece + "\n"
         prev_was_text_element = is_text_element
 
     for k in range(len(open_groups), 0, -1):
         xml += "    </" + open_groups[k - 1] + ">\n"
+
+    # G10 non-default standalone survival: any G10 wrapper whose enum carried a
+    # non-default value but whose lazy-open group never fired (no child emitted)
+    # would otherwise drop its pre-resolved attribute. Emit the self-closing
+    # <Wrapper attr="v"/> so the authored value survives the round-trip; the
+    # default-valued case is never queued, so a bare default still emits nothing.
+    for wrapper, attr_str in g10_standalone:
+        if wrapper not in wrapper_opened:
+            xml += "    <" + wrapper + attr_str + "/>\n"
 
     xml += "  </Step>"
     return xml
