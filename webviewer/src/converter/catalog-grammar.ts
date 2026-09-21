@@ -172,6 +172,11 @@ export interface GrammarParam {
   hrSlot: number | null;
   hrHidden: boolean | null;
   hrBare: boolean | null;
+  // Inverse of hrBare: render a calc/field/script value WITH its hrLabel prefix and
+  // match it by that label, even though those types are bare/positional by default.
+  // FileMaker labels the same value type per step (Perform Script bare; Configure
+  // Region Monitor Script's `Script: "…"`). Generic; needs a non-empty hrLabel.
+  hrLabeled: boolean | null;
   omitWhenEmpty: boolean | null;
   discriminator: string | null;
   discriminatorValues: Record<string, DiscriminatorBranch>;
@@ -257,6 +262,7 @@ function buildParam(d: Record<string, unknown>): GrammarParam {
     hrSlot: typeof d.hrSlot === 'number' ? (d.hrSlot as number) : null,
     hrHidden: (d.hrHidden as boolean) ?? null,
     hrBare: (d.hrBare as boolean) ?? null,
+    hrLabeled: (d.hrLabeled as boolean) ?? null,
     omitWhenEmpty: (d.omitWhenEmpty as boolean) ?? null,
     discriminator: (d.discriminator as string) ?? null,
     discriminatorValues,
@@ -704,6 +710,8 @@ export function computeParamHr(entry: GrammarEntry, step: Element, param: Gramma
     if (findChild(base, param.xmlElement) !== null && label) val = label;
   } else if (ptype === 'calc') {
     val = childText(base, 'Calculation');
+    // hrLabeled: FileMaker labels this calc for some steps (inverse of bare).
+    if (val && param.hrLabeled && label) val = label + ': ' + val;
   } else if (ptype === 'field') {
     const typeAttr = (param.raw.typeAttr as string) ?? '';
     let fieldNode: Element | null;
@@ -717,6 +725,8 @@ export function computeParamHr(entry: GrammarEntry, step: Element, param: Gramma
       const table = fieldNode.getAttribute('table') ?? '';
       const name = fieldNode.getAttribute('name') ?? '';
       val = !table ? name : table + '::' + name;
+      // hrLabeled: label the field where FileMaker does (inverse of bare).
+      if (val && param.hrLabeled && label) val = label + ': ' + val;
     }
   } else if (ptype === 'tableRef' || ptype === 'tableOccurrence') {
     const tableNode = findChild(base, 'Table');
@@ -769,6 +779,9 @@ export function computeParamHr(entry: GrammarEntry, step: Element, param: Gramma
       const name = scriptNode.getAttribute('name') ?? '';
       if (name) val = '"' + name + '"';
     }
+    // hrLabeled: FileMaker labels the script token for some steps (Configure Region
+    // Monitor Script's "Script:") while others print it bare (Perform Script).
+    if (val && param.hrLabeled && label) val = label + ': ' + val;
   } else if (ptype === 'text' || ptype === 'name') {
     val = childText(base, param.xmlElement);
     if (val && param.parentElement && label) val = label + ': ' + val;

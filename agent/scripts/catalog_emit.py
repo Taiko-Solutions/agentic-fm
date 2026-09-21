@@ -474,6 +474,10 @@ def _renders_bare_in_hr(param: StepParam) -> bool:
         return True
     if not param.hr_label:
         return True
+    # Per-param opt-in (inverse of hr_bare): a calc/field/script FileMaker renders
+    # WITH its label is matched by that label, never positionally.
+    if param.hr_labeled:
+        return False
     if param.type in ("calc", "field", "script"):
         return True
     if param.type == "layout":

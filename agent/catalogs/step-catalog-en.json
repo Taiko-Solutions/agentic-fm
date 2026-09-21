@@ -1229,6 +1229,7 @@
         "xmlElement": "Script",
         "type": "script",
         "hrLabel": "Script",
+        "hrLabeled": true,
         "required": false,
         "omitWhenEmpty": true,
         "hrSlot": 2
