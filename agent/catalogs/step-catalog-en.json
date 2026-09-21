@@ -3284,8 +3284,9 @@
         "type": "calc",
         "hrLabel": null,
         "required": false,
+        "omitWhenEmpty": true,
         "visibleWhen": { "param": "RowPageLocation", "values": ["ByCalculation"] },
-        "notes": "Row number calculation. Only applies when RowPageLocation is ByCalculation"
+        "notes": "Row number calculation. Only applies when RowPageLocation is ByCalculation. omitWhenEmpty: a preset (First/Last/Previous/Next) carries no calc, and FileMaker writes NO <Calculation> for it (live-verified on FM 26.0.2) - without it the SaXML->snippet path emits a spurious empty <Calculation/>. Mirrors Set Zoom Level's Calculation."
       }
     ],
     "hrSignature": "[ Select: On|Off ; First|Last|Previous|Next ; Exit after last: On|Off ; With dialog: On|Off ; calc ]",
@@ -3364,8 +3365,9 @@
         "type": "calc",
         "hrLabel": null,
         "required": false,
+        "omitWhenEmpty": true,
         "visibleWhen": { "param": "RowPageLocation", "values": ["ByCalculation"] },
-        "notes": "Record/request/page number calculation. Only applies when RowPageLocation is ByCalculation"
+        "notes": "Record/request/page number calculation. Only applies when RowPageLocation is ByCalculation. omitWhenEmpty: a preset (First/Last/Previous/Next) carries no calc, and FileMaker writes NO <Calculation> for it (live-verified on FM 26.0.2) - without it the SaXML->snippet path emits a spurious empty <Calculation/>. Mirrors Set Zoom Level's Calculation."
       }
     ],
     "hrSignature": "[ First|Last|Previous|Next ; Exit after last: On|Off ; With dialog: On|Off ; calc ]",
