@@ -3862,6 +3862,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Target Field",
+        "hrLabeled": true,
         "required": false,
         "notes": "Target field as sibling outside LLMBulkEmbedding. When omitted, uses active field."
       },
@@ -3885,6 +3886,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Source Field",
+        "hrLabeled": true,
         "parentElement": "LLMBulkEmbedding",
         "required": false,
         "notes": "Source field inside LLMBulkEmbedding"
@@ -5858,6 +5860,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Target field",
+        "hrLabeled": true,
         "required": false,
         "note": "Outside LLMSemanticFind, placed before it. Field ref form: <Field table= id=0 name=/>. When SaveResult uses a variable, <Text/> appears at step level before this Field element."
       },
@@ -9363,6 +9366,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Target Field",
+        "hrLabeled": true,
         "required": false,
         "notes": "Target field as sibling outside LLMBulkEmbedding. When omitted, uses active field."
       },
@@ -9386,6 +9390,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Source Field",
+        "hrLabeled": true,
         "parentElement": "LLMBulkEmbedding",
         "required": false,
         "notes": "Source container field inside LLMBulkEmbedding"
