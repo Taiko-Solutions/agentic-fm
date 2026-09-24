@@ -104,38 +104,35 @@ registerXmlToHr({
 });
 
 // --- Loop ---
-// Loop carries two catalog-defined options (step-catalog-en.json id 71):
-//   Collapsed -> <Restore state="True|False"/>  (default Off/False)
-//   Flush     -> <FlushType value="Always|Minimum|Defer"/> (default Always)
-// The XML tokens are the values FileMaker writes (verified against live FM).
-// Both were previously hardcoded, silently discarding a `Flush: Minimum`
-// performance choice (kirk-2026-09-20-D2).
-function splitNamedClause(clause: string): { label: string; value: string } {
-  const pos = clause.indexOf(':');
-  if (pos < 0) return { label: '', value: clause.trim() };
-  return { label: clause.slice(0, pos).trim(), value: clause.slice(pos + 1).trim() };
-}
-
+// Loop carries two options (catalog id 71): Collapsed -> <Restore state=…/>
+// (default Off/False) and Flush -> <FlushType value=…/> (default Always).
+// FLUSH HAS A LABEL/VALUE SPLIT: FileMaker WRITES value="Min" but DISPLAYS
+// "Minimum" in the Script Workspace (Always/Defer are written verbatim; only
+// Minimum abbreviates). So the human-readable clause uses "Minimum" while the
+// fmxmlsnippet must carry "Min" — emitting the display spelling as the XML value
+// produces a step FileMaker does not accept.
 registerHrToXml({
   stepNames: ['Loop'],
   toXml(line: ParsedLine): string {
     // line.params is the semicolon-split clause list, e.g.
-    // ['Collapsed: Off', 'Flush: Minimum'].
+    // `Loop [ Collapsed: Off ; Flush: Minimum ]` -> ["Collapsed: Off","Flush: Minimum"].
     let restore = 'False'; // Collapsed default Off
-    let flush = 'Always'; // Flush default Always
+    let flush = 'Always';  // Flush default Always
     for (const clause of line.params) {
-      const { label, value } = splitNamedClause(clause);
-      const lc = label.toLowerCase();
-      if (lc === 'collapsed') {
-        if (value.toLowerCase() === 'on') restore = 'True';
-        else if (value.toLowerCase() === 'off') restore = 'False';
-        // unrecognised: keep the default (no warnings channel in this converter)
-      } else if (lc === 'flush') {
-        const v = value.toLowerCase();
-        if (v === 'always') flush = 'Always';
-        else if (v === 'minimum') flush = 'Minimum';
-        else if (v === 'defer') flush = 'Defer';
-        // unrecognised: keep Always (never substitute a wrong value)
+      const idx = clause.indexOf(':');
+      if (idx < 0) continue;
+      const label = clause.slice(0, idx).trim().toLowerCase();
+      const value = clause.slice(idx + 1).trim().toLowerCase();
+      if (label === 'collapsed') {
+        if (value === 'on') restore = 'True';
+        else if (value === 'off') restore = 'False';
+        // unknown token: keep the default (no warning channel here)
+      } else if (label === 'flush') {
+        // Map the display label to the value FileMaker writes; accept raw "Min".
+        if (value === 'always') flush = 'Always';
+        else if (value === 'minimum' || value === 'min') flush = 'Min';
+        else if (value === 'defer') flush = 'Defer';
+        // unknown token: keep Always
       }
     }
     return [
@@ -153,10 +150,13 @@ registerXmlToHr({
     const restore = el.querySelector('Restore')?.getAttribute('state') ?? '';
     const flush = el.querySelector('FlushType')?.getAttribute('value') ?? '';
     const clauses: string[] = [];
-    // Emit a clause only when non-default; a plain Loop stays bare "Loop".
-    // Order matches the catalog hrSignature: Collapsed, then Flush.
+    // Emit a clause only when non-default, so a plain Loop stays bare "Loop".
     if (restore.toLowerCase() === 'true') clauses.push('Collapsed: On');
-    if (flush && flush.toLowerCase() !== 'always') clauses.push(`Flush: ${flush}`);
+    if (flush && flush.toLowerCase() !== 'always') {
+      // XML value -> FileMaker's display label.
+      const label = flush.toLowerCase() === 'min' ? 'Minimum' : flush;
+      clauses.push(`Flush: ${label}`);
+    }
     return clauses.length ? `Loop [ ${clauses.join(' ; ')} ]` : 'Loop';
   },
 });

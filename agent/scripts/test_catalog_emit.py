@@ -41,8 +41,20 @@ CONTROL_FLOW = {
     "# (comment)", "If", "Else If", "Else", "End If",
     "Loop", "Exit Loop If", "End Loop", "Exit Script", "Set Variable",
 }
-# The 3 FM26-AI grammar-gap steps stay excluded from every gate (plan §"known gap").
-FM26_AI_SKIP = {"Fine-Tune Model", "Generate Response from Model", "Install Menu Set"}
+# The FM26-AI grammar-gap steps stay excluded from every gate (plan §"known gap"):
+# FM26 AI steps whose reference fixtures (captured from an earlier FileMaker
+# serialization) no longer match the emit engine's FileMaker-26-correct output.
+# Configure AI Account is NO LONGER excluded — its wrapper spelling
+# (<SetLLMAccout>/<AccoutName> -> <SetLLMAccount>/<AccountName>) and its
+# LLMType-governed <VerifySSLCertificates> visibility are now modeled in the
+# catalog and its fixture is regenerated, so it round-trips byte-identical
+# (verified against live FileMaker 26), mirroring the TS byte-identity gate which
+# already includes it.
+FM26_AI_SKIP = {
+    "Fine-Tune Model",
+    "Generate Response from Model",
+    "Install Menu Set",
+}
 
 
 # --- minimal HR line parser (port of parser.ts parseLine + splitParams) ---------
@@ -282,3 +294,43 @@ def test_saxml_reading_of_the_gate_wins_over_the_derived_value():
     values[gi] = ""
     blanked = convert_step_with_catalog(entry, disabled, values, resolver)
     assert '<Restore state="True"/>' in blanked  # this sample DOES carry ExportOptions
+
+
+# ---------------------------------------------------------------------------
+# Cross-file Perform Script (id 1) — the fromFileElement grammar primitive.
+#
+# FM renders a call into another file as the positional token
+# `"NAME" from file: "FILE"`. A script param that opts into the from-file
+# grammar (``fromFileElement`` set) must split that infix clause into a
+# <FileReference name="FILE"> sibling carrying a
+# <UniversalPathList>file:FILE</UniversalPathList> child, emitted BEFORE a
+# name-only <Script name="NAME"/>. Live-verified against FileMaker (FM26): FM
+# binds the reference by the external-data-source NAME when one exists (the path
+# is ignored, no dialog, no regression) and the path preserves the file name
+# (`from file: "FILE"`, fail-loud + FM's normal locate prompt) when it does not
+# — instead of a name-only reference's silent `from file: ""` drop.
+# ---------------------------------------------------------------------------
+def test_cross_file_perform_script_emits_filereference_with_universal_path_list():
+    by_name, _ = _load()
+    out = _emit_hr(
+        by_name,
+        'Perform Script [ "Sandbox" from file: "QuickStart" ; '
+        "Specified: From list ; Parameter: \"hi\" ]",
+    )
+    # The from-file clause splits off a <FileReference> sibling with a
+    # <UniversalPathList>file:NAME</> child (the display name as path — the only
+    # value available offline).
+    assert '<FileReference name="QuickStart">' in out
+    assert "<UniversalPathList>file:QuickStart</UniversalPathList>" in out
+    # The <Script> keeps ONLY the name (no ` from file:` swallowed in) and is
+    # NOT resolved to a same-file id (the binding lives in the other file).
+    assert '<Script name="Sandbox"/>' in out
+    assert "from file:" not in out  # clause fully consumed, not leaked into a name
+
+
+def test_same_file_perform_script_unaffected_by_from_file_grammar():
+    by_name, _ = _load()
+    out = _emit_hr(by_name, 'Perform Script [ "Sandbox" ; Parameter: "hi" ]')
+    # No `from file:` clause => no FileReference; the <Script> is emitted as usual.
+    assert "<FileReference" not in out
+    assert "<Script " in out

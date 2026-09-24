@@ -426,6 +426,28 @@ def _resolve_enum_xml_value(param: StepParam, hr_value: str) -> str:
     return (param.default_value or "") if hr_value == "" else hr_value
 
 
+def _param_visible_hr(entry: CatalogEntry, values: list[str], param: StepParam) -> bool:
+    """HR->XML counterpart of catalog_grammar.param_visible: whether ``param`` passes
+    its ``visibleWhen`` gate given the sibling param's resolved value from the parsed
+    HR ``values``. An enum sibling's HR token is resolved to its FM XML value
+    (so "Custom" -> "Other" is compared against the value the gate lists); any other
+    sibling uses its raw HR value; empty falls back to the sibling's default. An
+    unresolved gate reference is inert (visible), so a catalog typo degrades to
+    always-emit. Symmetric with param_visible so both directions agree."""
+    vw = param.visible_when
+    if vw is None or not vw.param:
+        return True
+    for i, q in enumerate(entry.params):
+        if param_key(q) != vw.param:
+            continue
+        raw = values[i] if i < len(values) else ""
+        v = _resolve_enum_xml_value(q, raw) if q.type == "enum" else raw
+        if v == "":
+            v = q.default_value or ""
+        return v in vw.values
+    return True
+
+
 def _resolve_bool_state(param: StepParam, hr_value: str) -> str:
     state = param.default_value if param.default_value else "False"
     if hr_value != "":
@@ -452,6 +474,10 @@ def _renders_bare_in_hr(param: StepParam) -> bool:
         return True
     if not param.hr_label:
         return True
+    # Per-param opt-in (inverse of hr_bare): a calc/field/script FileMaker renders
+    # WITH its label is matched by that label, never positionally.
+    if param.hr_labeled:
+        return False
     if param.type in ("calc", "field", "script"):
         return True
     if param.type == "layout":
@@ -789,19 +815,31 @@ def _emit_field_or_variable(
         if _raw_bool(param.raw, "emitEmptyDefault"):
             return '    <Field table="" id="0" name=""/>'
         return ""
+    # A typed same-element child (typeAttr/typeValue) carries its fixed
+    # discriminator attribute on the <Field …> open tag — FM's variable-only
+    # <Field type="Messages">/<Field type="ToolCalls"> children of one wrapper.
+    # Generic, driven entirely by the catalog. Mirrors the C++ converter.
+    type_attr = param.raw.get("typeAttr") or ""
+    type_attr_str = (
+        ' ' + type_attr + '="' + esc_xml(param.raw.get("typeValue") or "") + '"'
+        if type_attr
+        else ""
+    )
     if _is_variable(hr_value):
         trimmed = _trim(hr_value)
         out = ""
         if not preceded_by_text_element:
             out += "    <Text/>\n"
-        out += "    <Field>" + esc_xml(trimmed) + "</Field>"
+        out += "    <Field" + type_attr_str + ">" + esc_xml(trimmed) + "</Field>"
         return out
     out = ""
     if _raw_bool(param.raw, "textMarker") and not preceded_by_text_element:
         out += "    <Text/>\n"
     table, fid, fname = resolver.resolve_field(hr_value)
     out += (
-        '    <Field table="'
+        '    <Field'
+        + type_attr_str
+        + ' table="'
         + esc_xml(table)
         + '" id="'
         + str(fid)
@@ -1104,6 +1142,15 @@ def convert_step_with_catalog(
     # G10 attribute-bearing wrapper: a wrapper element may carry an enum value as an
     # attribute (FM serializes <Action value="Queue"> holding children).
     wrapper_attr: dict[str, str] = {}
+    # G10 non-default standalone survival: a wrapper whose enum resolves to a
+    # NON-default value but whose lazy-open group never fires (no child emits)
+    # would otherwise drop the pre-resolved attribute entirely, leaving the step
+    # with no discriminator (FM re-fills the default on paste, losing the authored
+    # value). Remember these in param order and emit them as self-closing
+    # <Wrapper attr="v"/> after the loop if the wrapper never opened. Default-valued
+    # wrappers are intentionally NOT queued: a bare default emits nothing and FM
+    # re-fills the same default on paste, matching FM's own render.
+    g10_standalone: list[tuple[str, str]] = []
     is_wrapper: set[str] = set()
     for p in params:
         segs = _split_path(p.parent_element or "")
@@ -1115,7 +1162,10 @@ def convert_step_with_catalog(
             if v == "":
                 continue
             attr = p.xml_attr or "value"
-            wrapper_attr[p.xml_element] = " " + attr + '="' + esc_xml(v) + '"'
+            attr_str = " " + attr + '="' + esc_xml(v) + '"'
+            wrapper_attr[p.xml_element] = attr_str
+            if v != (p.default_value or ""):
+                g10_standalone.append((p.xml_element, attr_str))
             skip_param[pi] = True
 
     # G11 attribute-on-element: an enum/boolean param whose xmlElement uses "Elem/@attr"
@@ -1194,6 +1244,9 @@ def convert_step_with_catalog(
 
     prev_was_text_element = False
     open_groups: list[str] = []
+    # Wrappers actually opened by an emitting child during the loop, so the
+    # post-loop G10 standalone pass only injects for wrappers that never opened.
+    wrapper_opened: set[str] = set()
 
     for pi, param in enumerate(params):
         hr_value = values[pi]
@@ -1225,6 +1278,24 @@ def convert_step_with_catalog(
 
         if gov_handled:
             pass  # piece already decided (a value or intentionally empty)
+        elif (
+            param.type == "boolean"
+            and param.visible_when is not None
+            and param.visible_when.param
+            and param.omit_when_empty
+        ):
+            # P7.3 governed-visibility boolean: a boolean whose PRESENCE (not just
+            # value) is governed by a sibling enum's value declares a ``visibleWhen``
+            # gate — the generic "governed by another param's enum value" primitive,
+            # symmetric with the XML->HR param_visible skip and the discriminator-
+            # revealed omit. When the gate value is not met FileMaker omits the
+            # element ENTIRELY (confirmed live: Configure AI Account drops
+            # <VerifySSLCertificates> for every LLMType except "Other"); when met it
+            # emits with the normal flag-style presence semantics. Opt-in via
+            # omitWhenEmpty. Benefits any step of this shape, not just #212.
+            if _param_visible_hr(entry, values, param):
+                piece = _emit_boolean(param, hr_value)
+            # else: gate not met -> omit entirely (piece stays "")
         elif param.type == "boolean":
             if pi in implied_bool:
                 attr = param.xml_attr or "state"
@@ -1276,13 +1347,20 @@ def convert_step_with_catalog(
                 piece = '    <Field table="' + esc_xml(table) + '" id="' + str(fid) + '" name="' + esc_xml(fname) + '"/>'
         elif param.type == "tableRef":
             if not _trim(hr_value):
-                piece = '    <Table id="" name=""/>'
+                # A present-driven, gated table (Fine-Tune Model's training
+                # <Table>, revealed only in the DataTable branch) opts into
+                # omit_when_empty and emits nothing when unset.
+                if not param.omit_when_empty:
+                    piece = '    <Table id="" name=""/>'
             else:
                 tid, tname = _resolve_table(_unquote(hr_value))
                 piece = '    <Table id="' + str(tid) + '" name="' + esc_xml(tname) + '"/>'
         elif param.type == "tableOccurrence":
-            tid, tname = _resolve_table(_unquote(hr_value))
-            piece = '    <Table id="' + str(tid) + '" name="' + esc_xml(tname) + '"/>'
+            # An unset present-driven TO (omit_when_empty) emits no <Table> —
+            # matching FM's TrainingFile form; otherwise the TO always serializes.
+            if _trim(hr_value) or not param.omit_when_empty:
+                tid, tname = _resolve_table(_unquote(hr_value))
+                piece = '    <Table id="' + str(tid) + '" name="' + esc_xml(tname) + '"/>'
         elif param.type == "fileReference":
             if _trim(hr_value):
                 quoted, bare = _is_quoted_lone_variable(hr_value)
@@ -1318,9 +1396,46 @@ def convert_step_with_catalog(
                         piece = '    <Layout id="' + str(rid) + '" name="' + esc_xml(rname) + '"/>'
         elif param.type == "script":
             if not param.omit_when_empty or _trim(hr_value):
-                script_name = _unquote(hr_value)
-                sid, sname = resolver.resolve_script(script_name)
-                piece = '    <Script id="' + str(sid) + '" name="' + esc_xml(sname) + '"/>'
+                # Cross-file reference (Perform Script id 1): FM renders a call into
+                # another file as the positional token `"NAME" from file: "FILE"`.
+                # When the catalog opts this script param into the from-file grammar
+                # (``fromFileElement`` set), split that infix clause into a
+                # <FileReference name="FILE"> sibling emitted BEFORE the <Script>,
+                # carrying a <UniversalPathList>file:FILE</> child, and emit the
+                # <Script> NAME-ONLY. FM binds the reference by the external-data-
+                # source NAME when one of that name exists in the destination — the
+                # path is then ignored (even a wrong path binds, no dialog), so an
+                # in-solution cross-file call never regresses. When the destination
+                # does NOT yet reference FILE, the child preserves the file name
+                # (`from file: "FILE"`) and lets FM raise its normal locate prompt
+                # (fail-loud) instead of a name-only reference's silent `from file:
+                # ""` drop. The path uses the display NAME — the only value available
+                # offline; name-binding makes the real filename moot for resolvable
+                # references. The <Script> stays name-only: its binding id lives in
+                # the OTHER file (absent from the current-file context), so resolving
+                # it would bind the WRONG same-file script of the same name; FM shows
+                # it <unknown> until rebound while the file + name survive intact.
+                from_file_element = _raw_str(param.raw, "fromFileElement")
+                file_name = ""
+                script_token = hr_value
+                if from_file_element:
+                    marker = " from file: "
+                    fp = hr_value.find(marker)
+                    if fp != -1:
+                        script_token = _trim(hr_value[:fp])
+                        file_name = _unquote(_trim(hr_value[fp + len(marker):]))
+                script_name = _unquote(script_token)
+                if file_name:
+                    script_xml = '    <Script name="' + esc_xml(script_name) + '"/>'
+                    piece = (
+                        "    <" + from_file_element + ' name="' + esc_xml(file_name) + '">\n'
+                        + "      <UniversalPathList>file:" + esc_xml(file_name)
+                        + "</UniversalPathList>\n    </" + from_file_element + ">\n"
+                        + script_xml
+                    )
+                else:
+                    sid, sname = resolver.resolve_script(script_name)
+                    piece = '    <Script id="' + str(sid) + '" name="' + esc_xml(sname) + '"/>'
         elif param.type in ("text", "name") and (not param.omit_when_empty or _trim(hr_value)):
             quoted, bare = _is_quoted_lone_variable(hr_value)
             emit_value = bare if quoted else hr_value
@@ -1343,12 +1458,22 @@ def convert_step_with_catalog(
             wa = wrapper_attr.get(want[k], "")
             xml += "    <" + want[k] + wa + ">\n"
             open_groups.append(want[k])
+            wrapper_opened.add(want[k])
 
         xml += piece + "\n"
         prev_was_text_element = is_text_element
 
     for k in range(len(open_groups), 0, -1):
         xml += "    </" + open_groups[k - 1] + ">\n"
+
+    # G10 non-default standalone survival: any G10 wrapper whose enum carried a
+    # non-default value but whose lazy-open group never fired (no child emitted)
+    # would otherwise drop its pre-resolved attribute. Emit the self-closing
+    # <Wrapper attr="v"/> so the authored value survives the round-trip; the
+    # default-valued case is never queued, so a bare default still emits nothing.
+    for wrapper, attr_str in g10_standalone:
+        if wrapper not in wrapper_opened:
+            xml += "    <" + wrapper + attr_str + "/>\n"
 
     xml += "  </Step>"
     return xml

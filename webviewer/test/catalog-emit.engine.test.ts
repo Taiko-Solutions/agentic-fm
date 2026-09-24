@@ -83,3 +83,37 @@ describe('governed-visibility boolean (hrHidden gate derived on emit)', () => {
     ).toContain('<DontEncodeURL state="False"/>');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Cross-file Perform Script (id 1) — the fromFileElement grammar primitive.
+//
+// FM renders a call into another file as the positional token
+// `"NAME" from file: "FILE"`. A script param that opts into the from-file
+// grammar (`fromFileElement` set) must split that infix clause into a
+// <FileReference name="FILE"> sibling carrying a
+// <UniversalPathList>file:FILE</UniversalPathList> child, emitted BEFORE a
+// name-only <Script name="NAME"/>. Live-verified against FileMaker (FM26): FM
+// binds the reference by the external-data-source NAME when one exists (path
+// ignored, no dialog, no regression) and the path preserves the file name
+// (`from file: "FILE"`, fail-loud + FM's normal locate prompt) when it does not
+// — instead of a name-only reference's silent `from file: ""` drop. Mirrors the
+// Python test_catalog_emit.py cross-file cases.
+// ---------------------------------------------------------------------------
+describe('cross-file Perform Script (fromFileElement grammar)', () => {
+  it('splits the from-file clause into FileReference + UniversalPathList + name-only Script', () => {
+    const out = hrToXml(
+      'Perform Script [ "Sandbox" from file: "QuickStart" ; Specified: From list ; Parameter: "hi" ]',
+    ).xml;
+    expect(out).toContain('<FileReference name="QuickStart">');
+    expect(out).toContain('<UniversalPathList>file:QuickStart</UniversalPathList>');
+    expect(out).toContain('<Script name="Sandbox"/>');
+    // The clause is fully consumed — never leaked into a swallowed script name.
+    expect(out).not.toContain('from file:');
+  });
+
+  it('leaves a same-file call untouched (no FileReference)', () => {
+    const out = hrToXml('Perform Script [ "Sandbox" ; Parameter: "hi" ]').xml;
+    expect(out).not.toContain('<FileReference');
+    expect(out).toContain('<Script ');
+  });
+});
