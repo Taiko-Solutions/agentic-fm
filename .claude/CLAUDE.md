@@ -226,6 +226,29 @@ The developer always works in **human-readable (HR) script format**. The agent's
 >
 > As a normal unstored calc, `AsJSON` evaluates in the current layout's TO context and **returns `{}` when read from another layout** — the Manager merges `{}` and downstream checks pass through silently. Fix in FM: Manage Database → field → Storage Options → **"Use global storage"**, uniformly on **every** Utility's AsJSON field. (Discovered in Borneo 944.9; document affected files in the solution's 01-Decisiones-Tomadas.md.)
 
+> **CRITICAL — `Perform Script`: child element ORDER decides whether the target resolves**
+>
+> Emit the children in the exact order FileMaker itself produces, with the target **last**:
+>
+> ```xml
+> <Step enable="True" id="1" name="Perform Script">
+>   <DisableStepCollapsed state="False"/>
+>   <FileReference id="10" name="Controlador">          <!-- cross-file only; OMIT for same-file calls -->
+>     <UniversalPathList>file:Borneo-Controller</UniversalPathList>
+>   </FileReference>
+>   <Calculation><![CDATA[ ...script parameter... ]]></Calculation>
+>   <Script id="1543" name="Plantas | Asignar Propietario {json}"/>
+> </Step>
+> ```
+>
+> Put `<Script>` first and FileMaker accepts the paste but leaves the target **unresolved** — HR reads `Perform Script [ From list ; "" ; Parameter: … ]`, with no name and no `File:`, and **the step calls nothing, with no error at runtime**. Neither the catalog nor fmlint checks the order.
+>
+> Two related traps:
+> - **`<Calculated><Calculation>` is the "by name" mode** — its content is the script *name*, and it is mutually exclusive with `<Script>`. The parameter goes in a **bare** `<Calculation>`. `fm_xml_to_snippet.py` emits the parameter inside `<Calculated>`: its output is fine for **reading** a script, but copying a block of it into a new script leaves the step dead.
+> - **X003 is a false positive for same-file calls** — the catalog says *"Omit `<FileReference>` entirely for same-file calls"*. Don't add or keep an empty one to silence the rule.
+>
+> When a step's structure is non-trivial, the fastest reliable source is to copy that step from FileMaker and read it with `python3 agent/scripts/clipboard.py read <out.xml>` — not the catalog alone, and never the converter's output. (Real case: Borneo 964, scripts 1547/1257 — three silent dead `Perform Script` steps.)
+
 
 
 # Core workflow

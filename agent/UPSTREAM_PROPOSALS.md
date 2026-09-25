@@ -1,5 +1,45 @@
 # Propuestas Upstream
 
+## 2026-09-25 — `Perform Script`: el orden de los elementos hijos es significativo (fallo silencioso)
+
+- **Categoría**: catalog / fmlint / knowledge
+- **Descripción**: En `<Step name="Perform Script">` el orden de los hijos determina si FileMaker resuelve el destino. La forma que produce el propio FileMaker (verificada copiando un paso real al portapapeles y leyéndolo con `clipboard.py read`) es:
+
+  ```xml
+  <Step enable="True" id="1" name="Perform Script">
+    <DisableStepCollapsed state="False"/>
+    <FileReference id="10" name="Controlador">
+      <UniversalPathList>file:Borneo-Controller</UniversalPathList>
+    </FileReference>
+    <Calculation><![CDATA[...parámetro...]]></Calculation>
+    <Script id="1543" name="Nombre del script"/>
+  </Step>
+  ```
+
+  Es decir: `FileReference` → `Calculation` (parámetro) → `Script` (destino, **al final**). Con el orden invertido (`Script` primero), FileMaker acepta el paste sin error pero deja el destino **sin resolver**: el HR queda como `Perform Script [ From list ; "" ; Parameter: ... ]`, sin nombre ni `File:`, y el paso **no llama a nada**. No hay error en tiempo de ejecución: el script simplemente no hace su trabajo.
+- **Propuesta**: (a) documentar el orden en el `notes` del catálogo para `Perform Script`; (b) regla fmlint nueva que verifique el orden de los hijos y avise cuando `<Script>` precede a `<Calculation>`/`<FileReference>`.
+- **Archivos afectados**: `agent/catalogs/step-catalog-en.json`, `agent/fmlint/`
+- **Origen**: 964 Borneo, reescritura del script 1257 — el `Perform Script` cross-file al Controller quedó mudo dos veces antes de dar con la causa.
+
+## 2026-09-25 — `<Calculated>` es el modo "by name", no el parámetro (fallo silencioso del conversor)
+
+- **Categoría**: converter / knowledge
+- **Descripción**: En fmxmlsnippet, `<Calculated><Calculation>` dentro de `Perform Script` es el **modo "by name"**: su contenido es el *nombre* del script a ejecutar, y es **mutuamente excluyente** con `<Script id name/>`. El parámetro va en un `<Calculation>` suelto, hermano de `<Script>`. El catálogo ya lo documenta correctamente.
+
+  El problema es que `fm_xml_to_snippet.py` emite el **parámetro** envuelto en `<Calculated>`. Su salida sirve para *leer* un script, pero si se copia un bloque suyo a un script nuevo, FileMaker interpreta "el nombre del script es este JSON", descarta el `<Script>` y deja el paso muerto — otra vez sin error.
+- **Propuesta**: (a) corregir el conversor para emitir el parámetro como `<Calculation>` suelto; (b) mientras tanto, avisar en `CONVERTERS.md` de que la salida del conversor no es apta para copiar bloques a scripts nuevos.
+- **Archivos afectados**: `agent/scripts/fm_xml_to_snippet.py`, `agent/docs/CONVERTERS.md`
+- **Origen**: 964 Borneo, scripts 1547 y 1548 — el `Perform Script` a `Create Log` quedó muerto y el logging de errores no registraba nada, sin síntoma visible salvo la ausencia de entradas en `Log`.
+
+## 2026-09-25 — fmlint X003: falso positivo en llamadas al mismo archivo
+
+- **Categoría**: fmlint
+- **Descripción**: X003 exige `<UniversalPathList>` dentro de `<FileReference>`, pero se dispara también cuando el `<FileReference>` está vacío o ausente en un `Perform Script` **del mismo archivo**, donde el catálogo indica explícitamente *"Omit entirely for same-file calls"*. Hacer caso al aviso (quitar o rellenar el elemento) no arregla nada y puede despistar: en esta sesión llevó a anular una decisión correcta y a perseguir la causa equivocada.
+- **Propuesta**: que X003 solo aplique cuando el paso declara un destino externo (FileReference presente con id/name no vacíos).
+- **Archivos afectados**: `agent/fmlint/`
+- **Origen**: 964 Borneo, script 1547.
+
+
 ## 2026-03-10 — Documentar patrón Omit Find para búsquedas "distinto de"
 
 - **Categoría**: knowledge
@@ -314,3 +354,40 @@ Ran into this deploying agentic-fm against a multi-file solution — seven `.fmp
 - **Fix propuesto**: añadir `"$XML_PARSED_DIR/custom_functions/$SOLUTION_NAME"` a `_search_dirs` de `custom_function` (manteniendo `custom_functions_sanitized/` por compatibilidad con el layout plano) y corregir la ruta en `.claude/CLAUDE.md`. La otra mitad de la propuesta original (`check_embedded_agfm.py` sin glob recursivo) ya está aplicada en `taiko` (entrada del 2026-09-08).
 - **Archivos afectados**: `fmparse.sh`, `.claude/CLAUDE.md`
 - **Origen**: setup en un repo cliente con 3 bases de datos en un solo clon (2026-07-01): la auditoría de `removals.json` detectó que la limpieza de CFs no cubría la carpeta real. Verificado en `taiko` el 2026-09-19. Sin datos de cliente.
+
+## 2026-09-22 — fm_xml_to_snippet.py: 4 desviaciones que rompen un script al re-pegarlo (Perform Script "By name", Layout autocerrado) — **severidad alta**
+
+- **Categoría**: script_utility
+- **Descripción**: al convertir a sandbox un script transaccional real (SaXML → fmxmlsnippet) para modificarlo, el resultado pasa fmlint pero **cambiaría el comportamiento al pegarlo**. `snippet_to_hr.py` lo delata. Casos:
+  1. **`Perform Script` same-file con parámetro** → el parámetro sale envuelto en `<Calculated>` (que en el catálogo significa **"By name"**) más un `<FileReference></FileReference>` vacío. El HR muestra `Perform Script [ "Create Log" ; By name: JSONSetElement(…) ]`: al pegar, FM intentaría resolver un script cuyo nombre es el JSON. Forma correcta: `<Calculation>` directo + `<Script>`, sin FileReference. En llamadas cross-file también deja el `<FileReference>` vacío (sin id/name ni `UniversalPathList`; fmlint X003 lo detecta).
+  2. **`Go to Layout` por nombre calculado** (`LayoutNameByCalc`) → se emite `LayoutDestination="SelectedLayout"` con `<Layout name="…"/>` **autocerrado y sin id**. El catálogo documenta que FM descarta en silencio el `<Layout/>` autocerrado → el script sigue en el layout anterior.
+  3. **`New Window`** → `<Layout id="N" name="…"/>` autocerrado (mismo silent-discard).
+  4. **`Perform Find` sin petición guardada** → emite `<Restore state="True"/>` (el SaXML original no tiene Restore). HR: `Perform Find [ Restore ]`.
+  Ninguno lo detecta fmlint hoy salvo X003 en el caso cross-file.
+- **Fix propuesto**: (a) en el conversor, mapear el parámetro de Perform Script a `<Calculation>` y reservar `<Calculated>` para el modo By name real; omitir FileReference en llamadas same-file y emitirla completa (id, name, `UniversalPathList`) en cross-file; (b) emitir siempre `<Layout …></Layout>` explícito y conservar `LayoutNameByCalc` + `<Calculation>` cuando el original es por cálculo; (c) no emitir Restore en Perform Find sin Query. (d) Reglas fmlint nuevas: `<Layout/>` autocerrado en Go to Layout/New Window, y `<Calculated>` en Perform Script cuyo contenido no es un nombre de script plausible (p. ej. contiene `JSONSetElement` / `;`). (e) Añadir un transaccional Clew típico al test de round-trip propuesto el 2026-09-08.
+- **Archivos afectados**: `agent/scripts/fm_xml_to_snippet.py`, `agent/fmlint/rules/param_fidelity.py` (o regla nueva), tests de round-trip
+- **Origen**: proyecto cliente (2026-09-22), al copiar a sandbox un script transaccional con New Window + Go to Layout por cálculo + Perform Script a un logger. Detectado con el diff `snippet_to_hr` original vs conversión. Sin datos de cliente.
+
+## 2026-09-22 — fmlint C004: falso positivo en `error.ThrowIf` cuya condición es verdadera en la evaluación en vivo
+
+- **Categoría**: script_utility (fmlint)
+- **Descripción**: en Tier 3, C004 evalúa cada cálculo en el motor FM fuera de contexto de script. Las variables están vacías, así que un guard Clew como `error.ThrowIf ( IsEmpty ( $X ) ; _error_MISSING_REQUIRED_PARAM ; "…" )` tiene condición **verdadera**, lanza (usa `Get ( ScriptName )` y el trace) y devuelve `?` → C004 ERROR. Reproducción mínima: `error.ThrowIf ( True ; 5499 ; "x" )` → C004; `error.ThrowIf ( False ; 5499 ; "x" )` → pasa. Bloquea el "0 ERROR antes de presentar" en scripts correctos que validan variables vacías, y empuja a desactivar la regla.
+- **Fix propuesto**: en C004, no reportar (o degradar a INFO) cuando la expresión evaluada es una llamada de la familia `error.Throw*` / `error.CreateVarsFromKeys`, o cuando depende de `$variables` no inicializadas. Alternativa: evaluar sustituyendo `error.Throw*(cond ; …)` por `cond` para validar solo la sintaxis del argumento.
+- **Archivos afectados**: `agent/fmlint/rules/` (regla C004), tests de fmlint
+- **Origen**: proyecto cliente (2026-09-22), script de interfaz Clew que valida un global vacío antes de llamar a un transaccional. Sin datos de cliente.
+
+## 2026-09-22 — Replace Field Contents: `<Restore>` es el flag "Perform auto-enter options" (invertido); catálogo y snippet_example lo documentan mal
+
+- **Categoría**: catálogo / snippet_examples / script_utility
+- **Descripción**: en `Replace Field Contents`, la casilla de FM 2026 *Perform auto-enter options for fields* (HR `Skip auto-enter options`; SaXML `<Boolean type="Skip auto-enter options">`) se serializa en fmxmlsnippet como **`<Restore state>` invertido**: `Restore="False"` = auto-enter **ON** (casilla marcada), `Restore="True"` = auto-enter **OFF**. Verificado copiando el mismo paso con la casilla marcada y desmarcada desde el Script Workspace: solo cambia `Restore`; `SerialNumbers@PerformAutoEnter` queda `False` en ambos. Sin embargo: (a) el catálogo marca `Restore` como `hrHidden` con la nota "FM always serializes <Restore state="False"> … the dialog exposes no Restore control" (falso); (b) `snippet_examples/steps/fields/Replace Field Contents.xml` dice que `PerformAutoEnter="False"` = "Skip auto-enter" (falso para modo cálculo) y que `Restore` significa "use stored settings"; (c) `snippet_to_hr.py` no muestra la opción. Consecuencia real: una migración masiva generada con `Restore="False"` actualizó la fecha/usuario de modificación de todos los registros.
+- **Fix propuesto**: (1) catálogo: `Restore` → param visible `hrLabel: "Skip auto-enter options"`, `flagStyle`, con nota "Restore=True ⇒ Skip auto-enter (casilla Perform auto-enter DESMARCADA)"; aclarar que `SerialNumbers@PerformAutoEnter` solo afecta al modo Serial numbers. (2) Corregir los comentarios del snippet_example. (3) `snippet_to_hr.py` / `fm_xml_to_snippet.py`: mapear el `Boolean "Skip auto-enter options"` del SaXML ↔ `Restore`. (4) fmlint: INFO/WARNING en `Replace Field Contents` que actualiza auto-enter (Restore="False") dentro de scripts de carpeta Migraciones o con `TriggersDisable`, para forzar la decisión explícita.
+- **Archivos afectados**: `agent/catalogs/step-catalog-en.json`, `agent/snippet_examples/steps/fields/Replace Field Contents.xml`, `agent/scripts/snippet_to_hr.py`, `agent/scripts/fm_xml_to_snippet.py`, `agent/fmlint/rules/`
+- **Origen**: proyecto cliente (2026-09-22), migración de backfill de un campo nuevo sobre ~1.300 registros; el desarrollador detectó la casilla marcada y aportó los dos XML de contraste. Sin datos de cliente.
+
+## 2026-09-22 — FileMaker rechaza en silencio pegar un fragmento con bloque descompensado (`Else If` sin `If`)
+
+- **Categoría**: knowledge / script_utility
+- **Descripción**: al insertar una rama nueva en un `If/Else If` existente, lo natural es generar un snippet que empiece por `<Step id="125" name="Else If">` y pegarlo dentro del bloque. FileMaker **no pega nada y no avisa**: el portapapeles contiene el XMSS correcto (verificado con `clipboard.py read`), pero el Script Workspace lo descarta por bloque descompensado. Lo mismo aplicaría a `Else`, `End If`, `End Loop` sueltos. Workaround: pegar solo los pasos interiores y crear la línea `Else If` a mano (duplicando una rama existente), o regenerar el script entero — esto último peligroso cuando el original tiene pasos que el conversor degrada.
+- **Fix propuesto**: (1) documentarlo en `agent/docs/knowledge/` (nuevo `paste-unbalanced-block.md`) y enlazarlo desde el MANIFEST y desde CLAUDE.md § fmxmlsnippet rules; (2) regla fmlint (WARNING) cuando un snippet de sandbox empieza por un step con `blockPair.role` = `middle`/`close` sin su apertura, con el mensaje del workaround — hoy S007 lo marca como ERROR de estructura sin explicar que FM lo descartará en silencio.
+- **Archivos afectados**: `agent/docs/knowledge/` + MANIFEST, `.claude/CLAUDE.md`, `agent/fmlint/rules/` (S007)
+- **Origen**: proyecto cliente (2026-09-22), añadir una acción a un router `If/Else If` de 5 ramas. Sin datos de cliente.
