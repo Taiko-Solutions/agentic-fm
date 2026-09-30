@@ -83,7 +83,48 @@ Let (
 
 ## Referencia de campo
 
-La referencia de campo pasada a `SQL.GetTableName()` y `SQL.GetFieldName()` puede ser de cualquier TO que apunte a la tabla base deseada. Las funciones resuelven al nombre de la tabla/campo base, independientemente del TO usado.
+La referencia de campo pasada a `SQL.GetTableName()` y `SQL.GetFieldName()` puede ser de cualquier TO que apunte a la tabla base deseada, **siempre que esa TO esté relacionada con el layout desde el que se ejecuta el cálculo**. Si no lo está, la CF devuelve `?`; ver la sección siguiente.
+
+En la práctica, lo más seguro es **pasar `GetFieldName ( TO::Campo )`**. Funciona desde cualquier layout y mantiene la referencia fuerte al renombrar.
+
+---
+
+## ⚠ La referencia debe poder evaluarse desde el contexto actual: si no, `?` silencioso
+
+Al pasar un campo como parámetro de una custom function, FileMaker **lee su valor** al enlazar el parámetro. Si la TO no pertenece al grupo de TOs del layout actual, esa lectura da error y **toda la CF devuelve `?`**, aunque por dentro solo use `GetFieldName`. `GetFieldName ( TO::Campo )` escrito directamente no lee el valor, así que funciona siempre. Por eso despista.
+
+Verificado en el motor en vivo (`AGFMEvaluation`, 2026-09-30). `SolutionApp__Bridge` es una TO de un grupo aislado y el layout `Inicio` pertenece a otro grupo:
+
+| Expresión | Layout | Resultado |
+|---|---|---|
+| `GetFieldName ( SolutionApp__Bridge::Campo )` | Inicio | `SolutionApp__Bridge::Campo` |
+| `SQL.GetTableName ( SolutionApp__Bridge::Campo )` | Inicio | **`?`** |
+| `SQL.GetTableName ( SolutionApp__Bridge::Campo )` | layout sobre `SolutionApp__Bridge` | `"SolutionApp__Bridge"` |
+| `SQL.GetTableName ( GetFieldName ( SolutionApp__Bridge::Campo ) )` | Inicio | `"SolutionApp__Bridge"` |
+
+El `?` se propaga a `SQL.GetColumn`, `SQL.GetColumn2Fields` y compañía. **El caso peligroso es el chequeo de existencia**: `IsEmpty ( "?" )` = False, así que el script cree que el registro "ya existe" y **nunca lo crea**, sin error y marcando la idempotencia como hecha.
+
+### Patrón correcto
+
+```filemaker
+// BIEN — funciona desde cualquier layout
+Insert Calculated Result [ $Existe ;
+    not IsEmpty ( SQL.GetColumn2Fields (
+        GetFieldName ( SolutionApp__Bridge::PrimaryKey ) ;
+        GetFieldName ( SolutionApp__Bridge::FK_Parent ) ; $ParentId ;
+        GetFieldName ( SolutionApp__Bridge::FK_Child )  ; $ChildId
+    ) )
+]
+```
+
+Con `GetFieldName`, los valores (`$ParentId`) funcionan igual como texto o como número. Si no hay coincidencia, devuelve vacío, no `?`.
+
+### Cuándo aplicarlo
+
+- **Siempre** en scripts documentados como "Contexto: insensitive", en migraciones y en routers o subscripts llamados desde cualquier layout.
+- **Siempre** que la tabla consultada sea una tabla puente o esté en un grupo de TOs propio.
+- Para detectar el problema: un `ExecuteSQL` que devuelve `?` con `FROM ?` en la query, o un chequeo de existencia que nunca da "no existe".
+- Para saber si una TO está relacionada con el contexto de un script, busca un camino en `relationships.index` entre la TO base del layout y la TO consultada.
 
 ---
 
