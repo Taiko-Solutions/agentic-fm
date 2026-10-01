@@ -73,7 +73,7 @@ Una sesión puede tener uno, otro, ambos o ninguno. Regla práctica: *"¿dónde 
 
 ## Prerequisito de instalación (para que "viaje" con la rama)
 
-El repo trae `.mcp.json` con el servidor `proofkit-mcp` (comando `proofkit-mcp`, resuelto por PATH). Cada desarrollador necesita:
+El repo trae `.mcp.json` con el servidor `proofkit-mcp` (comando `proofkit mcp`, binario `proofkit` en `~/.local/bin`, en el PATH). Cada desarrollador necesita:
 
 1. La app ProofKit instalada (deja el wrapper `proofkit-mcp` en `~/.local/bin`, en PATH).
 2. El plugin ProofKit cargado en el archivo FileMaker.

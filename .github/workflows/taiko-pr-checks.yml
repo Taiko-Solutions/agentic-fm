@@ -5,6 +5,9 @@ on:
 jobs:
   paths-and-sanity:
     runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ github.base_ref }}
+      HEAD_REF: ${{ github.head_ref }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -12,9 +15,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Reglas de rutas (mismas que el hook pre-push)
+      - name: Reglas de rutas (script y paths.conf de la rama BASE, no de la PR; por commit)
         run: |
-          git diff --name-only --diff-filter=d "origin/${{ github.base_ref }}...HEAD" \
-            | python3 agent/scripts/check_pushed_paths.py --branch "${{ github.head_ref }}"
+          git show "origin/$BASE_REF:agent/scripts/check_pushed_paths.py" > /tmp/check_pushed_paths.py
+          git show "origin/$BASE_REF:agent/scripts/hooks/paths.conf" > /tmp/paths.conf
+          python3 /tmp/check_pushed_paths.py --branch "$HEAD_REF" --revs "origin/$BASE_REF..HEAD" \
+            --repo . --rules /tmp/paths.conf
       - name: Sanity checks (catálogos, conversor, fmlint, scripts)
         run: python3 agent/scripts/ci_checks.py

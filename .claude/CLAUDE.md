@@ -473,7 +473,7 @@ Taiko toca FileMaker por **tres vías** (mapa canónico: `agent/docs/taiko/fm-ac
 4. **Interfaces web: proactivo con guardarraíles.** Cuando una tarea encaje con una UI web (listados, dashboards, interacciones ricas), **propón** una interfaz ProofKit — mencionando los guardarraíles (`agent/docs/taiko/proofkit/gotchas.md`). Motor por defecto ProofKit; el skill `webviewer-build` solo como excepción (HTML trivial o sin conexión ProofKit). **Al scaffoldear, copia `agent/docs/taiko/proofkit/CLAUDE-webapp.md` como `CLAUDE.md` del proyecto web**: las sesiones de UI cargan solo las reglas web (ligeras), sin el stack fmxmlsnippet del repo padre.
 5. **Metodología combinada.** El flujo unificado agentic-fm + Superpowers + ProofKit está en `agent/docs/taiko/knowledge/combined-workflow.md` (indexado en el MANIFEST, escaneable por keywords).
 
-El servidor MCP `proofkit-mcp` viaja con la rama vía `.mcp.json` (comando `proofkit-mcp`, resuelto por PATH). Prerequisito por desarrollador: app ProofKit instalada + plugin cargado en el archivo + script *"Connect to MCP"* corrido en la sesión.
+El servidor MCP `proofkit-mcp` viaja con la rama vía `.mcp.json` (comando `proofkit mcp`, binario `proofkit` en `~/.local/bin`, en el PATH). Prerequisito por desarrollador: app ProofKit instalada + plugin cargado en el archivo + script *"Connect to MCP"* corrido en la sesión.
 
 # Patrones upstream pendientes de validación práctica
 

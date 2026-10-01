@@ -2,11 +2,13 @@
 
 Run: python3 agent/scripts/test_check_pushed_paths.py
 """
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
 import check_pushed_paths as cpp
+from test_sync_clone import git, make_origin
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RULES = cpp.load_rules(REPO_ROOT / "agent/scripts/hooks/paths.conf")
@@ -75,6 +77,55 @@ class ConfParsingTests(unittest.TestCase):
             self.assertEqual([r.pattern for r in rules["forbidden"]], ["^secret/"])
             r = cpp.classify(["ok/a.md"], "mejora/x", False, rules)
             self.assertTrue(r.ok, r.blocked)
+
+
+class ChangedFilesTests(unittest.TestCase):
+    """Los ficheros del rango se calculan POR COMMIT (con -m en merges), no como diff de árboles."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.origin, self.seed = make_origin(self.tmp)
+        self.clone = self.tmp / "clone"
+        git(self.tmp, "clone", "-q", str(self.origin), str(self.clone))
+        git(self.clone, "config", "user.email", "t@t")
+        git(self.clone, "config", "user.name", "t")
+        git(self.clone, "checkout", "-qb", "mejora/x")
+
+    def commit_file(self, rel, text, msg):
+        f = self.clone / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text, encoding="utf-8")
+        git(self.clone, "add", "-A")
+        git(self.clone, "commit", "-qm", msg)
+
+    def test_added_then_deleted_is_still_seen(self):
+        self.commit_file("docs/spec.md", "secreto", "añade")
+        git(self.clone, "rm", "-q", "docs/spec.md")
+        git(self.clone, "commit", "-qm", "borra")
+        self.assertIn("docs/spec.md", cpp.changed_files(self.clone, "origin/taiko..HEAD"))
+
+    def test_pure_deletion_is_ignored(self):
+        git(self.clone, "rm", "-q", "agent/a.md")
+        git(self.clone, "commit", "-qm", "borra a")
+        self.assertEqual(cpp.changed_files(self.clone, "origin/taiko..HEAD"), [])
+
+    def test_file_introduced_in_merge_commit_is_seen(self):
+        self.commit_file("agent/a.md", "rama x", "x")
+        git(self.clone, "checkout", "-qb", "otra", "origin/taiko")
+        self.commit_file("agent/a.md", "rama otra", "otra")
+        git(self.clone, "checkout", "-q", "mejora/x")
+        rc = subprocess.run(["git", "-C", str(self.clone), "merge", "otra"], capture_output=True).returncode
+        self.assertNotEqual(rc, 0)                       # conflicto esperado
+        (self.clone / "agent" / "a.md").write_text("resuelto", encoding="utf-8")
+        (self.clone / "docs").mkdir(exist_ok=True)
+        (self.clone / "docs" / "evil.md").write_text("colado en el merge", encoding="utf-8")
+        git(self.clone, "add", "-A")
+        git(self.clone, "commit", "-qm", "merge con regalo")
+        self.assertIn("docs/evil.md", cpp.changed_files(self.clone, "origin/taiko..HEAD"))
+
+    def test_new_branch_revs_syntax(self):
+        self.commit_file("agent/b.md", "b", "b")
+        self.assertIn("agent/b.md", cpp.changed_files(self.clone, "HEAD --not --remotes"))
 
 
 if __name__ == "__main__":

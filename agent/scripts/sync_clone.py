@@ -13,6 +13,7 @@ En el repo base (con remote upstream) no aplica. Solo librería estándar.
 """
 import argparse
 import json
+from datetime import datetime
 import subprocess
 import sys
 from pathlib import Path
@@ -51,7 +52,8 @@ def _branch_exists(repo, name) -> bool:
 def sync(repo, migrar: bool = False) -> dict:
     repo = Path(repo)
     res = {"mode": "clone", "taiko_before": None, "taiko_after": None, "updates": [],
-           "merged": False, "conflicts": [], "migrated": False, "messages": []}
+           "merged": False, "conflicts": [], "migrated": False, "hook_changed": False,
+           "messages": []}
     # Con --migrar el desarrollador afirma que esto es un clon: un remote `upstream`
     # residual (anomalía) no lo convierte en repo base, se elimina más abajo.
     if not migrar and is_base_repo(repo):
@@ -69,11 +71,26 @@ def sync(repo, migrar: bool = False) -> dict:
     _, remote_taiko, _ = _git(repo, "rev-parse", "origin/taiko")
     res["taiko_before"] = _git(repo, "rev-parse", "taiko")[1] if _branch_exists(repo, "taiko") else None
 
+    # Commits propios en taiko (modelo antiguo o descuido): nunca se destruyen en silencio
+    local_on_taiko = []
+    if res["taiko_before"]:
+        _, out, _ = _git(repo, "rev-list", "origin/taiko..taiko", check=False)
+        local_on_taiko = out.splitlines()
+    if local_on_taiko and not migrar:
+        res["messages"].append(f"taiko tiene {len(local_on_taiko)} commit(s) locales: ejecuta agentic-fm-sync --migrar "
+                               f"para moverlos a trabajo (no se ha tocado nada)")
+        return res
+
     if migrar:
-        if current == "taiko" and res["taiko_before"] != remote_taiko and not _branch_exists(repo, "trabajo"):
-            # commits locales en taiko → trabajo (taiko se realinea más abajo)
-            _git(repo, "branch", "trabajo", "taiko")
-            res["messages"].append("commits locales de taiko movidos a trabajo")
+        if local_on_taiko:
+            if not _branch_exists(repo, "trabajo"):
+                _git(repo, "branch", "trabajo", "taiko")
+                res["messages"].append("commits locales de taiko movidos a trabajo")
+            else:
+                backup = "backup/taiko-local-" + datetime.now().strftime("%Y-%m-%d")
+                _git(repo, "branch", "-f", backup, "taiko")
+                res["messages"].append(f"taiko tenía commits locales y trabajo ya existía: guardados en {backup} "
+                                       f"y mezclados en trabajo")
         rc, _, _ = _git(repo, "remote", "get-url", "upstream", check=False)
         if rc == 0:
             _git(repo, "remote", "remove", "upstream")
@@ -90,6 +107,13 @@ def sync(repo, migrar: bool = False) -> dict:
         _git(repo, "branch", "trabajo", "taiko")
         res["messages"].append("rama trabajo creada desde taiko")
     _git(repo, "checkout", "--quiet", "trabajo")
+    if migrar and local_on_taiko and _branch_exists(repo, "trabajo"):
+        # trabajo existía: traer primero los commits que estaban en taiko (backup/*)
+        rc, _, _ = _git(repo, "merge", "--no-edit", res["taiko_before"], check=False)
+        if rc != 0:
+            _git(repo, "merge", "--abort", check=False)
+            res["messages"].append("conflicto al traer los commits locales de taiko a trabajo: resuélvelo a mano")
+            return res
     rc, _, _ = _git(repo, "merge", "--no-edit", "taiko", check=False)
     if rc == 0:
         res["merged"] = True
@@ -99,11 +123,27 @@ def sync(repo, migrar: bool = False) -> dict:
         _git(repo, "merge", "--abort", check=False)
         res["messages"].append("conflicto al mezclar taiko en trabajo: resuélvelo a mano con git merge taiko")
 
+    # Hook: reinstalar si cambió (o siempre con --migrar); excluir specs de cliente del índice
+    if res["taiko_before"] and res["taiko_before"] != remote_taiko:
+        _, changed, _ = _git(repo, "diff", "--name-only", f"{res['taiko_before']}..{remote_taiko}",
+                             "--", "agent/scripts/hooks/", "agent/scripts/check_pushed_paths.py",
+                             "agent/scripts/install-hooks.sh", check=False)
+        res["hook_changed"] = bool(changed.strip())
+    installer = repo / "agent" / "scripts" / "install-hooks.sh"
+    if (migrar or res["hook_changed"]) and installer.exists():
+        subprocess.run(["bash", str(installer)], cwd=repo, capture_output=True)
+        res["messages"].append("hook pre-push reinstalado (install-hooks.sh)")
+    elif res["hook_changed"]:
+        res["messages"].append("el hook cambió: ejecuta bash agent/scripts/install-hooks.sh")
     if migrar:
-        hook = repo / "agent" / "scripts" / "install-hooks.sh"
-        if hook.exists():
-            subprocess.run(["bash", str(hook)], cwd=repo, capture_output=True)
-            res["messages"].append("hook pre-push reinstalado")
+        _, gitdir, _ = _git(repo, "rev-parse", "--git-common-dir")
+        exclude = (repo / gitdir if not Path(gitdir).is_absolute() else Path(gitdir)) / "info" / "exclude"
+        exclude.parent.mkdir(parents=True, exist_ok=True)
+        current_text = exclude.read_text(encoding="utf-8") if exclude.exists() else ""
+        if "docs/superpowers/" not in current_text:
+            with exclude.open("a", encoding="utf-8") as fh:
+                fh.write("\n# agentic-fm: specs/planes de cliente viven en el vault, nunca en git\ndocs/superpowers/\n")
+            res["messages"].append("docs/superpowers/ excluido del índice (.git/info/exclude)")
     return res
 
 

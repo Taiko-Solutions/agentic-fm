@@ -61,18 +61,12 @@ fi
 BASE_FLAG=""
 git remote get-url upstream >/dev/null 2>&1 && BASE_FLAG="--base-repo"
 
-detect_changed_files() {
-    local remote="$1"
-    local branch="$2"
-    if git show-ref --verify --quiet "refs/remotes/${remote}/${branch}"; then
-        git --no-pager diff --name-only --diff-filter=d "${remote}/${branch}...HEAD"
-    else
-        git --no-pager log --pretty="" --name-only --diff-filter=d HEAD --not --remotes | sort -u
-    fi
-}
-
-CHANGED_FILES="$(detect_changed_files "$REMOTE" "$BRANCH")"
-if ! OUT="$(printf '%s\n' "$CHANGED_FILES" | python3 agent/scripts/check_pushed_paths.py --branch "$BRANCH" $BASE_FLAG)"; then
+if git show-ref --verify --quiet "refs/remotes/${REMOTE}/${BRANCH}"; then
+    REVS="${REMOTE}/${BRANCH}..HEAD"
+else
+    REVS="HEAD --not --remotes"
+fi
+if ! OUT="$(python3 agent/scripts/check_pushed_paths.py --branch "$BRANCH" --revs "$REVS" --repo . $BASE_FLAG)"; then
     echo "$OUT"
     echo "Backup del trabajo operativo → Time Machine local, nunca git."
     exit 1

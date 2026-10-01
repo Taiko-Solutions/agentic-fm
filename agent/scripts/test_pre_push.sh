@@ -14,10 +14,12 @@ mkdir -p agent/scripts/hooks agent/docs/taiko
 cp "$REPO_ROOT/agent/scripts/hooks/pre-push" agent/scripts/hooks/pre-push
 cp "$REPO_ROOT/agent/scripts/hooks/paths.conf" agent/scripts/hooks/paths.conf
 cp "$REPO_ROOT/agent/scripts/check_pushed_paths.py" agent/scripts/check_pushed_paths.py
+cp "$REPO_ROOT/agent/scripts/install-hooks.sh" agent/scripts/install-hooks.sh
 echo "# changelog" > TAIKO-UPDATES.md
 git add -A && git commit -qm base && git branch -M taiko && git remote add origin "$T/origin.git" && git push -q origin taiko
 
-install_hook() { cp agent/scripts/hooks/pre-push .git/hooks/pre-push; chmod +x .git/hooks/pre-push; }
+install_hook() { bash agent/scripts/install-hooks.sh >/dev/null; }                      # instalador real
+install_hook_only() { cp agent/scripts/hooks/pre-push .git/hooks/pre-push; chmod +x .git/hooks/pre-push; }  # instalación antigua
 
 # --- Clon (sin upstream) -------------------------------------------------
 git clone -q -b taiko "$T/origin.git" "$T/clone" && cd "$T/clone" && git config user.email t@t && git config user.name t && install_hook
@@ -37,6 +39,12 @@ git checkout -qb mejora/borrado taiko && git rm -q TAIKO-UPDATES.md && mkdir -p 
 git push -q origin mejora/borrado 2>/dev/null && fail "fichero añadido fuera de allowlist (aunque luego borrado) debió bloquearse" || pass "clon: añadir fuera de allowlist bloqueado aunque se borre después"
 git checkout -qb mejora/solo-borrado taiko && git rm -q agent/docs/taiko/a.md 2>/dev/null || true; echo z > agent/docs/taiko/z.md && git add -A && git commit -qm z
 git push -q origin mejora/solo-borrado || fail "borrar ficheros debió permitirse"; pass "clon: borrados no cuentan para la allowlist"
+
+# --- Clon con instalación antigua (solo el hook) y rama sin el script -----
+git clone -q -b taiko "$T/origin.git" "$T/viejo" && cd "$T/viejo" && git config user.email t@t && git config user.name t && install_hook_only
+git checkout -qb backup/viejo && git rm -q agent/scripts/check_pushed_paths.py && mkdir -p docs && echo s > docs/spec.md && git add -A && git commit -qm "rama vieja con spec"
+git push -q origin backup/viejo 2>/dev/null && fail "sin script en el árbol ni en .git/hooks el push debió bloquearse (fail-closed)" || pass "clon: fail-closed sin script disponible"
+cd "$T/clone"
 
 # --- Repo base (con upstream) --------------------------------------------
 git clone -q -b taiko "$T/origin.git" "$T/base" && cd "$T/base" && git config user.email t@t && git config user.name t && install_hook

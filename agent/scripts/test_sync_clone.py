@@ -78,6 +78,44 @@ class SyncCloneTests(unittest.TestCase):
         self.assertIn("commit de cliente", git(self.clone, "log", "--oneline", "trabajo"))
         self.assertNotIn("upstream", git(self.clone, "remote"))
 
+    def test_sync_without_migrar_refuses_when_taiko_has_local_commits(self):
+        (self.clone / "local.md").write_text("cliente", encoding="utf-8")
+        git(self.clone, "add", "-A")
+        git(self.clone, "commit", "-qm", "commit de cliente")
+        sha = git(self.clone, "rev-parse", "HEAD")
+        res = sc.sync(self.clone)
+        self.assertFalse(res["merged"], res)
+        self.assertTrue(any("--migrar" in m for m in res["messages"]), res["messages"])
+        self.assertEqual(git(self.clone, "rev-parse", "taiko"), sha)          # nada destruido
+
+    def test_migrar_with_existing_trabajo_keeps_local_taiko_commits(self):
+        git(self.clone, "branch", "trabajo")
+        (self.clone / "local.md").write_text("cliente", encoding="utf-8")
+        git(self.clone, "add", "-A")
+        git(self.clone, "commit", "-qm", "commit de cliente")
+        res = sc.sync(self.clone, migrar=True)
+        self.assertTrue(res["migrated"], res)
+        self.assertIn("commit de cliente", git(self.clone, "log", "--oneline", "trabajo"))
+        self.assertEqual(git(self.clone, "rev-parse", "taiko"), git(self.clone, "rev-parse", "origin/taiko"))
+
+    def test_migrar_excludes_client_specs(self):
+        res = sc.sync(self.clone, migrar=True)
+        self.assertTrue(res["migrated"], res)
+        exclude = (self.clone / ".git" / "info" / "exclude").read_text(encoding="utf-8")
+        self.assertIn("docs/superpowers/", exclude)
+
+    def test_hook_change_is_reported(self):
+        git(self.clone, "checkout", "-qb", "trabajo")
+        (self.seed / "agent" / "scripts" / "hooks").mkdir(parents=True)
+        (self.seed / "agent" / "scripts" / "hooks" / "pre-push").write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+        git(self.seed, "add", "-A")
+        git(self.seed, "commit", "-qm", "hook nuevo")
+        git(self.seed, "push", "-q", "origin", "taiko")
+        res = sc.sync(self.clone)
+        self.assertTrue(res["merged"], res)
+        self.assertTrue(res["hook_changed"])
+        self.assertTrue(any("install-hooks" in m for m in res["messages"]), res["messages"])
+
     def test_conflict_reported_not_raised(self):
         git(self.clone, "checkout", "-qb", "trabajo")
         (self.clone / "agent" / "a.md").write_text("local", encoding="utf-8")

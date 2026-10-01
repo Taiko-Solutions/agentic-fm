@@ -282,7 +282,13 @@ class KnownSilentDiscardPatterns(LintRule):
                     is_external = bool(fileref_el.get("id")) and bool(fileref_el.get("name"))
                     if not is_external:
                         # <FileReference/> vacío = llamada al mismo archivo (ruido del conversor);
-                        # el catálogo dice "omit entirely for same-file calls".
+                        # el catálogo dice "omit entirely for same-file calls". Informativo, no error.
+                        diags.append(Diagnostic(
+                            rule_id=self.rule_id, severity=Severity.INFO, line=0,
+                            message=(f'Step {idx + 1} "{name}": <FileReference> vacío — ruido del conversor en '
+                                     f"una llamada al mismo archivo; FileMaker lo ignora."),
+                            fix_hint="Omite <FileReference> en llamadas al mismo archivo.",
+                        ))
                         continue
                     if fileref_el.find("UniversalPathList") is None:
                         diags.append(Diagnostic(
@@ -352,12 +358,22 @@ class PerformScriptChildOrder(LintRule):
             if calculated is not None:
                 calc = calculated.find("Calculation")
                 text = (calc.text or "") if calc is not None else ""
-                if any(m in text for m in _PARAM_LIKE) or step.find("Script") is not None:
+                if step.find("Script") is not None:
+                    # by name + by id a la vez: paso muerto seguro → ERROR
                     diags.append(Diagnostic(
                         rule_id=self.rule_id, severity=sev, line=0,
                         message=(f'Step {idx + 1} "{name}": <Calculated> es el modo by name (su contenido es el '
                                  f"NOMBRE del script) y excluye a <Script>; aquí parece el parámetro."),
                         fix_hint=("El parámetro va en un <Calculation> suelto, hermano de <Script>; "
                                   "usa <Calculated> solo para llamar por nombre."),
+                    ))
+                elif any(m in text for m in _PARAM_LIKE):
+                    # Solo heurística de contenido: un by name legítimo puede ser una expresión
+                    # (selector/router) → WARNING, nunca bloquea
+                    diags.append(Diagnostic(
+                        rule_id=self.rule_id, severity=Severity.WARNING, line=0,
+                        message=(f'Step {idx + 1} "{name}": <Calculated> (by name) con contenido que parece '
+                                 f"un parámetro ({text[:40]!r}…). Si es el nombre calculado del script, ignora este aviso."),
+                        fix_hint="El parámetro va en <Calculation> suelto; <Calculated> solo lleva el nombre del script.",
                     ))
         return diags

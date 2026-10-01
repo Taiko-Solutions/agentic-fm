@@ -17,18 +17,27 @@
 # Después, si el push toca catálogos/conversor/fmlint, corre agent/scripts/ci_checks.py.
 #
 # Instalación en un repo:   bash agent/scripts/install-hooks.sh
-# Bypass de emergencia (bajo tu responsabilidad):   git push --no-verify
+# No hay bypass: --no-verify va contra la política (la GitHub Action repite la comprobación).
 
 set -e
 
 REMOTE_NAME="${1:-}"
 REMOTE_URL="${2:-}"
 ZERO_SHA="0000000000000000000000000000000000000000"
-CHECK="agent/scripts/check_pushed_paths.py"
 
 # Repo base = el único con remote `upstream` (petrowsky). Exento de reglas de rama/allowlist.
 BASE_FLAG=""
 if git remote get-url upstream >/dev/null 2>&1; then BASE_FLAG="--base-repo"; fi
+
+# Script y reglas: primero la copia instalada junto al hook (install-hooks.sh la deja en
+# .git/hooks/, independiente de la rama en checkout); si no, la del árbol de trabajo.
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+CHECK=""; RULES_FLAG=""
+if [ -f "$HOOK_DIR/check_pushed_paths.py" ] && [ -f "$HOOK_DIR/paths.conf" ]; then
+    CHECK="$HOOK_DIR/check_pushed_paths.py"; RULES_FLAG="--rules $HOOK_DIR/paths.conf"
+elif [ -f "agent/scripts/check_pushed_paths.py" ] && [ -f "agent/scripts/hooks/paths.conf" ]; then
+    CHECK="agent/scripts/check_pushed_paths.py"
+fi
 
 found_violation=0
 all_pushed_files=""
@@ -38,18 +47,17 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     branch="${remote_ref#refs/heads/}"
 
     if [ "$remote_sha" = "$ZERO_SHA" ]; then
-        commits=$(git rev-list "$local_sha" --not --remotes 2>/dev/null || git rev-list "$local_sha")
+        revs="$local_sha --not --remotes"               # rama nueva: todo lo que no esté ya en el remoto
     else
-        commits=$(git rev-list "${remote_sha}..${local_sha}")
+        revs="${remote_sha}..${local_sha}"
     fi
-    files=""
-    [ -n "$commits" ] && files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only --diff-filter=d -r {} 2>/dev/null | sort -u)
+    files=$(git log -m --pretty=format: --name-only --diff-filter=d $revs 2>/dev/null | sort -u)
     all_pushed_files="$all_pushed_files
 $files"
 
-    if [ -f "$CHECK" ]; then
-        # Capas 1–4 en una sola implementación
-        if ! out=$(printf '%s\n' "$files" | python3 "$CHECK" --branch "$branch" $BASE_FLAG); then
+    if [ -n "$CHECK" ]; then
+        # Capas 1–4 en una sola implementación (por commit, merges incluidos)
+        if ! out=$(python3 "$CHECK" --branch "$branch" --revs "$revs" --repo . $RULES_FLAG $BASE_FLAG); then
             echo ""
             echo "$out"
             echo "  Rama:   $local_ref → $remote_ref"
@@ -58,8 +66,15 @@ $files"
         else
             [ -n "$out" ] && echo "$out"
         fi
+    elif [ -z "$BASE_FLAG" ]; then
+        # Clon sin el script disponible (instalación antigua + rama vieja): FAIL-CLOSED
+        echo ""
+        echo "❌ PUSH BLOQUEADO — no encuentro agent/scripts/check_pushed_paths.py ni su copia en .git/hooks/"
+        echo "   Actualiza el clon (agentic-fm-sync) y reinstala el hook (bash agent/scripts/install-hooks.sh),"
+        echo "   o haz el push desde una rama que contenga el script."
+        found_violation=1
     else
-        # Fallback sin el script (clon muy antiguo): solo la capa de prohibidos
+        # Repo base sin el script (histórico): solo la capa de prohibidos
         FORBIDDEN_REGEX='^(xml_exports/|agent/xml_parsed/|agent/context/|agent/CONTEXT\.json$|agent/sandbox/.*\.xml$|agent/config/.*\.(json|md)$)'
         WHITELIST_REGEX='(\.example(\..*)?$|^agent/config/fmlint\.config\.json$|^agent/sandbox/script\.xml$)'
         matches=$(echo "$files" | grep -E "$FORBIDDEN_REGEX" | grep -vE "$WHITELIST_REGEX" || true)
@@ -96,7 +111,7 @@ if echo "$all_pushed_files" | grep -qE "$CRITICAL_REGEX" 2>/dev/null; then
     if ! python3 agent/scripts/ci_checks.py; then
         echo ""
         echo "❌ PUSH BLOQUEADO — sanity checks fallidos (agent/scripts/ci_checks.py)"
-        echo "   Arregla los fallos y reintenta. Bypass de emergencia: git push --no-verify"
+        echo "   Arregla los fallos y reintenta."
         exit 1
     fi
 fi

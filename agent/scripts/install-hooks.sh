@@ -49,6 +49,12 @@ for hook in "$HOOKS_SRC"/*; do
     installed=$((installed + 1))
 done
 
+# Ficheros de apoyo del hook (no son hooks: git los ignora por nombre). Copiarlos aquí
+# hace que el hook funcione aunque la rama en checkout no los tenga (fail-closed si faltan).
+for support in "$REPO_ROOT/agent/scripts/check_pushed_paths.py" "$HOOKS_SRC/paths.conf"; do
+    [ -f "$support" ] && cp "$support" "$HOOKS_DST/$(basename "$support")" && echo "✅ Apoyo:     .git/hooks/$(basename "$support")"
+done
+
 if [ $installed -eq 0 ]; then
     echo "⚠️  No se encontraron hooks en $HOOKS_SRC"
     exit 1

@@ -14,6 +14,7 @@ import unittest
 from pathlib import Path
 
 from ..engine import LintRunner
+from ..types import Severity
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -43,7 +44,17 @@ class ParamFidelityTestCase(unittest.TestCase):
             '<Calculation><![CDATA["p"]]></Calculation>'
             '<Script id="12" name="Create Log"/></Step>'
         )
-        self.assertEqual([d for d in x_diags(result) if d.rule_id == "X003"], [])
+        errors = [d for d in x_diags(result) if d.rule_id == "X003" and d.severity == Severity.ERROR]
+        self.assertEqual(errors, [])
+
+    def test_x003_empty_filereference_gives_info(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<FileReference></FileReference>'
+            '<Script id="12" name="Create Log"/></Step>'
+        )
+        infos = [d for d in x_diags(result) if d.rule_id == "X003" and d.severity == Severity.INFO]
+        self.assertEqual(len(infos), 1, [(d.rule_id, d.severity, d.message) for d in x_diags(result)])
 
     def test_x003_crossfile_without_pathlist_still_error(self):
         result = self.lint(
@@ -87,6 +98,25 @@ class ParamFidelityTestCase(unittest.TestCase):
         )
         diags = [d for d in x_diags(result) if d.rule_id == "X004"]
         self.assertTrue(diags and "by name" in diags[0].message, [d.message for d in x_diags(result)])
+
+    def test_x004_by_name_with_expression_is_warning_not_error(self):
+        # Patrón selector/router: el nombre se calcula; no puede ser ERROR (bloquearía el deploy)
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<Calculated><Calculation><![CDATA[Case ( $Modo ; "Alta" ; "Baja" )]]></Calculation></Calculated>'
+            '<Calculation><![CDATA["p"]]></Calculation></Step>'
+        )
+        diags = [d for d in x_diags(result) if d.rule_id == "X004"]
+        self.assertEqual([d.severity for d in diags], [Severity.WARNING], [d.message for d in diags])
+
+    def test_x004_calculated_and_script_coexist_is_error(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<Calculated><Calculation><![CDATA[$ReturnScript]]></Calculation></Calculated>'
+            '<Script id="12" name="Create Log"/></Step>'
+        )
+        diags = [d for d in x_diags(result) if d.rule_id == "X004"]
+        self.assertEqual([d.severity for d in diags], [Severity.ERROR], [d.message for d in diags])
 
     def test_x004_by_name_legit_clean(self):
         result = self.lint(

@@ -13,14 +13,20 @@ si un conjunto de ficheros puede subir en una rama dada:
 El repo base (el único con remote `upstream`) solo pasa la capa 1.
 
 Uso:
-  git diff --name-only origin/taiko...HEAD | \
-      python3 agent/scripts/check_pushed_paths.py --branch mejora/x [--base-repo]
+  python3 agent/scripts/check_pushed_paths.py --branch mejora/x --revs "origin/taiko..HEAD"
+  python3 agent/scripts/check_pushed_paths.py --branch mejora/x --revs "HEAD --not --remotes"   # rama nueva
+  git diff --name-only … | python3 agent/scripts/check_pushed_paths.py --branch mejora/x          # lista por stdin
+
+Con --revs los ficheros se calculan POR COMMIT (y en los merges contra cada padre, -m),
+no como diff de árboles: un fichero añadido y borrado dentro del rango sigue en el
+historial y se detecta. Los borrados puros no cuentan (no filtran datos).
 
 Exit: 0 ok · 2 ficheros prohibidos · 3 fuera de la allowlist o rama bloqueada.
 Solo librería estándar.
 """
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -58,6 +64,16 @@ def load_rules(path) -> dict:
             raise ValueError(f"regla fuera de sección en {path}: {line}")
         rules[section].append(re.compile(line))
     return rules
+
+
+def changed_files(repo, revs: str) -> list:
+    """Ficheros añadidos/modificados en los commits de `revs` (sintaxis de git rev-list)."""
+    cmd = ["git", "-C", str(repo), "log", "-m", "--pretty=format:", "--name-only",
+           "--diff-filter=d", *revs.split()]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise RuntimeError(f"git log {revs}: {proc.stderr.strip()}")
+    return sorted({line.strip() for line in proc.stdout.splitlines() if line.strip()})
 
 
 def _matches(patterns, path: str) -> bool:
@@ -102,8 +118,17 @@ def main() -> int:
     ap.add_argument("--branch", required=True, help="rama destino (sin refs/heads/)")
     ap.add_argument("--base-repo", action="store_true", help="repo base (tiene remote upstream)")
     ap.add_argument("--rules", type=Path, default=DEFAULT_RULES)
+    ap.add_argument("--revs", help="rango de commits (git rev-list) en vez de la lista por stdin")
+    ap.add_argument("--repo", type=Path, default=Path.cwd())
     args = ap.parse_args()
-    files = [line.rstrip("\n") for line in sys.stdin]
+    if args.revs:
+        try:
+            files = changed_files(args.repo, args.revs)
+        except RuntimeError as exc:
+            print(f"❌ {exc}")
+            return 3
+    else:
+        files = [line.rstrip("\n") for line in sys.stdin]
     res = classify(files, args.branch, args.base_repo, load_rules(args.rules))
     for w in res.warnings:
         print(f"⚠️  {w}")
