@@ -96,6 +96,10 @@ def sync(repo, migrar: bool = False) -> dict:
         if rewritten:
             res["messages"].append(f"origin/taiko fue reescrita ({old_remote[:7]} → {remote_taiko[:7]}): "
                                    f"taiko y trabajo se realinean a la historia nueva")
+            if res["taiko_before"]:
+                keep = "backup/taiko-pre-reescritura-" + datetime.now().strftime("%Y-%m-%d")
+                _git(repo, "branch", "-f", keep, "taiko")
+                res["messages"].append(f"historia antigua de taiko guardada en {keep}")
             if _branch_exists(repo, "trabajo"):
                 _, out, _ = _git(repo, "rev-list", "--no-merges", "--reverse", f"{old_remote}..trabajo", check=False)
                 to_replay = out.splitlines()

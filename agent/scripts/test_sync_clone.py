@@ -140,6 +140,8 @@ class SyncCloneTests(unittest.TestCase):
         self.assertEqual(res["conflicts"], [])
         self.assertEqual(git(self.clone, "rev-parse", "trabajo"), git(self.clone, "rev-parse", "origin/taiko"))
         self.assertTrue(any("reescrit" in m for m in res["messages"]), res["messages"])
+        backups = [b.strip() for b in git(self.clone, "branch", "--list", "backup/taiko-pre-reescritura-*").splitlines()]
+        self.assertEqual(len(backups), 1, backups)          # la historia antigua queda en una rama, no solo en el reflog
 
     def test_migrar_after_force_push_rebases_real_local_commits(self):
         (self.clone / "local.md").write_text("cliente", encoding="utf-8")
