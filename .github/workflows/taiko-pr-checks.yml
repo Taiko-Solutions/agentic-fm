@@ -29,5 +29,7 @@ jobs:
           fi
           python3 /tmp/check_pushed_paths.py --branch "$HEAD_REF" --revs "origin/$BASE_REF..HEAD" \
             --repo . --rules /tmp/paths.conf
+      - name: xmllint (fmcontext.sh lo necesita; macOS lo trae de serie)
+        run: sudo apt-get install -y --no-install-recommends libxml2-utils
       - name: Sanity checks (catálogos, conversor, fmlint, scripts)
         run: python3 agent/scripts/ci_checks.py

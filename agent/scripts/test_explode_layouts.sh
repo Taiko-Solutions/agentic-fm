@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 fail() { echo "❌ $1"; exit 1; }
 pass() { echo "✅ $1"; }
+command -v xmllint >/dev/null || fail "xmllint not available (fmcontext.sh needs it; on Linux: apt-get install libxml2-utils)"
 
 cat > "$T/fake-exploder" <<'PY'
 #!/usr/bin/env python3
@@ -51,18 +52,19 @@ make_template() { # dir layout(new|legacy)
   fi
 }
 
-run_case() { # name layout
-  local C="$T/$1"; mkdir -p "$C/agent/config" "$C/agent/xml_parsed" "$T/tpl-$1" "$T/desk-$1"
+run_case() { # name layout — sets C (no command substitution: a failure inside would be silent under set -e)
+  C="$T/$1"; mkdir -p "$C/agent/config" "$C/agent/xml_parsed" "$T/tpl-$1" "$T/desk-$1"
   cp "$REPO_ROOT/fmparse.sh" "$REPO_ROOT/fmcontext.sh" "$C/"
   make_template "$T/tpl-$1" "$2"
   echo "$T/tpl-$1" > "$T/desk-$1/Demo.xml"
   echo '{"Demo": {"custom_functions": ["ApiKey"]}}' > "$C/agent/config/removals.json"
-  (cd "$C" && FM_XML_EXPLODER_BIN="$T/fake-exploder" ./fmparse.sh -s Demo "$T/desk-$1/Demo.xml" > "$T/$1.log" 2>&1) || { cat "$T/$1.log"; fail "$1: fmparse.sh exited non-zero"; }
-  echo "$C"
+  if ! (cd "$C" && FM_XML_EXPLODER_BIN="$T/fake-exploder" ./fmparse.sh -s Demo "$T/desk-$1/Demo.xml" > "$T/$1.log" 2>&1); then
+    cat "$T/$1.log"; fail "$1: fmparse.sh exited non-zero"
+  fi
 }
 
 # --- disposición 0.7.1 ---------------------------------------------------
-C="$(run_case new new)"
+run_case new new
 [[ -z "$(find "$C/agent/xml_parsed" -name 'ApiKey - ID 9.*')" ]] || fail "0.7.1: removals.json left ApiKey behind: $(find "$C/agent/xml_parsed" -name 'ApiKey - ID 9.*')"
 pass "0.7.1: removals.json deletes the custom function in custom_functions/ and custom_functions_sanitized/"
 grep -q '^FormatMoney|1|amount|All|FormatMoney|functional|$' "$C/agent/context/Demo/custom_functions.index" || fail "0.7.1: custom_functions.index lacks FormatMoney: $(cat "$C/agent/context/Demo/custom_functions.index")"
@@ -73,7 +75,7 @@ grep -q '^Invoice IDs|1|FromField|(field-based)$' "$C/agent/context/Demo/value_l
 pass "0.7.1: value_lists.index has names, ids and (field-based)"
 
 # --- disposición 0.5.1 ---------------------------------------------------
-C="$(run_case legacy legacy)"
+run_case legacy legacy
 [[ -z "$(find "$C/agent/xml_parsed" -name 'ApiKey - ID 9.*')" ]] || fail "0.5.1: removals.json left ApiKey behind"
 grep -q '^FormatMoney|1|amount|All|FormatMoney|functional|$' "$C/agent/context/Demo/custom_functions.index" || fail "0.5.1: custom_functions.index lacks FormatMoney"
 grep -q '^Statuses|2|Custom|Draft,Sent$' "$C/agent/context/Demo/value_lists.index" || fail "0.5.1: value_lists.index lacks Statuses (value_list_stubs/)"
