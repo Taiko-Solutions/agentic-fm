@@ -1,0 +1,9 @@
+#!/bin/bash
+# agentic-fm-sync — actualiza este clon de cliente desde origin/taiko (modelo trabajo/taiko/mejora).
+#   agentic-fm-sync             # fetch · taiko en avance rápido · merge en trabajo · novedades
+#   agentic-fm-sync --migrar    # una vez por clon: crea trabajo, quita upstream, reinstala el hook
+#   agentic-fm-sync --json      # salida máquina
+set -euo pipefail
+REPO="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "❌ No estás en un repositorio git."; exit 1; }
+[ -f "$REPO/agent/scripts/sync_clone.py" ] || { echo "❌ Este repo no tiene agent/scripts/sync_clone.py: haz 'git pull origin taiko' primero."; exit 1; }
+exec python3 "$REPO/agent/scripts/sync_clone.py" --repo "$REPO" "$@"
