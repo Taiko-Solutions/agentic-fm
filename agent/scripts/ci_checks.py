@@ -78,6 +78,8 @@ def main() -> int:
                 label, [sys.executable, script])))
         checks.append(("explode layouts tests (fmparse.sh + fmcontext.sh)", lambda: run_cmd(
             "explode layouts tests", ["bash", "agent/scripts/test_explode_layouts.sh"])))
+        checks.append(("agentic-fm-start tests", lambda: run_cmd(
+            "agentic-fm-start tests", ["bash", "agent/scripts/test_agentic_fm_start.sh"])))
         checks.append(("fmlint tests", lambda: run_cmd(
             "fmlint tests",
             [sys.executable, "-m", "unittest", "discover",

@@ -346,6 +346,15 @@ Accepts a JSON payload of runtime debug state and writes it to `agent/debug/outp
 
 ---
 
+## Behind Agentic-FM-APP
+
+When Agentic-FM-APP is installed, `agentic-fm-start` runs `agfm serve` on 8765 instead of this server.
+That service answers `/health`, `/explode` and `/context` itself (the explode goes through its pipeline and
+is indexed; the context is snapshotted into the index) and forwards every other endpoint described here,
+unchanged, to a `companion_server.py` child it starts from the agentic-fm checkout on an internal
+loopback-only port. Payloads and responses are the same; `/health` gains a `service` block. See
+`docs/service.md` in the agentic-fm-app repository.
+
 ## Security
 
 **This project is designed exclusively for local development.** It assumes you are working on your own machine, on a private, firewalled network. It is not hardened for production use, multi-user environments, or internet-facing deployment. Never forward the companion port to a public interface or expose any part of it to the internet.

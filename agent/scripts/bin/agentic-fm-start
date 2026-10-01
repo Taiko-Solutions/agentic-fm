@@ -9,7 +9,9 @@
 #   Ver Guias-FM/Companion-Bind-LAN en el vault.
 #   El healthcheck local se hace siempre por 127.0.0.1.
 
-RUNTIME="$HOME/Library/Application Support/agentic-fm-services/runtime"
+RUNTIME="${AGFM_RUNTIME:-$HOME/Library/Application Support/agentic-fm-services/runtime}"
+AGFM_APP_REPO="${AGFM_APP_REPO:-$HOME/GITs/agentic-fm-app}"
+APP_LOG_DIR="$HOME/Library/Application Support/Agentic-FM-APP/logs"
 REPO_BASE="$HOME/GITs/agentic-fm"
 CURRENT_REPO="$PWD"
 
@@ -22,18 +24,28 @@ is_valid_repo() {
     [[ -f "$repo/version.txt" && -f "$repo/agent/scripts/companion_server.py" && -d "$repo/webviewer" ]]
 }
 
-if [[ ! -f "$RUNTIME/agent/scripts/companion_server.py" ]]; then
-    echo "❌ Runtime no encontrado en: $RUNTIME"
-    echo "   Ejecuta: agentic-fm-update /ruta/al/repo/agentic-fm"
-    exit 1
-fi
+# Agentic-FM-APP (agfm serve) toma el 8765 cuando está instalada; si no, el companion clásico.
+use_app() { [[ -f "$AGFM_APP_REPO/pyproject.toml" ]] && command -v uv >/dev/null 2>&1; }
 
-
-# --- Companion Server ---
 if curl -s "$HEALTH_URL" > /dev/null 2>&1; then
-    echo "✅ Companion ya corriendo en :8765"
+    echo "✅ Servicio ya corriendo en :8765"
     echo "   $(curl -s "$HEALTH_URL")"
+elif use_app; then
+    echo "🚀 Arrancando Agentic-FM-APP (agfm serve) en 127.0.0.1/::1 :8765..."
+    mkdir -p "$APP_LOG_DIR"
+    nohup uv run --project "$AGFM_APP_REPO" agfm serve > "$APP_LOG_DIR/start.log" 2>&1 &
+    for _ in 1 2 3 4 5 6 7 8 9 10; do curl -s "$HEALTH_URL" > /dev/null 2>&1 && break; sleep 1; done
+    if curl -s "$HEALTH_URL" > /dev/null 2>&1; then
+        echo "✅ Agentic-FM-APP arrancada: $(curl -s "$HEALTH_URL")"
+    else
+        echo "❌ Error arrancando Agentic-FM-APP. Ver $APP_LOG_DIR/start.log"
+    fi
 else
+    if [[ ! -f "$RUNTIME/agent/scripts/companion_server.py" ]]; then
+        echo "❌ Runtime no encontrado en: $RUNTIME"
+        echo "   Ejecuta: agentic-fm-update /ruta/al/repo/agentic-fm"
+        exit 1
+    fi
     echo "🚀 Arrancando Companion Server en ${LISTEN_HOST}:8765..."
     COMPANION_BIND_HOST="$LISTEN_HOST" nohup python3 "$RUNTIME/agent/scripts/companion_server.py" --port 8765 > /tmp/companion_server.log 2>&1 &
     sleep 2
@@ -44,7 +56,6 @@ else
     fi
 fi
 
-# --- Comprobar versión ---
 RUNNING_VERSION=$(curl -s "$HEALTH_URL" 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('version','?'))" 2>/dev/null)
 BASE_VERSION=$(cat "$REPO_BASE/version.txt" 2>/dev/null || echo "?")
 CURRENT_VERSION="?"
