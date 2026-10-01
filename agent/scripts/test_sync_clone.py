@@ -128,6 +128,31 @@ class SyncCloneTests(unittest.TestCase):
         self.assertFalse(res["merged"])
         self.assertTrue(any("sin commit" in m for m in res["messages"]), res["messages"])
 
+    def rewrite_origin_history(self):
+        """Simula un force-push: el seed reescribe su último commit y lo empuja forzado."""
+        git(self.seed, "commit", "--amend", "-qm", "base (reescrita)")
+        git(self.seed, "push", "-q", "--force", "origin", "taiko")
+
+    def test_migrar_after_force_push_without_local_work_tracks_new_history(self):
+        self.rewrite_origin_history()
+        res = sc.sync(self.clone, migrar=True)
+        self.assertTrue(res["merged"], res)
+        self.assertEqual(res["conflicts"], [])
+        self.assertEqual(git(self.clone, "rev-parse", "trabajo"), git(self.clone, "rev-parse", "origin/taiko"))
+        self.assertTrue(any("reescrit" in m for m in res["messages"]), res["messages"])
+
+    def test_migrar_after_force_push_rebases_real_local_commits(self):
+        (self.clone / "local.md").write_text("cliente", encoding="utf-8")
+        git(self.clone, "add", "-A")
+        git(self.clone, "commit", "-qm", "commit de cliente")
+        self.rewrite_origin_history()
+        res = sc.sync(self.clone, migrar=True)
+        self.assertTrue(res["merged"], res)
+        log = git(self.clone, "log", "--oneline", "trabajo")
+        self.assertIn("commit de cliente", log)
+        self.assertIn("base (reescrita)", log)
+        self.assertEqual(git(self.clone, "rev-list", "--count", "origin/taiko..trabajo"), "1")
+
     def test_conflict_reported_not_raised(self):
         git(self.clone, "checkout", "-qb", "trabajo")
         (self.clone / "agent" / "a.md").write_text("local", encoding="utf-8")

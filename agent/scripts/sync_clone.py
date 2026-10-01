@@ -66,23 +66,47 @@ def sync(repo, migrar: bool = False) -> dict:
         res["messages"].append("hay cambios sin commit: haz commit o stash antes de sincronizar")
         return res
 
+    # Punta remota ANTES del fetch: permite distinguir commits propios de una reescritura del remoto
+    rc, old_remote, _ = _git(repo, "rev-parse", "--verify", "--quiet", "origin/taiko", check=False)
+    old_remote = old_remote if rc == 0 else None
     _git(repo, "fetch", "--quiet", "origin")
     _, current, _ = _git(repo, "branch", "--show-current")
     _, remote_taiko, _ = _git(repo, "rev-parse", "origin/taiko")
     res["taiko_before"] = _git(repo, "rev-parse", "taiko")[1] if _branch_exists(repo, "taiko") else None
 
-    # Commits propios en taiko (modelo antiguo o descuido): nunca se destruyen en silencio
+    # ¿origin/taiko fue reescrita (force-push)? Entonces lo que había no es "trabajo local"
+    rewritten = False
+    if old_remote and old_remote != remote_taiko:
+        rc, _, _ = _git(repo, "merge-base", "--is-ancestor", old_remote, remote_taiko, check=False)
+        rewritten = rc != 0
+    base_for_local = old_remote if old_remote else remote_taiko
+
+    # Commits propios en taiko (más allá de la punta remota que conocíamos): nunca se destruyen en silencio
     local_on_taiko = []
     if res["taiko_before"]:
-        _, out, _ = _git(repo, "rev-list", "origin/taiko..taiko", check=False)
+        _, out, _ = _git(repo, "rev-list", "--no-merges", f"{base_for_local}..taiko", check=False)
         local_on_taiko = out.splitlines()
-    if local_on_taiko and not migrar:
-        res["messages"].append(f"taiko tiene {len(local_on_taiko)} commit(s) locales: ejecuta agentic-fm-sync --migrar "
-                               f"para moverlos a trabajo (no se ha tocado nada)")
+    if not migrar and (local_on_taiko or rewritten):
+        why = "origin/taiko fue reescrita" if rewritten else f"taiko tiene {len(local_on_taiko)} commit(s) locales"
+        res["messages"].append(f"{why}: ejecuta agentic-fm-sync --migrar (no se ha tocado nada)")
         return res
 
+    to_replay = []   # commits propios a reaplicar sobre la taiko nueva (solo si hubo reescritura)
     if migrar:
-        if local_on_taiko:
+        if rewritten:
+            res["messages"].append(f"origin/taiko fue reescrita ({old_remote[:7]} → {remote_taiko[:7]}): "
+                                   f"taiko y trabajo se realinean a la historia nueva")
+            if _branch_exists(repo, "trabajo"):
+                _, out, _ = _git(repo, "rev-list", "--no-merges", "--reverse", f"{old_remote}..trabajo", check=False)
+                to_replay = out.splitlines()
+                backup = "backup/trabajo-pre-reescritura-" + datetime.now().strftime("%Y-%m-%d")
+                _git(repo, "branch", "-f", backup, "trabajo")
+                _git(repo, "branch", "-D", "trabajo")
+                res["messages"].append(f"trabajo recreada (copia previa en {backup})")
+            else:
+                _, out, _ = _git(repo, "rev-list", "--no-merges", "--reverse", f"{old_remote}..taiko", check=False)
+                to_replay = out.splitlines()
+        elif local_on_taiko:
             if not _branch_exists(repo, "trabajo"):
                 _git(repo, "branch", "trabajo", "taiko")
                 res["messages"].append("commits locales de taiko movidos a trabajo")
@@ -107,7 +131,18 @@ def sync(repo, migrar: bool = False) -> dict:
         _git(repo, "branch", "trabajo", "taiko")
         res["messages"].append("rama trabajo creada desde taiko")
     _git(repo, "checkout", "--quiet", "trabajo")
-    if migrar and local_on_taiko and _branch_exists(repo, "trabajo"):
+    if to_replay:
+        # Reaplicar los commits propios (sin merges) sobre la historia nueva
+        for sha in to_replay:
+            rc, _, err = _git(repo, "cherry-pick", "--allow-empty", "--keep-redundant-commits", sha, check=False)
+            if rc != 0:
+                _git(repo, "cherry-pick", "--abort", check=False)
+                res["conflicts"] = [f"cherry-pick {sha[:7]}"]
+                res["messages"].append(f"conflicto al reaplicar {sha[:7]} sobre la taiko nueva: hazlo a mano "
+                                       f"(git cherry-pick {sha[:7]}) — el resto queda en la rama de copia")
+                return res
+        res["messages"].append(f"{len(to_replay)} commit(s) propios reaplicados sobre la historia nueva")
+    if migrar and not rewritten and local_on_taiko and _branch_exists(repo, "trabajo"):
         # trabajo existía: traer primero los commits que estaban en taiko (backup/*)
         rc, _, _ = _git(repo, "merge", "--no-edit", res["taiko_before"], check=False)
         if rc != 0:

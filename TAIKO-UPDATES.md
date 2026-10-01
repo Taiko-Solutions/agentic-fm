@@ -11,6 +11,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - Clones: `taiko` = espejo (sin commits propios), `trabajo` = todo lo del cliente (nunca se sube), `mejora/<tema>` = solo capa herramientas, PR a `taiko`.
 - Hook pre-push: prohibidos (como antes) + bloqueo de `taiko`/`trabajo` desde clones + allowlist de la capa herramientas en cualquier otra rama del clon (`agent/scripts/hooks/paths.conf`) + aviso si se tocan reglas sin entrada aquí. `agentic-fm-safe-push` y la GitHub Action usan las mismas reglas (`agent/scripts/check_pushed_paths.py`).
 - `session_start.py` lista las novedades de este fichero cuando el clon va por detrás y avisa si estás en `taiko` dentro de un clon.
+- `agentic-fm-sync --migrar` detecta una reescritura de `origin/taiko` (force-push) con el reflog del remoto: realinea `taiko`/`trabajo` a la historia nueva y reaplica solo los commits propios (sin merges); lo anterior queda en `backup/trabajo-pre-reescritura-<fecha>`.
 - Seguridad: `agentic-fm-sync` nunca descarta commits locales de `taiko` (sin `--migrar` se detiene; con `--migrar` los mueve a `trabajo` o los guarda en `backup/taiko-local-<fecha>`). El hook lleva copia de `check_pushed_paths.py` y `paths.conf` en `.git/hooks/` y es **fail-closed**: sin ellas, un clon no puede hacer push. La Action usa las reglas de la rama base y mira commit a commit (merges incluidos).
 
 ## 2026-10-01 — ProofKit: gotchas F13–F19, deploy estándar en FileMaker 2026 y plantilla CLAUDE-webapp.md nueva
