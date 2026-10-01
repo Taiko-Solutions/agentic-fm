@@ -6,7 +6,8 @@ Guards the machine-readable artifacts that every other tool depends on:
   1. catalogs   — every agent/catalogs/*.json parses as valid JSON
                   (a single missing comma silently breaks every consumer)
   2. converter  — unit tests for the SaXML → fmxmlsnippet translator
-  3. fmlint     — unit tests for the linter (incl. the param-fidelity
+  3. scripts    — paths rules, sync_clone and session_start tests
+  4. fmlint     — unit tests for the linter (incl. the param-fidelity
                   corpus smoke test against agent/snippet_examples/)
 
 Usage:
@@ -69,6 +70,11 @@ def main() -> int:
         checks.append(("freshness check tests", lambda: run_cmd(
             "freshness check tests",
             [sys.executable, "agent/scripts/test_check_embedded_agfm.py"])))
+        for label, script in (("paths rules tests", "agent/scripts/test_check_pushed_paths.py"),
+                              ("sync_clone tests", "agent/scripts/test_sync_clone.py"),
+                              ("session_start tests", "agent/scripts/test_session_start.py")):
+            checks.append((label, lambda label=label, script=script: run_cmd(
+                label, [sys.executable, script])))
         checks.append(("fmlint tests", lambda: run_cmd(
             "fmlint tests",
             [sys.executable, "-m", "unittest", "discover",

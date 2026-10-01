@@ -40,14 +40,16 @@ from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import sync_clone  # noqa: E402 — vecino en agent/scripts/ (modelo de ramas Taiko)
 
 OK, WARN, FAIL, SKIP = "OK", "WARN", "FAIL", "SKIP"
 
 
-def _run(cmd, timeout=15):
-    """Run a command from the repo root; returns (rc, stdout) — never raises."""
+def _run(cmd, timeout=15, cwd=None):
+    """Run a command from the repo root (or cwd); returns (rc, stdout) — never raises."""
     try:
-        proc = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True,
+        proc = subprocess.run(cmd, cwd=cwd or REPO_ROOT, capture_output=True,
                               text=True, timeout=timeout)
         return proc.returncode, (proc.stdout or "").strip()
     except Exception as exc:  # noqa: BLE001 — any failure is a soft-skip
@@ -67,30 +69,45 @@ def _http_json(url, timeout=4):
 # Checks — each returns (status, message, data)
 # ---------------------------------------------------------------------------
 
-def check_git():
-    rc, _ = _run(["git", "rev-parse", "--is-inside-work-tree"])
+def check_git(repo_root=None):
+    """Estado git según el modelo Taiko (trabajo/taiko/mejora) o, sin origin/taiko, upstream."""
+    cwd = Path(repo_root) if repo_root else REPO_ROOT
+    rc, _ = _run(["git", "rev-parse", "--is-inside-work-tree"], cwd=cwd)
     if rc != 0:
         return SKIP, "no es un repo git", {}
-    _run(["git", "fetch", "--all", "--quiet"], timeout=30)
+    _run(["git", "fetch", "--all", "--quiet"], timeout=30, cwd=cwd)
+    _, branch = _run(["git", "branch", "--show-current"], cwd=cwd)
+    is_base = sync_clone.is_base_repo(cwd)
+    data = {"branch": branch, "model": None, "behind": 0, "updates": [], "is_base": is_base}
 
-    # Prefer the Taiko propagation model when an origin/taiko branch exists;
-    # fall back to the upstream origin/main check otherwise.
-    data = {}
-    for ref, label in (("origin/taiko", "taiko"), ("origin/main", "main")):
-        rc, out = _run(["git", "rev-list", f"HEAD..{ref}", "--count"])
+    # Modelo Taiko si existe origin/taiko; si no, chequeo upstream contra origin/main
+    ref_name = None
+    for ref, model in (("origin/taiko", "taiko"), ("origin/main", "main")):
+        rc, out = _run(["git", "rev-list", f"HEAD..{ref}", "--count"], cwd=cwd)
         if rc == 0 and out.isdigit():
-            data[label] = int(out)
-
-    if "taiko" in data:
-        behind, branch = data["taiko"], "origin/taiko"
-    elif "main" in data:
-        behind, branch = data["main"], "origin/main"
-    else:
+            data["model"], data["behind"], ref_name = model, int(out), ref
+            break
+    if ref_name is None:
         return SKIP, "sin remoto comparable (offline o repo aislado)", data
 
-    if behind > 0:
-        return WARN, f"{behind} commit(s) por detrás de {branch} — considera actualizar antes de seguir", data
-    return OK, f"al día con {branch}", data
+    if data["model"] == "taiko":
+        rc, base = _run(["git", "merge-base", "HEAD", "origin/taiko"], cwd=cwd)
+        rc2, head = _run(["git", "rev-parse", "origin/taiko"], cwd=cwd)
+        if rc == 0 and rc2 == 0:
+            data["updates"] = sync_clone.updates_between(cwd, base, head)[:10]
+        if not is_base and branch == "taiko":
+            return WARN, ("estás en la rama taiko de un clon: trabaja en `trabajo` "
+                          "(agentic-fm-sync --migrar la primera vez)"), data
+
+    if data["behind"] > 0:
+        msg = f"{data['behind']} commit(s) por detrás de {ref_name}"
+        if data["updates"]:
+            msg += " — novedades: " + "; ".join(data["updates"][:3])
+            if len(data["updates"]) > 3:
+                msg += f" (+{len(data['updates']) - 3})"
+        msg += " → agentic-fm-sync" if (data["model"] == "taiko" and not is_base) else " → git pull --ff-only"
+        return WARN, msg, data
+    return OK, f"al día con {ref_name}", data
 
 
 def check_env():
