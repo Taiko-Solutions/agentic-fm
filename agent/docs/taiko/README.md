@@ -1,86 +1,44 @@
-# Taiko Solutions — Development Standards
+# Capa Taiko de agentic-fm — índice
 
-This folder contains Taiko-specific coding conventions, architectural patterns, and knowledge documents. They extend and, where noted, override the base conventions in `agent/docs/CODING_CONVENTIONS.md`.
+Esta carpeta y unos pocos ficheros fuera de ella son **todo lo que Taiko añade** sobre el agentic-fm de upstream. Viven solo en la rama `taiko` y nunca se proponen a petrowsky tal cual (las piezas genéricas se sanitizan y van como PR desde el repo base).
 
-## How it works
+## Orden de lectura para el agente
 
-The AI reads these documents in addition to the standard project docs. The priority order is:
+1. `CODING_CONVENTIONS.md` — convenciones Taiko (PascalCase, español, Insert Calculated Result, `.Controller`). **Mandan** sobre `agent/docs/CODING_CONVENTIONS.md`.
+2. `knowledge/MANIFEST.md` — patrones Taiko (Clew, tres capas, transaccional, logging, silent-discard…). Se escanea por keywords antes de escribir; con el MCP `agentic-fm-app`, `kb_search` lo sustituye.
+3. `agent/docs/knowledge/MANIFEST.md` — knowledge general de upstream (fallback).
+4. `fm-access.md` — las tres vías de acceso a FileMaker (ProofKit MCP · OData · ProofKit Web Viewer) y el gating `connectedFiles`.
 
-1. **Taiko conventions** (`agent/docs/taiko/CODING_CONVENTIONS.md`) — read first, always applies
-2. **Base conventions** (`agent/docs/CODING_CONVENTIONS.md`) — fallback for anything Taiko does not define
-3. **Taiko knowledge base** (`agent/docs/taiko/knowledge/MANIFEST.md`) — scanned by keyword before writing scripts
-4. **Base knowledge base** (`agent/docs/knowledge/MANIFEST.md`) — also scanned
+## Qué hay en cada sitio
 
-## Contents
+| Carpeta / fichero | Contenido | Cuándo se usa |
+|---|---|---|
+| `CODING_CONVENTIONS.md` | Convenciones de código Taiko | Siempre que se genera código |
+| `knowledge/` | Patrones y gotchas Taiko (uno por fichero + `MANIFEST.md`) | Antes de escribir un script; `kb_search` |
+| `templates/` | Esqueletos de scripts Clew en formato HR (`clew-simple`, `clew-transactional`, dual, orchestrator, completo) | Al componer un script nuevo |
+| `custom_functions/` | fmxmlsnippet de los módulos obligatorios: Clew (`clew.xml`), fm-sql-cfs (`sql-cfs.xml`), triggers (`triggers.xml`) | Al preparar una solución nueva |
+| `proofkit/` | Base de conocimiento ProofKit: `mcp-connector.md` (Vía 1), `webviewer-build.md`, `architecture.md`, `gotchas.md` (F1–F19), `troubleshooting.md`, `conventions.md`, `CLAUDE-webapp.md` (plantilla para apps web) | Consulta en vivo o interfaz web |
+| `fm-access.md` | Mapa de las tres vías y reparto explode vs. en vivo | Antes de tocar FileMaker |
+| `sessions/` | Procedimientos de sesión que leen las skills del plugin `taiko-filemaker` (`fm-sesion.md`, `fm-nuevo-proyecto.md`) | Al arrancar una sesión o un proyecto |
+| `UPSTREAM_IMPROVEMENTS.md` | Cómo registrar mejoras desde un clon (`agent/UPSTREAM_PROPOSALS.md`) | Al cerrar una tarea |
+| `bendita-conversion-guide.md` | Guía de conversión de una solución concreta | Solo en ese proyecto |
+| `../../scripts/bin/` | `agentic-fm-start`, `-update`, `-sync`, `-safe-push` (symlinks a `~/bin`) | Terminal |
+| `../../scripts/hooks/` | Hook pre-push + `paths.conf` (reglas de rutas) | Instalado por `install-hooks.sh` |
+| `/TAIKO-UPDATES.md` | Changelog de esta capa; lo leen `session_start.py` y `agentic-fm-sync` | Al actualizar un clon |
+| `/.claude/CLAUDE.md` | Las secciones marcadas "(Taiko)" y "override" | Siempre |
 
-### fm-access.md
+## Cómo se propaga
 
-The map of how agentic-fm reaches FileMaker — **three independent rails**: (1) ProofKit MCP (live querying, primary today), (2) OData (automate/do + external tools), (3) ProofKit Web Viewer (UI, parked). Contains the key division of labor for **structure lookups**: the on-disk "explode" (`*.index`, `scripts_sanitized/`, `xml_parsed/`) is primary and authoritative for large solutions; ProofKit MCP is the live, surgical complement (it times out on bulk structure of big solutions like Bendita). Read this first to situate everything else.
+```
+petrowsky/agentic-fm ──(repo base: pull main → merge; PRs sanitizadas)── Taiko-Solutions/agentic-fm · taiko
+                                                                                    │
+                     clon de cliente: taiko (espejo) ─► trabajo (cliente, local) ─► mejora/<tema> ─PR─► taiko
+```
 
-### CODING_CONVENTIONS.md
+- Actualizar un clon: `agentic-fm-sync` (primera vez `--migrar`).
+- Subir una mejora: rama `mejora/<tema>` con solo la capa herramientas + entrada en `TAIKO-UPDATES.md` + PR a `taiko`. El hook y la GitHub Action rechazan lo demás.
+- Detalle: `.claude/CLAUDE.md` § "Propagación de reglas y actualizaciones (Taiko)".
 
-Taiko naming standards, script structure preferences, language rules, and author metadata. Overrides specific sections of the base conventions (variables use PascalCase instead of camelCase, comments in Spanish, Insert Calculated Result preferred over Set Variable, etc.).
+## Mantenimiento
 
-### knowledge/
-
-Curated documents describing Taiko's architectural patterns and development decisions. These go beyond generic FileMaker best practices — they define how Taiko builds solutions.
-
-| File | Description |
-|------|-------------|
-| `clew-pattern.md` | Error handling system using Loop/Exit Loop If as try-catch |
-| `three-layer-architecture.md` | Interface, Controller, Data layer separation |
-| `utility-transactional.md` | Non-destructive editing with global fields and transactions |
-| `logging-system.md` | Error logging to Log table with retry capability |
-| `executesql-pattern.md` | Resilient ExecuteSQL pattern with SQL.Get* functions |
-| `transaction-navigation.md` | Navigation strategies within open transactions |
-| `superpowers-workflow.md` | Superpowers development process for structural-scope tasks |
-| `combined-workflow.md` | How agentic-fm + Superpowers + ProofKit work as one whole |
-
-### fm-access.md & proofkit/
-
-`fm-access.md` is the canonical map of the **three ways** agentic-fm reaches FileMaker: ProofKit MCP (live query), OData (automation), and ProofKit Web Viewer (web UI — the default web engine). The `proofkit/` folder details ProofKit usage: `mcp-connector.md` (live query tools), `webviewer-build.md` (building web interfaces), `architecture.md`, `gotchas.md`, `troubleshooting.md`, `conventions.md`. Gating: ProofKit tools require `connectedFiles` to return a file; otherwise the static explode/CONTEXT.json path is used. See `knowledge/combined-workflow.md` for the unified methodology.
-
-The ProofKit MCP server travels with this branch via the repo-root `.mcp.json` (command `proofkit-mcp`, resolved on PATH). Each developer needs the ProofKit app installed and the plugin loaded in the FileMaker file.
-
-### custom_functions/
-
-fmxmlsnippet XML files containing custom function definitions that every Taiko solution should include. These can be pasted directly into FileMaker.
-
-| File | Description |
-|------|-------------|
-| `sql-cfs.xml` | fm-sql-cfs module (Geist Interactive) — SQL.GetFieldName, SQL.GetTableName, SQL.GetColumn, SQL.GetColumn2Fields, SQL.GetColumnStatement, SQL.GetRecordsAsJSON, SQL.RecordExists |
-| `clew.xml` | Clew error handling framework (Marcelo Piñeyro / Soliant) — 40 functions: error.*, _error_* constants, json.* utilities, Log.*, getScriptEnvironment, IsRunningOnServer |
-| `triggers.xml` | Trigger suppression module (Jeremy Bante) — TriggersAreActive, TriggersDisable, TriggersEnable, TriggersReset |
-
-### templates/
-
-Human-readable script templates in `scripts_sanitized` format (numbered, indented steps). The AI uses these as structural references when composing scripts — they are not XML output.
-
-| File | Description |
-|------|-------------|
-| `clew-simple.md` | Traditional Clew pattern (read, query, navigation scripts) |
-| `clew-completo.md` | Complete Clew with all subscript scenarios (InSubscriptThrow, InSubscript, DeleteTrace) |
-| `clew-transactional.md` | Utility Manager + Initialize Shadow + Transactional Controller |
-
-### proofkit/
-
-Knowledge base for **ProofKit**, which for Taiko spans two rails: **Rail 1 — the MCP connector** (querying the live FileMaker file — primary use today) and **Rail 3 — the Web Viewer stack** (React UI inside FileMaker — parked). Both share the local bridge but are used very differently. A different domain from the FM-script knowledge in `knowledge/`. Start at `proofkit/README.md`; see `../fm-access.md` for how these fit with OData (Rail 2).
-
-| File | Description |
-|------|-------------|
-| `README.md` | Index of the folder, the two rails, and provenance |
-| `mcp-connector.md` | **Rail 1 (primary):** the MCP connector for live FileMaker querying — tools, limits (times out on bulk structure of large solutions like Bendita), and when to use MCP vs. the on-disk explode/sanitized |
-| `architecture.md` | Mental model: the 4 pieces (typegen, zod schema, bridge, fmFetch+callback), data flow, glossary, dev vs. production |
-| `gotchas.md` | The 11 field-report findings as actionable patterns — most disguise themselves as network errors |
-| `troubleshooting.md` | Ordered diagnostic ladder for "won't load / infinite spinner" + symptom→cause→action table |
-| `conventions.md` | Taiko preventive habits + project-start checklist (`clearOldFiles: false`, serialize reads, timeout wrapper, exact web-viewer name, security) |
-
-### UPSTREAM_IMPROVEMENTS.md
-
-Instructions and a reusable CLAUDE.md section for solution-specific repos. When included, the AI will detect tool improvements during normal development and log proposals to `agent/UPSTREAM_PROPOSALS.md` — without ever leaking solution-specific data. The developer reviews proposals periodically and applies them to this template repo.
-
-## Maintenance
-
-These documents are maintained by the Taiko Solutions team. They live exclusively on the `taiko` branch and are never merged to `main` or proposed upstream.
-
-To update: edit the files directly on the `taiko` branch, commit, and push.
+Lo mantiene el equipo Taiko. Los nombres de cliente no aparecen como procedencia en estos ficheros ("proyecto cliente (AAAA-MM)"); los specs y decisiones de cada solución viven en el vault de Obsidian, nunca aquí.
