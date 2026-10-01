@@ -34,6 +34,68 @@ class ParamFidelityTestCase(unittest.TestCase):
     def lint(self, inner_xml):
         return self.runner.lint(WRAP.format(inner_xml), fmt="xml")
 
+    # -- X003: FileReference vacío en same-file no es error ---------------
+
+    def test_x003_empty_filereference_same_file_is_not_error(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<FileReference></FileReference>'
+            '<Calculation><![CDATA["p"]]></Calculation>'
+            '<Script id="12" name="Create Log"/></Step>'
+        )
+        self.assertEqual([d for d in x_diags(result) if d.rule_id == "X003"], [])
+
+    def test_x003_crossfile_without_pathlist_still_error(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<FileReference id="10" name="Controller"></FileReference>'
+            '<Script id="12" name="Remote"/></Step>'
+        )
+        self.assertTrue(any(d.rule_id == "X003" for d in x_diags(result)))
+
+    # -- X004: orden de hijos en Perform Script ---------------------------
+
+    def test_x004_script_first_is_dead_step(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<Script id="12" name="Create Log"/>'
+            '<Calculation><![CDATA["p"]]></Calculation></Step>'
+        )
+        diags = [d for d in x_diags(result) if d.rule_id == "X004"]
+        self.assertEqual(len(diags), 1, [d.message for d in x_diags(result)])
+        self.assertIn("último", diags[0].message)
+
+    def test_x004_canonical_crossfile_order_clean(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<DisableStepCollapsed state="False"/>'
+            '<FileReference id="10" name="Controller"><UniversalPathList>file:OtherFile</UniversalPathList></FileReference>'
+            '<Calculation><![CDATA["p"]]></Calculation>'
+            '<Script id="12" name="Remote"/></Step>'
+        )
+        self.assertEqual([d for d in x_diags(result) if d.rule_id == "X004"], [])
+
+    def test_x004_script_only_clean(self):
+        result = self.lint('<Step enable="True" id="1" name="Perform Script"><Script id="12" name="X"/></Step>')
+        self.assertEqual(x_diags(result), [], [d.message for d in x_diags(result)])
+
+    def test_x004_calculated_with_parameter_like_content(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<Calculated><Calculation><![CDATA[JSONSetElement ( "{}" ; "a" ; 1 ; JSONString )]]></Calculation></Calculated>'
+            '<Script id="12" name="Create Log"/></Step>'
+        )
+        diags = [d for d in x_diags(result) if d.rule_id == "X004"]
+        self.assertTrue(diags and "by name" in diags[0].message, [d.message for d in x_diags(result)])
+
+    def test_x004_by_name_legit_clean(self):
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<Calculated><Calculation><![CDATA[$ReturnScript]]></Calculation></Calculated>'
+            '<Calculation><![CDATA["p"]]></Calculation></Step>'
+        )
+        self.assertEqual([d for d in x_diags(result) if d.rule_id == "X004"], [])
+
     # -- X001: unknown param element ------------------------------------
 
     def test_x001_set_error_capture_wrong_element(self):

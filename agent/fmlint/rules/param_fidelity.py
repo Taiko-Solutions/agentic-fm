@@ -1,4 +1,4 @@
-"""Param-fidelity rules X001–X003 for FMLint.
+"""Param-fidelity rules X001–X004 for FMLint.
 
 FileMaker's fmxmlsnippet parser **silently discards** child elements whose
 tag name does not match what the step expects: the step imports fine, but
@@ -279,6 +279,11 @@ class KnownSilentDiscardPatterns(LintRule):
                             ),
                         ))
                 for fileref_el in step.findall("FileReference"):
+                    is_external = bool(fileref_el.get("id")) and bool(fileref_el.get("name"))
+                    if not is_external:
+                        # <FileReference/> vacío = llamada al mismo archivo (ruido del conversor);
+                        # el catálogo dice "omit entirely for same-file calls".
+                        continue
                     if fileref_el.find("UniversalPathList") is None:
                         diags.append(Diagnostic(
                             rule_id=self.rule_id,
@@ -294,4 +299,65 @@ class KnownSilentDiscardPatterns(LintRule):
                                 "</UniversalPathList> inside <FileReference>."
                             ),
                         ))
+        return diags
+
+
+# ---------------------------------------------------------------------------
+# X004 — perform-script-child-order
+# ---------------------------------------------------------------------------
+
+_PS_ORDER = {"FileReference": 0, "Calculated": 1, "Calculation": 2, "Script": 3}
+_PARAM_LIKE = (";", "JSONSetElement", "\n")
+
+
+@rule
+class PerformScriptChildOrder(LintRule):
+    """Perform Script: el orden de los hijos decide si el destino resuelve.
+
+    Forma que produce FileMaker: DisableStepCollapsed → FileReference →
+    Calculated (by name) → Calculation (parámetro) → Script (destino, ÚLTIMO).
+    Con <Script> antes que <Calculation>/<FileReference> el paste se acepta
+    pero el paso queda `From list ; ""` y no llama a nada. Además,
+    <Calculated> es el modo by-name (su contenido es el NOMBRE del script),
+    excluyente con <Script>: un parámetro envuelto en <Calculated> mata el paso.
+    """
+
+    rule_id = "X004"
+    name = "perform-script-child-order"
+    category = "param-fidelity"
+    default_severity = Severity.ERROR
+    formats = {"xml"}
+    tier = 1
+
+    def check_xml(self, parse_result, catalog, context, config):
+        if parse_result.root is None:
+            return []
+        sev = self.severity(config)
+        diags = []
+        for idx, step in enumerate(parse_result.steps):
+            name = step.get("name", "")
+            if name not in ("Perform Script", "Perform Script on Server"):
+                continue
+            tags = [c.tag for c in list(step) if c.tag in _PS_ORDER]
+            ranks = [_PS_ORDER[t] for t in tags]
+            if ranks != sorted(ranks):
+                diags.append(Diagnostic(
+                    rule_id=self.rule_id, severity=sev, line=0,
+                    message=(f'Step {idx + 1} "{name}": orden de hijos {tags} — <Script> debe ir el último '
+                             f"(FileReference → Calculated → Calculation → Script); si no, FileMaker deja "
+                             f"el destino sin resolver y el paso no llama a nada."),
+                    fix_hint="Reordena los hijos: FileReference, Calculated, Calculation, Script.",
+                ))
+            calculated = step.find("Calculated")
+            if calculated is not None:
+                calc = calculated.find("Calculation")
+                text = (calc.text or "") if calc is not None else ""
+                if any(m in text for m in _PARAM_LIKE) or step.find("Script") is not None:
+                    diags.append(Diagnostic(
+                        rule_id=self.rule_id, severity=sev, line=0,
+                        message=(f'Step {idx + 1} "{name}": <Calculated> es el modo by name (su contenido es el '
+                                 f"NOMBRE del script) y excluye a <Script>; aquí parece el parámetro."),
+                        fix_hint=("El parámetro va en un <Calculation> suelto, hermano de <Script>; "
+                                  "usa <Calculated> solo para llamar por nombre."),
+                    ))
         return diags
