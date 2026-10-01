@@ -320,7 +320,9 @@ def write_to_clipboard(input_path, cls=None):
         hex_data = raw_bytes.hex()
         # «data XMSS<hexdata>» — the AppleScript binary descriptor literal syntax
         script = f'set the clipboard to \u00abdata {cls}{hex_data}\u00bb'
-        result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+        # Script via stdin, not `-e`: large snippets (e.g. a whole HTML app in Insert Text)
+        # exceed the OS argument-size limit (Errno 7 "Argument list too long").
+        result = subprocess.run(['osascript', '-'], input=script, capture_output=True, text=True)
         if result.returncode != 0:
             print(f'ERROR: {result.stderr.strip()}', file=sys.stderr)
             sys.exit(1)
@@ -342,7 +344,9 @@ def _write_ut16_to_clipboard(xml_text, input_path):
     else:
         hex_data = utf16_bytes.hex()
         script = f'set the clipboard to \u00abdata ut16{hex_data}\u00bb'
-        result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
+        # Script via stdin, not `-e`: large snippets (e.g. a whole HTML app in Insert Text)
+        # exceed the OS argument-size limit (Errno 7 "Argument list too long").
+        result = subprocess.run(['osascript', '-'], input=script, capture_output=True, text=True)
         if result.returncode != 0:
             print(f'ERROR: {result.stderr.strip()}', file=sys.stderr)
             sys.exit(1)
