@@ -83,9 +83,10 @@ def classify(files, branch: str, is_base: bool, rules: dict) -> Result:
                             f"mejora/<tema> y abre una PR a taiko"))
         return res
 
-    # 3. Allowlist en cualquier otra rama de un clon
+    # 3. Allowlist en cualquier otra rama de un clon (sin repetir los ya prohibidos)
+    already = {f for f, _ in res.blocked}
     for f in files:
-        if not _matches(rules["allow"], f):
+        if f not in already and not _matches(rules["allow"], f):
             res.blocked.append((f, "fuera de la capa herramientas (paths.conf [allow])"))
 
     # 4. Aviso de changelog

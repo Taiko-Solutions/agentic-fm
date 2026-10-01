@@ -1,106 +1,82 @@
 #!/bin/bash
-# agentic-fm pre-push hook — máxima protección contra fuga de datos de cliente
+# agentic-fm pre-push hook — protección contra fuga de datos de cliente (Taiko)
 #
-# Bloquea cualquier push (a cualquier remote, en cualquier rama) si algún commit
-# del rango a empujar contiene archivos que NUNCA deben versionarse en ningún git.
+# Cuatro capas, implementadas en agent/scripts/check_pushed_paths.py sobre las reglas
+# de agent/scripts/hooks/paths.conf (las mismas que usan agentic-fm-safe-push y la
+# GitHub Action del fork):
 #
-# Patrón de diseño: whitelist-based
-#   Primero se marcan como "sospechosos" los archivos que coincidan con FORBIDDEN_REGEX
-#   Después se quitan los que coincidan con WHITELIST_REGEX (legítimos conocidos)
-#   Lo que queda se bloquea
+#   1. [forbidden] − [whitelist]: ficheros que NUNCA se versionan (xml_parsed, CONTEXT.json,
+#      sandbox/*.xml, config/*.json…). Cualquier rama, cualquier repo.
+#   2. Clon de cliente (repo SIN remote `upstream`): push a `taiko` o `trabajo` → bloqueado.
+#      Las mejoras suben en una rama mejora/<tema> y entran en taiko por PR.
+#   3. Clon de cliente, cualquier otra rama: todo fichero debe estar en [allow]
+#      (capa herramientas). Un spec de cliente en docs/ no puede salir del clon.
+#   4. Clon de cliente: tocar reglas sin añadir entrada en TAIKO-UPDATES.md → aviso.
 #
-# Archivos PROHIBIDOS por defecto:
-#   - xml_exports/                      Exportaciones XML legacy
-#   - agent/xml_parsed/                 XML parseado de soluciones FM
-#   - agent/context/                    Índices generados por fmcontext.sh
-#   - agent/CONTEXT.json                Contexto actual de la tarea
-#   - agent/sandbox/*.xml               Trabajo agéntico en progreso
-#   - agent/config/*.json|*.md          Config de proyecto (credenciales, overrides locales)
+# El repo base (el único con remote `upstream`) solo pasa la capa 1.
+# Después, si el push toca catálogos/conversor/fmlint, corre agent/scripts/ci_checks.py.
 #
-# Archivos EXPLÍCITAMENTE PERMITIDOS (whitelist):
-#   - *.example y *.example.md          Plantillas públicas sin datos reales
-#   - agent/config/fmlint.config.json   Override Taiko del linter (compartido)
-#   - agent/sandbox/script.xml          Placeholder documentado
-#
-# Instalación en un repo:
-#   bash agent/scripts/install-hooks.sh
-#
-# Bypass (emergencia, bajo tu responsabilidad):
-#   git push --no-verify
+# Instalación en un repo:   bash agent/scripts/install-hooks.sh
+# Bypass de emergencia (bajo tu responsabilidad):   git push --no-verify
 
 set -e
 
 REMOTE_NAME="${1:-}"
 REMOTE_URL="${2:-}"
 ZERO_SHA="0000000000000000000000000000000000000000"
+CHECK="agent/scripts/check_pushed_paths.py"
 
-FORBIDDEN_REGEX='^(xml_exports/|agent/xml_parsed/|agent/context/|agent/CONTEXT\.json$|agent/sandbox/.*\.xml$|agent/config/.*\.(json|md)$)'
-WHITELIST_REGEX='(\.example(\..*)?$|^agent/config/fmlint\.config\.json$|^agent/sandbox/script\.xml$)'
+# Repo base = el único con remote `upstream` (petrowsky). Exento de reglas de rama/allowlist.
+BASE_FLAG=""
+if git remote get-url upstream >/dev/null 2>&1; then BASE_FLAG="--base-repo"; fi
 
 found_violation=0
 all_pushed_files=""
 
 while read -r local_ref local_sha remote_ref remote_sha; do
-    # Rama eliminada (nada que verificar)
-    if [ "$local_sha" = "$ZERO_SHA" ]; then
-        continue
-    fi
+    [ "$local_sha" = "$ZERO_SHA" ] && continue          # borrado de rama: permitido
+    branch="${remote_ref#refs/heads/}"
 
-    # Calcular rango de commits a examinar
     if [ "$remote_sha" = "$ZERO_SHA" ]; then
-        # Rama nueva — examinar commits que no estén en ninguna otra rama remota
         commits=$(git rev-list "$local_sha" --not --remotes 2>/dev/null || git rev-list "$local_sha")
     else
         commits=$(git rev-list "${remote_sha}..${local_sha}")
     fi
-
-    [ -z "$commits" ] && continue
-
-    # Archivos tocados en todos los commits del rango (deduplicados)
-    files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only -r {} 2>/dev/null | sort -u)
+    files=""
+    [ -n "$commits" ] && files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only -r {} 2>/dev/null | sort -u)
     all_pushed_files="$all_pushed_files
 $files"
 
-    # Sospechosos = coincide con FORBIDDEN y NO coincide con WHITELIST
-    matches=$(echo "$files" | grep -E "$FORBIDDEN_REGEX" 2>/dev/null | grep -vE "$WHITELIST_REGEX" 2>/dev/null || true)
-
-    if [ -n "$matches" ]; then
-        if [ $found_violation -eq 0 ]; then
+    if [ -f "$CHECK" ]; then
+        # Capas 1–4 en una sola implementación
+        if ! out=$(printf '%s\n' "$files" | python3 "$CHECK" --branch "$branch" $BASE_FLAG); then
             echo ""
-            echo "❌ PUSH BLOQUEADO — agentic-fm pre-push hook"
-            echo ""
-            echo "Los siguientes archivos están en commits que se van a empujar"
-            echo "y NUNCA deben subirse a ningún git:"
-            echo ""
+            echo "$out"
+            echo "  Rama:   $local_ref → $remote_ref"
+            echo "  Remote: $REMOTE_NAME ($REMOTE_URL)"
+            found_violation=1
+        else
+            [ -n "$out" ] && echo "$out"
         fi
-        echo "  Rama:   $local_ref → $remote_ref"
-        echo "  Remote: $REMOTE_NAME ($REMOTE_URL)"
-        echo "  Archivos:"
-        echo "$matches" | sed 's/^/    /'
-        echo ""
-        found_violation=1
+    else
+        # Fallback sin el script (clon muy antiguo): solo la capa de prohibidos
+        FORBIDDEN_REGEX='^(xml_exports/|agent/xml_parsed/|agent/context/|agent/CONTEXT\.json$|agent/sandbox/.*\.xml$|agent/config/.*\.(json|md)$)'
+        WHITELIST_REGEX='(\.example(\..*)?$|^agent/config/fmlint\.config\.json$|^agent/sandbox/script\.xml$)'
+        matches=$(echo "$files" | grep -E "$FORBIDDEN_REGEX" | grep -vE "$WHITELIST_REGEX" || true)
+        if [ -n "$matches" ]; then
+            echo ""; echo "❌ PUSH BLOQUEADO — archivos prohibidos:"; echo "$matches" | sed 's/^/    /'
+            found_violation=1
+        fi
     fi
 done
 
 if [ $found_violation -eq 1 ]; then
+    echo ""
     echo "Cómo resolver:"
-    echo ""
-    echo "  1. Si los archivos están en el commit más reciente y la rama es tuya:"
-    echo "       git reset --soft HEAD~1"
-    echo "       git restore --staged <archivos-prohibidos>"
-    echo "       git commit -c ORIG_HEAD   # rehacer el commit sin los archivos"
-    echo ""
-    echo "  2. Si los archivos están más atrás en el historial:"
-    echo "       git rebase -i <sha-previo>   # edita/elimina el commit afectado"
-    echo ""
-    echo "  3. Si es un falso positivo (archivo legítimo nuevo que coincide con el patrón):"
-    echo "       añadirlo a WHITELIST_REGEX en agent/scripts/hooks/pre-push"
-    echo "       luego: bash agent/scripts/install-hooks.sh"
-    echo ""
-    echo "  Patrones activos:"
-    echo "    PROHIBIDO: $FORBIDDEN_REGEX"
-    echo "    PERMITIDO: $WHITELIST_REGEX"
-    echo ""
+    echo "  · Fichero prohibido: quítalo del commit (git reset --soft HEAD~1; git restore --staged <f>; git commit -c ORIG_HEAD)."
+    echo "  · Rama taiko/trabajo desde un clon: crea mejora/<tema> desde taiko con solo los ficheros de la capa herramientas y abre PR."
+    echo "  · Fichero legítimo fuera de la allowlist: amplía [allow] en agent/scripts/hooks/paths.conf (y reinstala el hook)."
+    echo "  Nunca uses --no-verify para saltarte esto."
     exit 1
 fi
 

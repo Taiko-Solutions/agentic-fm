@@ -18,6 +18,10 @@ class ForbiddenTests(unittest.TestCase):
         self.assertFalse(r.ok)
         self.assertEqual([f for f, _ in r.blocked], ["agent/CONTEXT.json"])
 
+    def test_forbidden_file_reported_once(self):
+        r = cpp.classify(["agent/CONTEXT.json"], "mejora/x", is_base=False, rules=RULES)
+        self.assertEqual(len(r.blocked), 1, r.blocked)
+
     def test_whitelist_wins_over_forbidden(self):
         r = cpp.classify(["agent/config/automation.json.example", "agent/sandbox/script.xml"], "mejora/x", False, RULES)
         self.assertTrue(r.ok, r.blocked)
