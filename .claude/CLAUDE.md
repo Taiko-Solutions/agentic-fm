@@ -440,9 +440,10 @@ Modelo de **dos niveles**. La dirección importa:
 
 **Reglas:**
 
-1. **En un repo de proyecto cliente, el flujo hacia petrowsky NO aplica.** La única fuente de actualizaciones es la **rama `taiko`** del repo base (`git pull <remoto-taiko> taiko` → merge a la rama del proyecto). No hagas el chequeo de "agentic-fm update available" contra `origin/main`, no `git pull --ff-only` de main, y **no propongas PRs a petrowsky**. Petrowsky lo gestiona **exclusivamente** el repo base Taiko.
-2. **Las mejoras suben a `taiko`.** Si en un proyecto cliente detectas una mejora en la **capa de herramientas/reglas** (knowledge, convenciones, custom functions, utilidades de `agent/scripts/`, templates, snippet_examples, library), **regístrala para que suba a la rama `taiko`** — nunca directa a petrowsky, y **nunca con datos de cliente**. Mecanismo y qué NUNCA sube: `agent/docs/taiko/UPSTREAM_IMPROVEMENTS.md` (log en `agent/UPSTREAM_PROPOSALS.md`; el mantenedor del repo base lo aplica a `taiko`).
-3. **Petrowsky solo desde el repo base.** Traer novedades de petrowsky (`git pull main` → merge a `taiko`) y proponer PRs a petrowsky son operaciones **exclusivas del repo base Taiko**, jamás de un proyecto cliente.
+1. **En un repo de proyecto cliente, el flujo hacia petrowsky NO aplica.** El clon tiene tres ramas con nombre fijo: `taiko` (espejo de `origin/taiko`, sin commits propios), `trabajo` (todo lo del cliente; nunca se sube) y `mejora/<tema>` (solo capa herramientas, sanitizada; PR a `taiko`). Actualizar = `agentic-fm-sync` (primera vez `--migrar`). No `git pull` de `main`, no PRs a petrowsky.
+2. **Las mejoras suben a `taiko` por PR desde `mejora/*`.** Solo rutas de la capa herramientas (`agent/scripts/hooks/paths.conf` [allow]); el hook pre-push, `agentic-fm-safe-push` y la GitHub Action lo comprueban en cualquier rama que salga de un clon. Nunca datos de cliente ni nombres de cliente como procedencia (usa "proyecto cliente (AAAA-MM)"). Si una mejora no se puede subir en el momento, regístrala en `agent/UPSTREAM_PROPOSALS.md` (`agent/docs/taiko/UPSTREAM_IMPROVEMENTS.md`).
+3. **Toda PR a `taiko` que cambie reglas, scripts, catálogos o fmlint añade una entrada en `TAIKO-UPDATES.md`** (con "Acción requerida" si el desarrollador debe hacer algo). `session_start.py` la muestra a los clones que van por detrás.
+4. **Petrowsky solo desde el repo base** (el único con remote `upstream`): traer `main`, mergear a `taiko`, proponer PRs.
 
 # Ejecución local por defecto (Taiko)
 
