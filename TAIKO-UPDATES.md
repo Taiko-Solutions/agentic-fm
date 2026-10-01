@@ -28,6 +28,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - Nombre del Web Viewer `web` (F13); `PK_send_callback` resuelve en la ventana activa (F14); cerrar la pantalla antes de `deploy_html` (F15); `fmBridge` en dev dentro de FM con `?wv=web` (F16); esperar a `window.FileMaker` (F17); claves UUIDDecimal nunca por OData (F19).
 - Deploy FM 2026: `deploy_html` guarda en el almacén persistente; el WV lee `"data:text/html," & GetPersistentData ( "proofkit" ; "<app>" )`. Sobrevive migraciones.
 - Docs alineados: `proofkit/README.md`, `taiko/README.md`, `troubleshooting.md`, `conventions.md`.
+- **Corrección (2026-10-01, tarde):** la PR #11 borró `.cursor/` creyendo que eran copias; en realidad `.claude/skills` es un symlink a `.cursor/skills` (estructura de upstream) y las 25 skills desaparecieron. Restaurado en `taiko`; `agentic-fm-sync` lo trae. Si en un clon `ls .claude/skills/` está vacío o da error, sincroniza.
 
 ## 2026-10-01 — Perform Script: orden de los hijos (fmlint X004) y X003 sin falsos positivos
 

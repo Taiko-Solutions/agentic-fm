@@ -26,6 +26,7 @@ Esta carpeta y unos pocos ficheros fuera de ella son **todo lo que Taiko añade*
 | `../../scripts/hooks/` | Hook pre-push + `paths.conf` (reglas de rutas) | Instalado por `install-hooks.sh` |
 | `/TAIKO-UPDATES.md` | Changelog de esta capa; lo leen `session_start.py` y `agentic-fm-sync` | Al actualizar un clon |
 | `/.claude/CLAUDE.md` | Las secciones marcadas "(Taiko)" y "override" | Siempre |
+| `/.cursor/skills/` | Las 25 skills (upstream las mantiene aquí; `/.claude/skills` es un **symlink** a esta carpeta: no borrar `.cursor/`) | Skills del agente |
 
 ## Cómo se propaga
 
