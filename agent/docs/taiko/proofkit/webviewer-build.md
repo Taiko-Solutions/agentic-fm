@@ -41,7 +41,17 @@ Aplica el **checklist de arranque** de [conventions.md](conventions.md) desde el
 
 ## Deploy: elige método según migraciones
 
-`deploy_html` usa por defecto **Embedded** (el código va como *dato* en el archivo FM). Trade-off Taiko relevante: **Embedded no sobrevive a una migración de datos** (importar datos a un archivo nuevo pierde el Web Viewer). Alternativas documentadas: **Store code in a script** (sobrevive migraciones), **Hosted** (servidor web) o **Downloaded** (híbrido self-updating), y un script post-deploy de OttoFMS. Decide según si la solución hace migraciones.
+`deploy_html` (herramienta MCP → script `PK_deploy_html`). **En FileMaker 2026 este es el método estándar Taiko** (verificado en Borneo 944, 2026-10-01): además del registro en `ProofKitApps` (Embedded, compatibilidad), guarda el HTML en el **almacén persistente** (`Configure Persistent Data`, nombre `proofkit`, instancia = `appName`). El Web Viewer lo lee con:
+
+```
+"data:text/html," & GetPersistentData ( "proofkit" ; "<appName>" )
+```
+
+- El almacén persistente es **esquema**, no datos: lo comparten todos los usuarios al instante, viaja en los clones y, en una migración, el destino es el fichero de desarrollo → **lo desplegado en dev llega a producción** (el registro de `ProofKitApps` no). Escribir exige acceso total; leer, no.
+- Objeto Web Viewer llamado **`web`** (gotchas F13). Pantalla del WV **cerrada al desplegar** (F15).
+- Modo desarrollo dentro de FM: `If ( $$X.WV.DEV ; "http://localhost:5175/?wv=web" ; <fórmula de arriba> )` + script interruptor que hace `Set Web Viewer [ Reset ]` (F16).
+
+Antes de FileMaker 2026, `deploy_html` solo hacía **Embedded**, que **no sobrevive a una migración de datos**. Alternativas: **Store code in a script** (un `Insert Text` con el HTML en una variable global; ojo con `clipboard.py`, que necesita el arreglo de stdin para snippets grandes), **Hosted** o **Downloaded**, y un script post-deploy de OttoFMS.
 
 ## Ventaja de la Data API en Web Viewer (vs Vía 2 OData)
 
