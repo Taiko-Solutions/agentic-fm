@@ -391,3 +391,30 @@ Ran into this deploying agentic-fm against a multi-file solution — seven `.fmp
 - **Fix propuesto**: (1) documentarlo en `agent/docs/knowledge/` (nuevo `paste-unbalanced-block.md`) y enlazarlo desde el MANIFEST y desde CLAUDE.md § fmxmlsnippet rules; (2) regla fmlint (WARNING) cuando un snippet de sandbox empieza por un step con `blockPair.role` = `middle`/`close` sin su apertura, con el mensaje del workaround — hoy S007 lo marca como ERROR de estructura sin explicar que FM lo descartará en silencio.
 - **Archivos afectados**: `agent/docs/knowledge/` + MANIFEST, `.claude/CLAUDE.md`, `agent/fmlint/rules/` (S007)
 - **Origen**: proyecto cliente (2026-09-22), añadir una acción a un router `If/Else If` de 5 ramas. Sin datos de cliente.
+
+## 2026-09-30 — fm-sql-cfs: `SQL.GetTableName` / `SQL.GetFieldName` devuelven `?` si la TO no está relacionada con el contexto actual (fallo silencioso)
+
+- **Categoría**: knowledge / upstream (pack [fm-sql-cfs](https://github.com/karbonfm/fm-sql-cfs))
+- **Descripción**: al pasar una **referencia de campo** como parámetro de una custom function, FileMaker lee el **valor** del campo al enlazar el parámetro. Si la TO de ese campo no pertenece al grupo de TOs del layout actual, la lectura da error y **toda la CF devuelve `?`**, aunque por dentro solo use `GetFieldName ( field )`. En cambio, `GetFieldName ( TO::Campo )` escrito directamente en el cálculo no lee el valor y funciona desde cualquier contexto. Por eso despista: la expresión "parece" la misma.
+
+  Verificado en el motor en vivo con `AGFMEvaluation` (2026-09-30). `Bridge` es una TO de un grupo aislado; `Other` está relacionada con el layout `Inicio`:
+
+  | Expresión | Layout | Resultado |
+  |---|---|---|
+  | `GetFieldName ( Bridge::Campo )` | Inicio | `Bridge::Campo` |
+  | `Bridge::Campo` | Inicio | `?` |
+  | `SQL.GetTableName ( Bridge::Campo )` / `SQL.GetFieldName ( … )` | Inicio | `?` |
+  | `SQL.GetTableName ( Other::Campo )` | Inicio | `"Other"` |
+  | `SQL.GetTableName ( Bridge::Campo )` / `SQL.GetFieldName ( … )` | layout sobre `Bridge` | `"Bridge"` / `"Bridge"."Campo"` |
+  | `SQL.GetTableName ( GetFieldName ( Bridge::Campo ) )` | Inicio | `"Bridge"` |
+  | `SQL.GetColumn2Fields ( GetFieldName (…) ; GetFieldName (…) ; v1 ; GetFieldName (…) ; v2 )` | Inicio | id correcto; vacío si no existe |
+
+  El `?` se propaga a `SQL.GetColumn`, `SQL.GetColumn2Fields`, `SQL.GetColumnStatement` y `SQL.GetRecordsAsJSON`. Hay dos síntomas: `FROM ?`, donde ExecuteSQL devuelve `?` y el error sale si se comprueba; y el peligroso, `IsEmpty ( SQL.GetColumn2Fields (…) )` = False, que se lee como "ya existe" y **salta la creación en silencio**.
+
+  No es un error de código del pack: la CF ya admite recibir el nombre como texto (`Case ( fn = "?" ; field ; fn )`). Lo que falta es documentarlo: el JSDoc dice `@param {reference} field` y no avisa de que la referencia tiene que poder evaluarse desde el contexto actual.
+- **Propuesta**:
+  - (a) Upstream fm-sql-cfs: indicar en el README y en el JSDoc que la referencia debe ser de una TO relacionada con el contexto, o pasar `GetFieldName ( TO::Campo )` como texto. Esa forma funciona desde cualquier layout y mantiene la referencia fuerte al renombrar.
+  - (b) Hecho en `taiko`: sección nueva en `agent/docs/taiko/knowledge/executesql-pattern.md`.
+  - (c) Posible regla fmlint o `fm_audit`: avisar de `SQL.Get*( TO::campo )` cuando la TO no esté en el grupo de TOs del layout activo (requiere el grafo de relaciones).
+- **Archivos afectados**: `agent/docs/taiko/knowledge/executesql-pattern.md`, `agent/fmlint/` (opcional)
+- **Origen**: tabla puente N:M en un grupo de TOs propio, consultada desde scripts "context-insensitive" de un proyecto cliente (2026-09-30). Hubo 5 scripts afectados: 2 migraciones ya ejecutadas en producción que no crearon ni rellenaron nada, un router que nunca creaba la fila puente y 2 scripts con error visible. Sin datos de cliente.
