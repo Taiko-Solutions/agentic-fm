@@ -51,7 +51,7 @@ Detalle completo en [`architecture.md`](architecture.md).
 
 | Doc | Léelo cuando… |
 |-----|---------------|
-| [`mcp-connector.md`](mcp-connector.md) | **(Vía 1 — consulta en vivo)** Vayas a consultar FileMaker en vivo vía el connector MCP: qué tools, sus **límites** (timeout en soluciones grandes como Bendita), y cuándo usar MCP vs. el explode/sanitized de agentic-fm. |
+| [`mcp-connector.md`](mcp-connector.md) | **(Vía 1 — consulta en vivo)** Vayas a consultar FileMaker en vivo vía el connector MCP: qué tools, sus **límites** (timeout en soluciones grandes), y cuándo usar MCP vs. el explode/sanitized de agentic-fm. |
 | [`architecture.md`](architecture.md) | **(Vía 3 — Web Viewer)** Necesites el modelo mental del Web Viewer: las 4 piezas, el flujo `fmFetch`→callback, el glosario, dev vs. producción. |
 | [`gotchas.md`](gotchas.md) | Vayas a construir o depurar un Web Viewer ProofKit. Los 19 hallazgos (doc, campo y proyecto cliente 2026-10 con FileMaker 2026) como patrones accionables. |
 | [`CLAUDE-webapp.md`](CLAUDE-webapp.md) | Vayas a scaffoldear una app web: cópialo como `CLAUDE.md` del proyecto web. |

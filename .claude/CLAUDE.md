@@ -220,11 +220,11 @@ The developer always works in **human-readable (HR) script format**. The agent's
 
 > **CRITICAL — Internal layout `name` ≠ exported filename**
 >
-> The exporter may write `Utility__Peticiones - ID 295.xml` (TWO underscores) when the layout's internal `name` is `Utility_Peticiones` (ONE). Mismatches fail silently in `<Layout name>` refs AND in runtime literals (`Get(LayoutName)` checks, button params). Always verify against the **first column** of `agent/context/<solution>/layouts.index`, and prefer `Get ( LayoutName )` over hardcoded literals. (Real case: Borneo 944.9, dead back button.)
+> The exporter may write `Utility__Peticiones - ID 295.xml` (TWO underscores) when the layout's internal `name` is `Utility_Peticiones` (ONE). Mismatches fail silently in `<Layout name>` refs AND in runtime literals (`Get(LayoutName)` checks, button params). Always verify against the **first column** of `agent/context/<solution>/layouts.index`, and prefer `Get ( LayoutName )` over hardcoded literals. (Real case: proyecto cliente 2026-07, dead back button.)
 
 > **CRITICAL — Utility shadow `AsJSON` calc must use storage `Global`, not unstored**
 >
-> As a normal unstored calc, `AsJSON` evaluates in the current layout's TO context and **returns `{}` when read from another layout** — the Manager merges `{}` and downstream checks pass through silently. Fix in FM: Manage Database → field → Storage Options → **"Use global storage"**, uniformly on **every** Utility's AsJSON field. (Discovered in Borneo 944.9; document affected files in the solution's 01-Decisiones-Tomadas.md.)
+> As a normal unstored calc, `AsJSON` evaluates in the current layout's TO context and **returns `{}` when read from another layout** — the Manager merges `{}` and downstream checks pass through silently. Fix in FM: Manage Database → field → Storage Options → **"Use global storage"**, uniformly on **every** Utility's AsJSON field. (Discovered in a client project, 2026-07; document affected files in the solution's 01-Decisiones-Tomadas.md.)
 
 > **CRITICAL — `Perform Script`: `<Script>` va el ÚLTIMO** (`FileReference → Calculated → Calculation → Script`). Con `<Script>` primero FileMaker acepta el paste y el paso no llama a nada; `<Calculated>` es el modo by name, no el parámetro. fmlint X004 lo bloquea. Detalle y XML canónico: `agent/docs/taiko/knowledge/silent-discard-params.md`.
 
@@ -468,7 +468,7 @@ Taiko toca FileMaker por **tres vías** (mapa canónico: `agent/docs/taiko/fm-ac
 **Reglas de operación:**
 
 1. **Gating.** Antes de cualquier herramienta ProofKit (Vías 1 y 3), llama a `connectedFiles`. Si devuelve `[]` o falla, cae al flujo estático (explode, CONTEXT.json, OData) **sin bloquear**. agentic-fm nunca depende de ProofKit para funcionar.
-2. **Estructura: manda el explode.** Estructura amplia/completa → explode/sanitized (`agent/xml_parsed/`, `context/*.index`), sin timeout. ProofKit MCP solo para preguntas **puntuales y en vivo** — nunca volcado masivo (timeout en soluciones grandes, p. ej. Bendita).
+2. **Estructura: manda el explode.** Estructura amplia/completa → explode/sanitized (`agent/xml_parsed/`, `context/*.index`), sin timeout. ProofKit MCP solo para preguntas **puntuales y en vivo** — nunca volcado masivo (timeout en soluciones grandes).
 3. **Reparto de autoría.** agentic-fm autora scripts/cálculos/esquema (fmxmlsnippet/OData); ProofKit v2 **no** edita scripts/esquema, solo construye UI web y lee/escribe datos (Data API). Complementarios.
 4. **Interfaces web: proactivo con guardarraíles.** Cuando una tarea encaje con una UI web (listados, dashboards, interacciones ricas), **propón** una interfaz ProofKit — mencionando los guardarraíles (`agent/docs/taiko/proofkit/gotchas.md`). Motor por defecto ProofKit; el skill `webviewer-build` solo como excepción (HTML trivial o sin conexión ProofKit). **Al scaffoldear, copia `agent/docs/taiko/proofkit/CLAUDE-webapp.md` como `CLAUDE.md` del proyecto web**: las sesiones de UI cargan solo las reglas web (ligeras), sin el stack fmxmlsnippet del repo padre.
 5. **Metodología combinada.** El flujo unificado agentic-fm + Superpowers + ProofKit está en `agent/docs/taiko/knowledge/combined-workflow.md` (indexado en el MANIFEST, escaneable por keywords).

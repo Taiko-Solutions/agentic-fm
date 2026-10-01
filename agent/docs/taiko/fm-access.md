@@ -46,7 +46,7 @@ No compiten: el plug-in **no** toca Data API/OData/web viewer; ProofKit **no** e
 Hay **dos** fuentes de estructura (campos, scripts, relaciones, lógica) y **no compiten — se reparten por tamaño y frescura**:
 
 - **El "explode" de agentic-fm** — `agent/xml_parsed/` + `scripts_sanitized/` y los `agent/context/{solución}/*.index`. Pre-extraído en disco, **completo, grep-able y sin timeout**. Fuente **PRIMARIA y autoritativa** de estructura, sobre todo en soluciones grandes.
-- **ProofKit MCP** — fuente **viva** del archivo conectado, pero **quirúrgica**: brilla en consultas puntuales y **hace timeout en introspección de estructura masiva** (caso real: **Bendita**, solución muy grande).
+- **ProofKit MCP** — fuente **viva** del archivo conectado, pero **quirúrgica**: brilla en consultas puntuales y **hace timeout en introspección de estructura masiva** (caso real: una solución de cliente muy grande).
 
 > **Regla Taiko:** estructura amplia → **manda el explode/sanitized**. ProofKit MCP es el complemento en vivo para preguntas concretas y frescas — nunca el volcado masivo.
 

@@ -31,7 +31,7 @@ Herramientas del servidor MCP `proofkit-mcp`, para preguntas **concretas y fresc
 
 ## Límites reales (lo que NO debe hacer)
 
-ProofKit MCP tiene límites en la **introspección de estructura** y, en soluciones grandes, **hace timeout** (**observación de campo Taiko** — caso **Bendita**, solución muy grande; **no** documentado por ProofKit, pero contrastado en la práctica).
+ProofKit MCP tiene límites en la **introspección de estructura** y, en soluciones grandes, **hace timeout** (**observación de campo Taiko** — caso real: una solución de cliente muy grande; **no** documentado por ProofKit, pero contrastado en la práctica).
 
 - ❌ **No** lo uses para volcar estructura **completa/amplia** de una solución grande.
 - ❌ **No** pidas DDL de muchas TOs a la vez — selecciona las que necesitas.

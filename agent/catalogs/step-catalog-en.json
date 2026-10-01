@@ -5599,7 +5599,7 @@
         "hrLabel": "By name",
         "wrapperElement": "Calculated",
         "required": false,
-        "note": "By name mode: <Calculated><Calculation>script name</Calculation></Calculated>, emitted BEFORE the parameter <Calculation>. Mutually exclusive with <Script> (by id). Less robust than by id (the reference does not follow a script rename) but required when the target is only known at runtime, as in the selector/router returnScript pattern. Verified in Borneo: SelectorContacto.Seleccionar (925), Contacto.Seleccionado.Router (951)."
+        "note": "By name mode: <Calculated><Calculation>script name</Calculation></Calculated>, emitted BEFORE the parameter <Calculation>. Mutually exclusive with <Script> (by id). Less robust than by id (the reference does not follow a script rename) but required when the target is only known at runtime, as in the selector/router returnScript pattern. Verified in a client solution (selector/router returnScript pattern)."
       },
       {
         "xmlElement": "Calculation",

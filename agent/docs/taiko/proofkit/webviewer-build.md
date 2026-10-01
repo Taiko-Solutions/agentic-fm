@@ -41,7 +41,7 @@ Aplica el **checklist de arranque** de [conventions.md](conventions.md) desde el
 
 ## Deploy: elige método según migraciones
 
-`deploy_html` (herramienta MCP → script `PK_deploy_html`). **En FileMaker 2026 este es el método estándar Taiko** (verificado en Borneo 944, 2026-10-01): además del registro en `ProofKitApps` (Embedded, compatibilidad), guarda el HTML en el **almacén persistente** (`Configure Persistent Data`, nombre `proofkit`, instancia = `appName`). El Web Viewer lo lee con:
+`deploy_html` (herramienta MCP → script `PK_deploy_html`). **En FileMaker 2026 este es el método estándar Taiko** (verificado en un proyecto cliente, 2026-10-01): además del registro en `ProofKitApps` (Embedded, compatibilidad), guarda el HTML en el **almacén persistente** (`Configure Persistent Data`, nombre `proofkit`, instancia = `appName`). El Web Viewer lo lee con:
 
 ```
 "data:text/html," & GetPersistentData ( "proofkit" ; "<appName>" )
