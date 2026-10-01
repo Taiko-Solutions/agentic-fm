@@ -4,6 +4,12 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-02 — Procedimientos de sesión en el repo y plugin taiko-filemaker
+
+**Acción requerida:** instala el plugin `taiko-filemaker` del marketplace `taiko` (README de `claude-plugins`). Los prompts Nueva-Tarea/Puesta-Al-Dia/Nuevo-Proyecto del vault quedan retirados.
+
+- `agent/docs/taiko/sessions/fm-sesion.md` y `fm-nuevo-proyecto.md`: lo que leen las skills `fm-sesion` y `fm-nuevo-proyecto`. El hook `SessionStart` del plugin ejecuta `session_start.py` e inyecta el resumen en cada sesión dentro de un clon.
+
 ## 2026-10-01 — Modelo de ramas trabajo/taiko/mejora, hook de cuatro capas y agentic-fm-sync
 
 **Acción requerida:** en cada clon, una vez: `git pull origin taiko && agentic-fm-sync --migrar` (crea `trabajo`, deja `taiko` como espejo, quita `upstream` si lo hubiera, reinstala el hook). Instala el symlink nuevo: `ln -sf "$PWD/agent/scripts/bin/agentic-fm-sync" ~/bin/agentic-fm-sync`.
