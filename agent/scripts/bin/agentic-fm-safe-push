@@ -65,9 +65,9 @@ detect_changed_files() {
     local remote="$1"
     local branch="$2"
     if git show-ref --verify --quiet "refs/remotes/${remote}/${branch}"; then
-        git --no-pager diff --name-only "${remote}/${branch}...HEAD"
+        git --no-pager diff --name-only --diff-filter=d "${remote}/${branch}...HEAD"
     else
-        git --no-pager log --pretty="" --name-only HEAD --not --remotes | sort -u
+        git --no-pager log --pretty="" --name-only --diff-filter=d HEAD --not --remotes | sort -u
     fi
 }
 

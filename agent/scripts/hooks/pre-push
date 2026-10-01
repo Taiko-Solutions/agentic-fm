@@ -43,7 +43,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         commits=$(git rev-list "${remote_sha}..${local_sha}")
     fi
     files=""
-    [ -n "$commits" ] && files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only -r {} 2>/dev/null | sort -u)
+    [ -n "$commits" ] && files=$(echo "$commits" | xargs -I {} git diff-tree --no-commit-id --name-only --diff-filter=d -r {} 2>/dev/null | sort -u)
     all_pushed_files="$all_pushed_files
 $files"
 

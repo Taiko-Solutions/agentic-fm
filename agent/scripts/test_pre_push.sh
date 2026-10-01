@@ -33,6 +33,10 @@ git push -q origin mejora/ctx 2>/dev/null && fail "CONTEXT.json debió bloquears
 git checkout -qb claude/spec taiko && mkdir -p docs/superpowers/specs && echo s > docs/superpowers/specs/y.md && git add -A && git commit -qm spec2
 git push -q origin claude/spec 2>/dev/null && fail "claude/* con docs/ debió bloquearse" || pass "clon: claude/* fuera de allowlist bloqueada"
 git push -q origin --delete mejora/ok || fail "borrar rama debió permitirse"; pass "clon: borrar rama permitido"
+git checkout -qb mejora/borrado taiko && git rm -q TAIKO-UPDATES.md && mkdir -p docs && echo d > docs/tmp.md && git add -A && git commit -qm "borra y añade" && git rm -q docs/tmp.md && git commit -qm "borra docs" 
+git push -q origin mejora/borrado 2>/dev/null && fail "fichero añadido fuera de allowlist (aunque luego borrado) debió bloquearse" || pass "clon: añadir fuera de allowlist bloqueado aunque se borre después"
+git checkout -qb mejora/solo-borrado taiko && git rm -q agent/docs/taiko/a.md 2>/dev/null || true; echo z > agent/docs/taiko/z.md && git add -A && git commit -qm z
+git push -q origin mejora/solo-borrado || fail "borrar ficheros debió permitirse"; pass "clon: borrados no cuentan para la allowlist"
 
 # --- Repo base (con upstream) --------------------------------------------
 git clone -q -b taiko "$T/origin.git" "$T/base" && cd "$T/base" && git config user.email t@t && git config user.name t && install_hook

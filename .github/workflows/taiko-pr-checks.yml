@@ -1,0 +1,20 @@
+name: taiko-pr-checks
+on:
+  pull_request:
+    branches: [taiko]
+jobs:
+  paths-and-sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reglas de rutas (mismas que el hook pre-push)
+        run: |
+          git diff --name-only --diff-filter=d "origin/${{ github.base_ref }}...HEAD" \
+            | python3 agent/scripts/check_pushed_paths.py --branch "${{ github.head_ref }}"
+      - name: Sanity checks (catálogos, conversor, fmlint, scripts)
+        run: python3 agent/scripts/ci_checks.py
