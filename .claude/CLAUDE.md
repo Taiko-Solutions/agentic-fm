@@ -368,7 +368,7 @@ Custom functions fall into three categories:
 When CONTEXT.json includes a `custom_functions` section, prefer it. Otherwise, check:
 
 - `xml_parsed/custom_functions_sanitized/` — human-readable calculation text
-- `xml_parsed/custom_function_calcs/` — XML calculation definitions
+- `xml_parsed/custom_functions/` — XML definitions (exploder ≥ 0.6.1); explodes made with 0.5.1 have `custom_function_stubs/` (and `value_list_stubs/` instead of `value_lists/`) — check which one exists
 
 # Custom menus
 

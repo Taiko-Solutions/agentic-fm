@@ -345,9 +345,12 @@ PYEOF
                         )
                         ;;
                     custom_function)
+                        # fm-xml-export-exploder <= 0.5.1 wrote custom_function_calcs/ + custom_function_stubs/;
+                        # >= 0.6.1 writes custom_functions/*.xml + custom_functions_sanitized/*.txt. Clean all.
                         _search_dirs=(
                             "$XML_PARSED_DIR/custom_function_calcs/$SOLUTION_NAME"
                             "$XML_PARSED_DIR/custom_function_stubs/$SOLUTION_NAME"
+                            "$XML_PARSED_DIR/custom_functions/$SOLUTION_NAME"
                             "$XML_PARSED_DIR/custom_functions_sanitized/$SOLUTION_NAME"
                         )
                         ;;

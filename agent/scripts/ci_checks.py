@@ -72,9 +72,12 @@ def main() -> int:
             [sys.executable, "agent/scripts/test_check_embedded_agfm.py"])))
         for label, script in (("paths rules tests", "agent/scripts/test_check_pushed_paths.py"),
                               ("sync_clone tests", "agent/scripts/test_sync_clone.py"),
-                              ("session_start tests", "agent/scripts/test_session_start.py")):
+                              ("session_start tests", "agent/scripts/test_session_start.py"),
+                              ("analyze layouts tests", "agent/scripts/test_analyze_layouts.py")):
             checks.append((label, lambda label=label, script=script: run_cmd(
                 label, [sys.executable, script])))
+        checks.append(("explode layouts tests (fmparse.sh + fmcontext.sh)", lambda: run_cmd(
+            "explode layouts tests", ["bash", "agent/scripts/test_explode_layouts.sh"])))
         checks.append(("fmlint tests", lambda: run_cmd(
             "fmlint tests",
             [sys.executable, "-m", "unittest", "discover",

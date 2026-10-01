@@ -370,7 +370,7 @@ Items can be identified by name or by FileMaker ID. ID matching is preferred bec
 }
 ```
 
-Strings match by name; integers match by ID. Each matched item is removed from all parallel directories (`scripts/`, `scripts_sanitized/`, `custom_functions/`, `custom_function_stubs/`). See `agent/config/removals.json.example` for a full template.
+Strings match by name; integers match by ID. Each matched item is removed from all parallel directories (`scripts/`, `scripts_sanitized/`, `script_stubs/`, `custom_functions/`, `custom_functions_sanitized/`, and the legacy `custom_function_stubs/`, `custom_function_calcs/`). See `agent/config/removals.json.example` for a full template.
 
 # fmcontext.sh
 
