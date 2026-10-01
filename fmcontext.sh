@@ -377,10 +377,16 @@ PYFIELDS
     {
         echo "# ValueListName|ValueListID|SourceType|Values"
 
-        if [[ -d "$XML_PARSED_DIR/value_lists/$SOLUTION" ]]; then
-        find "$XML_PARSED_DIR/value_lists/$SOLUTION" -name '*.xml' -type f 2>/dev/null | sort | while IFS= read -r file; do
-            vl_name=$(xval 'string(/ValueList/ValueListReference/@name)' "$file")
-            vl_id=$(xval 'string(/ValueList/ValueListReference/@id)' "$file")
+        # exploder >= 0.6.1 writes value_lists/; 0.5.1 wrote value_list_stubs/
+        VL_DIR="$XML_PARSED_DIR/value_lists/$SOLUTION"
+        [[ -d "$VL_DIR" ]] || VL_DIR="$XML_PARSED_DIR/value_list_stubs/$SOLUTION"
+        if [[ -d "$VL_DIR" ]]; then
+        find "$VL_DIR" -name '*.xml' -type f 2>/dev/null | sort | while IFS= read -r file; do
+            # The exploder writes name/id on the <ValueList> root (never a ValueListReference child)
+            vl_name=$(xval 'string(/ValueList/@name)' "$file")
+            vl_id=$(xval 'string(/ValueList/@id)' "$file")
+            [[ -n "$vl_name" ]] || vl_name=$(xval 'string(/ValueList/ValueListReference/@name)' "$file")
+            [[ -n "$vl_id" ]] || vl_id=$(xval 'string(/ValueList/ValueListReference/@id)' "$file")
             vl_source=$(xval 'string(/ValueList/Source/@value)' "$file")
 
             # For custom value lists, extract the values (newline-separated in XML)
@@ -389,7 +395,7 @@ PYFIELDS
                 raw_values=$(xval 'string(/ValueList/CustomValues/Text)' "$file")
                 # Replace newlines with commas for single-line format
                 vl_values=$(echo "$raw_values" | tr '\n' ',' | sed 's/,$//' | sed 's/^,//')
-            elif [[ "$vl_source" == "Field" ]]; then
+            elif [[ "$vl_source" == "Field" || "$vl_source" == "FromField" ]]; then
                 vl_values="(field-based)"
             fi
 
@@ -414,7 +420,9 @@ PYFIELDS
     {
         echo "# FunctionName|FunctionID|Parameters|Access|Display|Category|FolderPath"
 
-        STUB_DIR="$XML_PARSED_DIR/custom_function_stubs/$SOLUTION"
+        # exploder >= 0.6.1 writes the XML definitions in custom_functions/; 0.5.1 wrote custom_function_stubs/
+        STUB_DIR="$XML_PARSED_DIR/custom_functions/$SOLUTION"
+        [[ -n "$(find "$STUB_DIR" -name '*.xml' -print -quit 2>/dev/null)" ]] || STUB_DIR="$XML_PARSED_DIR/custom_function_stubs/$SOLUTION"
         SANITIZED_DIR="$XML_PARSED_DIR/custom_functions_sanitized/$SOLUTION"
 
         if [[ -d "$STUB_DIR" ]]; then
@@ -424,7 +432,7 @@ PYFIELDS
             cf_access=$(xval 'string(/CustomFunction/@access)' "$file")
             cf_display=$(xval 'string(/CustomFunction/Display)' "$file")
 
-            folder_path=$(get_folder_path "$file" "$XML_PARSED_DIR/custom_function_stubs")
+            folder_path=$(get_folder_path "$file" "$(dirname -- "$STUB_DIR")")
 
             # Extract parameter names from stub
             param_count=$(xval 'string(/CustomFunction/ObjectList/@membercount)' "$file")

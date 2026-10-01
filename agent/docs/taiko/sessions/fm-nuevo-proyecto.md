@@ -6,7 +6,7 @@ Datos: carpeta (`~/GITs/<Cliente>/agentic-fm`), ficheros `.fmp12` (sin extensió
 
 1. **Hook y reglas de rutas (obligatorio):** `bash agent/scripts/install-hooks.sh`; verifica `ls -la "$(git rev-parse --git-common-dir)/hooks/pre-push"`. Sin hook no se continúa.
 2. **Scripts de terminal [app]:** symlinks de `agent/scripts/bin/` a `~/bin` (`agentic-fm-start`, `-update`, `-sync`, `-safe-push`); `~/.zshrc` con `export PATH="$HOME/bin:$PATH"`.
-3. **Dependencias:** `python3 --version`; `~/bin/fm-xml-export-exploder` (https://github.com/bc-m/fm-xml-export-exploder/releases/latest, aarch64-apple-darwin); `xmllint`; `node ≥ 18` (webviewer opcional).
+3. **Dependencias:** `python3 --version`; `~/bin/fm-xml-export-exploder` **0.7.1** (https://github.com/bc-m/fm-xml-export-exploder/releases/latest, aarch64-apple-darwin; las ≥ 0.6.1 escriben `custom_functions/` y `value_lists/` en vez de `*_stubs/`); `xmllint`; `node ≥ 18` (webviewer opcional).
 4. **Directorios:** `mkdir -p agent/xml_parsed agent/context agent/sandbox agent/debug agent/config` (todos ignorados por git y bloqueados por el hook).
 5. **`agent/config/removals.json`** (scripts/CFs con credenciales que no deben quedar en el explode): pregunta qué objetos; IDs mejor que nombres. Plantilla: `agent/config/removals.json.example`.
 6. **`agent/config/automation.json`:** `companion_url` = `http://127.0.0.1:8765` (local por defecto; FMS→companion es opt-in), bloque `odata` por solución con `base_url`, `database`, `username`, `password`, `script_bridge: "AGFMScriptBridge"`, y `explode_xml` con `repo_path`/`export_path`. Pide las credenciales OData. Plantilla: `agent/config/automation.json.example`.

@@ -1428,7 +1428,10 @@ def analyze_custom_functions(solution_name):
     if not cf_dir.exists():
         return {"total": 0, "note": "no custom functions directory found"}
 
-    stub_dir = XML_PARSED_DIR / "custom_function_stubs" / solution_name
+    # exploder >= 0.6.1 writes the XML definitions in custom_functions/; 0.5.1 wrote custom_function_stubs/
+    stub_dir = XML_PARSED_DIR / "custom_functions" / solution_name
+    if not any(stub_dir.rglob("*.xml")) if stub_dir.exists() else True:
+        stub_dir = XML_PARSED_DIR / "custom_function_stubs" / solution_name
 
     # Recurse into folder subdirectories — CFs organised into FileMaker
     # folders are nested in "{FolderName} - ID N/" subdirs, and a flat
