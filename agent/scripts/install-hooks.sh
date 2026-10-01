@@ -40,6 +40,7 @@ installed=0
 for hook in "$HOOKS_SRC"/*; do
     [ -f "$hook" ] || continue
     name="$(basename "$hook")"
+    case "$name" in *.conf|*.md) continue ;; esac   # ficheros de reglas/docs, no hooks
     dst="$HOOKS_DST/$name"
 
     cp "$hook" "$dst"
