@@ -4,6 +4,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-02 — agentic-fm-start arranca Agentic-FM-APP (`agfm serve`) si está instalada
+
+**Acción opcional:** instala agentic-fm-app (`git clone git@GIT:Taiko-Solutions/agentic-fm-app.git ~/GITs/agentic-fm-app && cd ~/GITs/agentic-fm-app && uv sync && uv run agfm exploder install`). Desde entonces `agentic-fm-start` levanta `agfm serve` en 8765: Explode XML pasa por el pipeline nuevo (explode + índices + indexación + retención) y Push Context entra en el índice al momento. El resto de endpoints (`/trigger`, `/clipboard`, `/debug`, `/lint`, `/webviewer/*`, `/plugin/*`) los sigue sirviendo el companion de siempre como proceso hijo (puerto interno 8769, solo `127.0.0.1`). Sin la app, nada cambia.
+
+- `agentic-fm-start`: variables `AGFM_APP_REPO` (por defecto `~/GITs/agentic-fm-app`) y `AGFM_RUNTIME`.
+- Diagnóstico: `uv run --project ~/GITs/agentic-fm-app agfm service status`; log en `~/Library/Application Support/Agentic-FM-APP/logs/service.log`.
+- Detalle en `docs/service.md` de agentic-fm-app y en `agent/docs/COMPANION_SERVER.md` § Behind Agentic-FM-APP.
+
 ## 2026-10-02 — Procedimientos de sesión en el repo y plugin taiko-filemaker
 
 **Acción requerida:** instala el plugin `taiko-filemaker` del marketplace `taiko` (README de `claude-plugins`). Los prompts Nueva-Tarea/Puesta-Al-Dia/Nuevo-Proyecto del vault quedan retirados.
