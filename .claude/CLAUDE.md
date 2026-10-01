@@ -31,7 +31,7 @@ Or activate the venv first: `source agent/.venv/bin/activate`
 
 # Session startup
 
-> **(Taiko) Atajo unificado — un solo comando.** `python3 agent/scripts/session_start.py` ejecuta TODOS los chequeos de arranque de esta sección en una sola llamada (update de git con detección taiko/main, entorno/sandbox, frescura del código embebido, companion + plug-in) **más** el gating ProofKit (`:1365/connectedFiles`), la presencia de `PROJECT.md` y la frescura de `CONTEXT.json`. Córrelo **una vez por sesión**, interpreta su resumen (OK/WARN/FAIL/SKIP) y actúa según lo que indique cada línea. Las subsecciones siguientes quedan como referencia de qué significa cada chequeo y como fallback si el script no está disponible.
+> **(Taiko) Atajo unificado — un solo comando.** `python3 agent/scripts/session_start.py` ejecuta TODOS los chequeos de arranque de esta sección en una sola llamada (update de git con detección taiko/main, entorno/sandbox, frescura del código embebido, companion + plug-in) **más** el gating ProofKit (`:1365/connectedFiles`), la presencia de `PROJECT.md` y la frescura de `CONTEXT.json`. Córrelo **una vez por sesión**, interpreta su resumen (OK/WARN/FAIL/SKIP) y actúa según lo que indique cada línea. Las subsecciones siguientes quedan como referencia de qué significa cada chequeo y como fallback si el script no está disponible. Con el plugin `taiko-filemaker` instalado, el hook `SessionStart` lo ejecuta por ti e inyecta el resumen; el procedimiento completo está en `agent/docs/taiko/sessions/fm-sesion.md`.
 
 At the start of each new CLI/IDE session, before responding to the first prompt, run an update check:
 
