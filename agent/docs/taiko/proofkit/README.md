@@ -2,8 +2,8 @@
 
 Esta carpeta recoge cómo Taiko entiende y usa **ProofKit**. Para Taiko, ProofKit son **dos vías** (mapa completo de acceso a FileMaker en [`../fm-access.md`](../fm-access.md)):
 
-- **Vía 1 — ProofKit MCP (connector):** consultar el archivo FileMaker **en vivo** (estructura puntual, SQL, valores) con mucha más facilidad. Es el uso **principal hoy**. → [`mcp-connector.md`](mcp-connector.md)
-- **Vía 3 — stack Web Viewer:** app React **dentro de un Web Viewer**, con cliente tipado y deploy de un solo archivo. **Aparcada** (cuesta avanzar). → el resto de esta carpeta.
+- **Vía 1 — ProofKit MCP (connector):** consultar el archivo FileMaker **en vivo** (estructura puntual, SQL, valores) con mucha más facilidad. Es una de las dos vías de pleno derecho. → [`mcp-connector.md`](mcp-connector.md)
+- **Vía 3 — stack Web Viewer:** app React **dentro de un Web Viewer**, con cliente tipado y deploy de un solo archivo. **Activa — motor web por defecto de Taiko** (reactivada 2026-07-01; guardarraíles en `gotchas.md`, 19 hallazgos). → el resto de esta carpeta.
 
 Ambas comparten el mismo bridge local (`localhost:1365`) pero se usan de forma muy distinta. A diferencia de `../knowledge/` —*gotchas de scripts FileMaker*—, esto es otro dominio (connector + toolchain web), por eso vive aparte, igual que `../custom_functions/` y `../templates/`.
 
@@ -13,7 +13,7 @@ El conocimiento de la Vía 3 no es teórico: nace de un **informe de campo real*
 
 ## Alcance: qué cubre esta carpeta
 
-- **Vía 1 — ProofKit MCP:** [`mcp-connector.md`](mcp-connector.md). El uso principal hoy: consultar FileMaker en vivo vía el connector.
+- **Vía 1 — ProofKit MCP:** [`mcp-connector.md`](mcp-connector.md). Consultar FileMaker en vivo vía el connector (también sin interfaz web de por medio).
 - **Vía 3 — Web Viewer:** `architecture.md` + `gotchas.md` + `troubleshooting.md` + `conventions.md`, derivados del field report. Stack `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen`, bridge + `fmFetch`/callback.
 
 Fuera de esta carpeta:
@@ -51,9 +51,10 @@ Detalle completo en [`architecture.md`](architecture.md).
 
 | Doc | Léelo cuando… |
 |-----|---------------|
-| [`mcp-connector.md`](mcp-connector.md) | **(Vía 1 — lo principal hoy)** Vayas a consultar FileMaker en vivo vía el connector MCP: qué tools, sus **límites** (timeout en soluciones grandes como Bendita), y cuándo usar MCP vs. el explode/sanitized de agentic-fm. |
+| [`mcp-connector.md`](mcp-connector.md) | **(Vía 1 — consulta en vivo)** Vayas a consultar FileMaker en vivo vía el connector MCP: qué tools, sus **límites** (timeout en soluciones grandes), y cuándo usar MCP vs. el explode/sanitized de agentic-fm. |
 | [`architecture.md`](architecture.md) | **(Vía 3 — Web Viewer)** Necesites el modelo mental del Web Viewer: las 4 piezas, el flujo `fmFetch`→callback, el glosario, dev vs. producción. |
-| [`gotchas.md`](gotchas.md) | Vayas a construir o depurar un Web Viewer ProofKit. Los 11 hallazgos del informe como patrones accionables, agrupados por tema. |
+| [`gotchas.md`](gotchas.md) | Vayas a construir o depurar un Web Viewer ProofKit. Los 19 hallazgos (doc, campo y proyecto cliente 2026-10 con FileMaker 2026) como patrones accionables. |
+| [`CLAUDE-webapp.md`](CLAUDE-webapp.md) | Vayas a scaffoldear una app web: cópialo como `CLAUDE.md` del proyecto web. |
 | [`troubleshooting.md`](troubleshooting.md) | Algo "no carga", hay spinner infinito, o fallos intermitentes. Escalera de diagnóstico ordenada. |
 | [`conventions.md`](conventions.md) | Arranques un proyecto ProofKit Taiko o revises uno existente. Hábitos preventivos + checklist. |
 
@@ -78,6 +79,8 @@ El conocimiento inicial procede del **ProofKit Field Report** de **Eikonsys — 
 Entorno del informe (referencia): connector v2.2.2, `@proofkit/webviewer` 3.1.0, `@proofkit/fmdapi` 5.1.2, `@proofkit/typegen` ^1.1.1, zod ^4, Vite ^7, React 19.2, Node v26.3, FileMaker Server 2025 (WebDirect), bridge en `localhost:1365`.
 
 > Es un informe orientado a *upstream* (sugerencias al equipo de ProofKit). Aquí lo reinterpretamos como **aprendizaje interno Taiko**: qué evitar y cómo, no propuestas a terceros.
+
+Desde octubre 2026 se añaden hallazgos verificados en proyectos cliente con **FileMaker 2026** (ProofKit 3.2.0, `@proofkit/webviewer` 3.3.0): F13–F19 y el deploy estándar por almacén persistente (`GetPersistentData`).
 
 ## Mantenimiento
 

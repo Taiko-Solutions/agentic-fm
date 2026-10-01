@@ -1,7 +1,7 @@
 # ProofKit Web Viewer — convenciones (checklist de arranque)
 
 > Hábitos preventivos que evitan la mayoría de los gotchas ([gotchas.md](gotchas.md)). Aplícalos **al arrancar** cualquier interfaz web ProofKit (Vía 3), no al depurar.
-> Procedencia: **[doc]** = documentado por ProofKit (`proofkit.proof.sh`, `llms-full.txt`); **[campo]** = observación empírica de Taiko (field report Eikonsys, 2026-06-16), no necesariamente en la doc oficial.
+> Procedencia: **[doc]** = documentado por ProofKit (`proofkit.proof.sh`, `llms-full.txt`); **[campo]** = observación empírica de Taiko (field report Eikonsys, 2026-06-16), no necesariamente en la doc oficial; **[cliente 2026-10]** = verificado en un proyecto cliente con FileMaker 2026 y ProofKit 3.2/3.3.
 
 ## Versiones — compruébalas PRIMERO [doc]
 
@@ -29,9 +29,17 @@ El **batching** de la Data API es la palanca nº1 de rendimiento y exige version
 
 - [ ] Rutina de arranque: **"conecta FileMaker → carga app"**. Tras reinicio de FM: **"Connect to MCP → recarga fuerte"**.
 - [ ] **Mantén abierta la ventana del connector "Connect to MCP" en modo Navegar.** Cerrarla o pasar el archivo a modo Diseño **rompe el bridge en silencio** (F12).
-- [ ] **`$webViewerName` (variable del script FM de callback) == `Object Name` del objeto Web Viewer**, exacto. Ojo: **no es una API JS** (`setWebViewerName` no existe); es la variable que el script de callback usa para devolver el resultado a la instancia correcta.
+- [ ] **Objeto Web Viewer llamado `web`** en todos los layouts (F13). Otro nombre solo con `globalSettings.setWebViewerName` (`@proofkit/webviewer` ≥ 3.3) + scripts puente que respeten `callback.webViewerName`.
+- [ ] **Espera a `window.FileMaker`** antes de montar la app (F17).
+- [ ] **TanStack Query: `refetchOnWindowFocus: false`, `refetchOnReconnect: false`** (F14).
 - [ ] `withTimeout` en las lecturas como red de seguridad **[campo]**: `fmFetch` tiene un error `"timed out"` nativo, pero un timeout propio (15–30 s) evita cuelgues si el callback se pierde.
 - [ ] Manejo de errores que **distingue validación de esquema (zod) de fallo de transporte** — no todo lo que falla es "la red".
+
+## Despliegue [cliente 2026-10]
+
+- [ ] **FileMaker 2026:** `deploy_html` + Web Viewer con `"data:text/html," & GetPersistentData ( "proofkit" ; "<appName>" )`. Cierra la pantalla del WV antes de desplegar (F15); cierra "ProofKit App" después.
+- [ ] **Modo dev dentro de FM:** `?wv=web` + `fmBridge` condicionado (F16) + script interruptor `$$X.WV.DEV` con `Set Web Viewer [ Reset ]`.
+- [ ] **Claves UUIDDecimal:** nunca por OData (F19).
 
 ## Diseñar para reemplazar
 

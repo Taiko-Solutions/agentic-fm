@@ -2,6 +2,8 @@
 
 ## Recent Changes
 
+> Cambios de la capa Taiko (rama `taiko`): ver `TAIKO-UPDATES.md`.
+
 ### Companion config — `agent/config/companion.json` (2026-07-15, v0.8.1)
 
 **Action: optional — existing setups keep working with no changes.**

@@ -1,0 +1,33 @@
+name: taiko-pr-checks
+on:
+  pull_request:
+    branches: [taiko]
+jobs:
+  paths-and-sanity:
+    runs-on: ubuntu-latest
+    env:
+      BASE_REF: ${{ github.base_ref }}
+      HEAD_REF: ${{ github.head_ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Reglas de rutas (script y paths.conf de la rama BASE, no de la PR; por commit)
+        run: |
+          # Script y reglas de la rama base (una PR no puede autoautorizarse editándolos).
+          # Si la base aún no los tiene (primera PR que los introduce), se usan los de la PR.
+          if git cat-file -e "origin/$BASE_REF:agent/scripts/check_pushed_paths.py" 2>/dev/null; then
+            git show "origin/$BASE_REF:agent/scripts/check_pushed_paths.py" > /tmp/check_pushed_paths.py
+            git show "origin/$BASE_REF:agent/scripts/hooks/paths.conf" > /tmp/paths.conf
+          else
+            echo "::warning::la rama base aún no tiene check_pushed_paths.py; usando el de la PR"
+            cp agent/scripts/check_pushed_paths.py /tmp/check_pushed_paths.py
+            cp agent/scripts/hooks/paths.conf /tmp/paths.conf
+          fi
+          python3 /tmp/check_pushed_paths.py --branch "$HEAD_REF" --revs "origin/$BASE_REF..HEAD" \
+            --repo . --rules /tmp/paths.conf
+      - name: Sanity checks (catálogos, conversor, fmlint, scripts)
+        run: python3 agent/scripts/ci_checks.py

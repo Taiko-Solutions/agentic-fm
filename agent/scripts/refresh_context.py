@@ -25,7 +25,7 @@ command prints what it is about to run and asks for confirmation unless
 
 Usage:
   python3 agent/scripts/refresh_context.py --task "944.9 F1 audit" \
-      --layout "Utility_Peticiones" [--solution "Borneo"] [--via auto] [--yes]
+      --layout "Utility_Peticiones" [--solution "SolutionApp"] [--via auto] [--yes]
 
 Standard library only.
 """

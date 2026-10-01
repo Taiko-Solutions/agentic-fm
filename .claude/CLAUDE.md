@@ -220,34 +220,13 @@ The developer always works in **human-readable (HR) script format**. The agent's
 
 > **CRITICAL — Internal layout `name` ≠ exported filename**
 >
-> The exporter may write `Utility__Peticiones - ID 295.xml` (TWO underscores) when the layout's internal `name` is `Utility_Peticiones` (ONE). Mismatches fail silently in `<Layout name>` refs AND in runtime literals (`Get(LayoutName)` checks, button params). Always verify against the **first column** of `agent/context/<solution>/layouts.index`, and prefer `Get ( LayoutName )` over hardcoded literals. (Real case: Borneo 944.9, dead back button.)
+> The exporter may write `Utility__Peticiones - ID 295.xml` (TWO underscores) when the layout's internal `name` is `Utility_Peticiones` (ONE). Mismatches fail silently in `<Layout name>` refs AND in runtime literals (`Get(LayoutName)` checks, button params). Always verify against the **first column** of `agent/context/<solution>/layouts.index`, and prefer `Get ( LayoutName )` over hardcoded literals. (Real case: proyecto cliente 2026-07, dead back button.)
 
 > **CRITICAL — Utility shadow `AsJSON` calc must use storage `Global`, not unstored**
 >
-> As a normal unstored calc, `AsJSON` evaluates in the current layout's TO context and **returns `{}` when read from another layout** — the Manager merges `{}` and downstream checks pass through silently. Fix in FM: Manage Database → field → Storage Options → **"Use global storage"**, uniformly on **every** Utility's AsJSON field. (Discovered in Borneo 944.9; document affected files in the solution's 01-Decisiones-Tomadas.md.)
+> As a normal unstored calc, `AsJSON` evaluates in the current layout's TO context and **returns `{}` when read from another layout** — the Manager merges `{}` and downstream checks pass through silently. Fix in FM: Manage Database → field → Storage Options → **"Use global storage"**, uniformly on **every** Utility's AsJSON field. (Discovered in a client project, 2026-07; document affected files in the solution's 01-Decisiones-Tomadas.md.)
 
-> **CRITICAL — `Perform Script`: child element ORDER decides whether the target resolves**
->
-> Emit the children in the exact order FileMaker itself produces, with the target **last**:
->
-> ```xml
-> <Step enable="True" id="1" name="Perform Script">
->   <DisableStepCollapsed state="False"/>
->   <FileReference id="10" name="Controlador">          <!-- cross-file only; OMIT for same-file calls -->
->     <UniversalPathList>file:Borneo-Controller</UniversalPathList>
->   </FileReference>
->   <Calculation><![CDATA[ ...script parameter... ]]></Calculation>
->   <Script id="1543" name="Plantas | Asignar Propietario {json}"/>
-> </Step>
-> ```
->
-> Put `<Script>` first and FileMaker accepts the paste but leaves the target **unresolved** — HR reads `Perform Script [ From list ; "" ; Parameter: … ]`, with no name and no `File:`, and **the step calls nothing, with no error at runtime**. Neither the catalog nor fmlint checks the order.
->
-> Two related traps:
-> - **`<Calculated><Calculation>` is the "by name" mode** — its content is the script *name*, and it is mutually exclusive with `<Script>`. The parameter goes in a **bare** `<Calculation>`. `fm_xml_to_snippet.py` emits the parameter inside `<Calculated>`: its output is fine for **reading** a script, but copying a block of it into a new script leaves the step dead.
-> - **X003 is a false positive for same-file calls** — the catalog says *"Omit `<FileReference>` entirely for same-file calls"*. Don't add or keep an empty one to silence the rule.
->
-> When a step's structure is non-trivial, the fastest reliable source is to copy that step from FileMaker and read it with `python3 agent/scripts/clipboard.py read <out.xml>` — not the catalog alone, and never the converter's output. (Real case: Borneo 964, scripts 1547/1257 — three silent dead `Perform Script` steps.)
+> **CRITICAL — `Perform Script`: `<Script>` va el ÚLTIMO** (`FileReference → Calculated → Calculation → Script`). Con `<Script>` primero FileMaker acepta el paste y el paso no llama a nada; `<Calculated>` es el modo by name, no el parámetro. fmlint X004 lo bloquea. Detalle y XML canónico: `agent/docs/taiko/knowledge/silent-discard-params.md`.
 
 
 
@@ -440,9 +419,10 @@ Modelo de **dos niveles**. La dirección importa:
 
 **Reglas:**
 
-1. **En un repo de proyecto cliente, el flujo hacia petrowsky NO aplica.** La única fuente de actualizaciones es la **rama `taiko`** del repo base (`git pull <remoto-taiko> taiko` → merge a la rama del proyecto). No hagas el chequeo de "agentic-fm update available" contra `origin/main`, no `git pull --ff-only` de main, y **no propongas PRs a petrowsky**. Petrowsky lo gestiona **exclusivamente** el repo base Taiko.
-2. **Las mejoras suben a `taiko`.** Si en un proyecto cliente detectas una mejora en la **capa de herramientas/reglas** (knowledge, convenciones, custom functions, utilidades de `agent/scripts/`, templates, snippet_examples, library), **regístrala para que suba a la rama `taiko`** — nunca directa a petrowsky, y **nunca con datos de cliente**. Mecanismo y qué NUNCA sube: `agent/docs/taiko/UPSTREAM_IMPROVEMENTS.md` (log en `agent/UPSTREAM_PROPOSALS.md`; el mantenedor del repo base lo aplica a `taiko`).
-3. **Petrowsky solo desde el repo base.** Traer novedades de petrowsky (`git pull main` → merge a `taiko`) y proponer PRs a petrowsky son operaciones **exclusivas del repo base Taiko**, jamás de un proyecto cliente.
+1. **En un repo de proyecto cliente, el flujo hacia petrowsky NO aplica.** El clon tiene tres ramas con nombre fijo: `taiko` (espejo de `origin/taiko`, sin commits propios), `trabajo` (todo lo del cliente; nunca se sube) y `mejora/<tema>` (solo capa herramientas, sanitizada; PR a `taiko`). Actualizar = `agentic-fm-sync` (primera vez `--migrar`). No `git pull` de `main`, no PRs a petrowsky.
+2. **Las mejoras suben a `taiko` por PR desde `mejora/*`.** Solo rutas de la capa herramientas (`agent/scripts/hooks/paths.conf` [allow]); el hook pre-push, `agentic-fm-safe-push` y la GitHub Action lo comprueban en cualquier rama que salga de un clon. Nunca datos de cliente ni nombres de cliente como procedencia (usa "proyecto cliente (AAAA-MM)"). Si una mejora no se puede subir en el momento, regístrala en `agent/UPSTREAM_PROPOSALS.md` (`agent/docs/taiko/UPSTREAM_IMPROVEMENTS.md`).
+3. **Toda PR a `taiko` que cambie reglas, scripts, catálogos o fmlint añade una entrada en `TAIKO-UPDATES.md`** (con "Acción requerida" si el desarrollador debe hacer algo). `session_start.py` la muestra a los clones que van por detrás.
+4. **Petrowsky solo desde el repo base** (el único con remote `upstream`): traer `main`, mergear a `taiko`, proponer PRs.
 
 # Ejecución local por defecto (Taiko)
 
@@ -488,12 +468,12 @@ Taiko toca FileMaker por **tres vías** (mapa canónico: `agent/docs/taiko/fm-ac
 **Reglas de operación:**
 
 1. **Gating.** Antes de cualquier herramienta ProofKit (Vías 1 y 3), llama a `connectedFiles`. Si devuelve `[]` o falla, cae al flujo estático (explode, CONTEXT.json, OData) **sin bloquear**. agentic-fm nunca depende de ProofKit para funcionar.
-2. **Estructura: manda el explode.** Estructura amplia/completa → explode/sanitized (`agent/xml_parsed/`, `context/*.index`), sin timeout. ProofKit MCP solo para preguntas **puntuales y en vivo** — nunca volcado masivo (timeout en soluciones grandes, p. ej. Bendita).
+2. **Estructura: manda el explode.** Estructura amplia/completa → explode/sanitized (`agent/xml_parsed/`, `context/*.index`), sin timeout. ProofKit MCP solo para preguntas **puntuales y en vivo** — nunca volcado masivo (timeout en soluciones grandes).
 3. **Reparto de autoría.** agentic-fm autora scripts/cálculos/esquema (fmxmlsnippet/OData); ProofKit v2 **no** edita scripts/esquema, solo construye UI web y lee/escribe datos (Data API). Complementarios.
 4. **Interfaces web: proactivo con guardarraíles.** Cuando una tarea encaje con una UI web (listados, dashboards, interacciones ricas), **propón** una interfaz ProofKit — mencionando los guardarraíles (`agent/docs/taiko/proofkit/gotchas.md`). Motor por defecto ProofKit; el skill `webviewer-build` solo como excepción (HTML trivial o sin conexión ProofKit). **Al scaffoldear, copia `agent/docs/taiko/proofkit/CLAUDE-webapp.md` como `CLAUDE.md` del proyecto web**: las sesiones de UI cargan solo las reglas web (ligeras), sin el stack fmxmlsnippet del repo padre.
 5. **Metodología combinada.** El flujo unificado agentic-fm + Superpowers + ProofKit está en `agent/docs/taiko/knowledge/combined-workflow.md` (indexado en el MANIFEST, escaneable por keywords).
 
-El servidor MCP `proofkit-mcp` viaja con la rama vía `.mcp.json` (comando `proofkit-mcp`, resuelto por PATH). Prerequisito por desarrollador: app ProofKit instalada + plugin cargado en el archivo + script *"Connect to MCP"* corrido en la sesión.
+El servidor MCP `proofkit-mcp` viaja con la rama vía `.mcp.json` (comando `proofkit mcp`, binario `proofkit` en `~/.local/bin`, en el PATH). Prerequisito por desarrollador: app ProofKit instalada + plugin cargado en el archivo + script *"Connect to MCP"* corrido en la sesión.
 
 # Patrones upstream pendientes de validación práctica
 

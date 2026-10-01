@@ -112,7 +112,7 @@ When `Perform Script` (step id 1) calls a script in another file, `<FileReferenc
 ```xml
 <Step enable="True" id="1" name="Perform Script">
   <FileReference id="10" name="Controlador">
-    <UniversalPathList>file:Borneo-Controller</UniversalPathList>
+    <UniversalPathList>file:OtherFile</UniversalPathList>
   </FileReference>
   <Calculation><![CDATA[$param]]></Calculation>
   <Script id="1363" name="ContactosClientes | Alta Modificar ContactoCliente {json}"/>
@@ -125,4 +125,26 @@ The `FileReference id`/`name` match the external data source entry in the caller
 
 ## Provenance
 
-These rules originated as prose "CRITICAL" blocks in `.claude/CLAUDE.md` (Taiko layer), distilled from real-world failures (Borneo 944.x among others). They were converted to fmlint enforcement in July 2026 so the linter catches them mechanically; this document preserves the full examples and context. If the upstream PR adopting the X-family rules is merged, this knowledge doc travels with it.
+These rules originated as prose "CRITICAL" blocks in `.claude/CLAUDE.md` (Taiko layer), distilled from real-world failures (client projects, 2026). They were converted to fmlint enforcement in July 2026 so the linter catches them mechanically; this document preserves the full examples and context. If the upstream PR adopting the X-family rules is merged, this knowledge doc travels with it.
+
+## Perform Script: el ORDEN de los hijos decide si el destino resuelve (X004)
+
+Forma que produce FileMaker (verificada copiando un paso real al portapapeles y leyéndolo con `python3 agent/scripts/clipboard.py read out.xml`):
+
+```xml
+<Step enable="True" id="1" name="Perform Script">
+  <DisableStepCollapsed state="False"/>
+  <FileReference id="10" name="Controller">
+    <UniversalPathList>file:OtherFile</UniversalPathList>
+  </FileReference>                                   <!-- solo cross-file; OMITIR en el mismo archivo -->
+  <Calculation><![CDATA[ ...parámetro... ]]></Calculation>
+  <Script id="1543" name="Nombre del script"/>       <!-- el destino, SIEMPRE el último -->
+</Step>
+```
+
+- `<Script>` primero → FileMaker acepta el paste pero deja el destino **sin resolver**: el HR muestra `Perform Script [ From list ; "" ; Parameter: … ]` y el paso **no llama a nada, sin error en runtime**.
+- `<Calculated><Calculation>…</Calculation></Calculated>` es el modo **by name**: su contenido es el *nombre* del script, excluyente con `<Script>`. El parámetro va en un `<Calculation>` suelto. `fm_xml_to_snippet.py` emite hoy el parámetro envuelto en `<Calculated>` (propuesta 2026-09-25): su salida sirve para leer, no para copiar bloques a scripts nuevos.
+- Un `<FileReference></FileReference>` vacío en una llamada al mismo archivo es ruido del conversor, no error (X003 ya no lo marca).
+- Con un paso de estructura no trivial, la fuente fiable es copiarlo desde FileMaker y leerlo con `clipboard.py read`, no el catálogo solo ni la salida del conversor. (Caso real: proyecto cliente 2026-09, tres `Perform Script` mudos.)
+
+**Enforcement:** fmlint **X004** (`perform-script-child-order`), `agent/fmlint/rules/param_fidelity.py`.

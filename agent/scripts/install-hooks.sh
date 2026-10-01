@@ -40,12 +40,19 @@ installed=0
 for hook in "$HOOKS_SRC"/*; do
     [ -f "$hook" ] || continue
     name="$(basename "$hook")"
+    case "$name" in *.conf|*.md) continue ;; esac   # ficheros de reglas/docs, no hooks
     dst="$HOOKS_DST/$name"
 
     cp "$hook" "$dst"
     chmod +x "$dst"
     echo "✅ Instalado: .git/hooks/$name"
     installed=$((installed + 1))
+done
+
+# Ficheros de apoyo del hook (no son hooks: git los ignora por nombre). Copiarlos aquí
+# hace que el hook funcione aunque la rama en checkout no los tenga (fail-closed si faltan).
+for support in "$REPO_ROOT/agent/scripts/check_pushed_paths.py" "$HOOKS_SRC/paths.conf"; do
+    [ -f "$support" ] && cp "$support" "$HOOKS_DST/$(basename "$support")" && echo "✅ Apoyo:     .git/hooks/$(basename "$support")"
 done
 
 if [ $installed -eq 0 ]; then

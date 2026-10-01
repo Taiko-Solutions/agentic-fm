@@ -6,6 +6,7 @@ Fuente **canónica y versionada** de los scripts que cada desarrollador instala 
 |---|---|
 | `agentic-fm-start` | Arranca el companion (runtime único, `:8765`). **Bind por defecto `127.0.0.1`**; el modo FMS→companion es opt-in vía `COMPANION_BIND_HOST`. |
 | `agentic-fm-update` | Copia un repo válido → runtime único (sin `.git` ni datos de cliente) y reinicia el companion. En rama `taiko` hace `git pull --ff-only` antes. |
+| `agentic-fm-sync` | Actualiza un clon de cliente: `taiko` en avance rápido, merge en `trabajo`, lista las novedades de `TAIKO-UPDATES.md`. `--migrar` la primera vez (crea `trabajo`, quita `upstream`, reinstala el hook). |
 | `agentic-fm-safe-push` | Validación manual de política antes de un push (2ª red; la 1ª es `.gitignore`, la 3ª el hook pre-push). `--check` / `--execute`. |
 
 ## Instalación (una vez por máquina)
@@ -14,7 +15,7 @@ Recomendado — **symlinks al repo base** (se actualizan solos con `git pull`):
 
 ```bash
 mkdir -p ~/bin
-for s in agentic-fm-start agentic-fm-update agentic-fm-safe-push; do
+for s in agentic-fm-start agentic-fm-update agentic-fm-sync agentic-fm-safe-push; do
   ln -sf "$HOME/GITs/agentic-fm/agent/scripts/bin/$s" ~/bin/$s
 done
 ```

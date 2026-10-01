@@ -7,7 +7,7 @@ agentic-fm accede a FileMaker por **tres vías independientes**. No son variante
 
 | Vía | Pregunta que responde | Herramienta | Estado |
 |-----|----------------------|-------------|--------|
-| **1 · ProofKit MCP** | "¿Qué hay AHORA en el archivo?" (ver, en vivo) | servidor MCP `proofkit-mcp` (bridge `localhost:1365`) | **Primaria** para frescura/verificación puntual → [proofkit/mcp-connector.md](proofkit/mcp-connector.md) |
+| **1 · ProofKit MCP** | "¿Qué hay AHORA en el archivo?" (ver, en vivo) | servidor MCP `proofkit-mcp` (comando `proofkit mcp`; bridge `localhost:1365` solo en dev) | **Primaria** para frescura/verificación puntual → [proofkit/mcp-connector.md](proofkit/mcp-connector.md) |
 | **2 · OData** | "Haz / cambia / automatiza esto" | FMS OData + `AGFMScriptBridge`; skills `schema-build`, `data-migrate`, `data-seed` | En uso |
 | **3 · ProofKit Web Viewer** | "Construye una UI web dentro de FileMaker" | `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen` | **Activa — motor web por defecto** (con guardarraíles) → [proofkit/webviewer-build.md](proofkit/webviewer-build.md) |
 
@@ -46,7 +46,7 @@ No compiten: el plug-in **no** toca Data API/OData/web viewer; ProofKit **no** e
 Hay **dos** fuentes de estructura (campos, scripts, relaciones, lógica) y **no compiten — se reparten por tamaño y frescura**:
 
 - **El "explode" de agentic-fm** — `agent/xml_parsed/` + `scripts_sanitized/` y los `agent/context/{solución}/*.index`. Pre-extraído en disco, **completo, grep-able y sin timeout**. Fuente **PRIMARIA y autoritativa** de estructura, sobre todo en soluciones grandes.
-- **ProofKit MCP** — fuente **viva** del archivo conectado, pero **quirúrgica**: brilla en consultas puntuales y **hace timeout en introspección de estructura masiva** (caso real: **Bendita**, solución muy grande).
+- **ProofKit MCP** — fuente **viva** del archivo conectado, pero **quirúrgica**: brilla en consultas puntuales y **hace timeout en introspección de estructura masiva** (caso real: una solución de cliente muy grande).
 
 > **Regla Taiko:** estructura amplia → **manda el explode/sanitized**. ProofKit MCP es el complemento en vivo para preguntas concretas y frescas — nunca el volcado masivo.
 
