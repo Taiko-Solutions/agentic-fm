@@ -1,6 +1,6 @@
 # Propuestas Upstream
 
-## 2026-09-25 — `Perform Script`: el orden de los elementos hijos es significativo (fallo silencioso)
+## 2026-09-25 — `Perform Script`: el orden de los elementos hijos es significativo (fallo silencioso) — **APLICADO en `taiko`** (2026-10-01: fmlint X004 + knowledge)
 
 - **Categoría**: catalog / fmlint / knowledge
 - **Descripción**: En `<Step name="Perform Script">` el orden de los hijos determina si FileMaker resuelve el destino. La forma que produce el propio FileMaker (verificada copiando un paso real al portapapeles y leyéndolo con `clipboard.py read`) es:
@@ -21,7 +21,7 @@
 - **Archivos afectados**: `agent/catalogs/step-catalog-en.json`, `agent/fmlint/`
 - **Origen**: 964 Borneo, reescritura del script 1257 — el `Perform Script` cross-file al Controller quedó mudo dos veces antes de dar con la causa.
 
-## 2026-09-25 — `<Calculated>` es el modo "by name", no el parámetro (fallo silencioso del conversor)
+## 2026-09-25 — `<Calculated>` es el modo "by name", no el parámetro (fallo silencioso del conversor) — **knowledge APLICADO en `taiko`** (2026-10-01; X004 detecta el síntoma; conversor pendiente)
 
 - **Categoría**: converter / knowledge
 - **Descripción**: En fmxmlsnippet, `<Calculated><Calculation>` dentro de `Perform Script` es el **modo "by name"**: su contenido es el *nombre* del script a ejecutar, y es **mutuamente excluyente** con `<Script id name/>`. El parámetro va en un `<Calculation>` suelto, hermano de `<Script>`. El catálogo ya lo documenta correctamente.
@@ -31,7 +31,7 @@
 - **Archivos afectados**: `agent/scripts/fm_xml_to_snippet.py`, `agent/docs/CONVERTERS.md`
 - **Origen**: 964 Borneo, scripts 1547 y 1548 — el `Perform Script` a `Create Log` quedó muerto y el logging de errores no registraba nada, sin síntoma visible salvo la ausencia de entradas en `Log`.
 
-## 2026-09-25 — fmlint X003: falso positivo en llamadas al mismo archivo
+## 2026-09-25 — fmlint X003: falso positivo en llamadas al mismo archivo — **APLICADO en `taiko`** (2026-10-01)
 
 - **Categoría**: fmlint
 - **Descripción**: X003 exige `<UniversalPathList>` dentro de `<FileReference>`, pero se dispara también cuando el `<FileReference>` está vacío o ausente en un `Perform Script` **del mismo archivo**, donde el catálogo indica explícitamente *"Omit entirely for same-file calls"*. Hacer caso al aviso (quitar o rellenar el elemento) no arregla nada y puede despistar: en esta sesión llevó a anular una decisión correcta y a perseguir la causa equivocada.
