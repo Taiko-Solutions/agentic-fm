@@ -7,7 +7,7 @@ agentic-fm accede a FileMaker por **tres vías independientes**. No son variante
 
 | Vía | Pregunta que responde | Herramienta | Estado |
 |-----|----------------------|-------------|--------|
-| **1 · ProofKit MCP** | "¿Qué hay AHORA en el archivo?" (ver, en vivo) | servidor MCP `proofkit-mcp` (bridge `localhost:1365`) | **Primaria** para frescura/verificación puntual → [proofkit/mcp-connector.md](proofkit/mcp-connector.md) |
+| **1 · ProofKit MCP** | "¿Qué hay AHORA en el archivo?" (ver, en vivo) | servidor MCP `proofkit-mcp` (comando `proofkit mcp`; bridge `localhost:1365` solo en dev) | **Primaria** para frescura/verificación puntual → [proofkit/mcp-connector.md](proofkit/mcp-connector.md) |
 | **2 · OData** | "Haz / cambia / automatiza esto" | FMS OData + `AGFMScriptBridge`; skills `schema-build`, `data-migrate`, `data-seed` | En uso |
 | **3 · ProofKit Web Viewer** | "Construye una UI web dentro de FileMaker" | `@proofkit/webviewer` + `@proofkit/fmdapi` + `@proofkit/typegen` | **Activa — motor web por defecto** (con guardarraíles) → [proofkit/webviewer-build.md](proofkit/webviewer-build.md) |
 
