@@ -61,7 +61,7 @@ def sync(repo, migrar: bool = False) -> dict:
         res["messages"].append("repo base (remote upstream): aquí se actualiza con git pull; sync no aplica")
         return res
 
-    _, status, _ = _git(repo, "status", "--porcelain")
+    _, status, _ = _git(repo, "status", "--porcelain", "--untracked-files=no")
     if status:
         res["messages"].append("hay cambios sin commit: haz commit o stash antes de sincronizar")
         return res

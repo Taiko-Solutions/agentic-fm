@@ -116,6 +116,18 @@ class SyncCloneTests(unittest.TestCase):
         self.assertTrue(res["hook_changed"])
         self.assertTrue(any("install-hooks" in m for m in res["messages"]), res["messages"])
 
+    def test_untracked_files_do_not_block_sync(self):
+        (self.clone / "borrador.md").write_text("sin trackear", encoding="utf-8")
+        res = sc.sync(self.clone)
+        self.assertTrue(res["merged"], res)
+        self.assertTrue((self.clone / "borrador.md").exists())
+
+    def test_modified_tracked_file_blocks_sync(self):
+        (self.clone / "agent" / "a.md").write_text("modificado", encoding="utf-8")
+        res = sc.sync(self.clone)
+        self.assertFalse(res["merged"])
+        self.assertTrue(any("sin commit" in m for m in res["messages"]), res["messages"])
+
     def test_conflict_reported_not_raised(self):
         git(self.clone, "checkout", "-qb", "trabajo")
         (self.clone / "agent" / "a.md").write_text("local", encoding="utf-8")
