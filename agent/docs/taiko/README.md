@@ -21,7 +21,6 @@ Esta carpeta y unos pocos ficheros fuera de ella son **todo lo que Taiko añade*
 | `fm-access.md` | Mapa de las tres vías y reparto explode vs. en vivo | Antes de tocar FileMaker |
 | `sessions/` | Procedimientos de sesión que leen las skills del plugin `taiko-filemaker` (`fm-sesion.md`, `fm-nuevo-proyecto.md`) | Al arrancar una sesión o un proyecto |
 | `UPSTREAM_IMPROVEMENTS.md` | Cómo registrar mejoras desde un clon (`agent/UPSTREAM_PROPOSALS.md`) | Al cerrar una tarea |
-| `bendita-conversion-guide.md` | Guía de conversión de una solución concreta | Solo en ese proyecto |
 | `../../scripts/bin/` | `agentic-fm-start`, `-update`, `-sync`, `-safe-push` (symlinks a `~/bin`) | Terminal |
 | `../../scripts/hooks/` | Hook pre-push + `paths.conf` (reglas de rutas) | Instalado por `install-hooks.sh` |
 | `/TAIKO-UPDATES.md` | Changelog de esta capa; lo leen `session_start.py` y `agentic-fm-sync` | Al actualizar un clon |
