@@ -4,6 +4,10 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-06 — Fuera de la capa herramientas la guía de conversión de un proyecto cliente
+
+Sin acción. `agent/docs/taiko/` tenía una guía de migración Geist → Clew de un proyecto cliente concreto (2026-03). Ahora está en el vault de Obsidian, en la carpeta de ese cliente, y deja de llegar a los clones. El patrón general sigue en `knowledge/clew-pattern.md`, `knowledge/clew-transactional-dual.md` y `templates/`.
+
 ## 2026-10-06 — Plantillas Clew transaccionales sin nombre de cliente
 
 Sin acción. La cabecera de `templates/clew-transactional-dual.md` y `clew-transactional-orchestrator.md` pasa a `# Capa: Controller (plantilla)`, y `knowledge/clew-transactional-dual.md` cita la validación como "proyecto cliente (2026-06)". Antes ambas nombraban la solución de un cliente.
