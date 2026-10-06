@@ -4,6 +4,13 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-06 — IDs de pasos corregidos en CODING_CONVENTIONS y `<FlushType>` en las plantillas CLEW transaccionales
+
+**Acción opcional:** si generaste scripts a partir de `templates/clew-transactional-dual.md` o `clew-transactional-orchestrator.md`, o tomaste IDs de la tabla de `CODING_CONVENTIONS.md`, revisa el XML guardado: busca `<Flush state="Always"/>` (cámbialo por `<FlushType value="Always"/>`) e `id="118|200|201|202"` en Close Window / Open, Commit y Revert Transaction. Los scripts ya pegados en FileMaker no tienen que cambiar: FM descarta `<Flush>` y aplica `Always`, que es el valor por defecto.
+
+- `agent/docs/taiko/CODING_CONVENTIONS.md`, tabla "FM Script Step ID Reference": Close Window 118 → **121**, Open Transaction 200 → **205**, Commit Transaction 201 → **206**, Revert Transaction 202 → **207**, que son los valores del catálogo y del XML de FileMaker. Los demás IDs de la tabla se han contrastado con `step-catalog-en.json` y cuadran.
+- `templates/clew-transactional-dual.md` y `clew-transactional-orchestrator.md`: el paso Loop pasa de `<Flush state="Always"/>` a `<FlushType value="Always"/>`, el elemento que define el catálogo. fmlint lo marcaba X001 en todos los scripts generados desde estas plantillas. Ahora el XML de las dos plantillas pasa fmlint sin errores.
+
 ## 2026-10-02 — agentic-fm-start arranca Agentic-FM-APP (`agfm serve`) si está instalada
 
 **Acción opcional:** instala agentic-fm-app (`git clone git@GIT:Taiko-Solutions/agentic-fm-app.git ~/GITs/agentic-fm-app && cd ~/GITs/agentic-fm-app && uv sync && uv run agfm exploder install`). Desde entonces `agentic-fm-start` levanta `agfm serve` en 8765: Explode XML pasa por el pipeline nuevo (explode + índices + indexación + retención) y Push Context entra en el índice al momento. El resto de endpoints (`/trigger`, `/clipboard`, `/debug`, `/lint`, `/webviewer/*`, `/plugin/*`) los sigue sirviendo el companion de siempre como proceso hijo (puerto interno 8769, solo `127.0.0.1`). Sin la app, nada cambia.

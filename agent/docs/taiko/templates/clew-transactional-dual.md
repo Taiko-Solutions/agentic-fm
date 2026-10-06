@@ -242,7 +242,7 @@ Plantilla canónica del patrón Clew transaccional **dual padre/hijo**: el mismo
     <Text># BLOQUE TRY — pseudo try-catch con Loop [Flush: Always]</Text>
   </Step>
   <Step enable="True" id="71" name="Loop">
-    <Flush state="Always"/>
+    <FlushType value="Always"/>
   </Step>
   <Step enable="True" id="72" name="Exit Loop If">
     <Calculation><![CDATA[error.CreateVarsFromKeys ( Get ( ScriptParameter ) ; "" )]]></Calculation>

@@ -215,11 +215,11 @@ When generating fmxmlsnippet XML, use these real step IDs instead of `id="0"`:
 | `Enter Find Mode` | 22 | |
 | `Perform Find` | 28 | |
 | `New Window` | 122 | |
-| `Close Window` | 118 | |
+| `Close Window` | 121 | |
 | `Show Custom Dialog` | 87 | |
-| `Open Transaction` | 200 | |
-| `Commit Transaction` | 201 | |
-| `Revert Transaction` | 202 | |
+| `Open Transaction` | 205 | |
+| `Commit Transaction` | 206 | |
+| `Revert Transaction` | 207 | |
 
 ### Special case: `error.DeleteTrace`
 
