@@ -7,6 +7,18 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 ## 2026-10-06 — Plantillas Clew transaccionales sin nombre de cliente
 
 Sin acción. La cabecera de `templates/clew-transactional-dual.md` y `clew-transactional-orchestrator.md` pasa a `# Capa: Controller (plantilla)`, y `knowledge/clew-transactional-dual.md` cita la validación como "proyecto cliente (2026-06)". Antes ambas nombraban la solución de un cliente.
+## 2026-10-06 — Funciones personalizadas del patrón Clew transaccional dual en `custom_functions/clew-transactional.xml`
+
+**Acción requerida:** antes de pegar un script hecho con `templates/clew-transactional-dual.md` o `clew-transactional-orchestrator.md` en un archivo que aún no use el patrón, pega primero `agent/docs/taiko/custom_functions/clew-transactional.xml` (`python3 agent/scripts/clipboard.py write agent/docs/taiko/custom_functions/clew-transactional.xml` → Gestionar funciones personalizadas → ⌘V). Si falta alguna de las cuatro funciones, FileMaker comenta con `/* */` el cálculo que la usa y el script deja de propagar el error sin avisar. Los archivos que ya usan el patrón no tienen que hacer nada: el 2026-10-06 se comprobó en el índice de Agentic-FM-APP que el único que lo usa tiene las cuatro definidas y todos sus usos resueltos.
+
+- Nuevo `agent/docs/taiko/custom_functions/clew-transactional.xml`: `Clew.SetError ( trace )`, `Clew.ClearError`, `Clew.HasError` y `Clew.GetError`, con el mismo cuerpo que define `knowledge/clew-transactional-dual.md`. Va aparte de `clew.xml` porque es una extensión de Taiko que solo necesita quien use el patrón dual.
+- Las dos plantillas avisan en la cabecera de este requisito; `knowledge/clew-transactional-dual.md`, `knowledge/MANIFEST.md` y `agent/docs/taiko/README.md` enlazan el XML.
+## 2026-10-06 — IDs de pasos corregidos en CODING_CONVENTIONS y `<FlushType>` en las plantillas CLEW transaccionales
+
+**Acción opcional:** si generaste scripts a partir de `templates/clew-transactional-dual.md` o `clew-transactional-orchestrator.md`, o tomaste IDs de la tabla de `CODING_CONVENTIONS.md`, revisa el XML guardado: busca `<Flush state="Always"/>` (cámbialo por `<FlushType value="Always"/>`) e `id="118|200|201|202"` en Close Window / Open, Commit y Revert Transaction. Los scripts ya pegados en FileMaker no tienen que cambiar: FM descarta `<Flush>` y aplica `Always`, que es el valor por defecto.
+
+- `agent/docs/taiko/CODING_CONVENTIONS.md`, tabla "FM Script Step ID Reference": Close Window 118 → **121**, Open Transaction 200 → **205**, Commit Transaction 201 → **206**, Revert Transaction 202 → **207**, que son los valores del catálogo y del XML de FileMaker. Los demás IDs de la tabla se han contrastado con `step-catalog-en.json` y cuadran.
+- `templates/clew-transactional-dual.md` y `clew-transactional-orchestrator.md`: el paso Loop pasa de `<Flush state="Always"/>` a `<FlushType value="Always"/>`, el elemento que define el catálogo. fmlint lo marcaba X001 en todos los scripts generados desde estas plantillas. Ahora el XML de las dos plantillas pasa fmlint sin errores.
 
 ## 2026-10-02 — agentic-fm-start arranca Agentic-FM-APP (`agfm serve`) si está instalada
 
