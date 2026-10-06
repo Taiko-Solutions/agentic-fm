@@ -10,6 +10,12 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 - Nuevo `agent/docs/taiko/custom_functions/clew-transactional.xml`: `Clew.SetError ( trace )`, `Clew.ClearError`, `Clew.HasError` y `Clew.GetError`, con el mismo cuerpo que define `knowledge/clew-transactional-dual.md`. Va aparte de `clew.xml` porque es una extensión de Taiko que solo necesita quien use el patrón dual.
 - Las dos plantillas avisan en la cabecera de este requisito; `knowledge/clew-transactional-dual.md`, `knowledge/MANIFEST.md` y `agent/docs/taiko/README.md` enlazan el XML.
+## 2026-10-06 — IDs de pasos corregidos en CODING_CONVENTIONS y `<FlushType>` en las plantillas CLEW transaccionales
+
+**Acción opcional:** si generaste scripts a partir de `templates/clew-transactional-dual.md` o `clew-transactional-orchestrator.md`, o tomaste IDs de la tabla de `CODING_CONVENTIONS.md`, revisa el XML guardado: busca `<Flush state="Always"/>` (cámbialo por `<FlushType value="Always"/>`) e `id="118|200|201|202"` en Close Window / Open, Commit y Revert Transaction. Los scripts ya pegados en FileMaker no tienen que cambiar: FM descarta `<Flush>` y aplica `Always`, que es el valor por defecto.
+
+- `agent/docs/taiko/CODING_CONVENTIONS.md`, tabla "FM Script Step ID Reference": Close Window 118 → **121**, Open Transaction 200 → **205**, Commit Transaction 201 → **206**, Revert Transaction 202 → **207**, que son los valores del catálogo y del XML de FileMaker. Los demás IDs de la tabla se han contrastado con `step-catalog-en.json` y cuadran.
+- `templates/clew-transactional-dual.md` y `clew-transactional-orchestrator.md`: el paso Loop pasa de `<Flush state="Always"/>` a `<FlushType value="Always"/>`, el elemento que define el catálogo. fmlint lo marcaba X001 en todos los scripts generados desde estas plantillas. Ahora el XML de las dos plantillas pasa fmlint sin errores.
 
 ## 2026-10-02 — agentic-fm-start arranca Agentic-FM-APP (`agfm serve`) si está instalada
 
