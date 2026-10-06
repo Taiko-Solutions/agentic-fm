@@ -16,7 +16,7 @@ Orquestador del patrón Clew transaccional dual: ejecuta N workers (o sub-orques
 #            una única transacción agregada. Propaga errores vía $$ClewError.
 #            Soporta N niveles de anidamiento y rollback total transparente.
 # Contexto: insensible (crea Proc_Globales en ventana tmp si es root)
-# Capa: Template (BPController2025)
+# Capa: Controller (plantilla)
 # -------------------------------------------------------------------------------------
 # Parámetros Requeridos:
 #   - MarcaPrefix (string)
@@ -168,7 +168,7 @@ Orquestador del patrón Clew transaccional dual: ejecuta N workers (o sub-orques
 #            una única transacción agregada. Propaga errores vía $$ClewError.
 #            Soporta N niveles de anidamiento y rollback total transparente.
 # Contexto: insensible (crea Proc_Globales en ventana tmp si es root)
-# Capa: Template (BPController2025)
+# Capa: Controller (plantilla)
 # -------------------------------------------------------------------------------------
 # Parámetros Requeridos:
 #   - MarcaPrefix (string)

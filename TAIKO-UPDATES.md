@@ -4,6 +4,9 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-06 — Plantillas Clew transaccionales sin nombre de cliente
+
+Sin acción. La cabecera de `templates/clew-transactional-dual.md` y `clew-transactional-orchestrator.md` pasa a `# Capa: Controller (plantilla)`, y `knowledge/clew-transactional-dual.md` cita la validación como "proyecto cliente (2026-06)". Antes ambas nombraban la solución de un cliente.
 ## 2026-10-06 — Funciones personalizadas del patrón Clew transaccional dual en `custom_functions/clew-transactional.xml`
 
 **Acción requerida:** antes de pegar un script hecho con `templates/clew-transactional-dual.md` o `clew-transactional-orchestrator.md` en un archivo que aún no use el patrón, pega primero `agent/docs/taiko/custom_functions/clew-transactional.xml` (`python3 agent/scripts/clipboard.py write agent/docs/taiko/custom_functions/clew-transactional.xml` → Gestionar funciones personalizadas → ⌘V). Si falta alguna de las cuatro funciones, FileMaker comenta con `/* */` el cálculo que la usa y el script deja de propagar el error sin avisar. Los archivos que ya usan el patrón no tienen que hacer nada: el 2026-10-06 se comprobó en el índice de Agentic-FM-APP que el único que lo usa tiene las cuatro definidas y todos sus usos resueltos.

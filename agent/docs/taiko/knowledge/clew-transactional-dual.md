@@ -6,7 +6,7 @@
 >
 > **Los dos a la vez** solo en un Controller de borde que es transaccional **y** devuelve envelope al exterior (caso poco común).
 
-Patrón canónico de script transaccional Clew que se comporta idénticamente sea invocado como **root** (crea su propia transacción) o como **hijo** (hereda la del padre). Escala a **N niveles** de anidamiento. Validado empíricamente con 6 casos de test — ver `Clew | Runner Pruebas` en BPController2025.
+Patrón canónico de script transaccional Clew que se comporta idénticamente sea invocado como **root** (crea su propia transacción) o como **hijo** (hereda la del padre). Escala a **N niveles** de anidamiento. Validado empíricamente con 6 casos de test — ver `Clew | Runner Pruebas` en un proyecto cliente (2026-06).
 
 **Relación con otros patrones:**
 - Extiende `clew-pattern.md` (error handling base) añadiendo el eje transaccional y la propagación cross-script vía variable global.

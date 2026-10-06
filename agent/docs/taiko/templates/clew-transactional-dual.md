@@ -17,7 +17,7 @@ Plantilla canónica del patrón Clew transaccional **dual padre/hijo**: el mismo
 #            El root limpia la global al terminar. Los intermedios solo leen y propagan.
 #            Soporta N niveles de anidamiento y rollback total transparente.
 # Contexto: insensible (crea Proc_Globales en ventana tmp si es root)
-# Capa: Template (BPController2025)
+# Capa: Controller (plantilla)
 # -------------------------------------------------------------------------------------
 # Parámetros Requeridos:
 #   - Marca (string): etiqueta identificadora (p.ej. "C1", "Test.1.2")
@@ -140,7 +140,7 @@ Plantilla canónica del patrón Clew transaccional **dual padre/hijo**: el mismo
 #            El root limpia la global al terminar. Los intermedios solo leen y propagan.
 #            Soporta N niveles de anidamiento y rollback total transparente.
 # Contexto: insensible (crea Proc_Globales en ventana tmp si es root)
-# Capa: Template (BPController2025)
+# Capa: Controller (plantilla)
 # -------------------------------------------------------------------------------------
 # Parámetros Requeridos:
 #   - Marca (string): etiqueta identificadora (p.ej. "C1", "Test.1.2")
