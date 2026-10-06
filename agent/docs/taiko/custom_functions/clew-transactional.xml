@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmxmlsnippet type="FMObjectList">
+  <Group groupCollapsed="False" id="0" name="Clew Transactional">
+    <CustomFunction id="0" functionArity="1" visible="True" parameters="trace" name="Clew.SetError">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+Clew.SetError ( trace )
+
+PARAMETERS:
+trace - el errorTrace Clew que se quiere propagar; normalmente error.GetTrace.
+
+HISTORY:
+Taiko addition (no upstream Marcelo) — patrón Clew transaccional dual.
+
+PURPOSE:
+Guarda el error en la variable global $$ClewError para que sobreviva al Revert Transaction que mata al script hijo antes de su Exit Script. Conserva el PRIMER error: si $$ClewError ya tiene valor, no lo sobrescribe. Llamarla siempre ANTES del Revert Transaction.
+
+RESULT:
+Vacío. Úsala en Insert Calculated Result sobre $null.
+
+DEPENDENCIES:
+Ninguna. Ver agent/docs/taiko/knowledge/clew-transactional-dual.md.
+*/
+Let ( $$ClewError = If ( IsEmpty ( $$ClewError ) ; trace ; $$ClewError ) ; "" )]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="0" functionArity="0" visible="True" parameters="" name="Clew.ClearError">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+Clew.ClearError
+
+HISTORY:
+Taiko addition (no upstream Marcelo) — patrón Clew transaccional dual.
+
+PURPOSE:
+Vacía $$ClewError. Solo la llama el script root al terminar, tanto en éxito como en error; los scripts intermedios no la llaman.
+
+RESULT:
+Vacío.
+
+DEPENDENCIES:
+Ninguna. Ver agent/docs/taiko/knowledge/clew-transactional-dual.md.
+*/
+Let ( $$ClewError = "" ; "" )]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="0" functionArity="0" visible="True" parameters="" name="Clew.HasError">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+Clew.HasError
+
+HISTORY:
+Taiko addition (no upstream Marcelo) — patrón Clew transaccional dual.
+
+PURPOSE:
+Indica si algún script de la cadena transaccional ha guardado un error en $$ClewError. El padre la consulta tras cada Perform Script (fail-fast). No modifica nada.
+
+RESULT:
+True (1) si $$ClewError tiene valor; False (0) si está vacía.
+
+DEPENDENCIES:
+Ninguna. Ver agent/docs/taiko/knowledge/clew-transactional-dual.md.
+*/
+not IsEmpty ( $$ClewError )]]></Calculation>
+    </CustomFunction>
+    <CustomFunction id="0" functionArity="0" visible="True" parameters="" name="Clew.GetError">
+      <Calculation><![CDATA[/*
+SIGNATURE:
+Clew.GetError
+
+HISTORY:
+Taiko addition (no upstream Marcelo) — patrón Clew transaccional dual.
+
+PURPOSE:
+Devuelve el errorTrace guardado en $$ClewError (el primer error de la cadena). No modifica nada.
+
+RESULT:
+El errorTrace JSON Clew, o vacío si no hay error.
+
+DEPENDENCIES:
+Ninguna. Ver agent/docs/taiko/knowledge/clew-transactional-dual.md.
+*/
+$$ClewError]]></Calculation>
+    </CustomFunction>
+  </Group>
+</fmxmlsnippet>

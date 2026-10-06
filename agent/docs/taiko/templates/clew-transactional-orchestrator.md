@@ -5,6 +5,8 @@ Orquestador del patrón Clew transaccional dual: ejecuta N workers (o sub-orques
 **Name:** `Clew | Template Orchestrator {json}`
 
 > Patrón completo, reglas de oro y validación empírica en [`../knowledge/clew-transactional-dual.md`](../knowledge/clew-transactional-dual.md).
+>
+> **Requisito — funciones personalizadas:** el archivo FileMaker debe tener Clew ([`../custom_functions/clew.xml`](../custom_functions/clew.xml)) y las cuatro funciones del patrón dual `Clew.SetError` / `Clew.ClearError` / `Clew.HasError` / `Clew.GetError` ([`../custom_functions/clew-transactional.xml`](../custom_functions/clew-transactional.xml)). Pégalas **antes** que el script: si falta alguna, FileMaker comenta con `/* */` el cálculo que la usa y el script deja de propagar el error sin avisar.
 
 ## Script (human-readable)
 

@@ -16,7 +16,7 @@ Esta carpeta y unos pocos ficheros fuera de ella son **todo lo que Taiko añade*
 | `CODING_CONVENTIONS.md` | Convenciones de código Taiko | Siempre que se genera código |
 | `knowledge/` | Patrones y gotchas Taiko (uno por fichero + `MANIFEST.md`) | Antes de escribir un script; `kb_search` |
 | `templates/` | Esqueletos de scripts Clew en formato HR (`clew-simple`, `clew-transactional`, dual, orchestrator, completo) | Al componer un script nuevo |
-| `custom_functions/` | fmxmlsnippet de los módulos obligatorios: Clew (`clew.xml`), fm-sql-cfs (`sql-cfs.xml`), triggers (`triggers.xml`) | Al preparar una solución nueva |
+| `custom_functions/` | fmxmlsnippet de los módulos obligatorios: Clew (`clew.xml`), extensión transaccional dual de Clew (`clew-transactional.xml`), fm-sql-cfs (`sql-cfs.xml`), triggers (`triggers.xml`) | Al preparar una solución nueva |
 | `proofkit/` | Base de conocimiento ProofKit: `mcp-connector.md` (Vía 1), `webviewer-build.md`, `architecture.md`, `gotchas.md` (F1–F19), `troubleshooting.md`, `conventions.md`, `CLAUDE-webapp.md` (plantilla para apps web) | Consulta en vivo o interfaz web |
 | `fm-access.md` | Mapa de las tres vías y reparto explode vs. en vivo | Antes de tocar FileMaker |
 | `sessions/` | Procedimientos de sesión que leen las skills del plugin `taiko-filemaker` (`fm-sesion.md`, `fm-nuevo-proyecto.md`) | Al arrancar una sesión o un proyecto |

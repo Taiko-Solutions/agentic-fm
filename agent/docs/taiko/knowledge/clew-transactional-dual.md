@@ -30,6 +30,8 @@ Una variable global sobrevive al `Revert Transaction` que mata al hijo. El hijo 
 
 ### Custom Functions requeridas
 
+XML pegable: [`../custom_functions/clew-transactional.xml`](../custom_functions/clew-transactional.xml) (además de Clew base, `clew.xml`). Si falta alguna al pegar un script, FileMaker comenta el cálculo con `/* */` sin avisar.
+
 | Nombre | Parámetros | Calculation |
 |---|---|---|
 | `Clew.SetError` | `trace` | `Let ( $$ClewError = If ( IsEmpty ( $$ClewError ) ; trace ; $$ClewError ) ; "" )` |
