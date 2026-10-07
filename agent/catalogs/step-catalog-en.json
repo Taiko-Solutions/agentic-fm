@@ -5614,6 +5614,7 @@
         "type": "text",
         "hrLabel": null,
         "required": false,
+        "omitWhenEmpty": true,
         "note": "Cross-file call only: direct child of <Step>, sibling of Calculation/Script — NEVER nested inside <Script>. Carries id/name of the caller file's external data source and a <UniversalPathList>file:FileNameWithoutExtension</UniversalPathList> child (rule X003 enforces the shape). Omit entirely for same-file calls."
       }
     ],

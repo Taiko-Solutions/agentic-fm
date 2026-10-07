@@ -21,7 +21,7 @@
 - **Archivos afectados**: `agent/catalogs/step-catalog-en.json`, `agent/fmlint/`
 - **Origen**: 964 Borneo, reescritura del script 1257 — el `Perform Script` cross-file al Controller quedó mudo dos veces antes de dar con la causa.
 
-## 2026-09-25 — `<Calculated>` es el modo "by name", no el parámetro (fallo silencioso del conversor) — **knowledge APLICADO en `taiko`** (2026-10-01; X004 detecta el síntoma; conversor pendiente)
+## 2026-09-25 — `<Calculated>` es el modo "by name", no el parámetro (fallo silencioso del conversor) — **APLICADO en `taiko`** (knowledge 2026-10-01; conversor 2026-10-07)
 
 - **Categoría**: converter / knowledge
 - **Descripción**: En fmxmlsnippet, `<Calculated><Calculation>` dentro de `Perform Script` es el **modo "by name"**: su contenido es el *nombre* del script a ejecutar, y es **mutuamente excluyente** con `<Script id name/>`. El parámetro va en un `<Calculation>` suelto, hermano de `<Script>`. El catálogo ya lo documenta correctamente.
@@ -355,7 +355,7 @@ Ran into this deploying agentic-fm against a multi-file solution — seven `.fmp
 - **Archivos afectados**: `fmparse.sh`, `.claude/CLAUDE.md`
 - **Origen**: setup en un repo cliente con 3 bases de datos en un solo clon (2026-07-01): la auditoría de `removals.json` detectó que la limpieza de CFs no cubría la carpeta real. Verificado en `taiko` el 2026-09-19. Sin datos de cliente.
 
-## 2026-09-22 — fm_xml_to_snippet.py: 4 desviaciones que rompen un script al re-pegarlo (Perform Script "By name", Layout autocerrado) — **severidad alta**
+## 2026-09-22 — fm_xml_to_snippet.py: 4 desviaciones que rompen un script al re-pegarlo (Perform Script "By name", Layout autocerrado) — **severidad alta** — **casos 1 y 2 APLICADOS en `taiko`** (2026-10-07; 3 y 4 pendientes)
 
 - **Categoría**: script_utility
 - **Descripción**: al convertir a sandbox un script transaccional real (SaXML → fmxmlsnippet) para modificarlo, el resultado pasa fmlint pero **cambiaría el comportamiento al pegarlo**. `snippet_to_hr.py` lo delata. Casos:
@@ -367,6 +367,7 @@ Ran into this deploying agentic-fm against a multi-file solution — seven `.fmp
 - **Fix propuesto**: (a) en el conversor, mapear el parámetro de Perform Script a `<Calculation>` y reservar `<Calculated>` para el modo By name real; omitir FileReference en llamadas same-file y emitirla completa (id, name, `UniversalPathList`) en cross-file; (b) emitir siempre `<Layout …></Layout>` explícito y conservar `LayoutNameByCalc` + `<Calculation>` cuando el original es por cálculo; (c) no emitir Restore en Perform Find sin Query. (d) Reglas fmlint nuevas: `<Layout/>` autocerrado en Go to Layout/New Window, y `<Calculated>` en Perform Script cuyo contenido no es un nombre de script plausible (p. ej. contiene `JSONSetElement` / `;`). (e) Añadir un transaccional Clew típico al test de round-trip propuesto el 2026-09-08.
 - **Archivos afectados**: `agent/scripts/fm_xml_to_snippet.py`, `agent/fmlint/rules/param_fidelity.py` (o regla nueva), tests de round-trip
 - **Origen**: proyecto cliente (2026-09-22), al copiar a sandbox un script transaccional con New Window + Go to Layout por cálculo + Perform Script a un logger. Detectado con el diff `snippet_to_hr` original vs conversión. Sin datos de cliente.
+- **Aplicado (2026-10-07, rama `taiko`)**: caso 1 → `saxml_read` lleva el parámetro al hueco "Parameter" y el "By name" real a `<Calculated>`; `catalog_emit` emite Perform Script en el orden FileReference → Calculated → Calculation → Script; el `FileReference` vacío se omite y el cross-file sale completo con la `UniversalPathList` de `xml_parsed/external_data_sources/`. Caso 2 → un `LayoutReferenceContainer value="3"` (por cálculo) se conserva como `LayoutNameByCalc` aunque el cálculo sea un literal entre comillas; antes salía `SelectedLayout` con `<Layout name/>` sin id y FileMaker lo pegaba como `<BROKEN REFERENCE>` (proyecto cliente, 2026-10). Sobre 700 scripts reales: X004 pasa de 1553 errores a 0 y los `<Layout name/>` sin id de 53 a 0. **Candidato a PR a petrowsky** desde el repo base: son ficheros genéricos (`agent/scripts/`, catálogo, fixtures), sin capa Taiko.
 
 ## 2026-09-22 — fmlint C004: falso positivo en `error.ThrowIf` cuya condición es verdadera en la evaluación en vivo
 

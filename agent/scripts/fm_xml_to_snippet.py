@@ -299,7 +299,51 @@ def _self_close(entry, disabled: bool) -> str:
     return f'{S}<Step enable="{"False" if disabled else "True"}" id="{sid}" name="{escape_xml(entry.name)}"/>'
 
 
-def tx_engine(step, stats: dict) -> str:
+def _data_source_path(source: Path | None, ds_id: str, ds_name: str) -> str:
+    """UniversalPathList of an external data source, read from the explode.
+
+    A script at ``xml_parsed/scripts/<Solution>/…`` has its data sources at
+    ``xml_parsed/external_data_sources/<Solution>/<name> - ID <id>.xml``. Returns ''
+    when the input is not inside an explode or the file is missing.
+    """
+    if source is None:
+        return ''
+    parts = source.resolve().parts
+    if 'scripts' not in parts:
+        return ''
+    i = len(parts) - 1 - parts[::-1].index('scripts')
+    if i + 1 >= len(parts) - 1:
+        return ''
+    ds_dir = Path(*parts[:i]) / 'external_data_sources' / parts[i + 1]
+    candidate = ds_dir / f'{ds_name} - ID {ds_id}.xml'
+    if not candidate.is_file():
+        return ''
+    try:
+        upl = ET.parse(str(candidate)).getroot().find('.//UniversalPathList')
+    except ET.ParseError:
+        return ''
+    return (upl.text or '').strip() if upl is not None else ''
+
+
+def _file_reference(step, source: Path | None) -> str:
+    """Cross-file Perform Script: the <FileReference> FileMaker needs to resolve
+    the target (X003/X004). Empty for same-file calls."""
+    dsr = step.find("ParameterValues/Parameter[@type='List']/List/DataSourceReference")
+    if dsr is None:
+        return ''
+    ds_id, ds_name = dsr.get('id', '0'), dsr.get('name', '')
+    path = _data_source_path(source, ds_id, ds_name)
+    if not path:
+        print(f'WARNING: Perform Script to data source "{ds_name}" (id={ds_id}) — '
+              'file path not found in external_data_sources/; FileReference without '
+              'UniversalPathList', file=sys.stderr)
+        return f'{L1}<FileReference id="{escape_xml(ds_id)}" name="{escape_xml(ds_name)}"/>'
+    return (f'{L1}<FileReference id="{escape_xml(ds_id)}" name="{escape_xml(ds_name)}">\n'
+            f'{L2}<UniversalPathList>{escape_xml(path)}</UniversalPathList>\n'
+            f'{L1}</FileReference>')
+
+
+def tx_engine(step, stats: dict, source: Path | None = None) -> str:
     """Decode a non-control SaXML step via the catalog grammar (reader → emit).
 
     Real object IDs are preserved through the SeededResolver returned by the reader.
@@ -325,7 +369,14 @@ def tx_engine(step, stats: dict) -> str:
                 f'{S}<Step enable="{enable}" id="{sid}" name="{escape_xml(name)}"/>')
     if entry.self_closing and not entry.params:
         return _self_close(entry, disabled)
-    return convert_step_with_catalog(entry, disabled, values, resolver)
+    xml = convert_step_with_catalog(entry, disabled, values, resolver)
+    if name == 'Perform Script':
+        fref = _file_reference(step, source)
+        if fref:
+            # FileReference goes first (FileMaker's order; the engine has no shape for it).
+            head, sep, body = xml.partition('\n')
+            xml = head + sep + fref + '\n' + body
+    return xml
 
 
 # ---------------------------------------------------------------------------
@@ -349,7 +400,7 @@ def translate_script(input_path: Path, stats: dict | None = None) -> str:
         if control is not None:
             parts.append(control(step_el))
         else:
-            parts.append(tx_engine(step_el, stats))
+            parts.append(tx_engine(step_el, stats, input_path))
     parts.append('</fmxmlsnippet>')
 
     return '\n'.join(parts) + '\n'

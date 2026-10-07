@@ -20,6 +20,7 @@ Designed to be run by hand, from the pre-push hook, or from CI.
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -45,10 +46,29 @@ def check_catalogs() -> list:
     return failures
 
 
+def _clean_env() -> dict:
+    """Environment without git's repo-local variables.
+
+    Run from a git hook (pre-push), git exports GIT_DIR and friends; the tests that
+    build throwaway repos would then run their git commands against THIS repo and
+    fail (seen pushing from a worktree). ``git rev-parse --local-env-vars`` lists them.
+    """
+    env = dict(os.environ)
+    try:
+        names = subprocess.run(["git", "rev-parse", "--local-env-vars"],
+                               capture_output=True, text=True).stdout.split()
+    except OSError:
+        names = []
+    for name in names or ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_PREFIX"):
+        env.pop(name, None)
+    return env
+
+
 def run_cmd(label: str, cmd: list) -> list:
     """Run a test command from the repo root. Returns list of failures."""
     proc = subprocess.run(
-        cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=300
+        cmd, cwd=REPO_ROOT, capture_output=True, text=True, timeout=300,
+        env=_clean_env(),
     )
     if proc.returncode != 0:
         tail = "\n".join((proc.stderr or proc.stdout).strip().splitlines()[-12:])

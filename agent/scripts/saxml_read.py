@@ -202,9 +202,10 @@ def _layout_token_from_lrc(lrc: ET.Element) -> str:
         return '"' + lr.get("name", "") + '"'
     val = lrc.get("value", "")
     if val == "3":
-        # Bare calculation, matching what FileMaker itself renders and what the
-        # grammar now emits; the emit reads a bare calc back as LayoutNameByCalc.
-        return _calc_text(lrc)
+        # Keeps the keyword: a calc that is just a quoted literal ("Proc_Notes")
+        # reads back bare as a layout NAME, which emits SelectedLayout with no id
+        # and pastes as <BROKEN REFERENCE>. The source says by-calculation, so say so.
+        return "by name: " + _calc_text(lrc)
     if val == "4":
         # Keeps the keyword: FileMaker renders number-by-calculation identically
         # to name-by-calculation, so a bare calc could not round-trip as this one.
@@ -1084,9 +1085,15 @@ def _dec_perform_script(entry: CatalogEntry, step_el: ET.Element) -> list[str]:
         sr = inner.find("ScriptReference") if inner is not None else None
         if sr is not None:
             v.set('"' + sr.get("name", "") + '"', xml="Script")
+        elif inner is not None and inner.find("Calculation") is not None:
+            # "By name": the calc is the script NAME (<Calculated> wrapper on emit).
+            v.set(_calc_text(inner), xml="Calculation", hr="By name")
+        # A cross-file target's <DataSourceReference> is rendered by the caller
+        # (fm_xml_to_snippet), which can resolve the data source's file path.
     par = _ptype(step_el, "Parameter")
     if par is not None:
-        v.set(_calc_text(par), xml="Calculation")
+        # hr= targets the parameter slot; the first Calculation param is "By name".
+        v.set(_calc_text(par), xml="Calculation", hr="Parameter")
     return v.list()
 
 
