@@ -1083,6 +1083,30 @@ def _emit_field_list(param: StepParam, hr_value: str, resolver: IdResolver) -> s
 # ---------------------------------------------------------------------------
 # The orchestrator: values[] → emit-XML in catalog param order.
 # ---------------------------------------------------------------------------
+# Steps whose top-level children FileMaker reads in an order other than the catalog
+# param order (which follows the HR signature). Perform Script: with <Script> before
+# the parameter <Calculation> the paste is accepted but the target stays unresolved
+# ("From list ; \"\"") and the step calls nothing — fmlint X004 checks the same order.
+_XML_CHILD_ORDER: dict[str, tuple[str, ...]] = {
+    "Perform Script": ("FileReference", "Calculated", "Calculation", "Script"),
+}
+
+
+def _emit_order(entry: CatalogEntry) -> list[int]:
+    """Param indices in XML emission order (catalog order unless overridden)."""
+    order = _XML_CHILD_ORDER.get(entry.name)
+    indices = list(range(len(entry.params)))
+    if not order:
+        return indices
+
+    def rank(pi: int) -> tuple[int, int]:
+        p = entry.params[pi]
+        top = _split_path(p.parent_element or "")[:1] or [p.wrapper_element or p.xml_element]
+        return (order.index(top[0]) if top[0] in order else len(order), pi)
+
+    return sorted(indices, key=rank)
+
+
 def convert_step_with_catalog(
     entry: CatalogEntry, disabled: bool, values: list[str], resolver: IdResolver
 ) -> str:
@@ -1195,7 +1219,8 @@ def convert_step_with_catalog(
     prev_was_text_element = False
     open_groups: list[str] = []
 
-    for pi, param in enumerate(params):
+    for pi in _emit_order(entry):
+        param = params[pi]
         hr_value = values[pi]
         if skip_param[pi]:
             continue

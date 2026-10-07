@@ -4,6 +4,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-07 — `fm_xml_to_snippet.py`: Go to Layout por cálculo y Perform Script con parámetro ya se pegan bien
+
+**Acción requerida:** vuelve a convertir con `fm_xml_to_snippet.py` cualquier XML de `agent/sandbox/` que hayas sacado de `xml_parsed/scripts/` y aún no hayas pegado. Lo que ya está pegado en FileMaker revísalo así: en los `Go to Layout`, un layout que sale como `<BROKEN REFERENCE>`, y en los `Perform Script`, un paso que muestra `From list ; ""` o `By name:` con el parámetro.
+
+- **Go to Layout por cálculo.** Si el destino era un cálculo con el nombre entre comillas (`"Proc_Notas"`), el conversor lo pasaba a "layout seleccionado" por nombre y sin id (`<Layout name="Proc_Notas"/>`), y FileMaker lo pegaba como `<BROKEN REFERENCE>`. Ahora se mantiene por cálculo (`LayoutNameByCalc`), igual que en el original. Los layouts elegidos de la lista ya conservaban su id.
+- **Perform Script.** El parámetro salía dentro de `<Calculated>`, que es el modo "by name", con `<Script>` delante y un `<FileReference>` vacío. Ese es el fallo X004 de fmlint, y el paso no llamaba a nada. Ahora sale en el orden de FileMaker: `FileReference` (solo si el script está en otro archivo, con su ruta sacada de `xml_parsed/external_data_sources/`), luego `Calculation` con el parámetro y `Script` al final. El modo "by name" real, que antes se perdía, sale en `<Calculated>`.
+- Comprobado sobre 700 scripts reales de un proyecto cliente (2026-10): X004 pasa de 1553 errores a 0 y los `<Layout name/>` sin id de 53 a 0. Siguen saliendo X003 en los `Perform Script` cuyo archivo externo ya está roto en el origen (`<unknown>`). Hay tests nuevos en `test_fm_xml_to_snippet.py` y muestras nuevas en `agent/fixtures/converter/`. Los parches `_fix_layout_ids.py` y `_fix_perform_script.py` ya no hacen falta.
+
 ## 2026-10-07 — `agent/fixtures/` en la capa herramientas
 
 **Acción requerida:** tras traer `taiko`, ejecuta `agentic-fm-sync` para reinstalar el hook pre-push con la regla nueva. `agent/fixtures/` (muestras y goldens de los tests de conversores) quedó fuera de `[allow]` en `agent/scripts/hooks/paths.conf` al crear la allowlist, y el hook bloqueaba subir un test de conversor. Ya estaba versionado en `taiko`.

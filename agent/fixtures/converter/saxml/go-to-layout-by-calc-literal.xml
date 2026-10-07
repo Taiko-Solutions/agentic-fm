@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Script>
+  <ObjectList>
+<Step hash="0" id="6" name="Go to Layout" enable="True">
+    <Options>16394</Options>
+    <ParameterValues membercount="2">
+        <Parameter type="LayoutReferenceContainer">
+            <LayoutReferenceContainer value="3">
+                <Calculation datatype="1" position="5">
+                    <Calculation>
+                        <Text><![CDATA["Proc_Notes"]]></Text>
+                    </Calculation>
+                </Calculation>
+            </LayoutReferenceContainer>
+        </Parameter>
+        <Parameter type="Animation">
+            <Animation name="None" value="0"></Animation>
+        </Parameter>
+    </ParameterValues>
+</Step>
+  </ObjectList>
+</Script>

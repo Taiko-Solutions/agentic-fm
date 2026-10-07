@@ -73,6 +73,8 @@ Step id `6`; the destination enum is `LayoutDestination` and the `<Layout>` ref 
 
 Prefer `OriginalLayout` over capturing `Get(LayoutName)` at the start and restoring manually. Note `<Layout>` must use explicit open/close tags — the self-closing form is dropped on paste.
 
+A calculation that is only a quoted literal (`"Proc_Tasks"`) is still `LayoutNameByCalc`. Writing it as `SelectedLayout` with `<Layout name="Proc_Tasks"/>` and no `id` pastes as `<BROKEN REFERENCE>` (client project, 2026-10). `fm_xml_to_snippet.py` keeps such steps by calculation since 2026-10-07; a by-reference `<Layout>` always needs the real `id`.
+
 ### New Window — explicit `<LayoutDestination>` before `<NewWndStyles>`
 
 Without `<LayoutDestination value="SelectedLayout"/>` (or `LayoutNameByCalc`, etc.) as the **first** child of the Step, FM defaults to `CurrentLayout` and **silently ignores** the `<Layout id name>` even when present and well-formed. The sanitized output shows `Layout: ""` (empty).
@@ -143,7 +145,7 @@ Forma que produce FileMaker (verificada copiando un paso real al portapapeles y 
 ```
 
 - `<Script>` primero → FileMaker acepta el paste pero deja el destino **sin resolver**: el HR muestra `Perform Script [ From list ; "" ; Parameter: … ]` y el paso **no llama a nada, sin error en runtime**.
-- `<Calculated><Calculation>…</Calculation></Calculated>` es el modo **by name**: su contenido es el *nombre* del script, excluyente con `<Script>`. El parámetro va en un `<Calculation>` suelto. `fm_xml_to_snippet.py` emite hoy el parámetro envuelto en `<Calculated>` (propuesta 2026-09-25): su salida sirve para leer, no para copiar bloques a scripts nuevos.
+- `<Calculated><Calculation>…</Calculation></Calculated>` es el modo **by name**: su contenido es el *nombre* del script, excluyente con `<Script>`. El parámetro va en un `<Calculation>` suelto. Desde 2026-10-07 `fm_xml_to_snippet.py` emite esta forma (orden FileReference → Calculated → Calculation → Script, `FileReference` solo en llamadas a otro archivo y con su `UniversalPathList` sacada de `xml_parsed/external_data_sources/`). Las conversiones hechas antes llevan el parámetro dentro de `<Calculated>`: regenéralas antes de pegar.
 - Un `<FileReference></FileReference>` vacío en una llamada al mismo archivo es ruido del conversor, no error (X003 ya no lo marca).
 - Con un paso de estructura no trivial, la fuente fiable es copiarlo desde FileMaker y leerlo con `clipboard.py read`, no el catálogo solo ni la salida del conversor. (Caso real: proyecto cliente 2026-09, tres `Perform Script` mudos.)
 
