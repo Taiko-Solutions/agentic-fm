@@ -4,6 +4,10 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-07 — `agent/fixtures/` en la capa herramientas
+
+**Acción requerida:** tras traer `taiko`, ejecuta `agentic-fm-sync` para reinstalar el hook pre-push con la regla nueva. `agent/fixtures/` (muestras y goldens de los tests de conversores) quedó fuera de `[allow]` en `agent/scripts/hooks/paths.conf` al crear la allowlist, y el hook bloqueaba subir un test de conversor. Ya estaba versionado en `taiko`.
+
 ## 2026-10-06 — Fuera de la capa herramientas la guía de conversión de un proyecto cliente
 
 Sin acción. `agent/docs/taiko/` tenía una guía de migración Geist → Clew de un proyecto cliente concreto (2026-03). Ahora está en el vault de Obsidian, en la carpeta de ese cliente, y deja de llegar a los clones. El patrón general sigue en `knowledge/clew-pattern.md`, `knowledge/clew-transactional-dual.md` y `templates/`.
