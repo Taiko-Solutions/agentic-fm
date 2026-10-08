@@ -928,6 +928,30 @@ function emitFieldList(param: GrammarParam, hrValue: string, resolver: IdResolve
 // ---------------------------------------------------------------------------
 // The orchestrator: parse-HR → emit-XML in catalog param order.
 // ---------------------------------------------------------------------------
+// Steps whose top-level children FileMaker reads in an order other than the catalog
+// param order (which follows the HR signature). Perform Script: with <Script> before
+// the parameter <Calculation> the paste is accepted but the target stays unresolved
+// ("From list ; \"\"") and the step calls nothing — fmlint X004 checks the same order.
+// Mirrors _XML_CHILD_ORDER in agent/scripts/catalog_emit.py.
+const XML_CHILD_ORDER: Record<string, readonly string[]> = {
+  'Perform Script': ['FileReference', 'Calculated', 'Calculation', 'Script'],
+};
+
+/** Param indices in XML emission order (catalog order unless overridden). */
+function emitOrder(entry: GrammarEntry): number[] {
+  const indices = entry.params.map((_, pi) => pi);
+  const order = XML_CHILD_ORDER[entry.name];
+  if (!order) return indices;
+  const rank = (pi: number): number => {
+    const p = entry.params[pi];
+    const top = splitPath(p.parentElement ?? '')[0] ?? (p.wrapperElement || p.xmlElement);
+    const r = order.indexOf(top);
+    return r === -1 ? order.length : r;
+  };
+  // Array.prototype.sort is stable, so equal ranks keep catalog order.
+  return indices.sort((a, b) => rank(a) - rank(b));
+}
+
 export function convertStepWithCatalog(
   entry: GrammarEntry,
   line: ParsedLine,
@@ -1033,7 +1057,7 @@ export function convertStepWithCatalog(
   let prevWasTextElement = false;
   const openGroups: string[] = [];
 
-  for (let pi = 0; pi < params.length; pi++) {
+  for (const pi of emitOrder(entry)) {
     const param = params[pi];
     const hrValue = values[pi];
     if (skipParam[pi]) continue;

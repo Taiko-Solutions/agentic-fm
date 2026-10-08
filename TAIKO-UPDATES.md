@@ -4,6 +4,15 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-07 — Conversor HR→XML del webviewer: Perform Script con parámetro ya se pega bien
+
+**Acción opcional:** si convertiste con el webviewer (HR→XML) algún `Perform Script` con parámetro y ya lo pegaste, revísalo en FileMaker: un paso que muestra `From list ; ""` no llama a nada. Vuelve a convertirlo y pégalo de nuevo.
+
+- El conversor TypeScript (`webviewer/src/converter/catalog-emit.ts`) emitía `<Script>` antes que el `<Calculation>` del parámetro, porque sigue el orden del catálogo, que es el del HR. Con ese orden FileMaker acepta el paste pero deja el destino sin resolver (fmlint X004). Ahora emite en el orden de FileMaker, `FileReference → Calculated → Calculation → Script`, igual que el conversor Python (`_XML_CHILD_ORDER` en `catalog_emit.py`).
+- Con el `omitWhenEmpty` que el catálogo ya trae en el `FileReference` de Perform Script, una llamada al mismo archivo tampoco arrastra aquí un `<FileReference></FileReference>` vacío.
+- Test nuevo `webviewer/test/hr-to-xml.perform-script-order.test.ts`. El fixture de `Insert Text` en `hr-to-xml.json` se re-bendice: estaba desfasado desde que el catálogo pasó a poner `<Text>` antes que `<Field>`.
+- `Perform Script on Server` no cambia: el catálogo ya emite el parámetro antes de `<Script>`.
+
 ## 2026-10-07 — `fm_xml_to_snippet.py`: Go to Layout por cálculo y Perform Script con parámetro ya se pegan bien
 
 **Acción requerida:** vuelve a convertir con `fm_xml_to_snippet.py` cualquier XML de `agent/sandbox/` que hayas sacado de `xml_parsed/scripts/` y aún no hayas pegado. Lo que ya está pegado en FileMaker revísalo así: en los `Go to Layout`, un layout que sale como `<BROKEN REFERENCE>`, y en los `Perform Script`, un paso que muestra `From list ; ""` o `By name:` con el parámetro.
