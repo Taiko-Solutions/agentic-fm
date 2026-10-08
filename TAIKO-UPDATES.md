@@ -31,6 +31,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - Si no hay objetos de FileMaker, `read` sale con código 1, no escribe el archivo y avisa: "el portapapeles no contiene objetos de FileMaker: copia los pasos en Script Workspace con ⌘C".
 - La decisión está en una función pura, `classify_clipboard()`. Los tests nuevos están en `agent/scripts/test_clipboard.py` y los ejecuta `ci_checks.py`.
 
+## 2026-10-08 — Conocimiento: trampas del separador decimal (`decimal-separator-traps.md`)
+
+**Acción opcional:** si tu solución lee importes con `ExecuteSQL` y los convierte con `GetAsNumber`, revísalos. En un archivo con coma decimal, `GetAsNumber ( "677.6" )` devuelve 6776. El arreglo es una CF `num.DesdeTextoPunto` (el texto está en el documento).
+
+- Documento nuevo en `agent/docs/taiko/knowledge/` con tres trampas que no dan error: `GetAsNumber` sobre texto de ExecuteSQL (×10/×100), `JSONRaw` con un número de FileMaker (trunca los decimales) y `JSONNumber` con valor vacío (serializa `0`).
+- Incluye cómo comprobarlo en el motor antes de pegar. Indexado en el MANIFEST.
+- Origen: proyecto cliente (2026-10), un MCP devolvía importes ×10/×100.
+
 ## 2026-10-07 — Conversor HR→XML del webviewer: Perform Script con parámetro ya se pega bien
 
 **Acción opcional:** si convertiste con el webviewer (HR→XML) algún `Perform Script` con parámetro y ya lo pegaste, revísalo en FileMaker: un paso que muestra `From list ; ""` no llama a nada. Vuelve a convertirlo y pégalo de nuevo.
