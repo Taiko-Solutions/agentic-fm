@@ -64,6 +64,26 @@ class ParamFidelityTestCase(unittest.TestCase):
         )
         self.assertTrue(any(d.rule_id == "X003" for d in x_diags(result)))
 
+    def test_x003_crossfile_path_without_name_is_error(self):
+        # Verificado en FileMaker (2026-10): con name="" descarta la ruta al pegar
+        # y el paso queda "<unknown> from file: \"\"". No es ruido de mismo archivo.
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<FileReference id="0" name=""><UniversalPathList>file:Otro</UniversalPathList></FileReference>'
+            '<Script id="0" name="Remote"/></Step>'
+        )
+        errors = [d for d in x_diags(result) if d.rule_id == "X003" and d.severity == Severity.ERROR]
+        self.assertEqual(len(errors), 1, [(d.rule_id, d.severity, d.message) for d in x_diags(result)])
+
+    def test_x003_crossfile_by_name_with_id_zero_is_ok(self):
+        # id="0" + name + ruta: FileMaker resuelve la fuente de datos por nombre al pegar.
+        result = self.lint(
+            '<Step enable="True" id="1" name="Perform Script">'
+            '<FileReference id="0" name="Otro"><UniversalPathList>file:Otro</UniversalPathList></FileReference>'
+            '<Script id="0" name="Remote"/></Step>'
+        )
+        self.assertEqual([d for d in x_diags(result) if d.rule_id == "X003"], [])
+
     # -- X004: orden de hijos en Perform Script ---------------------------
 
     def test_x004_script_first_is_dead_step(self):

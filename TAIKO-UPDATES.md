@@ -4,6 +4,16 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-08 — Conversor HR→XML del webviewer: Perform Script a otro archivo
+
+**Acción opcional:** si convertiste con el webviewer un `Perform Script` a otro archivo (`File: "…"` o `"Script" from file: "…"`) y lo pegaste, en FileMaker sale como `<unknown>`. Vuelve a convertirlo.
+
+- Antes el token `File: "Y"` acababa tal cual dentro de `<FileReference>` y FileMaker no resolvía el paso. Ahora se emite `<FileReference id="0" name="Y">` con `<UniversalPathList>file:Y</UniversalPathList>` y `<Script id="0" name="X"/>`. Comprobado pegando en FileMaker (2026-10): resuelve la fuente de datos y el guion remoto **por nombre**. El guion de destino nunca se busca en el contexto del archivo actual, porque su id es del otro archivo.
+- `Y` tiene que ser el nombre de la **fuente de datos externa** (*Manage External Data Sources*), que es lo que muestra el HR de FileMaker.
+- Con `File: ""` o `<unknown> from file: ""` el paso se marca como no convertible (error y marcador), en vez de emitir algo que no sirve. Copia ese paso desde FileMaker.
+- fmlint X003: un `<FileReference>` con `<UniversalPathList>` pero sin `name` ahora es error. Antes daba un INFO de «llamada al mismo archivo», pero FileMaker descarta la referencia al pegar.
+- Tests: `webviewer/test/hr-to-xml.perform-script-crossfile.test.ts` y 2 nuevos en `agent/fmlint/tests/test_param_fidelity.py`.
+
 ## 2026-10-08 — Conversor HR→XML del webviewer: entiende el `Specified:` de Perform Script
 
 **Acción opcional:** si pegaste en el webviewer un `Perform Script` o `Perform Script on Server` copiado de Script Workspace (con `Specified: From list` o `Specified: By name`) y lo pegaste convertido en FileMaker, revísalo: puede llamar a un script que no existe o no llamar a nada. Vuelve a convertirlo.

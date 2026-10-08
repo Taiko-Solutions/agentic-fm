@@ -280,6 +280,18 @@ class KnownSilentDiscardPatterns(LintRule):
                         ))
                 for fileref_el in step.findall("FileReference"):
                     is_external = bool(fileref_el.get("id")) and bool(fileref_el.get("name"))
+                    if not fileref_el.get("name") and fileref_el.find("UniversalPathList") is not None:
+                        # Ruta sin name: FileMaker resuelve la fuente de datos por name y, sin él,
+                        # descarta la ruta al pegar → "<unknown> from file: \"\"" (verificado 2026-10).
+                        diags.append(Diagnostic(
+                            rule_id=self.rule_id, severity=sev, line=0,
+                            message=(f'Step {idx + 1} "{name}": <FileReference> con <UniversalPathList> '
+                                     f"pero sin name — FileMaker descarta la referencia al pegar "
+                                     f"(el guion queda <unknown>)."),
+                            fix_hint=('Pon el nombre de la fuente de datos externa en name '
+                                      '(vale id="0": FileMaker la resuelve por nombre).'),
+                        ))
+                        continue
                     if not is_external:
                         # <FileReference/> vacío = llamada al mismo archivo (ruido del conversor);
                         # el catálogo dice "omit entirely for same-file calls". Informativo, no error.
