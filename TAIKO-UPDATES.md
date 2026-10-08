@@ -11,7 +11,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - El conversor TypeScript (`webviewer/src/converter/catalog-emit.ts`) emitía `<Script>` antes que el `<Calculation>` del parámetro, porque sigue el orden del catálogo, que es el del HR. Con ese orden FileMaker acepta el paste pero deja el destino sin resolver (fmlint X004). Ahora emite en el orden de FileMaker, `FileReference → Calculated → Calculation → Script`, igual que el conversor Python (`_XML_CHILD_ORDER` en `catalog_emit.py`).
 - Con el `omitWhenEmpty` que el catálogo ya trae en el `FileReference` de Perform Script, una llamada al mismo archivo tampoco arrastra aquí un `<FileReference></FileReference>` vacío.
 - Test nuevo `webviewer/test/hr-to-xml.perform-script-order.test.ts`. El fixture de `Insert Text` en `hr-to-xml.json` se re-bendice: estaba desfasado desde que el catálogo pasó a poner `<Text>` antes que `<Field>`.
-- `Perform Script on Server` no cambia: el catálogo ya emite el parámetro antes de `<Script>`.
+- `Perform Script on Server` y `… with Callback` no cambian: comprobado contra pasos copiados de FileMaker 2026, ya emiten el parámetro antes de `<Script>`. Quedan fijados con test.
 
 ## 2026-10-07 — `fm_xml_to_snippet.py`: Go to Layout por cálculo y Perform Script con parámetro ya se pegan bien
 

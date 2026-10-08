@@ -44,3 +44,23 @@ describe('HR→XML Perform Script child order (fmlint X004)', () => {
     expect(stepChildren(xml)).toEqual(['Calculated', 'Calculation']);
   });
 });
+
+// Order copied from FileMaker 2026 (clipboard, 2026-10-08), minus the
+// optional <DisableStepCollapsed>: both server steps already follow the
+// catalog order, with the parameter before <Script>. Guards against a future
+// XML_CHILD_ORDER entry or catalog reorder breaking them.
+describe('HR→XML Perform Script on Server child order (FileMaker real)', () => {
+  it('Perform Script on Server: WaitForCompletion → Calculation → Script', () => {
+    const { xml } = hrToXml('Perform Script on Server [ "Mi Script" ; Parameter: $p ; Wait for completion: On ]');
+    expect(stepChildren(xml)).toEqual(['WaitForCompletion', 'Calculation', 'Script']);
+  });
+
+  it('… with Callback: CallbackScriptState → Calculation → Script → CallbackScript', () => {
+    const { xml } = hrToXml(
+      'Perform Script on Server with Callback [ "Mi Script" ; Parameter: $p ; State: Continue ; ' +
+        'Callback script: Script="Otro Script", Parameter=$c ]',
+    );
+    expect(stepChildren(xml)).toEqual(['CallbackScriptState', 'Calculation', 'Script', 'CallbackScript']);
+    expect(xml).toContain('<ScriptName id="0" name="Otro Script"/>');
+  });
+});
