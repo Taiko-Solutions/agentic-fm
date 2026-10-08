@@ -962,6 +962,38 @@ function normalizeSpecifiedMode(entry: GrammarEntry, hrParams: string[]): string
   return out;
 }
 
+// Cross-file Perform Script: FileMaker's HR names the other file as a `File: "Y"`
+// token or inside the script token (`"X" from file: "Y"`). Offline there is no
+// data-source id, but FileMaker resolves <FileReference id="0" name="Y"> and
+// <Script id="0" name="X"> BY NAME on paste (verified 2026-10); with name="" it
+// drops the reference and the step calls `<unknown>`. So an empty file name is
+// not convertible. The target script's id belongs to the other file: never
+// resolve it against the caller's context.
+const FILE_TOKEN = /^File:\s*(.*)$/i;
+const FROM_FILE_TOKEN = /^(.*?)\s+from file:\s*("[^"]*"|\S*)(?:\s*\(file not open\))?$/i;
+
+/** Pulls the cross-file target out of the HR tokens; `file` is null for same-file calls. */
+function splitCrossFile(entry: GrammarEntry, hrParams: string[]): { hrParams: string[]; file: string | null } {
+  if (entry.name !== 'Perform Script') return { hrParams, file: null };
+  let file: string | null = null;
+  const out: string[] = [];
+  for (const raw of hrParams) {
+    const t = trim(raw);
+    const f = FILE_TOKEN.exec(t);
+    if (f) { file = unquote(trim(f[1])); continue; }
+    const ff = FROM_FILE_TOKEN.exec(t);
+    if (ff) { file = unquote(ff[2]); out.push(ff[1]); continue; }
+    out.push(raw);
+  }
+  if (file !== null && trim(file) === '') {
+    throw new Error(
+      'Perform Script a otro archivo sin nombre de archivo: no convertible ' +
+        '(FileMaker no resuelve la referencia sin nombre). Copia el paso desde FileMaker.',
+    );
+  }
+  return { hrParams: out, file };
+}
+
 /** By name (<Calculated>) and From list (<Script>) are exclusive: by name drops <Script>. */
 function isByNameCall(entry: GrammarEntry, values: string[]): boolean {
   if (!(entry.name in SPECIFIED_BY_NAME_LABEL)) return false;
@@ -1000,7 +1032,8 @@ export function convertStepWithCatalog(
   const params = entry.params;
   let xml = `  <Step enable="${!line.disabled ? 'True' : 'False'}" id="${entry.id}" name="${escXml(entry.name)}">\n`;
 
-  const values = matchParamValues(entry, normalizeSpecifiedMode(entry, line.params));
+  const crossFile = splitCrossFile(entry, normalizeSpecifiedMode(entry, line.params));
+  const values = matchParamValues(entry, crossFile.hrParams);
   const byName = isByNameCall(entry, values);
 
   // G10 attribute-bearing wrapper: a wrapper element may carry an enum value as an
@@ -1129,7 +1162,14 @@ export function convertStepWithCatalog(
       }
     }
 
-    if (govHandled) {
+    if (crossFile.file !== null && param.xmlElement === 'FileReference') {
+      const file = escXml(crossFile.file);
+      piece =
+        `    <FileReference id="0" name="${file}">\n` +
+        `      <UniversalPathList>file:${file}</UniversalPathList>\n    </FileReference>`;
+    } else if (crossFile.file !== null && param.type === 'script') {
+      if (trim(hrValue)) piece = `    <Script id="0" name="${escXml(unquote(hrValue))}"/>`;
+    } else if (govHandled) {
       // piece already decided (a value or intentionally empty).
     } else if (param.type === 'boolean') {
       if (impliedBool.has(pi)) {
