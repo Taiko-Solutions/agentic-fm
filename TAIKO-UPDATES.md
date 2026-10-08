@@ -13,6 +13,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - Comprobado con 458 líneas `Perform Script*` reales de proyectos cliente (2026-10): ningún error X004. Sigue sin resolverse la llamada a **otro archivo** (`File: "…"`): el conversor offline no conoce la fuente de datos externa y emite un `<FileReference>` que no sirve. Para esas, copia el paso desde FileMaker.
 - Test nuevo `webviewer/test/hr-to-xml.perform-script-specified.test.ts`.
 
+## 2026-10-08 — `clipboard.py read` ya no confunde texto plano con un menú
+
+**Acción opcional:** si hiciste un `clipboard.py read` que respondió `Saved ut16 (Menu)` y no habías copiado un menú, el archivo que guardó está vacío o tiene texto suelto. Vuelve a copiar los pasos en Script Workspace con ⌘C y repite el `read`.
+
+- `«class ut16»` aparece en cualquier texto copiado en macOS, no solo en los menús de FileMaker. `read` trataba como menú todo lo que la llevara, y con el portapapeles vacío guardaba un archivo de 1 byte. Ahora la cuenta como menú solo si el texto contiene `<CustomMenu`, `<CustomMenuSet` o `<fmxmlsnippet`. Se arregla en las dos rutas: AppKit y osascript.
+- Si no hay objetos de FileMaker, `read` sale con código 1, no escribe el archivo y avisa: "el portapapeles no contiene objetos de FileMaker: copia los pasos en Script Workspace con ⌘C".
+- La decisión está en una función pura, `classify_clipboard()`. Los tests nuevos están en `agent/scripts/test_clipboard.py` y los ejecuta `ci_checks.py`.
+
 ## 2026-10-07 — Conversor HR→XML del webviewer: Perform Script con parámetro ya se pega bien
 
 **Acción opcional:** si convertiste con el webviewer (HR→XML) algún `Perform Script` con parámetro y ya lo pegaste, revísalo en FileMaker: un paso que muestra `From list ; ""` no llama a nada. Vuelve a convertirlo y pégalo de nuevo.
