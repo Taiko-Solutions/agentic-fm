@@ -4,6 +4,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-08 — Clew: `CreateVarsFromKeys` convierte en fecha los parámetros de texto que lo parecen
+
+**Acción opcional:** si tienes Controllers Clew que reciben **texto libre** (porcentajes, importes tecleados, listas separadas por comas o puntos, códigos tipo `1.2`), revisa que no usen directamente la `$variable` de `error.CreateVarsFromKeys`. Reléela con `JSONGetElement ( Get ( ScriptParameter ) ; "Clave" )`.
+
+- `json.CreateVars` tipifica cada valor: si el texto es una fecha válida, crea la variable con `GetAsDate`. `"7.5"` llega como `7.5.2026` y `"1,2,3"` como `1,2,2003`; `"7,5"` llega bien. Sin error ni aviso, y depende del separador que teclee el usuario. Encontrado en un proyecto cliente (2026-10) con un test automático.
+- Aviso y patrón en `agent/docs/taiko/knowledge/clew-pattern.md` (*Parameter Parsing and Validation*); keywords nuevas en `MANIFEST.md`; nota en las plantillas `clew-transactional-dual.md` y `clew-simple.md`.
+- `.gitignore`: `agent/debug/`, donde el companion puede dejar `output.json` de `Agentic-fm Debug`.
+
 ## 2026-10-08 — Conversor HR→XML del webviewer: Perform Script a otro archivo
 
 **Acción opcional:** si convertiste con el webviewer un `Perform Script` a otro archivo (`File: "…"` o `"Script" from file: "…"`) y lo pegaste, en FileMaker sale como `<unknown>`. Vuelve a convertirlo.
