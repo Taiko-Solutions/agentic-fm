@@ -928,6 +928,46 @@ function emitFieldList(param: GrammarParam, hrValue: string, resolver: IdResolve
 // ---------------------------------------------------------------------------
 // The orchestrator: parse-HR → emit-XML in catalog param order.
 // ---------------------------------------------------------------------------
+// FileMaker's HR prints the script-selection mode of these steps as
+// `Specified: From list` / `Specified: By name` (also bare `From list` /
+// `By name`, before or after the script). It is a mode marker, not a value:
+// From list is the default and carries no token; By name labels the NEXT
+// token, the calculation, with the label the catalog reads for <Calculated>.
+const SPECIFIED_BY_NAME_LABEL: Record<string, string> = {
+  'Perform Script': 'By name',
+  'Perform Script on Server': 'Specified',
+  'Perform Script on Server with Callback': 'Specified',
+};
+const FROM_LIST_TOKEN = /^(?:Specified:\s*)?From list$/i;
+const BY_NAME_TOKEN = /^(?:Specified:\s*)?By name$/i;
+// A token that is itself "Label: …" (not a "Table::Field" reference).
+const LABELED_TOKEN = /^[A-Za-z][A-Za-z ]*:(?!:)/;
+
+function normalizeSpecifiedMode(entry: GrammarEntry, hrParams: string[]): string[] {
+  const label = SPECIFIED_BY_NAME_LABEL[entry.name];
+  if (!label) return hrParams;
+  const out: string[] = [];
+  for (let i = 0; i < hrParams.length; i++) {
+    const t = trim(hrParams[i]);
+    if (FROM_LIST_TOKEN.test(t)) continue;
+    if (BY_NAME_TOKEN.test(t)) {
+      const next = i + 1 < hrParams.length ? trim(hrParams[i + 1]) : '';
+      const calc = next !== '' && !LABELED_TOKEN.test(next) ? next : '';
+      if (calc !== '') i++;
+      out.push(`${label}: ${calc}`);
+      continue;
+    }
+    out.push(hrParams[i]);
+  }
+  return out;
+}
+
+/** By name (<Calculated>) and From list (<Script>) are exclusive: by name drops <Script>. */
+function isByNameCall(entry: GrammarEntry, values: string[]): boolean {
+  if (!(entry.name in SPECIFIED_BY_NAME_LABEL)) return false;
+  return entry.params.some((p, pi) => paramKey(p) === 'Calculated' && trim(values[pi]) !== '');
+}
+
 // Steps whose top-level children FileMaker reads in an order other than the catalog
 // param order (which follows the HR signature). Perform Script: with <Script> before
 // the parameter <Calculation> the paste is accepted but the target stays unresolved
@@ -960,7 +1000,8 @@ export function convertStepWithCatalog(
   const params = entry.params;
   let xml = `  <Step enable="${!line.disabled ? 'True' : 'False'}" id="${entry.id}" name="${escXml(entry.name)}">\n`;
 
-  const values = matchParamValues(entry, line.params);
+  const values = matchParamValues(entry, normalizeSpecifiedMode(entry, line.params));
+  const byName = isByNameCall(entry, values);
 
   // G10 attribute-bearing wrapper: a wrapper element may carry an enum value as an
   // attribute (FM serializes <Action value="Queue"> holding children).
@@ -1061,6 +1102,7 @@ export function convertStepWithCatalog(
     const param = params[pi];
     const hrValue = values[pi];
     if (skipParam[pi]) continue;
+    if (byName && param.type === 'script') continue;
 
     const isTextElement =
       (param.type === 'text' || param.type === 'name') && param.xmlElement === 'Text';
