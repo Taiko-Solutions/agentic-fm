@@ -4,6 +4,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-08 — `clipboard.py read` ya no confunde texto plano con un menú
+
+**Acción opcional:** si hiciste un `clipboard.py read` que respondió `Saved ut16 (Menu)` y no habías copiado un menú, el archivo que guardó está vacío o tiene texto suelto. Vuelve a copiar los pasos en Script Workspace con ⌘C y repite el `read`.
+
+- `«class ut16»` aparece en cualquier texto copiado en macOS, no solo en los menús de FileMaker. `read` trataba como menú todo lo que la llevara, y con el portapapeles vacío guardaba un archivo de 1 byte. Ahora la cuenta como menú solo si el texto contiene `<CustomMenu`, `<CustomMenuSet` o `<fmxmlsnippet`. Se arregla en las dos rutas: AppKit y osascript.
+- Si no hay objetos de FileMaker, `read` sale con código 1, no escribe el archivo y avisa: "el portapapeles no contiene objetos de FileMaker: copia los pasos en Script Workspace con ⌘C".
+- La decisión está en una función pura, `classify_clipboard()`. Los tests nuevos están en `agent/scripts/test_clipboard.py` y los ejecuta `ci_checks.py`.
+
 ## 2026-10-07 — `fm_xml_to_snippet.py`: Go to Layout por cálculo y Perform Script con parámetro ya se pegan bien
 
 **Acción requerida:** vuelve a convertir con `fm_xml_to_snippet.py` cualquier XML de `agent/sandbox/` que hayas sacado de `xml_parsed/scripts/` y aún no hayas pegado. Lo que ya está pegado en FileMaker revísalo así: en los `Go to Layout`, un layout que sale como `<BROKEN REFERENCE>`, y en los `Perform Script`, un paso que muestra `From list ; ""` o `By name:` con el parámetro.
