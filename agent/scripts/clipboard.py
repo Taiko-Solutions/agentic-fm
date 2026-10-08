@@ -97,13 +97,65 @@ def _pb_type_str(cls):
     return f"CorePasteboardFlavorType 0x{_FM_CLASS_HEX[cls]:08X}"
 
 
+NO_FM_OBJECTS_MSG = (
+    'ERROR: el portapapeles no contiene objetos de FileMaker: '
+    'copia los pasos en Script Workspace con ⌘C'
+)
+
+# «class ut16» is present for ANY plain text copied on macOS, not just FM menus.
+# Only treat it as a menu object when the text actually holds menu / snippet XML.
+_MENU_XML_RE = re.compile(r'<(CustomMenu|CustomMenuSet|fmxmlsnippet)[\s>/]')
+
+
+def is_menu_xml(text):
+    """True when ut16 clipboard text is FM menu XML (or at least an fmxmlsnippet)."""
+    return bool(text) and _MENU_XML_RE.search(text) is not None
+
+
+def classify_clipboard(binary_cls, ut16_text):
+    """Pure decision: which class to read from the clipboard, or None.
+
+    binary_cls -- FM binary descriptor code found on the clipboard (e.g. 'XMSS'), or None
+    ut16_text  -- decoded «class ut16» text on the clipboard, or None if absent
+    """
+    if binary_cls in FM_CLASSES:
+        return binary_cls
+    if is_menu_xml(ut16_text):
+        return 'ut16'
+    return None
+
+
 def _nspasteboard_detect():
     """Detect which FM class is on the clipboard via NSPasteboard. Returns code or None."""
     pb = NSPasteboard.generalPasteboard()
-    for cls in _FM_CLASS_HEX:
+    for cls in FM_CLASSES:
         if pb.dataForType_(_pb_type_str(cls)) is not None:
             return cls
-    return None
+    return classify_clipboard(None, _nspasteboard_read_ut16_text())
+
+
+def _nspasteboard_read_ut16_text():
+    """Decoded «class ut16» text via NSPasteboard, or None if absent."""
+    raw_bytes = _nspasteboard_read_bytes('ut16')
+    if raw_bytes is None:
+        return None
+    # FM writes menus with a BOM; plain text may come without one (native LE on macOS).
+    if raw_bytes[:2] in (b'\xff\xfe', b'\xfe\xff'):
+        return raw_bytes.decode('utf-16', errors='replace')
+    return raw_bytes.decode('utf-16-le', errors='replace')
+
+
+def _osascript_read_ut16_text():
+    """Decoded «class ut16» text via osascript, or None on failure."""
+    # Unlike binary FM descriptor classes, osascript returns ut16 clipboard content
+    # as plain UTF-8 text (not as «data ut16XXXX»), so we decode stdout directly.
+    result = subprocess.run(
+        ['osascript', '-e', 'the clipboard as «class ut16»'],
+        capture_output=True
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.decode('utf-8', errors='replace')
 
 
 def _nspasteboard_read_bytes(cls):
@@ -153,12 +205,11 @@ end try"""
     result = subprocess.run(['osascript', '-e', script], capture_output=True, text=True)
     cls = result.stdout.strip()
     if cls == 'ut16':
-        return 'ut16'
+        # ut16 is only a hint: plain text carries it too. Check the content.
+        return classify_clipboard(None, _osascript_read_ut16_text())
     # AppleScript returns the class as «class XMSS» — extract just the four-letter code
     match = re.search(r'\u00abclass (\w+)\u00bb', cls)
-    if match:
-        return match.group(1)
-    return cls if cls else None
+    return classify_clipboard(match.group(1) if match else cls, None)
 
 
 def detect_class_from_xml(xml_text):
@@ -194,7 +245,7 @@ def read_from_clipboard(output_path=None):
     """Extract FM objects from clipboard and output as formatted XML."""
     cls = detect_clipboard_class()
     if not cls:
-        print('ERROR: No FileMaker objects found on clipboard.', file=sys.stderr)
+        print(NO_FM_OBJECTS_MSG, file=sys.stderr)
         sys.exit(1)
 
     if cls in UT16_CLASSES:
@@ -251,24 +302,12 @@ def read_from_clipboard(output_path=None):
 
 def _read_ut16_from_clipboard(output_path=None):
     """Read a UTF-16 menu object from the clipboard (CustomMenu / CustomMenuSet)."""
-    if _HAS_APPKIT:
-        raw_bytes = _nspasteboard_read_bytes('ut16')
-        if raw_bytes is None:
-            print('ERROR: Could not read ut16 data from clipboard.', file=sys.stderr)
-            sys.exit(1)
-        # NSPasteboard gives us the raw UTF-16 bytes (with BOM); decode directly.
-        xml = raw_bytes.decode('utf-16')
-    else:
-        # Unlike binary FM descriptor classes, osascript returns ut16 clipboard content
-        # as plain UTF-8 text (not as «data ut16XXXX»), so we decode stdout directly.
-        result = subprocess.run(
-            ['osascript', '-e', 'the clipboard as \u00abclass ut16\u00bb'],
-            capture_output=True
-        )
-        if result.returncode != 0:
-            print(f'ERROR: {result.stderr.decode().strip()}', file=sys.stderr)
-            sys.exit(1)
-        xml = result.stdout.decode('utf-8')
+    xml = _nspasteboard_read_ut16_text() if _HAS_APPKIT else _osascript_read_ut16_text()
+    # Re-check: the clipboard may have changed since detection. Never write a file
+    # from plain text that is not menu XML.
+    if not is_menu_xml(xml):
+        print(NO_FM_OBJECTS_MSG, file=sys.stderr)
+        sys.exit(1)
 
     # Pretty-print with xmllint
     fmt = subprocess.run(['xmllint', '--format', '-'], input=xml.encode('utf-8'), capture_output=True)
