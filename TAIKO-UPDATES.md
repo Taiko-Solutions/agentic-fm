@@ -4,6 +4,15 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-08 — Conversor HR→XML del webviewer: entiende el `Specified:` de Perform Script
+
+**Acción opcional:** si pegaste en el webviewer un `Perform Script` o `Perform Script on Server` copiado de Script Workspace (con `Specified: From list` o `Specified: By name`) y lo pegaste convertido en FileMaker, revísalo: puede llamar a un script que no existe o no llamar a nada. Vuelve a convertirlo.
+
+- FileMaker escribe el modo de elegir el script como `Specified: From list` o `Specified: By name` (a veces sin `Specified:`, antes o después del nombre). El conversor lo tomaba como un valor: en `Perform Script` el texto `Specified: From list` acababa de nombre del script y el nombre real dentro de `<FileReference>`; en `Perform Script on Server` (y `… with Callback`) "From list" acababa en `<Calculated>`, que es el modo por nombre, junto a `<Script>`. Ese paso no llama a nada (fmlint X004).
+- Ahora `From list` no deja rastro (es el modo por defecto) y `By name` toma como cálculo el token siguiente. En modo por nombre no se emite `<Script>`.
+- Comprobado con 458 líneas `Perform Script*` reales de proyectos cliente (2026-10): ningún error X004. Sigue sin resolverse la llamada a **otro archivo** (`File: "…"`): el conversor offline no conoce la fuente de datos externa y emite un `<FileReference>` que no sirve. Para esas, copia el paso desde FileMaker.
+- Test nuevo `webviewer/test/hr-to-xml.perform-script-specified.test.ts`.
+
 ## 2026-10-08 — `clipboard.py read` ya no confunde texto plano con un menú
 
 **Acción opcional:** si hiciste un `clipboard.py read` que respondió `Saved ut16 (Menu)` y no habías copiado un menú, el archivo que guardó está vacío o tiene texto suelto. Vuelve a copiar los pasos en Script Workspace con ⌘C y repite el `read`.
@@ -11,6 +20,15 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - `«class ut16»` aparece en cualquier texto copiado en macOS, no solo en los menús de FileMaker. `read` trataba como menú todo lo que la llevara, y con el portapapeles vacío guardaba un archivo de 1 byte. Ahora la cuenta como menú solo si el texto contiene `<CustomMenu`, `<CustomMenuSet` o `<fmxmlsnippet`. Se arregla en las dos rutas: AppKit y osascript.
 - Si no hay objetos de FileMaker, `read` sale con código 1, no escribe el archivo y avisa: "el portapapeles no contiene objetos de FileMaker: copia los pasos en Script Workspace con ⌘C".
 - La decisión está en una función pura, `classify_clipboard()`. Los tests nuevos están en `agent/scripts/test_clipboard.py` y los ejecuta `ci_checks.py`.
+
+## 2026-10-07 — Conversor HR→XML del webviewer: Perform Script con parámetro ya se pega bien
+
+**Acción opcional:** si convertiste con el webviewer (HR→XML) algún `Perform Script` con parámetro y ya lo pegaste, revísalo en FileMaker: un paso que muestra `From list ; ""` no llama a nada. Vuelve a convertirlo y pégalo de nuevo.
+
+- El conversor TypeScript (`webviewer/src/converter/catalog-emit.ts`) emitía `<Script>` antes que el `<Calculation>` del parámetro, porque sigue el orden del catálogo, que es el del HR. Con ese orden FileMaker acepta el paste pero deja el destino sin resolver (fmlint X004). Ahora emite en el orden de FileMaker, `FileReference → Calculated → Calculation → Script`, igual que el conversor Python (`_XML_CHILD_ORDER` en `catalog_emit.py`).
+- Con el `omitWhenEmpty` que el catálogo ya trae en el `FileReference` de Perform Script, una llamada al mismo archivo tampoco arrastra aquí un `<FileReference></FileReference>` vacío.
+- Test nuevo `webviewer/test/hr-to-xml.perform-script-order.test.ts`. El fixture de `Insert Text` en `hr-to-xml.json` se re-bendice: estaba desfasado desde que el catálogo pasó a poner `<Text>` antes que `<Field>`.
+- `Perform Script on Server` y `… with Callback` no cambian: comprobado contra pasos copiados de FileMaker 2026, ya emiten el parámetro antes de `<Script>`. Quedan fijados con test.
 
 ## 2026-10-07 — `fm_xml_to_snippet.py`: Go to Layout por cálculo y Perform Script con parámetro ya se pegan bien
 
