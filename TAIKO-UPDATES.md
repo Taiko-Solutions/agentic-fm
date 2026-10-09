@@ -4,6 +4,15 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-09 — `fm_xml_to_snippet.py`: `Send Mail` «Con diálogo» ya no se invierte
+
+**Acción opcional:** si regeneraste con `fm_xml_to_snippet.py` algún guion con `Send Mail` y lo pegaste, revisa ese paso en FileMaker: si el original abría el mensaje para revisarlo («Con diálogo») y ahora sale sin diálogo, el correo va directo a la bandeja de salida. Vuelve a convertirlo o marca «Con diálogo» a mano.
+
+- FileMaker 2026 exporta el diálogo de `Send Mail` como `<Boolean type="With dialog" value="True">`; el decodificador (`saxml_read.py`, `_dec_send_mail`) suponía el antiguo `type="No dialog"` y lo invertía (`NoInteract="True"`). Ahora lee el `type` y acepta los dos.
+- `snippet_to_hr.py` lo delataba como «With dialog: Off» en un `Send Mail` que en FileMaker tiene diálogo.
+- Tests nuevos en `agent/scripts/test_fm_xml_to_snippet.py` (`TestSendMailDialog`: «With dialog» True/False y «No dialog» antiguo).
+- Conocimiento nuevo `agent/docs/taiko/knowledge/insert-from-url-curl-gotchas.md`: `-F "file=@$var"` sube con el nombre de la variable (usar `;filename=`), un 401 llega como error de `Insert from URL` (leer el código con `-D` antes de `ThrowIfLast`) y `--max-time` en llamadas que envían.
+
 ## 2026-10-08 — Conversor HR→XML del webviewer: Perform Script a otro archivo
 
 **Acción opcional:** si convertiste con el webviewer un `Perform Script` a otro archivo (`File: "…"` o `"Script" from file: "…"`) y lo pegaste, en FileMaker sale como `<unknown>`. Vuelve a convertirlo.
