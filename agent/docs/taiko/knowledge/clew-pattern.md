@@ -77,6 +77,27 @@ Las funciones Clew tienen dos tipos de segundo parámetro que **NO deben confund
 ### Parameter Parsing and Validation
 
 - `error.CreateVarsFromKeys(json; namespace)` — parses a JSON object into local `$variables`. The `namespace` is prepended to each variable name (use `""` unless you need a prefix). Returns True (error) if the JSON is invalid.
+
+> ⚠️ **`CreateVarsFromKeys` convierte en fecha los textos que lo parecen.** Delega en `json.CreateVars`, que **tipifica** cada valor: si `IsValid ( GetAsDate ( texto ) )`, crea la variable con `GetAsDate`. No hay error ni aviso:
+>
+> | Enviado (`JSONString`) | `$variable` recibida |
+> |---|---|
+> | `"7,5"` | `7,5` |
+> | `"7.5"` | `7.5.2026` (07/05 del año en curso) |
+> | `"1,2,3"` | `1,2,2003` (01/02/2003) |
+>
+> Afecta a cualquier parámetro de **texto libre**: porcentajes e importes tecleados por el usuario, listas separadas por comas o puntos, códigos tipo `1.2`. Depende del separador que use el usuario (`7,5` pasa, `7.5` no), así que se escapa en pruebas. No es un problema de pegado del XML: ocurre al ejecutar.
+>
+> **Regla:** tras `CreateVarsFromKeys`, relee en crudo esos parámetros:
+>
+> ```
+> Exit Loop If [ error.CreateVarsFromKeys ( Get ( ScriptParameter ) ; "" ) ]
+> # Texto libre en crudo: json.CreateVars convierte "7.5" o "1,2,3" en fechas
+> Insert Calculated Result [ Select: ON ; Target: $Porcentaje ; JSONGetElement ( Get ( ScriptParameter ) ; "Porcentaje" ) ]
+> ```
+>
+> IDs (UUIDNumber), booleanos y números enviados como `JSONNumber` no se ven afectados.
+
 - `error.ThrowIfMissingParam(variableList; namespace)` — checks that all variables in the semicolon-delimited list have values. The `namespace` must match what was used in `CreateVarsFromKeys`. Throws `_error_MISSING_REQUIRED_PARAM` if any are empty.
 - `error.ThrowIfMissingVar(variableList; namespace)` — same as above but for variables that may have been set by other means. Same `namespace` rule applies.
 

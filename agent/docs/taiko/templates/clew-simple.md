@@ -4,6 +4,8 @@ Human-readable script template for read-only operations, queries, navigation, an
 
 Replace `[Entity]` and `[Table]` with the actual entity and table names from CONTEXT.json.
 
+> **Parámetros de texto libre:** `error.CreateVarsFromKeys` convierte en fecha los textos que lo parecen (`"7.5"` → 07/05/año). Si el script recibe porcentajes, importes tecleados, listas o códigos como texto, reléelos después con `JSONGetElement ( Get ( ScriptParameter ) ; "Clave" )`. Ver [`../knowledge/clew-pattern.md`](../knowledge/clew-pattern.md) → *Parameter Parsing and Validation*.
+
 ---
 
 ## Controller Script: `Buscar[Entity].Controller`

@@ -7,6 +7,8 @@ Plantilla canónica del patrón Clew transaccional **dual padre/hijo**: el mismo
 > Patrón completo, reglas de oro y validación empírica en [`../knowledge/clew-transactional-dual.md`](../knowledge/clew-transactional-dual.md).
 >
 > **Requisito — funciones personalizadas:** el archivo FileMaker debe tener Clew ([`../custom_functions/clew.xml`](../custom_functions/clew.xml)) y las cuatro funciones del patrón dual `Clew.SetError` / `Clew.ClearError` / `Clew.HasError` / `Clew.GetError` ([`../custom_functions/clew-transactional.xml`](../custom_functions/clew-transactional.xml)). Pégalas **antes** que el script: si falta alguna, FileMaker comenta con `/* */` el cálculo que la usa y el script deja de propagar el error sin avisar.
+>
+> **Parámetros de texto libre:** `error.CreateVarsFromKeys` convierte en fecha los textos que lo parecen (`"7.5"` → 07/05/año). Si el script recibe porcentajes, importes tecleados, listas o códigos como texto, reléelos después con `JSONGetElement ( Get ( ScriptParameter ) ; "Clave" )`. Ver [`../knowledge/clew-pattern.md`](../knowledge/clew-pattern.md) → *Parameter Parsing and Validation*.
 
 ## Script (human-readable)
 
