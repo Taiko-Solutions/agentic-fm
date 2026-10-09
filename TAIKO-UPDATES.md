@@ -4,6 +4,16 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-09 — Upstream (petrowsky) hasta el 24-sep: 27 arreglos de catálogo y conversores
+
+**Acción opcional:** si regeneraste con el conversor (Python o webviewer) guiones con `Configure AI Account`, `Generate Response from Model`, `Fine-Tune Model`, `Loop` con «Flush: Minimum» o `Sort Records` con «Restore», vuelve a convertirlos: ahora salen como los escribe FileMaker 2026.
+
+- Traídos con cherry-pick (petrowsky reescribe su historia y un merge daba 50 conflictos falsos): `Configure AI Account` emite el `<SetLLMAccount>` de FM 2026 y lee también el antiguo `<SetLLMAccout>`; `Generate Response from Model` (220) modelado de punta a punta; `Loop` conserva «Collapsed» y «Flush» (y escribe `Min`, no «Minimum»); `Sort Records` acopla «Restore» a la ordenación; `Perform Script` a otro archivo con `fromFileElement`; etiquetas de varios pasos de FM 2026 (Insert Embedding, Perform Semantic Find, Configure Local Notification, NFC, Set Zoom Level…); `omitWhenEmpty` en Go to Record y Go to Portal Row.
+- Decisiones de Taiko que se mantienen: el webviewer sigue emitiendo `id="0"` en `<FileReference>`/`<Script>` de un `Perform Script` a otro archivo (comprobado en FileMaker, resuelve por nombre); el `<Calculated>` de un `Perform Script` por nombre no se pierde; `Send Mail` «Con diálogo».
+- fmlint X001 acepta los alias de elemento que declara el catálogo (`parentElementAliases`/`wrapperElementAliases`, p. ej. `<SetLLMAccout>`): ya no los marca como parámetro desconocido. Tests en `agent/fmlint/tests/test_param_fidelity.py`.
+- Goldens de conformidad regenerados con el código combinado (los 3 casos propios de Taiko conservan su salida).
+- `main` del fork sincronizado con petrowsky (`1c0b984`).
+
 ## 2026-10-09 — `fm_xml_to_snippet.py`: `Send Mail` «Con diálogo» ya no se invierte
 
 **Acción opcional:** si regeneraste con `fm_xml_to_snippet.py` algún guion con `Send Mail` y lo pegaste, revisa ese paso en FileMaker: si el original abría el mensaje para revisarlo («Con diálogo») y ahora sale sin diálogo, el correo va directo a la bandeja de salida. Vuelve a convertirlo o marca «Con diálogo» a mano.

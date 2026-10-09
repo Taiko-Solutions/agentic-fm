@@ -104,9 +104,12 @@ describe('cross-file Perform Script (fromFileElement grammar)', () => {
     const out = hrToXml(
       'Perform Script [ "Sandbox" from file: "QuickStart" ; Specified: From list ; Parameter: "hi" ]',
     ).xml;
-    expect(out).toContain('<FileReference name="QuickStart">');
+    // Taiko (TAIKO-UPDATES 2026-10-08): the TS converter emits id="0" on both
+    // references; verified pasting in FileMaker 2026 that it resolves the data
+    // source and the remote script BY NAME. Accept the id-less upstream form too.
+    expect(out).toMatch(/<FileReference(?: id="0")? name="QuickStart">/);
     expect(out).toContain('<UniversalPathList>file:QuickStart</UniversalPathList>');
-    expect(out).toContain('<Script name="Sandbox"/>');
+    expect(out).toMatch(/<Script(?: id="0")? name="Sandbox"\/>/);
     // The clause is fully consumed — never leaked into a swallowed script name.
     expect(out).not.toContain('from file:');
   });
