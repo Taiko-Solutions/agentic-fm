@@ -87,6 +87,44 @@ REVERT_TX_FULL = '''\
 </Step>'''
 
 
+# Send Mail as FileMaker 2026 serializes it: the dialog flag is <Boolean type="With dialog">.
+# value="True" means the mail client opens the message for review (NoInteract=False).
+def _send_mail(dialog_type: str, value: str) -> str:
+    return f'''\
+<Step hash="0" id="63" name="Send Mail" enable="True">
+    <Options>16416</Options>
+    <ParameterValues membercount="1">
+        <Parameter type="Email">
+            <Boolean type="{dialog_type}" position="159" value="{value}"></Boolean>
+            <Send OAuthAuthentication="False" SMTP="False">
+                <Multiple value="False"></Multiple>
+                <To>
+                    <CollectAddresses value="False"></CollectAddresses>
+                    <Calculation datatype="1" position="0"><Calculation><Text><![CDATA[$to]]></Text></Calculation></Calculation>
+                </To>
+                <Subject><Calculation datatype="1" position="3"><Calculation><Text><![CDATA["Asunto"]]></Text></Calculation></Calculation></Subject>
+                <Message><Calculation datatype="1" position="4"><Calculation><Text><![CDATA["Cuerpo"]]></Text></Calculation></Calculation></Message>
+            </Send>
+        </Parameter>
+    </ParameterValues>
+</Step>'''
+
+
+class TestSendMailDialog(unittest.TestCase):
+
+    def test_with_dialog_true_opens_message(self):
+        out = _translate(_send_mail("With dialog", "True"))
+        self.assertIn('<NoInteract state="False"/>', out)
+
+    def test_with_dialog_false_goes_to_outbox(self):
+        out = _translate(_send_mail("With dialog", "False"))
+        self.assertIn('<NoInteract state="True"/>', out)
+
+    def test_legacy_no_dialog_true_goes_to_outbox(self):
+        out = _translate(_send_mail("No dialog", "True"))
+        self.assertIn('<NoInteract state="True"/>', out)
+
+
 class TestRevertTransaction(unittest.TestCase):
 
     def test_full_form_emits_all_parameters(self):

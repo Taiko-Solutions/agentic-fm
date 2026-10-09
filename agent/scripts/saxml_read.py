@@ -1718,9 +1718,14 @@ def _dec_send_mail(entry: CatalogEntry, step_el: ET.Element) -> list[str]:
     v.set("SMTPEncryptionTLS", xml="SMTPEncryptionType")
     v.set("SMTPAuthenticationPlain", xml="SMTPAuthenticationType")
     v.set("OAuthProviderGoogle", xml="OAuthProvider")
-    nd = em.find("Boolean")  # <Boolean type="No dialog">
+    # FM 2026 serializes <Boolean type="With dialog" value="True"> (open the message for
+    # review); older exports used type="No dialog" with the opposite meaning. Read the
+    # type instead of assuming one: inverting "With dialog" sends mail straight to the outbox.
+    nd = em.find("Boolean")
     if nd is not None:
-        v.set("Off" if nd.get("value") == "True" else "On", xml="NoInteract")
+        is_true = nd.get("value") == "True"
+        with_dialog = is_true if nd.get("type") == "With dialog" else not is_true
+        v.set("On" if with_dialog else "Off", xml="NoInteract")
     upl = em.find("UniversalPathList")
     if upl is not None:
         loc = upl.find(".//Location")
