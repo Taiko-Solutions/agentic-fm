@@ -4,6 +4,15 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-09 — `fm_xml_to_snippet.py`: `Send Mail` «Con diálogo» ya no se invierte
+
+**Acción opcional:** si regeneraste con `fm_xml_to_snippet.py` algún guion con `Send Mail` y lo pegaste, revisa ese paso en FileMaker: si el original abría el mensaje para revisarlo («Con diálogo») y ahora sale sin diálogo, el correo va directo a la bandeja de salida. Vuelve a convertirlo o marca «Con diálogo» a mano.
+
+- FileMaker 2026 exporta el diálogo de `Send Mail` como `<Boolean type="With dialog" value="True">`; el decodificador (`saxml_read.py`, `_dec_send_mail`) suponía el antiguo `type="No dialog"` y lo invertía (`NoInteract="True"`). Ahora lee el `type` y acepta los dos.
+- `snippet_to_hr.py` lo delataba como «With dialog: Off» en un `Send Mail` que en FileMaker tiene diálogo.
+- Tests nuevos en `agent/scripts/test_fm_xml_to_snippet.py` (`TestSendMailDialog`: «With dialog» True/False y «No dialog» antiguo).
+- Conocimiento nuevo `agent/docs/taiko/knowledge/insert-from-url-curl-gotchas.md`: `-F "file=@$var"` sube con el nombre de la variable (usar `;filename=`), un 401 llega como error de `Insert from URL` (leer el código con `-D` antes de `ThrowIfLast`) y `--max-time` en llamadas que envían.
+
 ## 2026-10-08 — Clew: `CreateVarsFromKeys` convierte en fecha los parámetros de texto que lo parecen
 
 **Acción opcional:** si tienes Controllers Clew que reciben **texto libre** (porcentajes, importes tecleados, listas separadas por comas o puntos, códigos tipo `1.2`), revisa que no usen directamente la `$variable` de `error.CreateVarsFromKeys`. Reléela con `JSONGetElement ( Get ( ScriptParameter ) ; "Clave" )`.
@@ -38,6 +47,14 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - `«class ut16»` aparece en cualquier texto copiado en macOS, no solo en los menús de FileMaker. `read` trataba como menú todo lo que la llevara, y con el portapapeles vacío guardaba un archivo de 1 byte. Ahora la cuenta como menú solo si el texto contiene `<CustomMenu`, `<CustomMenuSet` o `<fmxmlsnippet`. Se arregla en las dos rutas: AppKit y osascript.
 - Si no hay objetos de FileMaker, `read` sale con código 1, no escribe el archivo y avisa: "el portapapeles no contiene objetos de FileMaker: copia los pasos en Script Workspace con ⌘C".
 - La decisión está en una función pura, `classify_clipboard()`. Los tests nuevos están en `agent/scripts/test_clipboard.py` y los ejecuta `ci_checks.py`.
+
+## 2026-10-08 — Conocimiento: trampas del separador decimal (`decimal-separator-traps.md`)
+
+**Acción opcional:** si tu solución lee importes con `ExecuteSQL` y los convierte con `GetAsNumber`, revísalos. En un archivo con coma decimal, `GetAsNumber ( "677.6" )` devuelve 6776. El arreglo es una CF `num.DesdeTextoPunto` (el texto está en el documento).
+
+- Documento nuevo en `agent/docs/taiko/knowledge/` con tres trampas que no dan error: `GetAsNumber` sobre texto de ExecuteSQL (×10/×100), `JSONRaw` con un número de FileMaker (trunca los decimales) y `JSONNumber` con valor vacío (serializa `0`).
+- Incluye cómo comprobarlo en el motor antes de pegar. Indexado en el MANIFEST.
+- Origen: proyecto cliente (2026-10), un MCP devolvía importes ×10/×100.
 
 ## 2026-10-07 — Conversor HR→XML del webviewer: Perform Script con parámetro ya se pega bien
 
