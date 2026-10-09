@@ -35,6 +35,29 @@ class ParamFidelityTestCase(unittest.TestCase):
     def lint(self, inner_xml):
         return self.runner.lint(WRAP.format(inner_xml), fmt="xml")
 
+    # -- X001: alias de elemento declarados en el catálogo ------------------
+
+    def test_x001_accepts_catalog_element_alias(self):
+        # FileMaker 2025 escribía <SetLLMAccout> (sic); FM 2026 lo corrigió a
+        # <SetLLMAccount>. El catálogo declara la grafía antigua como alias
+        # (parentElementAliases) y el conversor lee las dos: X001 no debe marcarla.
+        for contenedor in ("SetLLMAccount", "SetLLMAccout"):
+            result = self.lint(
+                '<Step enable="True" id="212" name="Configure AI Account">'
+                f'<{contenedor}><AccountName><Calculation><![CDATA["cuenta"]]></Calculation></AccountName></{contenedor}>'
+                '<LLMType value="ChatGPT"/><VerifySSLCertificates state="False"/></Step>'
+            )
+            x001 = [d.message for d in x_diags(result) if d.rule_id == "X001"]
+            self.assertEqual(x001, [], contenedor)
+
+    def test_x001_still_flags_unknown_element(self):
+        result = self.lint(
+            '<Step enable="True" id="212" name="Configure AI Account">'
+            '<SetLLMCuenta><AccountName><Calculation><![CDATA["cuenta"]]></Calculation></AccountName></SetLLMCuenta>'
+            '<LLMType value="ChatGPT"/></Step>'
+        )
+        self.assertTrue(any(d.rule_id == "X001" for d in x_diags(result)))
+
     # -- X003: FileReference vacío en same-file no es error ---------------
 
     def test_x003_empty_filereference_same_file_is_not_error(self):

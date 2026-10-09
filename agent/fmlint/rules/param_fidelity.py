@@ -54,6 +54,15 @@ def _allowed_children(entry: dict) -> set:
         top = _top_level_element(param)
         if top:
             allowed.add(top)
+        # Legacy spellings FileMaker also wrote for the same slot (catalog
+        # element-alias grammar, e.g. FM2025 <SetLLMAccout> for FM26
+        # <SetLLMAccount>): the converters read them, so they are not a
+        # mistyped parameter name. Only aliases of the element that surfaces
+        # as the direct child count (parent first, else wrapper).
+        alias_key = "parentElementAliases" if param.get("parentElement") else "wrapperElementAliases"
+        aliases = param.get(alias_key)
+        if isinstance(aliases, list):
+            allowed.update(a for a in aliases if isinstance(a, str) and a)
         ptype = param.get("type", "")
         # Bare calculation params serialize as a <Calculation> child even
         # when xmlElement carries a different logical name.

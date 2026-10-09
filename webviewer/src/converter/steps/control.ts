@@ -104,13 +104,41 @@ registerXmlToHr({
 });
 
 // --- Loop ---
+// Loop carries two options (catalog id 71): Collapsed -> <Restore state=…/>
+// (default Off/False) and Flush -> <FlushType value=…/> (default Always).
+// FLUSH HAS A LABEL/VALUE SPLIT: FileMaker WRITES value="Min" but DISPLAYS
+// "Minimum" in the Script Workspace (Always/Defer are written verbatim; only
+// Minimum abbreviates). So the human-readable clause uses "Minimum" while the
+// fmxmlsnippet must carry "Min" — emitting the display spelling as the XML value
+// produces a step FileMaker does not accept.
 registerHrToXml({
   stepNames: ['Loop'],
   toXml(line: ParsedLine): string {
+    // line.params is the semicolon-split clause list, e.g.
+    // `Loop [ Collapsed: Off ; Flush: Minimum ]` -> ["Collapsed: Off","Flush: Minimum"].
+    let restore = 'False'; // Collapsed default Off
+    let flush = 'Always';  // Flush default Always
+    for (const clause of line.params) {
+      const idx = clause.indexOf(':');
+      if (idx < 0) continue;
+      const label = clause.slice(0, idx).trim().toLowerCase();
+      const value = clause.slice(idx + 1).trim().toLowerCase();
+      if (label === 'collapsed') {
+        if (value === 'on') restore = 'True';
+        else if (value === 'off') restore = 'False';
+        // unknown token: keep the default (no warning channel here)
+      } else if (label === 'flush') {
+        // Map the display label to the value FileMaker writes; accept raw "Min".
+        if (value === 'always') flush = 'Always';
+        else if (value === 'minimum' || value === 'min') flush = 'Min';
+        else if (value === 'defer') flush = 'Defer';
+        // unknown token: keep Always
+      }
+    }
     return [
       stepOpen('Loop', !line.disabled),
-      '    <Restore state="False"/>',
-      '    <FlushType value="Always"/>',
+      `    <Restore state="${restore}"/>`,
+      `    <FlushType value="${flush}"/>`,
       '  </Step>',
     ].join('\n');
   },
@@ -118,8 +146,18 @@ registerHrToXml({
 
 registerXmlToHr({
   xmlStepNames: ['Loop'],
-  toHR(): string {
-    return 'Loop';
+  toHR(el: Element): string {
+    const restore = el.querySelector('Restore')?.getAttribute('state') ?? '';
+    const flush = el.querySelector('FlushType')?.getAttribute('value') ?? '';
+    const clauses: string[] = [];
+    // Emit a clause only when non-default, so a plain Loop stays bare "Loop".
+    if (restore.toLowerCase() === 'true') clauses.push('Collapsed: On');
+    if (flush && flush.toLowerCase() !== 'always') {
+      // XML value -> FileMaker's display label.
+      const label = flush.toLowerCase() === 'min' ? 'Minimum' : flush;
+      clauses.push(`Flush: ${label}`);
+    }
+    return clauses.length ? `Loop [ ${clauses.join(' ; ')} ]` : 'Loop';
   },
 });
 

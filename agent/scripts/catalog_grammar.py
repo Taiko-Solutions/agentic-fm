@@ -180,6 +180,13 @@ class StepParam:
     hr_slot: int | None = None
     hr_hidden: bool | None = None
     hr_bare: bool | None = None
+    # The exact inverse of ``hr_bare``: render a ``calc``/``field``/``script`` value
+    # WITH its ``hr_label`` prefix and match it by that label, even though those
+    # types print bare/positionally by default. FileMaker labels the same value type
+    # per step (Perform Script's name is bare; Configure Region Monitor Script's is
+    # ``Script: "…"``). Generic across the three bare-by-default value types; needs a
+    # non-empty ``hr_label``. Set only where FM renders the label (verified live).
+    hr_labeled: bool | None = None
     omit_when_empty: bool | None = None
     emit_empty_default: bool | None = None
     # Governing discriminator: string form names a sibling; map form carries branches.
@@ -224,6 +231,7 @@ class StepParam:
             hr_slot=d.get("hrSlot"),
             hr_hidden=d.get("hrHidden"),
             hr_bare=d.get("hrBare"),
+            hr_labeled=d.get("hrLabeled"),
             omit_when_empty=d.get("omitWhenEmpty"),
             emit_empty_default=d.get("emitEmptyDefault"),
             discriminator=d.get("discriminator"),
@@ -268,11 +276,34 @@ class CatalogEntry:
     status: str | None
     help_url: str | None
     notes: Any = None
+    # Element-alias grammar: a canonical XML element name mapped to the legacy
+    # synonyms FileMaker also wrote for the same logical slot across versions
+    # (e.g. FM2025 serialized <SetLLMAccout>/<AccoutName>; FM26 corrected the
+    # spelling to <SetLLMAccount>/<AccountName>). Emit uses the canonical name;
+    # read accepts either. Generic — benefits any drifted step, no per-step code.
+    # Populated at load from each param's `wrapperElementAliases` /
+    # `parentElementAliases` fields, keyed by the canonical element name (the
+    # last parent-path segment for a parent).
+    element_aliases: dict[str, list[str]] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> CatalogEntry:
         bp = d.get("blockPair")
+        ea: dict[str, list[str]] = {}
+        for p in d.get("params", []):
+            for alias_key, canonical in (
+                ("wrapperElementAliases", p.get("wrapperElement")),
+                ("parentElementAliases", p.get("parentElement")),
+            ):
+                syns = p.get(alias_key)
+                if not canonical or not isinstance(syns, list):
+                    continue
+                seg = canonical.rsplit("/", 1)[-1]
+                bucket = ea.setdefault(seg, [])
+                for s in syns:
+                    if isinstance(s, str) and s not in bucket:
+                        bucket.append(s)
         return cls(
             name=d.get("name", ""),
             id=d.get("id"),
@@ -285,6 +316,7 @@ class CatalogEntry:
             status=d.get("status"),
             help_url=d.get("helpUrl"),
             notes=d.get("notes"),
+            element_aliases=ea,
             raw=dict(d),
         )
 
@@ -475,15 +507,36 @@ def _nested_text(parent: ET.Element | None, child: str, grand: str) -> str:
     return g.text if (g is not None and g.text) else ""
 
 
-def _descend_path(step: ET.Element | None, path: str) -> ET.Element | None:
-    """Follow a '/'-delimited child path from ``step`` (direct children only)."""
+def _aliased_child(
+    parent: ET.Element | None, name: str, aliases: dict[str, list[str]] | None
+) -> ET.Element | None:
+    """Find a child by its canonical ``name``; if absent and the name carries
+    declared aliases, retry each legacy synonym in order (element-alias grammar).
+    Returns the first match, or ``None``."""
+    if parent is None:
+        return None
+    c = parent.find(name)
+    if c is not None:
+        return c
+    for syn in (aliases or {}).get(name, ()):
+        c = parent.find(syn)
+        if c is not None:
+            return c
+    return None
+
+
+def _descend_path(
+    step: ET.Element | None, path: str, aliases: dict[str, list[str]] | None = None
+) -> ET.Element | None:
+    """Follow a '/'-delimited child path from ``step`` (direct children only).
+    Each segment is resolved alias-tolerantly (element-alias grammar)."""
     n = step
     for seg in path.split("/"):
         if not seg:
             continue
         if n is None:
             return None
-        n = n.find(seg)
+        n = _aliased_child(n, seg, aliases)
     return n
 
 
@@ -576,12 +629,17 @@ def governing_discriminator_for(
     return None
 
 
-def read_enum_raw_value(step: ET.Element, p: StepParam) -> str:
-    base = step if not p.parent_element else _descend_path(step, p.parent_element)
+def read_enum_raw_value(
+    step: ET.Element, p: StepParam, aliases: dict[str, list[str]] | None = None
+) -> str:
+    base = step if not p.parent_element else _descend_path(step, p.parent_element, aliases)
+    el = _aliased_child(base, p.xml_element, aliases)
+    if el is None:
+        return ""
     if p.enum_style == "text":
-        return _child_text(base, p.xml_element)
+        return el.text or ""
     attr = p.xml_attr or "value"
-    return _child_attr(base, p.xml_element, attr)
+    return el.get(attr, "")
 
 
 def effective_hr_label(entry: CatalogEntry, step: ET.Element, param: StepParam) -> str:
@@ -589,7 +647,7 @@ def effective_hr_label(entry: CatalogEntry, step: ET.Element, param: StepParam) 
         for q in entry.params:
             if param_key(q) != variant.param:
                 continue
-            v = read_enum_raw_value(step, q) or (q.default_value or "")
+            v = read_enum_raw_value(step, q, entry.element_aliases) or (q.default_value or "")
             if v in variant.values:
                 return variant.hr_label or ""
             break
@@ -603,7 +661,7 @@ def param_visible(entry: CatalogEntry, step: ET.Element, param: StepParam) -> bo
     for q in entry.params:
         if param_key(q) != vw.param:
             continue
-        v = read_enum_raw_value(step, q) or (q.default_value or "")
+        v = read_enum_raw_value(step, q, entry.element_aliases) or (q.default_value or "")
         return v in vw.values
     return True
 
@@ -744,7 +802,11 @@ def _bitmask_mask_for_flags(param: StepParam, labels: list[str]) -> int:
 def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) -> str:
     """Compute one param's HR fragment ('' = no token), as the reference does."""
     val = ""
-    base = step if not param.parent_element else _descend_path(step, param.parent_element)
+    base = (
+        step
+        if not param.parent_element
+        else _descend_path(step, param.parent_element, entry.element_aliases)
+    )
     if base is None:
         base = step  # a missing wrapper reads nothing; keep base usable
     is_elem_attr, g11_elem, g11_attr = _split_element_attr(param.xml_element)
@@ -844,7 +906,10 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
                 val = inner if not label else (label + ": " + inner)
     elif ptype == "namedCalc":
         wrapper = param.wrapper_element or param.xml_element
-        val = _nested_text(base, wrapper, "Calculation")
+        # Element-alias grammar: match the wrapper by its canonical name,
+        # falling back to any declared legacy synonym (e.g. AccoutName).
+        wnode = _aliased_child(base, wrapper, entry.element_aliases)
+        val = _child_text(wnode, "Calculation") if wnode is not None else ""
         # hr_bare params (Show Custom Dialog's Title/Message) print positionally
         # with no label, mirroring FileMaker; every other namedCalc keeps its label.
         if val and not param.hr_bare:
@@ -888,9 +953,18 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             if val and label:
                 val = label + ": " + val
     elif ptype == "fieldOrVariable":
-        field_node = base.find(param.xml_element)
-        if field_node is None:
-            field_node = base.find("Field")
+        # A typed same-element child (typeAttr/typeValue) is located by its
+        # discriminator attribute rather than by position, so two typed <Field>
+        # siblings under one wrapper never read each other's node.
+        type_attr = param.raw.get("typeAttr")
+        if type_attr:
+            field_node = base.find(
+                "Field[@%s='%s']" % (type_attr, param.raw.get("typeValue", ""))
+            )
+        else:
+            field_node = base.find(param.xml_element)
+            if field_node is None:
+                field_node = base.find("Field")
         if field_node is not None:
             table = field_node.get("table", "")
             name = field_node.get("name", "")
@@ -908,20 +982,36 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             val = label
     elif ptype == "calc":
         val = _child_text(base, "Calculation")
+        # hr_labeled: FileMaker labels this calc for some steps (inverse of bare).
+        if val and param.hr_labeled and label:
+            val = label + ": " + val
     elif ptype == "field":
-        field_node = base.find(param.xml_element)
-        if field_node is None:
-            field_node = base.find("Field")
+        type_attr = param.raw.get("typeAttr")
+        if type_attr:
+            field_node = base.find(
+                "Field[@%s='%s']" % (type_attr, param.raw.get("typeValue", ""))
+            )
+        else:
+            field_node = base.find(param.xml_element)
+            if field_node is None:
+                field_node = base.find("Field")
         if field_node is not None:
             table = field_node.get("table", "")
             name = field_node.get("name", "")
             val = name if not table else table + "::" + name
+            # hr_labeled: label the field where FileMaker does (inverse of bare).
+            if val and param.hr_labeled and label:
+                val = label + ": " + val
     elif ptype in ("tableRef", "tableOccurrence"):
         table_node = base.find("Table")
         if table_node is not None:
             name = table_node.get("name", "")
             if name:
-                val = name if not label else (label + ": " + name)
+                # Labeled (Go to Related Record's "From table") renders
+                # "Label: name"; label-less (Fine-Tune Model's positional
+                # training table) renders the quoted TO name — the quoted
+                # positional spelling FM uses, mirroring `layout`.
+                val = ('"' + name + '"') if not label else (label + ": " + name)
     elif ptype == "fileReference":
         fr_node = base.find(param.xml_element)
         if fr_node is not None:
@@ -973,6 +1063,11 @@ def compute_param_hr(entry: CatalogEntry, step: ET.Element, param: StepParam) ->
             name = script_node.get("name", "")
             if name:
                 val = '"' + name + '"'
+        # hr_labeled: FileMaker labels the script token for some steps (Configure
+        # Region Monitor Script's "Script:") while others print it bare (Perform
+        # Script). Prefix the label when the catalog opts in. Inverse of the default.
+        if val and param.hr_labeled and label:
+            val = label + ": " + val
     elif ptype in ("text", "name"):
         val = _child_text(base, param.xml_element)
         if val and param.parent_element and label:
@@ -985,7 +1080,7 @@ def render_discriminator_group(
     entry: CatalogEntry, step: ET.Element, param: StepParam
 ) -> str:
     """Render a governing discriminator's HR fragment. Port of RenderDiscriminatorGroup."""
-    value = read_enum_raw_value(step, param) or (param.default_value or "")
+    value = read_enum_raw_value(step, param, entry.element_aliases) or (param.default_value or "")
     branch = param.discriminator_values.get(value)
     if branch is None:
         mapped = param.hr_enum_values.get(value) or value

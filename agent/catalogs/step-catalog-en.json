@@ -66,7 +66,7 @@
       },
       {
         "xmlElement": "PrivilegeSet",
-        "type": "text",
+        "type": "reference",
         "hrLabel": "Privilege Set",
         "required": true
       },
@@ -729,12 +729,16 @@
     "selfClosing": false,
     "params": [
       {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Account Name",
-        "wrapperElement": "AccoutName",
-        "parentElement": "SetLLMAccout",
-        "required": false
+        "xmlElement": "VerifySSLCertificates",
+        "type": "boolean",
+        "flagStyle": true,
+        "hrLabel": "Verify SSL Certificates",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "omitWhenEmpty": true,
+        "visibleWhen": { "param": "LLMType", "values": ["Other"] },
+        "hrSlot": 3
       },
       {
         "xmlElement": "LLMType",
@@ -752,32 +756,39 @@
         "hrEnumValues": {
           "ChatGPT": "OpenAI",
           "Other": "Custom"
-        }
+        },
+        "hrSlot": 1
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Account Name",
+        "wrapperElement": "AccountName",
+        "wrapperElementAliases": ["AccoutName"],
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
+        "required": false,
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "Endpoint",
         "wrapperElement": "Endpoint",
-        "parentElement": "SetLLMAccout",
-        "required": false
-      },
-      {
-        "xmlElement": "VerifySSLCertificates",
-        "type": "boolean",
-        "flagStyle": true,
-        "hrLabel": "Verify SSL Certificates",
-        "xmlAttr": "state",
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
         "required": false,
-        "defaultValue": "False"
+        "hrSlot": 2
       },
       {
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "API key",
         "wrapperElement": "AccessAPIKey",
-        "parentElement": "SetLLMAccout",
-        "required": false
+        "parentElement": "SetLLMAccount",
+        "parentElementAliases": ["SetLLMAccout"],
+        "required": false,
+        "hrSlot": 4
       }
     ],
     "hrSignature": "[ Account Name: calc ; Model Provider: option ; Endpoint: calc ; Verify SSL Certificates ; API key: calc ]",
@@ -796,7 +807,10 @@
         "xmlElement": "Script",
         "type": "script",
         "hrLabel": "Script",
-        "required": false
+        "hrLabeled": true,
+        "omitWhenEmpty": true,
+        "required": false,
+        "hrSlot": 2
       },
       {
         "xmlElement": "Action",
@@ -808,7 +822,8 @@
         "enumValues": [
           "Queue",
           "Clear"
-        ]
+        ],
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -816,7 +831,8 @@
         "hrLabel": "Name",
         "wrapperElement": "Name",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Calculation",
@@ -824,7 +840,8 @@
         "hrLabel": "Delay",
         "wrapperElement": "Delay",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 3
       },
       {
         "xmlElement": "Calculation",
@@ -832,7 +849,8 @@
         "hrLabel": "Title",
         "wrapperElement": "Title",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -840,7 +858,8 @@
         "hrLabel": "Body",
         "wrapperElement": "Body",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 5
       },
       {
         "xmlElement": "Calculation",
@@ -848,7 +867,8 @@
         "hrLabel": "Button 1 Label",
         "wrapperElement": "Button1Label",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "Calculation",
@@ -856,7 +876,8 @@
         "hrLabel": "Button 2 Label",
         "wrapperElement": "Button2Label",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 7
       },
       {
         "xmlElement": "Calculation",
@@ -864,7 +885,8 @@
         "hrLabel": "Button 3 Label",
         "wrapperElement": "Button3Label",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 8
       },
       {
         "xmlElement": "Calculation",
@@ -872,7 +894,8 @@
         "hrLabel": "Button 1 Foreground",
         "wrapperElement": "Button1ForceFgnd",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 9
       },
       {
         "xmlElement": "Calculation",
@@ -880,7 +903,8 @@
         "hrLabel": "Button 2 Foreground",
         "wrapperElement": "Button2ForceFgnd",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 10
       },
       {
         "xmlElement": "Calculation",
@@ -888,7 +912,8 @@
         "hrLabel": "Button 3 Foreground",
         "wrapperElement": "Button3ForceFgnd",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 11
       },
       {
         "xmlElement": "Calculation",
@@ -896,7 +921,8 @@
         "hrLabel": "Show when app in foreground",
         "wrapperElement": "ShowWhenAppInForeground",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 12
       }
     ],
     "hrSignature": "[ Action: Queue|Clear ; Name: calc ; Script: script ; Delay: calc ; Title: calc ; Body: calc ; Button 1 Label: calc ; Button 2 Label: calc ; Button 3 Label: calc ; Button 1 Foreground: calc ; Button 2 Foreground: calc ; Button 3 Foreground: calc ; Show when app in foreground: calc ]",
@@ -959,14 +985,19 @@
       {
         "xmlElement": "Calculation",
         "type": "calculation",
-        "hrLabel": "Script Parameter",
-        "required": false
+        "hrLabel": "Parameter",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 2
       },
       {
         "xmlElement": "Script",
         "type": "script",
         "hrLabel": "Script",
-        "required": false
+        "hrLabeled": true,
+        "omitWhenEmpty": true,
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Action",
@@ -978,7 +1009,8 @@
         "enumValues": [
           "Read",
           "Cancel"
-        ]
+        ],
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -986,7 +1018,8 @@
         "hrLabel": "Timeout",
         "wrapperElement": "Timeout",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 3
       },
       {
         "xmlElement": "Calculation",
@@ -994,7 +1027,8 @@
         "hrLabel": "Continuous Reading",
         "wrapperElement": "ReadMultiple",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -1002,10 +1036,11 @@
         "hrLabel": "Format Result as JSON",
         "wrapperElement": "JSONOutput",
         "parentElement": "Action",
-        "required": false
+        "required": false,
+        "hrSlot": 5
       }
     ],
-    "hrSignature": "[ Action: Read|Cancel ; Script: script ; Timeout: calc ; Continuous Reading: calc ; Format Result as JSON: calc ]",
+    "hrSignature": "[ Action: Read|Cancel ; Script: script ; Parameter: calc ; Timeout: calc ; Continuous Reading: calc ; Format Result as JSON: calc ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": null
@@ -1207,6 +1242,23 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Calculation",
+        "type": "calculation",
+        "hrLabel": "Parameter",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 3
+      },
+      {
+        "xmlElement": "Script",
+        "type": "script",
+        "hrLabel": "Script",
+        "hrLabeled": true,
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 2
+      },
+      {
         "xmlElement": "MonitorType",
         "type": "enum",
         "hrLabel": "Monitor",
@@ -1220,7 +1272,8 @@
         ],
         "hrEnumValues": {
           "GeoLocation": "Geofence"
-        }
+        },
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -1228,19 +1281,8 @@
         "hrLabel": "Name",
         "wrapperElement": "RangeName",
         "parentElement": "MonitorType",
-        "required": false
-      },
-      {
-        "xmlElement": "Script",
-        "type": "script",
-        "hrLabel": "Script",
-        "required": false
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "calculation",
-        "hrLabel": "Parameter",
-        "required": false
+        "required": false,
+        "hrSlot": 1
       },
       {
         "xmlElement": "Calculation",
@@ -1248,7 +1290,8 @@
         "hrLabel": "UUID",
         "wrapperElement": "ProximityUUID",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 4
       },
       {
         "xmlElement": "Calculation",
@@ -1256,7 +1299,8 @@
         "hrLabel": "Major",
         "wrapperElement": "MajorID",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 5
       },
       {
         "xmlElement": "Calculation",
@@ -1264,7 +1308,8 @@
         "hrLabel": "Minor",
         "wrapperElement": "MinorID",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "Calculation",
@@ -1272,7 +1317,8 @@
         "hrLabel": "Latitude",
         "wrapperElement": "Latitude",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 7
       },
       {
         "xmlElement": "Calculation",
@@ -1280,7 +1326,8 @@
         "hrLabel": "Longitude",
         "wrapperElement": "Longitude",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 8
       },
       {
         "xmlElement": "Calculation",
@@ -1288,7 +1335,8 @@
         "hrLabel": "Radius",
         "wrapperElement": "Radius",
         "parentElement": "MonitorType",
-        "required": false
+        "required": false,
+        "hrSlot": 9
       }
     ],
     "hrSignature": "[ Monitor: Clear|iBeacon|Geofence ; Name: calc ; Script: script ; Parameter: calc ; UUID: calc ; Major: calc ; Minor: calc ; Latitude: calc ; Longitude: calc ; Radius: calc ]",
@@ -2506,12 +2554,50 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrHidden": true,
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Emitted first, matching FM's serialization order. Renders no HR token of its own; FM shows the training table and Completion Field only when True. FM does NOT re-canonicalize it from content — handed False with a real <Table> it kept False and wiped the table to id 0 — so the converter derives the state from whether the gated table carries an HR token. The Completion Field is now scoped to <FineTuneLLM> via parentElement while the Response Target reads at step level, so the two <Field> params no longer collide."
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "complex",
+        "hrLabel": null,
+        "required": false,
+        "hrSlot": 3,
+        "notes": "type='Embedded' for DataTable source. type='Reference' for TrainingFile source (with file path)."
+      },
+      {
+        "xmlElement": "Table",
+        "type": "tableOccurrence",
+        "hrLabel": null,
+        "visibleWhen": { "param": "Option", "values": ["True"] },
+        "omitWhenEmpty": true,
+        "required": false,
+        "hrSlot": 3,
+        "notes": "Sibling. For DataTable source only. <Table id name/> table-occurrence reference, rendered in HR as the quoted TO name (a bare positional token: `Training Data: Table ; \"Invoices\" ;`). Uses the generic tableOccurrence grammar (was type:complex, which rendered/emitted nothing so the token was dropped) — its label-less read yields the quoted TO name and its emit resolves the TO id/name through context. omitWhenEmpty: present-driven, so the TrainingFile branch (no table token) emits no <Table> and derives Option=False via the hrHidden-boolean gate; the DataTable branch's token drives Option=True. visibleWhen Option=True gates the read (configured DataTable stores Option state=True). Live-verified against FM 26.0.2 copy-back (adhoc-2026-09-20-finetune-training-table-hr-token-dropped)."
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Response Target",
+        "required": false,
+        "omitWhenEmpty": true,
+        "hrSlot": 5,
+        "notes": "Sibling of FineTuneLLM, emitted before the wrapper (matching FM). Dual format: field ref (table/id/name with repetition) or variable (<Text/> marker + <Field repetition='n'>$variable</Field>). Uses the fieldOrVariable grammar (not the bare `field` type) so it reads BOTH the field-ref and the variable text-form and renders WITH its label; base/parentElement scoping already disambiguates it from the parented Completion <Field> at a different depth. omitWhenEmpty: present-driven so the unconfigured target emits no <Field>. Live-verified against FM 26.0.2 copy-back (adhoc-2026-09-19-finetune-model-field-depth-param-key)."
+      },
+      {
         "xmlElement": "Calculation",
         "type": "namedCalc",
         "hrLabel": "Account Name",
         "wrapperElement": "AccountName",
         "parentElement": "FineTuneLLM",
-        "required": false
+        "required": false,
+        "hrSlot": 0
       },
       {
         "xmlElement": "Calculation",
@@ -2519,7 +2605,17 @@
         "hrLabel": "Base Model",
         "wrapperElement": "FineTuneBaseModelName",
         "parentElement": "FineTuneLLM",
-        "required": false
+        "required": false,
+        "hrSlot": 1
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Parameters",
+        "wrapperElement": "Parameters",
+        "parentElement": "FineTuneLLM",
+        "required": false,
+        "hrSlot": 6
       },
       {
         "xmlElement": "DataSource",
@@ -2535,56 +2631,17 @@
         "hrEnumValues": {
           "DataTable": "Table",
           "TrainingFile": "File"
-        }
-      },
-      {
-        "xmlElement": "Table",
-        "type": "complex",
-        "hrLabel": null,
-        "visibleWhen": { "param": "Option", "values": ["True"] },
-        "required": false,
-        "notes": "Sibling. For DataTable source only. <Table id='' name=''/> with table id/name. Shown in HR as quoted table name."
+        },
+        "hrSlot": 2
       },
       {
         "xmlElement": "Field",
-        "type": "field",
+        "type": "fieldOrVariable",
         "hrLabel": "Completion Field",
         "parentElement": "FineTuneLLM",
         "required": false,
-        "notes": "Inside <FineTuneLLM>. Field ref only (table/id/name). DataTable source only."
-      },
-      {
-        "xmlElement": "UniversalPathList",
-        "type": "complex",
-        "hrLabel": null,
-        "required": false,
-        "notes": "type='Embedded' for DataTable source. type='Reference' for TrainingFile source (with file path)."
-      },
-      {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Response Target",
-        "required": false,
-        "omitWhenEmpty": true,
-        "notes": "Sibling of FineTuneLLM. Dual format: field ref (table/id/name with repetition) or variable (<Field repetition='n'>$variable</Field> with <Text/>). omitWhenEmpty: present-driven so the unconfigured target emits no <Field>."
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Parameters",
-        "wrapperElement": "Parameters",
-        "parentElement": "FineTuneLLM",
-        "required": false
-      },
-      {
-        "xmlElement": "Option",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; FM shows the training table and Completion Field only when True. FM does NOT re-canonicalize it from content — handed False with a real <Table> it kept False and wiped the table to id 0 — so the converter derives the state from whether the gated table carries an HR token. The Completion Field cannot be gated as well until this step's two colliding <Field> params get distinct keys."
+        "hrSlot": 4,
+        "notes": "Inside <FineTuneLLM>. Field ref only (table/id/name) in practice; DataTable source only. Uses the fieldOrVariable grammar (not the bare `field` type) so it renders WITH its label; parentElement=FineTuneLLM scopes the read to the wrapper, disambiguating it from the top-level Response Target <Field>. Live-verified against FM 26.0.2 copy-back."
       }
     ],
     "hrSignature": "Fine-Tune Model [ Account Name: {calc} ; Base Model: {calc} ; Training Data: {Table|File} ; {table|path} ; Completion Field: {field} ; Response Target: {field|$variable} ; Parameters: {calc} ]",
@@ -2624,99 +2681,26 @@
     "selfClosing": false,
     "params": [
       {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Account Name",
-        "wrapperElement": "AccountName",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Model",
-        "wrapperElement": "Model",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "User Prompt",
-        "wrapperElement": "UserPrompt",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
-      },
-      {
-        "xmlElement": "Set",
+        "xmlElement": "Option",
         "type": "boolean",
-        "hrLabel": "Agentic mode",
+        "hrLabel": null,
         "xmlAttr": "state",
+        "hrHidden": true,
         "required": false,
-        "defaultValue": "True"
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates Parameters. FM re-canonicalizes to True when content present on paste.",
+        "hrSlot": 17
       },
       {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Response",
+        "xmlElement": "SelectAll",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
         "required": false,
-        "notes": "Sibling of LLMRequestWithTools. Dual format: field ref or variable with <Text/>. Supports repetition."
-      },
-      {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Tool Calls from Model",
-        "parentElement": "LLMRequestWithTools",
-        "required": false,
-        "notes": "Inside LLMRequestWithTools with type='ToolCalls'. Variable only."
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Instructions",
-        "wrapperElement": "Instructions",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
-      },
-      {
-        "xmlElement": "Field",
-        "type": "field",
-        "hrLabel": "Messages",
-        "parentElement": "LLMRequestWithTools",
-        "required": false,
-        "notes": "Inside LLMRequestWithTools with type='Messages'. Variable only."
-      },
-      {
-        "xmlElement": "SlidingWindowVariable",
-        "type": "complex",
-        "hrLabel": "Save Message History To",
-        "parentElement": "LLMRequestWithTools",
-        "required": false,
-        "notes": "Variable name as text content. Repetition via sibling <SlidingWindowVariableRepetition><Calculation>."
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Message History Count",
-        "wrapperElement": "SlidingWindowMessageCount",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Temperature",
-        "wrapperElement": "Temperature",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
-      },
-      {
-        "xmlElement": "Calculation",
-        "type": "namedCalc",
-        "hrLabel": "Tool Definitions",
-        "wrapperElement": "ToolDefinitions",
-        "parentElement": "LLMRequestWithTools",
-        "required": false
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates Tool Definitions / Tool Calls from Model. FM re-derives on paste.",
+        "hrSlot": 18
       },
       {
         "xmlElement": "Stream",
@@ -2724,7 +2708,180 @@
         "hrLabel": "Stream",
         "xmlAttr": "state",
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "hrSlot": 13,
+        "flagStyle": true
+      },
+      {
+        "xmlElement": "Set",
+        "type": "boolean",
+        "hrLabel": "Agentic mode",
+        "xmlAttr": "state",
+        "required": false,
+        "defaultValue": "True",
+        "hrSlot": 3,
+        "flagStyle": true
+      },
+      {
+        "xmlElement": "LinkAvail",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates Messages. FM re-derives on paste.",
+        "hrSlot": 19
+      },
+      {
+        "xmlElement": "Restore",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "notes": "Renders no HR token; gates the WebScript group. FM re-derives on paste.",
+        "hrSlot": 20
+      },
+      {
+        "xmlElement": "UniversalPathList",
+        "type": "enum",
+        "hrLabel": null,
+        "xmlAttr": "type",
+        "hrHidden": true,
+        "required": true,
+        "defaultValue": "Embedded",
+        "enumValues": ["Embedded", "Reference"],
+        "notes": "FM26 internal path marker; renders no HR token (hrHidden). FM re-derives Embedded/Reference on paste. Mirrors Perform Semantic Find / Perform SQL Query by Natural Language.",
+        "hrSlot": 21
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Response",
+        "textMarker": true,
+        "required": false,
+        "notes": "Sibling of LLMRequestWithTools. Dual format: field ref or $variable (with the <Text/> marker). Supports repetition.",
+        "hrSlot": 4
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Account Name",
+        "wrapperElement": "AccountName",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 0
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Model",
+        "wrapperElement": "Model",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 1
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "User Prompt",
+        "wrapperElement": "UserPrompt",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 2
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Instructions",
+        "wrapperElement": "Instructions",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 6
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Messages",
+        "parentElement": "LLMRequestWithTools",
+        "typeAttr": "type",
+        "typeValue": "Messages",
+        "required": false,
+        "notes": "Inside LLMRequestWithTools with type='Messages'. Variable only.",
+        "hrSlot": 7
+      },
+      {
+        "xmlElement": "SlidingWindowVariable",
+        "type": "name",
+        "hrLabel": "Save Message History To",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "omitWhenEmpty": true,
+        "notes": "Variable name as text content of <SlidingWindowVariable>. Omitted when unset (no empty element leaks into a minimal step).",
+        "hrSlot": 8
+      },
+      {
+        "xmlElement": "SlidingWindowVariable/@IncludeToolCalls",
+        "type": "enum",
+        "hrLabel": "Include tool calls in message history",
+        "xmlAttr": "IncludeToolCalls",
+        "flagStyle": true,
+        "parentElement": "LLMRequestWithTools",
+        "enumValues": ["0", "1"],
+        "defaultValue": "0",
+        "required": false,
+        "notes": "FM's IncludeToolCalls flag on <SlidingWindowVariable> (0/1). Emitted as an attribute on that element via the generic Elem/@attr grammar; bare HR flag when set.",
+        "hrSlot": 10
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Message History Count",
+        "wrapperElement": "SlidingWindowMessageCount",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 9
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Message History Repetition",
+        "wrapperElement": "SlidingWindowVariableRepetition",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 22,
+        "hrHidden": true
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Tool Definitions",
+        "wrapperElement": "ToolDefinitions",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 12
+      },
+      {
+        "xmlElement": "Field",
+        "type": "fieldOrVariable",
+        "hrLabel": "Tool Calls from Model",
+        "parentElement": "LLMRequestWithTools",
+        "typeAttr": "type",
+        "typeValue": "ToolCalls",
+        "required": false,
+        "notes": "Inside LLMRequestWithTools with type='ToolCalls'. Variable only.",
+        "hrSlot": 5
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Temperature",
+        "wrapperElement": "Temperature",
+        "parentElement": "LLMRequestWithTools",
+        "required": false,
+        "hrSlot": 11
       },
       {
         "xmlElement": "Calculation",
@@ -2732,7 +2889,8 @@
         "hrLabel": "Parameters",
         "wrapperElement": "Parameters",
         "parentElement": "LLMRequestWithTools",
-        "required": false
+        "required": false,
+        "hrSlot": 14
       },
       {
         "xmlElement": "Calculation",
@@ -2740,7 +2898,8 @@
         "hrLabel": "Web Viewer",
         "wrapperElement": "ObjectName",
         "parentElement": "LLMRequestWithTools/WebScript",
-        "required": false
+        "required": false,
+        "hrSlot": 15
       },
       {
         "xmlElement": "Calculation",
@@ -2748,57 +2907,21 @@
         "hrLabel": "Function Name",
         "wrapperElement": "FunctionName",
         "parentElement": "LLMRequestWithTools/WebScript",
-        "required": false
+        "required": false,
+        "hrSlot": 16
       },
       {
-        "xmlElement": "Option",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
+        "xmlElement": "WebScriptParameters",
+        "type": "parametersList",
+        "hrLabel": "Web Viewer Parameters",
+        "parentElement": "LLMRequestWithTools/WebScript",
         "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Parameters. Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "SelectAll",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Tool Definitions (and Tool Calls from Model). Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "LinkAvail",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Save Message History To (the sliding-window group). Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "Restore",
-        "type": "boolean",
-        "hrHidden": true,
-        "hrLabel": null,
-        "xmlAttr": "state",
-        "required": false,
-        "defaultValue": "False",
-        "notes": "Renders no HR token of its own; gates Web Viewer / Function Name (the WebScript group). Isolated live probe: forced True alone on a minimal step, that companion and only that companion appears. DERIVED: with the content present FM re-canonicalizes all four flags to True on paste."
-      },
-      {
-        "xmlElement": "UniversalPathList",
-        "type": "complex",
-        "hrLabel": null,
-        "required": false,
-        "notes": "Serialized among the leading boolean flags in the reference example (type='Reference'). Mirrors the Fine-Tune Model param; not shown in HR."
+        "notes": "FM's <WebScriptParameters Count><P><Calculation> argument list for the Web Viewer call.",
+        "hrSlot": 23,
+        "hrHidden": true
       }
     ],
-    "hrSignature": "Generate Response from Model [ Account Name: {calc} ; Model: {calc} ; User Prompt: {calc} ; Agentic mode ; Response: {field|$variable} ; Tool Calls from Model: {$variable} ; Instructions: {calc} ; Messages: {$variable} ; Save Message History To: {$variable} ; Message History Count: {calc} ; Temperature: {calc} ; Tool Definitions: {calc} ; Stream ; Parameters: {calc} ; Web Viewer: {$object} ; Function Name: {calc} ]",
+    "hrSignature": "Generate Response from Model [ Account Name: {calc} ; Model: {calc} ; User Prompt: {calc} ; Agentic mode ; Response: {field|$variable} ; Tool Calls from Model: {$variable} ; Instructions: {calc} ; Messages: {$variable} ; Save Message History To: {$variable} ; Message History Count: {calc} ; Include tool calls in message history ; Temperature: {calc} ; Tool Definitions: {calc} ; Stream ; Parameters: {calc} ; Web Viewer: {calc} ; Function Name: {calc} ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": null
@@ -3186,8 +3309,9 @@
         "type": "calc",
         "hrLabel": null,
         "required": false,
+        "omitWhenEmpty": true,
         "visibleWhen": { "param": "RowPageLocation", "values": ["ByCalculation"] },
-        "notes": "Row number calculation. Only applies when RowPageLocation is ByCalculation"
+        "notes": "Row number calculation. Only applies when RowPageLocation is ByCalculation. omitWhenEmpty: a preset (First/Last/Previous/Next) carries no calc, and FileMaker writes NO <Calculation> for it (live-verified on FM 26.0.2) - without it the SaXML->snippet path emits a spurious empty <Calculation/>. Mirrors Set Zoom Level's Calculation."
       }
     ],
     "hrSignature": "[ Select: On|Off ; First|Last|Previous|Next ; Exit after last: On|Off ; With dialog: On|Off ; calc ]",
@@ -3266,8 +3390,9 @@
         "type": "calc",
         "hrLabel": null,
         "required": false,
+        "omitWhenEmpty": true,
         "visibleWhen": { "param": "RowPageLocation", "values": ["ByCalculation"] },
-        "notes": "Record/request/page number calculation. Only applies when RowPageLocation is ByCalculation"
+        "notes": "Record/request/page number calculation. Only applies when RowPageLocation is ByCalculation. omitWhenEmpty: a preset (First/Last/Previous/Next) carries no calc, and FileMaker writes NO <Calculation> for it (live-verified on FM 26.0.2) - without it the SaXML->snippet path emits a spurious empty <Calculation/>. Mirrors Set Zoom Level's Calculation."
       }
     ],
     "hrSignature": "[ First|Last|Previous|Next ; Exit after last: On|Off ; With dialog: On|Off ; calc ]",
@@ -3730,6 +3855,16 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "Option",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "Internal flag FM always serializes (live copy-back: <Option state=\"False\"/> ahead of LLMEmbedding); renders NO HR token (hrHidden). FM re-canonicalizes it on paste, so the hidden default round-trips (Perform SQL Query by Natural Language / Perform Find precedent)."
+      },
+      {
         "xmlElement": "Field",
         "type": "fieldOrVariable",
         "hrLabel": "Target",
@@ -3778,6 +3913,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Target Field",
+        "hrLabeled": true,
         "required": false,
         "notes": "Target field as sibling outside LLMBulkEmbedding. When omitted, uses active field."
       },
@@ -3801,6 +3937,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Source Field",
+        "hrLabeled": true,
         "parentElement": "LLMBulkEmbedding",
         "required": false,
         "notes": "Source field inside LLMBulkEmbedding"
@@ -4324,9 +4461,12 @@
         "defaultValue": "Always",
         "enumValues": [
           "Always",
-          "Minimum",
+          "Min",
           "Defer"
-        ]
+        ],
+        "hrEnumValues": {
+          "Min": "Minimum"
+        }
       }
     ],
     "hrSignature": "Loop [ Collapsed: {Off|On} ; Flush: {Always|Minimum|Defer} ]",
@@ -5434,6 +5574,26 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "DetectVertical",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26 internal flag FM always serializes ahead of RAGSpace (live copy-back: <DetectVertical state=\"False\"/>); renders NO HR token (hrHidden). FM re-canonicalizes on paste, so the hidden default round-trips."
+      },
+      {
+        "xmlElement": "RAGSpaceTokensPerTextChunk",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26 internal flag FM always serializes ahead of RAGSpace (live copy-back: <RAGSpaceTokensPerTextChunk state=\"False\"/>); renders NO HR token (hrHidden). FM re-canonicalizes on paste, so the hidden default round-trips."
+      },
+      {
         "xmlElement": "Stream",
         "type": "boolean",
         "hrLabel": "Stream",
@@ -5591,7 +5751,8 @@
         "hrLabel": null,
         "required": false,
         "omitWhenEmpty": true,
-        "note": "Present-driven: the unspecified target (<Script id=\"0\" name=\"\"/>) is omitted to match FM, which drops the empty <Script> on paste. Listed first to match the advertised hrSignature order (script name is the leading positional token)."
+        "fromFileElement": "FileReference",
+        "note": "Present-driven: the unspecified target (<Script id=\"0\" name=\"\"/>) is omitted to match FM, which drops the empty <Script> on paste. Listed first to match the advertised hrSignature order (script name is the leading positional token). fromFileElement enables the cross-file grammar: FM renders a call into another file as the positional token `\"NAME\" from file: \"FILE\"` (curly-quoted, plus a `Specified: From list` mode label); the converter splits that into a <FileReference name=\"FILE\"> sibling carrying a <UniversalPathList>file:FILE</UniversalPathList> child, emitted before a name-only <Script name=\"NAME\"/>, and re-emits the `from file:` clause on decompile. FileMaker binds the reference by the external-data-source name when one of that name exists in the destination, so the path is ignored and an in-solution cross-file call is unaffected; when the destination does not yet reference the file, the UniversalPathList child preserves the file name (`from file: \"FILE\"`) and FileMaker raises its normal locate prompt, instead of a name-only reference silently dropping the file (`from file: \"\"`). The path uses the display name, the only value available offline. The cross-file script's binding id lives in the other file (absent from the current-file context), so the script shows <unknown> until re-bound — the file + name survive intact. Same-file calls (no `from file:` clause) are unaffected."
       },
       {
         "xmlElement": "Calculation",
@@ -5618,7 +5779,7 @@
         "note": "Cross-file call only: direct child of <Step>, sibling of Calculation/Script — NEVER nested inside <Script>. Carries id/name of the caller file's external data source and a <UniversalPathList>file:FileNameWithoutExtension</UniversalPathList> child (rule X003 enforces the shape). Omit entirely for same-file calls."
       }
     ],
-    "hrSignature": "[ \"ScriptName\" ; Parameter: value ]",
+    "hrSignature": "[ \"ScriptName\" [from file: \"FileName\"] ; Parameter: value ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/perform-script.html"
@@ -5737,9 +5898,20 @@
     "selfClosing": false,
     "params": [
       {
+        "xmlElement": "UniversalPathList",
+        "type": "enum",
+        "hrLabel": null,
+        "xmlAttr": "type",
+        "hrHidden": true,
+        "required": true,
+        "defaultValue": "Embedded",
+        "note": "FM 26 internal marker FM always serializes ahead of LLMSemanticFind (live copy-back: <UniversalPathList type=\"Embedded\"/>); renders NO HR token (hrHidden). Mirrors Perform SQL Query by Natural Language's UniversalPathList; FM derives it on paste."
+      },
+      {
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Target field",
+        "hrLabeled": true,
         "required": false,
         "note": "Outside LLMSemanticFind, placed before it. Field ref form: <Field table= id=0 name=/>. When SaveResult uses a variable, <Text/> appears at step level before this Field element."
       },
@@ -6450,20 +6622,23 @@
         "hrLabel": null,
         "xmlAttr": "value",
         "required": false,
-        "defaultValue": "Calculation",
-        "enumValues": ["CurrentContents", "SerialNumbers", "Calculation"],
+        "defaultValue": "None",
+        "enumValues": ["None", "CurrentContents", "SerialNumbers", "Calculation"],
         "discriminatorValues": {
+          "None": {},
           "CurrentContents": { "hrToken": "Current contents" },
           "SerialNumbers": { "hrToken": "Serial numbers" },
-          "Calculation": { "reveal": ["Calculation"] }
-        }
+          "Calculation": {}
+        },
+        "notes": "None is FileMaker's unconfigured default and renders no HR token (empty discriminator spec). Current contents / Serial numbers render their bare tokens. Calculation also renders no token of its own - the replacement calculation appears in that slot instead (empty spec), and its presence is what selects Calculation on read-back (see the Calculation param's visibleWhen), mirroring Go to Record/Request/Page's ByCalculation."
       },
       {
         "xmlElement": "Calculation",
-        "type": "calculation",
+        "type": "calc",
         "hrLabel": null,
         "required": false,
-        "note": "Revealed only when With=Calculation; rendered bare (no label) as the replacement value. Omitted from XML for the Current contents / Serial numbers branches."
+        "visibleWhen": { "param": "With", "values": ["Calculation"] },
+        "note": "Shown only when With=Calculation; rendered bare (no label) as the replacement value, omitted from XML for the None / Current contents / Serial numbers branches. Its presence in HR is what selects With=Calculation on read-back (With renders no token for Calculation)."
       },
       {
         "xmlElement": "SerialNumbers",
@@ -6474,9 +6649,11 @@
         "fields": [
           { "key": "PerformAutoEnter", "kind": "attr", "xmlAttr": "PerformAutoEnter", "defaultValue": "False" },
           { "key": "UpdateEntryOptions", "kind": "attr", "xmlAttr": "UpdateEntryOptions", "defaultValue": "False" },
-          { "key": "UseEntryOptions", "kind": "attr", "xmlAttr": "UseEntryOptions", "defaultValue": "True" }
+          { "key": "increment", "kind": "attr", "xmlAttr": "increment", "defaultValue": "0" },
+          { "key": "InitialValue", "kind": "attr", "xmlAttr": "InitialValue", "defaultValue": "" },
+          { "key": "UseEntryOptions", "kind": "attr", "xmlAttr": "UseEntryOptions", "defaultValue": "False" }
         ],
-        "notes": "Always-present <SerialNumbers> config attrs. FM never renders them in HR (the 'Serial numbers' HR token comes from the With enum value, not this group). Hidden: emits catalog defaults, never claims an HR token. The auto-enter sub-options are not encoded in FM's HR text, so they are not authorable from HR - the same fidelity FM's own serialization has."
+        "notes": "Always-present <SerialNumbers> config attrs, in FileMaker's serialization order (PerformAutoEnter, UpdateEntryOptions, increment, InitialValue, UseEntryOptions). FM never renders them in HR (the 'Serial numbers' HR token comes from the With enum value, not this group). Hidden: emits catalog defaults, never claims an HR token. The serial start (InitialValue) / increment and the auto-enter sub-options are not encoded in FM's HR text, so they are not authorable from HR and an HR round-trip emits these defaults - the same fidelity FM's own serialization has."
       }
     ],
     "hrSignature": "[ With dialog: <On/Off> ; <Table::Field> ; <calculation | Current contents | Serial numbers> ]",
@@ -6708,8 +6885,30 @@
         "type": "flagBoolean",
         "hrLabel": "Include details for analysis tools",
         "xmlAttr": "state",
+        "flagStyle": true,
         "required": false,
-        "defaultValue": "False"
+        "defaultValue": "False",
+        "note": "FM renders this bare (flag) when On, nothing when Off (live copy-back: state=True -> 'Include details for analysis tools'). flagStyle."
+      },
+      {
+        "xmlElement": "OutputEntireBinaryData",
+        "type": "boolean",
+        "hrLabel": "Save each layout object's binary data under its node",
+        "xmlAttr": "state",
+        "flagStyle": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26. Bare flag: FM shows the label only when state=True (live copy-back: 'Save each layout object's binary data under its node'), nothing when False. flagStyle."
+      },
+      {
+        "xmlElement": "SpecifyJSONOptions",
+        "type": "boolean",
+        "hrLabel": null,
+        "xmlAttr": "state",
+        "hrHidden": true,
+        "required": false,
+        "defaultValue": "False",
+        "note": "FM 26 gate flag FM always serializes (live copy-back: <SpecifyJSONOptions state=\"...\"/>); renders NO HR token (hrHidden). Its True/False state is preserved on round-trip by P7.1 governed-visibility (derived on emit from whether the JSONOptions calc contributed an HR token — Import/Export/Sort Restore precedent), NOT by FM re-canonicalization (live FM keeps whatever state is pasted, unlike Perform SQL's Option). The <SaXML> subtree is emitted by FM regardless of this flag."
       },
       {
         "xmlElement": "UniversalPathList",
@@ -6724,9 +6923,20 @@
         "hrLabel": "Window name",
         "required": true,
         "note": "Window name of the open file to export"
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "namedCalc",
+        "hrLabel": "Specify options as JSON",
+        "wrapperElement": "JSONOptions",
+        "parentElement": "SaXML",
+        "required": false,
+        "omitWhenEmpty": true,
+        "visibleWhen": { "param": "SpecifyJSONOptions", "values": ["True"] },
+        "note": "FM 26. The catalog-options JSON expression, nested <SaXML><JSONOptions><Calculation> (live copy-back). Rendered 'Specify options as JSON: <calc>' only when SpecifyJSONOptions is True (P7.1 governed-visibility: FM shows this token only when the JSON option is on, and derives SpecifyJSONOptions=True on paste from this calc's presence — Import/Export/Sort Restore precedent). omitWhenEmpty: an unconfigured step emits no empty subtree; FM supplies its default catalog JSONSetElement on paste."
       }
     ],
-    "hrSignature": "[ Window name: <calc> ; Destination file: <path> ; <Include details for analysis tools> ]",
+    "hrSignature": "[ <Include details for analysis tools> ; <Save each layout object's binary data under its node> ; Destination file: <path> ; Window name: <calc> ; Specify options as JSON: <calc> ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/save-a-copy-as-xml.html"
@@ -7782,7 +7992,8 @@
         "type": "field",
         "hrLabel": null,
         "required": false,
-        "hrSlot": 0
+        "hrSlot": 0,
+        "notes": "Supports repetition attribute, shown in HR as [rep]."
       }
     ],
     "hrSignature": "[ Table::Field ; value ]",
@@ -8134,6 +8345,19 @@
         "xmlAttr": "value",
         "required": false,
         "defaultValue": "100",
+        "enumValues": [
+          "25",
+          "50",
+          "75",
+          "100",
+          "150",
+          "200",
+          "300",
+          "400",
+          "ZoomIn",
+          "ZoomOut",
+          "ByCalculation"
+        ],
         "hrEnumValues": {
           "25": "25%",
           "50": "50%",
@@ -8144,11 +8368,23 @@
           "300": "300%",
           "400": "400%",
           "ZoomIn": "Zoom In",
-          "ZoomOut": "Zoom Out"
-        }
+          "ZoomOut": "Zoom Out",
+          "ByCalculation": "By Calculation"
+        },
+        "hrHiddenValues": ["ByCalculation"],
+        "notes": "FM 26 adds ByCalculation: FileMaker renders NO zoom token for it — the percentage calculation appears in that slot instead (live copy-back: `[ Lock: Off ; 75% ]`), so the Calculation companion's presence is what selects it (mirrors Go to Record/Request/Page's ByCalculation). The other values render their own bare token."
+      },
+      {
+        "xmlElement": "Calculation",
+        "type": "calc",
+        "hrLabel": null,
+        "required": false,
+        "omitWhenEmpty": true,
+        "visibleWhen": { "param": "Zoom", "values": ["ByCalculation"] },
+        "notes": "Zoom-percentage calculation (FM 26). Only applies when Zoom is ByCalculation; rendered bare in the zoom slot. FM appends a cosmetic '%' to its own SW display of the calc, which the HR does not reproduce. omitWhenEmpty: a preset zoom (100/75/…) carries no calc, and FileMaker writes NO <Calculation> for it (live-verified on FM 26.0.2) — without this the SaXML→snippet path emits a spurious empty <Calculation/>."
       }
     ],
-    "hrSignature": "[ Lock: <On/Off> ; <25%/50%/75%/100%/150%/200%/300%/400%/Zoom In/Zoom Out> ]",
+    "hrSignature": "[ Lock: <On/Off> ; <25%/50%/75%/100%/150%/200%/300%/400%/Zoom In/Zoom Out/calc> ]",
     "blockPair": null,
     "status": "complete",
     "helpUrl": "https://help.claris.com/en/pro-help/content/set-zoom-level.html"
@@ -8408,17 +8644,21 @@
       },
       {
         "xmlElement": "Restore",
-        "type": "flagBoolean",
-        "hrLabel": "Restore",
+        "type": "boolean",
+        "hrLabel": null,
         "xmlAttr": "state",
+        "hrHidden": true,
         "required": false,
-        "defaultValue": "True"
+        "defaultValue": "True",
+        "note": "Governed companion of SortList (Import/Export Records pattern): FM writes Restore=True iff a sort order is specified (<SortList> present), and DISCARDS a stored SortList at runtime when Restore is False — so a SortList with Restore=False is a dead no-op sort. hrHidden: renders no HR token, its state is derived on emit from whether the SortList carries any sort key. Native copy-back 2026-08-28 (Sort Invoices script + dialog-authored): a specified sort is <Restore state=\"True\"/> + <SortList>."
       },
       {
         "xmlElement": "SortList",
         "type": "fieldList",
         "hrLabel": "Sort",
+        "visibleWhen": { "param": "Restore", "values": ["True"] },
         "fields": [
+          { "key": "BlanksLast", "kind": "attr", "xmlAttr": "BlanksLast", "defaultValue": "False" },
           { "key": "Maintain", "kind": "attr", "xmlAttr": "Maintain", "defaultValue": "True" },
           { "key": "value", "kind": "attr", "xmlAttr": "value", "defaultValue": "True" }
         ],
@@ -8427,7 +8667,7 @@
         "entryAttr": "type",
         "entryAttrDefault": "Ascending",
         "required": false,
-        "notes": "fieldList (Cluster 1): ordered sort keys. Each entry <Sort type=\"Ascending|Descending|Custom\"><PrimaryField><Field/></PrimaryField></Sort>. HR token `Sort: Table::Field=Ascending, ...`. SortList Maintain/value are always-on container attributes."
+        "notes": "fieldList (Cluster 1): ordered sort keys. Each entry <Sort type=\"Ascending|Descending|Custom\"><PrimaryField><Field/></PrimaryField></Sort>. HR token `Sort: Table::Field=Ascending, ...`. Gates the hrHidden Restore companion (visibleWhen): a present sort derives <Restore state=\"True\"/>, its absence <Restore state=\"False\"/>. SortList BlanksLast/Maintain/value are always-on container attributes (FM emits all three; native copy-back 2026-08-28)."
       }
     ],
     "hrSignature": "[ Restore ; With dialog: <On/Off> ]",
@@ -8513,7 +8753,7 @@
   },
   {
     "name": "Trigger Claris Connect Flow",
-    "id": null,
+    "id": 211,
     "category": "control",
     "snippetFile": "control/Trigger Claris Connect Flow.xml",
     "selfClosing": false,
@@ -8591,7 +8831,7 @@
     "blockPair": null,
     "notes": {
       "behavioral": "Triggers a Claris Connect flow via HTTP. The <Flow> element holds the flow's endpoint URL. The <CURLOptions> element wraps a <Calculation> with cURL option strings (e.g. --request POST --header). The <Text> element captures the response target. NoInteract suppresses the associated dialog — must be True for server-side, WebDirect, and Data API contexts.",
-      "gotchas": "Step ID is not yet confirmed — it is null in this catalog entry. Do not rely on the id field until a real xml_parsed example is found. The <Flow> and <Text> elements in the snippet example both contain placeholder '<unknown>' values indicating the full XML structure for those fields has not been fully reverse-engineered.",
+      "gotchas": "Step ID 211 confirmed by a live FileMaker 26.0.2 round-trip (paste into Script Workspace, copy back, read FM's own <Step id>). The <Flow> and <Text> elements in the snippet example still carry placeholder '<unknown>' values — the full XML structure for those fields has not been reverse-engineered from a captured example.",
       "constraints": "Requires a valid Claris Connect account and a configured flow with an HTTP trigger. VerifySSLCertificates defaults to False — set to True in production for security."
     },
     "status": "auto",
@@ -9178,6 +9418,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Target Field",
+        "hrLabeled": true,
         "required": false,
         "notes": "Target field as sibling outside LLMBulkEmbedding. When omitted, uses active field."
       },
@@ -9201,6 +9442,7 @@
         "xmlElement": "Field",
         "type": "field",
         "hrLabel": "Source Field",
+        "hrLabeled": true,
         "parentElement": "LLMBulkEmbedding",
         "required": false,
         "notes": "Source container field inside LLMBulkEmbedding"

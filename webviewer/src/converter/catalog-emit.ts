@@ -297,6 +297,27 @@ function resolveEnumXmlValue(param: GrammarParam, hrValue: string): string {
   return hrValue === '' ? (param.defaultValue ?? '') : hrValue;
 }
 
+// HR->XML counterpart of catalog-grammar's paramVisible: whether `param` passes its
+// `visibleWhen` gate given the sibling param's resolved value from the parsed HR
+// `values`. An enum sibling's HR token is resolved to its FM XML value (so "Custom"
+// -> "Other" is compared against the value the gate lists); any other sibling uses
+// its raw HR value; an empty value falls back to the sibling's default. An
+// unresolved gate reference is inert (visible), so a catalog typo degrades to
+// always-emit. Symmetric with paramVisible so both directions agree.
+function paramVisibleHr(entry: GrammarEntry, values: string[], param: GrammarParam): boolean {
+  const vw = param.visibleWhen;
+  if (vw === null || !vw.param) return true;
+  for (let i = 0; i < entry.params.length; i++) {
+    const q = entry.params[i];
+    if (paramKey(q) !== vw.param) continue;
+    const raw = i < values.length ? values[i] : '';
+    let v = q.type === 'enum' ? resolveEnumXmlValue(q, raw) : raw;
+    if (v === '') v = q.defaultValue || '';
+    return vw.values.includes(v);
+  }
+  return true;
+}
+
 function resolveBoolState(param: GrammarParam, hrValue: string): string {
   let state = param.defaultValue ? param.defaultValue : 'False';
   if (hrValue !== '') {
@@ -355,6 +376,9 @@ function positionalTokenFitsParam(param: GrammarParam, token: string): boolean {
 function rendersBareInHr(param: GrammarParam): boolean {
   if (param.hrBare) return true; // per-param opt-in: FileMaker prints it bare
   if (!param.hrLabel) return true;
+  // Inverse of hrBare: a calc/field/script FileMaker renders WITH its label is
+  // matched by that label, never positionally.
+  if (param.hrLabeled) return false;
   if (param.type === 'calc' || param.type === 'field' || param.type === 'script') return true;
   if (param.type === 'layout') return !param.hrLabel;
   if ((param.type === 'text' || param.type === 'name') && !param.parentElement) return true;
@@ -697,17 +721,25 @@ function emitFieldOrVariable(
     if (rawBool(param.raw, 'emitEmptyDefault')) return '    <Field table="" id="0" name=""/>';
     return '';
   }
+  // A typed same-element child (typeAttr/typeValue) carries its fixed
+  // discriminator attribute on the <Field …> open tag — FM's variable-only
+  // <Field type="Messages">/<Field type="ToolCalls"> children of one wrapper.
+  // Generic, driven entirely by the catalog. Mirrors the C++/Python converters.
+  const typeAttr = rawStr(param.raw, 'typeAttr');
+  const typeAttrStr = typeAttr
+    ? ` ${typeAttr}="${escXml(rawStr(param.raw, 'typeValue'))}"`
+    : '';
   if (isVariable(hrValue)) {
     const trimmed = trim(hrValue);
     let out = '';
     if (!precededByTextElement) out += '    <Text/>\n';
-    out += `    <Field>${escXml(trimmed)}</Field>`;
+    out += `    <Field${typeAttrStr}>${escXml(trimmed)}</Field>`;
     return out;
   }
   let out = '';
   if (rawBool(param.raw, 'textMarker') && !precededByTextElement) out += '    <Text/>\n';
   const resolved = resolver.resolveField(hrValue);
-  out += `    <Field table="${escXml(resolved.table)}" id="${resolved.fieldId}" name="${escXml(resolved.fieldName)}"/>`;
+  out += `    <Field${typeAttrStr} table="${escXml(resolved.table)}" id="${resolved.fieldId}" name="${escXml(resolved.fieldName)}"/>`;
   return out;
 }
 
@@ -1171,6 +1203,24 @@ export function convertStepWithCatalog(
       if (trim(hrValue)) piece = `    <Script id="0" name="${escXml(unquote(hrValue))}"/>`;
     } else if (govHandled) {
       // piece already decided (a value or intentionally empty).
+    } else if (
+      param.type === 'boolean' &&
+      param.visibleWhen !== null &&
+      param.visibleWhen.param &&
+      param.omitWhenEmpty
+    ) {
+      // P7.3 governed-visibility boolean: a boolean whose PRESENCE (not just value)
+      // is governed by a sibling enum's value declares a `visibleWhen` gate — the
+      // generic "governed by another param's enum value" primitive, symmetric with
+      // the XML->HR paramVisible skip and the discriminator-revealed omit. When the
+      // gate value is not met FileMaker omits the element ENTIRELY (confirmed live:
+      // Configure AI Account drops <VerifySSLCertificates> for every LLMType except
+      // "Other"); when met it emits with normal flag-style presence semantics.
+      // Opt-in via omitWhenEmpty. Benefits any step of this shape, not just #212.
+      if (paramVisibleHr(entry, values, param)) {
+        piece = emitBoolean(param, hrValue);
+      }
+      // else: gate not met -> omit entirely (piece stays '').
     } else if (param.type === 'boolean') {
       if (impliedBool.has(pi)) {
         const attr = param.xmlAttr || 'state';
@@ -1226,14 +1276,21 @@ export function convertStepWithCatalog(
       }
     } else if (param.type === 'tableRef') {
       if (!trim(hrValue)) {
-        piece = '    <Table id="" name=""/>';
+        // A present-driven, gated table (Fine-Tune Model's training <Table>,
+        // revealed only in the DataTable branch) opts into omitWhenEmpty and
+        // emits nothing when unset.
+        if (!param.omitWhenEmpty) piece = '    <Table id="" name=""/>';
       } else {
         const rt = resolveTable(unquote(hrValue));
         piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
       }
     } else if (param.type === 'tableOccurrence') {
-      const rt = resolveTable(unquote(hrValue));
-      piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
+      // An unset present-driven TO (omitWhenEmpty) emits no <Table> — matching
+      // FM's TrainingFile form; otherwise the TO always serializes.
+      if (trim(hrValue) || !param.omitWhenEmpty) {
+        const rt = resolveTable(unquote(hrValue));
+        piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
+      }
     } else if (param.type === 'fileReference') {
       if (trim(hrValue)) {
         const [quoted, bare] = isQuotedLoneVariable(hrValue);
@@ -1267,9 +1324,46 @@ export function convertStepWithCatalog(
       }
     } else if (param.type === 'script') {
       if (!param.omitWhenEmpty || trim(hrValue)) {
-        const scriptName = unquote(hrValue);
-        const resolved = resolver.resolveScript(scriptName);
-        piece = `    <Script id="${resolved.id}" name="${escXml(resolved.name)}"/>`;
+        // Cross-file reference (Perform Script id 1): FM renders a call into
+        // another file as the positional token `"NAME" from file: "FILE"`. When
+        // the catalog opts this script param into the from-file grammar
+        // (`fromFileElement` set), split that infix clause into a
+        // <FileReference name="FILE"> sibling emitted BEFORE the <Script>,
+        // carrying a <UniversalPathList>file:FILE</> child, and emit the <Script>
+        // NAME-ONLY. FM binds the reference by the external-data-source NAME when
+        // one of that name exists in the destination — the path is then ignored
+        // (even a wrong path binds, no dialog), so an in-solution cross-file call
+        // never regresses. When the destination does NOT yet reference FILE, the
+        // child preserves the file name (`from file: "FILE"`) and lets FM raise
+        // its normal locate prompt (fail-loud) instead of a name-only reference's
+        // silent `from file: ""` drop. The path uses the display NAME — the only
+        // value available offline; name-binding makes the real filename moot for
+        // resolvable references. The <Script> stays name-only: its binding id
+        // lives in the OTHER file (absent from the current-file context), so
+        // resolving it would bind the WRONG same-file script of the same name; FM
+        // shows it <unknown> until rebound while the file + name survive intact.
+        const fromFileElement = rawStr(param.raw, 'fromFileElement');
+        let fileName = '';
+        let scriptToken = hrValue;
+        if (fromFileElement) {
+          const marker = ' from file: ';
+          const fp = hrValue.indexOf(marker);
+          if (fp !== -1) {
+            scriptToken = trim(hrValue.slice(0, fp));
+            fileName = unquote(trim(hrValue.slice(fp + marker.length)));
+          }
+        }
+        const scriptName = unquote(scriptToken);
+        if (fileName) {
+          const scriptXml = `    <Script name="${escXml(scriptName)}"/>`;
+          piece =
+            `    <${fromFileElement} name="${escXml(fileName)}">\n` +
+            `      <UniversalPathList>file:${escXml(fileName)}</UniversalPathList>\n    </${fromFileElement}>\n` +
+            scriptXml;
+        } else {
+          const resolved = resolver.resolveScript(scriptName);
+          piece = `    <Script id="${resolved.id}" name="${escXml(resolved.name)}"/>`;
+        }
       }
     } else if (param.type === 'text' || param.type === 'name') {
       if (!param.omitWhenEmpty || trim(hrValue)) {
