@@ -78,5 +78,49 @@ class TestVersion(unittest.TestCase):
         self.assertIn("AGFM Version", [s.get("name") for s in top.findall("Script")])
 
 
+INTERACTIVE = {"Show Custom Dialog", "Get Folder Path", "Show/Hide Toolbars", "Pause/Resume Script"}
+
+
+def step_names(name):
+    return [st.get("name") for st in steps(name)]
+
+
+class TestPathScript(unittest.TestCase):
+    def test_path_script_has_no_dialogs(self):
+        self.assertFalse(INTERACTIVE & set(step_names("Get agentic-fm path")))
+
+    def test_path_script_asks_config_with_the_file_name_encoded_once(self):
+        texts = calcs("Get agentic-fm path")
+        self.assertTrue(any("/config?file=" in t and "GetAsURLEncoded ( Get ( FileName ) )" in t for t in texts))
+        urls = [st for st in steps("Get agentic-fm path") if st.get("name") == "Insert from URL"]
+        self.assertTrue(urls)
+        for st in urls:
+            self.assertEqual(st.find("DontEncodeURL").get("state"), "True")
+            self.assertIn("--max-time 3", st.find("CURLOptions/Calculation").text)
+
+    def test_path_script_reports_every_failure_as_json(self):
+        joined = "\n".join(calcs("Get agentic-fm path"))
+        for error in ('"no_service"', '"no_config"', 'JSONGetElement ( $response ; "error" )'):
+            self.assertIn(error, joined)
+        exits = [st for st in steps("Get agentic-fm path") if st.get("name") == "Exit Script"]
+        self.assertTrue(exits)
+        for st in exits:
+            self.assertIn('[ "ok" ;', st.findtext("Calculation"))
+
+    def test_path_script_sets_both_globals_from_the_answer(self):
+        joined = "\n".join(calcs("Get agentic-fm path"))
+        self.assertIn('JSONGetElement ( $response ; "repo_path" )', joined)
+        names = [st.findtext("Name") for st in steps("Get agentic-fm path") if st.get("name") == "Set Variable"]
+        self.assertIn("$$AGENTIC.FM", names)
+        self.assertIn("$$AGENTIC.FM.COMPANION.IP", names)
+
+
+class TestChooseFolder(unittest.TestCase):
+    def test_choose_folder_is_the_interactive_fallback(self):
+        names = step_names("AGFM Choose Folder")
+        self.assertIn("Get Folder Path", names)
+        self.assertIn("Get File Exists", names)
+
+
 if __name__ == "__main__":
     unittest.main()
