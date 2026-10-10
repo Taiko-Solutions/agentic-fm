@@ -122,5 +122,21 @@ class TestChooseFolder(unittest.TestCase):
         self.assertIn("Get File Exists", names)
 
 
+class TestPathCallers(unittest.TestCase):
+    CALLERS = ("Explode XML", "Push Context", "Agentic-fm Webviewer")
+
+    def test_callers_read_ok_from_the_json_and_fall_back_to_the_picker(self):
+        for name in self.CALLERS:
+            body = steps(name)
+            idx = next(i for i, st in enumerate(body) if st.get("name") == "Perform Script"
+                       and st.find("Script") is not None and st.find("Script").get("name") == "Get agentic-fm path")
+            self.assertEqual(body[idx + 1].findtext("Name"), "$pathResult", name)
+            self.assertIn('not JSONGetElement ( $pathResult ; "ok" )', calcs(name), name)
+            called = [st.find("Script").get("name") for st in body
+                      if st.get("name") == "Perform Script" and st.find("Script") is not None]
+            self.assertIn("AGFM Choose Folder", called, name)
+            self.assertNotIn("Bad install", "\n".join(calcs(name)), name)
+
+
 if __name__ == "__main__":
     unittest.main()
