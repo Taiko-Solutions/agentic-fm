@@ -8,6 +8,7 @@ Usage:
     python3 -m unittest agent/scripts/test_filemaker_bundle.py
 """
 
+import re
 import unittest
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -55,6 +56,26 @@ class TestExplodeLocation(unittest.TestCase):
         texts = calcs("Explode XML")
         self.assertTrue(any("Get ( TemporaryPath )" in t for t in texts))
         self.assertFalse(any("Get ( DesktopPath )" in t for t in texts))
+
+
+SEMVER = re.compile(r'^"(\d+\.\d+\.\d+)"$')
+
+
+def bundle_version():
+    exits = [st for st in steps("AGFM Version") if st.get("name") == "Exit Script"]
+    match = SEMVER.match((exits[0].findtext("Calculation") or "").strip())
+    if not match:
+        raise AssertionError("AGFM Version must exit with a quoted x.y.z literal")
+    return match.group(1)
+
+
+class TestVersion(unittest.TestCase):
+    def test_version_is_a_quoted_semver_literal(self):
+        self.assertEqual(bundle_version(), "1.0.0")
+
+    def test_version_script_lives_in_the_top_folder(self):
+        top = _ROOT.find("Group")
+        self.assertIn("AGFM Version", [s.get("name") for s in top.findall("Script")])
 
 
 if __name__ == "__main__":

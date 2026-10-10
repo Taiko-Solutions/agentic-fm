@@ -113,6 +113,14 @@
         <Calculation><![CDATA[True]]></Calculation>
       </Step>
     </Script>
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="20" name="AGFM Version">
+      <Step enable="True" id="89" name="# (comment)">
+        <Text>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Text>
+      </Step>
+      <Step enable="True" id="103" name="Exit Script">
+        <Calculation><![CDATA["1.0.0"]]></Calculation>
+      </Step>
+    </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="3" name="Explode XML">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Push out solution XML to be parsed for AI use.</Text>
