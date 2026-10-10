@@ -433,6 +433,41 @@ def _canonical_steps(reference_path):
     return best
 
 
+_VERSION_RE = re.compile(r'^"(\d+\.\d+\.\d+)"$')
+ADDON_VERSION_SCRIPT = "AGFM Version"
+
+
+def _version_from_steps(steps):
+    """The add-on version: the quoted x.y.z literal of AGFM Version's Exit Script, or None."""
+    for step in steps or []:
+        if step.get("name") == "Exit Script":
+            match = _VERSION_RE.match((step.findtext("Calculation") or "").strip())
+            return match.group(1) if match else None
+    return None
+
+
+def _addon_entries(scripts_dir, converter, bundle_version, canonical_names):
+    """One entry per exploded solution that carries agentic-fm: OK (same add-on version), STALE (older or
+    different version -- uninstall + install the add-on), PASTED (agentic-fm scripts but no AGFM Version:
+    the pre-add-on pasted bundle; the per-script diff above still applies)."""
+    if bundle_version is None or not scripts_dir.is_dir():
+        return []
+    wanted = {_key(n) for n in canonical_names}
+    entries = []
+    for solution in sorted(p for p in scripts_dir.iterdir() if p.is_dir()):
+        files = list(solution.rglob("*.xml"))
+        version_file = next((f for f in files if _key(_stem_without_id(f)) == _key(ADDON_VERSION_SCRIPT)), None)
+        if version_file is None:
+            if any(_key(_stem_without_id(f)) in wanted for f in files):
+                entries.append({"name": f"add-on ({solution.name})", "kind": "addon", "status": "PASTED", "diff": ""})
+            continue
+        found = _version_from_steps(_steps_from_embedded(version_file, converter))
+        status = "OK" if found == bundle_version else "STALE"
+        diff = "" if status == "OK" else f"{found or '?'} \u2192 {bundle_version}"
+        entries.append({"name": f"add-on ({solution.name})", "kind": "addon", "status": status, "diff": diff})
+    return entries
+
+
 def check(repo_root):
     """Compare embedded objects against the canonical reference.
 
@@ -494,6 +529,9 @@ def check(repo_root):
         results.append({"name": "Context", "kind": "custom_function",
                         "status": status, "diff": ""})
 
+    bundle_version = _version_from_steps(canonical.get(ADDON_VERSION_SCRIPT))
+    results.extend(_addon_entries(scripts_dir, converter, bundle_version, list(canonical)))
+
     any_embedded = bool(embedded_index) or _embedded_context_text(xml_parsed) is not None
     return {"objects": results, "checked": any_embedded,
             "explode_present": explode_present}
@@ -520,7 +558,7 @@ def _print_table(report, show_diff=False):
     print("Embedded agentic-fm code vs bundled reference:\n")
     for o in objs:
         mark = {"OK": "✓", "OK~": "✓", "STALE": "✗",
-                "MISSING": "•", "UNREADABLE": "?"}.get(o["status"], "?")
+                "MISSING": "•", "UNREADABLE": "?", "PASTED": "·"}.get(o["status"], "?")
         print(f"  {mark} {o['name']:<{width}}  {o['status']:<10} ({o['kind']})")
     print()
     if noise:
@@ -532,8 +570,15 @@ def _print_table(report, show_diff=False):
         print("   Context custom function into this solution from filemaker/ to resync.")
         print("   Review the diff first (--diff): an embedded object may carry a")
         print("   deliberate local change that a blind re-paste would destroy.")
+        if any(o["kind"] == "addon" for o in drift):
+            print("   Outdated add-on: uninstall it and install the current package "
+                  "(filemaker/addon/agentic-fm.fmaddon).")
     else:
         print("All embedded agentic-fm objects match the bundled reference.")
+    pasted = [o for o in objs if o["status"] == "PASTED"]
+    if pasted:
+        print(f"   {len(pasted)} solution(s) still carry the pasted bundle (no AGFM Version):")
+        print("   delete the pasted agentic-fm folder and Context, THEN install the agentic-fm add-on.")
     if show_diff:
         for o in objs:
             if o.get("diff"):

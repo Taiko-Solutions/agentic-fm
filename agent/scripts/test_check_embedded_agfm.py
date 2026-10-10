@@ -171,5 +171,38 @@ class TestContextSignature(unittest.TestCase):
                          C._context_signature(b, fold_case=True))
 
 
+def _snippet_script(path, exit_calc):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('<fmxmlsnippet type="FMObjectList"><Step enable="True" id="103" name="Exit Script">'
+                    f'<Calculation><![CDATA[{exit_calc}]]></Calculation></Step></fmxmlsnippet>', encoding="utf-8")
+
+
+class TestAddonVersion(unittest.TestCase):
+    def test_version_from_a_quoted_literal(self):
+        import xml.etree.ElementTree as ET
+        steps = ET.fromstring('<x><Step name="# (comment)"/><Step name="Exit Script">'
+                              '<Calculation>"1.2.3"</Calculation></Step></x>').findall("Step")
+        self.assertEqual(C._version_from_steps(steps), "1.2.3")
+        self.assertIsNone(C._version_from_steps([]))
+
+    def test_current_outdated_and_pasted_per_solution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp) / "scripts"
+            _snippet_script(scripts / "Current" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", '"1.0.0"')
+            _snippet_script(scripts / "Old" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", '"0.9.0"')
+            _snippet_script(scripts / "Pasted" / "agentic-fm - ID 1" / "Push Context - ID 4.xml", '""')
+            _snippet_script(scripts / "Unrelated" / "Misc - ID 1" / "Hello - ID 1.xml", '""')
+            entries = {e["name"]: e for e in C._addon_entries(scripts, Path("/unused"), "1.0.0", ["Push Context", "AGFM Version"])}
+        self.assertEqual(entries["add-on (Current)"]["status"], "OK")
+        self.assertEqual(entries["add-on (Old)"]["status"], "STALE")
+        self.assertEqual(entries["add-on (Old)"]["diff"], "0.9.0 → 1.0.0")
+        self.assertEqual(entries["add-on (Pasted)"]["status"], "PASTED")
+        self.assertNotIn("add-on (Unrelated)", entries)
+
+    def test_no_bundle_version_means_no_entries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(C._addon_entries(Path(tmp), Path("/unused"), None, ["Push Context"]), [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
