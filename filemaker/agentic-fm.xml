@@ -119,7 +119,7 @@
       </Step>
       <Step enable="False" id="61" name="Insert Text">
         <SelectAll state="False"/>
-        <Text>INTERACTIVE MODE (FM Pro):&#xD;  Run with no parameter. Saves XML to desktop, POSTs to localhost:8765/explode.&#xD;  Requires companion server running and $$AGENTIC.FM configured.&#xD;&#xD;SERVER MODE (OData via AGFMScriptBridge):&#xD;  Pass JSON parameter with keys:&#xD;    repo_path     &#x2014; absolute POSIX path to the agentic-fm project root on the companion server host&#xD;    export_path   &#x2014; absolute POSIX path where FMS will write the XML export (must be host-accessible)&#xD;    companion_url &#x2014; base URL of the companion server (e.g. http://host.docker.internal:8765)&#xD;    solution_name &#x2014; (optional) override solution name; defaults to Get(FileName)&#xD;&#xD;  NOTE: export_path must be a path FMS can write to AND the companion server host can read.&#xD;  On a Linux FMS container with a host-mounted Data dir, use that mount path.&#xD;  The FM path is constructed as "filelinux:" &amp; export_path &#x2014; adjust prefix for other OS.&#xD;&#xD;RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</Text>
+        <Text>INTERACTIVE MODE (FM Pro):&#xD;  Run with no parameter. Saves XML to the temporary folder, POSTs to the companion (agentic-fm-app) /explode.&#xD;  Requires companion server running and $$AGENTIC.FM configured.&#xD;&#xD;SERVER MODE (OData via AGFMScriptBridge):&#xD;  Pass JSON parameter with keys:&#xD;    repo_path     &#x2014; absolute POSIX path to the agentic-fm project root on the companion server host&#xD;    export_path   &#x2014; absolute POSIX path where FMS will write the XML export (must be host-accessible)&#xD;    companion_url &#x2014; base URL of the companion server (e.g. http://host.docker.internal:8765)&#xD;    solution_name &#x2014; (optional) override solution name; defaults to Get(FileName)&#xD;&#xD;  NOTE: export_path must be a path FMS can write to AND the companion server host can read.&#xD;  On a Linux FMS container with a host-mounted Data dir, use that mount path.&#xD;  The FM path is constructed as "filelinux:" &amp; export_path &#x2014; adjust prefix for other OS.&#xD;&#xD;RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</Text>
         <Field>$README</Field>
       </Step>
       <Step enable="True" id="89" name="# (comment)"/>
@@ -273,7 +273,7 @@
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="141" name="Set Variable">
         <Value>
-          <Calculation><![CDATA[Get ( DesktopPath ) & Get ( FileName ) & ".xml"]]></Calculation>
+          <Calculation><![CDATA[Get ( TemporaryPath ) & Get ( FileName ) & ".xml"]]></Calculation>
         </Value>
         <Repetition>
           <Calculation><![CDATA[1]]></Calculation>
@@ -309,7 +309,7 @@
         <CURLOptions>
           <Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation>
         </CURLOptions>
-        <Calculation><![CDATA["http://localhost:8765/explode"]]></Calculation>
+        <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/explode"]]></Calculation>
         <Text/>
         <Field>$response</Field>
       </Step>
@@ -1074,7 +1074,7 @@
         <Step enable="True" id="89" name="# (comment)"/>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
-            <Calculation><![CDATA["http://localhost:8765"]]></Calculation>
+            <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765"]]></Calculation>
           </Value>
           <Repetition>
             <Calculation><![CDATA[1]]></Calculation>
@@ -1513,7 +1513,7 @@
           <DontEncodeURL state="False"/>
           <SelectAll state="False"/>
           <VerifySSLCertificates state="False"/>
-          <Calculation><![CDATA["http://localhost:8765/pending"]]></Calculation>
+          <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/pending"]]></Calculation>
           <Text/>
           <Field>$pendingJSON</Field>
         </Step>
@@ -1623,7 +1623,7 @@
           <CURLOptions>
             <Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation>
           </CURLOptions>
-          <Calculation><![CDATA["http://127.0.0.1:8765/debug"]]></Calculation>
+          <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/debug"]]></Calculation>
           <Text/>
           <Field>$response</Field>
         </Step>
