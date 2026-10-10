@@ -164,5 +164,16 @@ class TestStartAndExplode(unittest.TestCase):
         self.assertEqual(layouts, ["AGFM Editor"])
 
 
+class TestReviewFixes(unittest.TestCase):
+    def test_a_json_answer_without_success_is_no_config(self):
+        """The classic companion answers /config with a JSON 404 ({"error": "Not found"}), not with text."""
+        self.assertIn('JSONGetElementType ( $response ; "success" ) ≠ JSONBoolean', "\n".join(calcs("Get agentic-fm path")))
+
+    def test_layout_references_use_explicit_close_tags(self):
+        raw = BUNDLE.read_text(encoding="utf-8")
+        self.assertIn('<Layout id="0" name="AGFM Editor"></Layout>', raw)
+        self.assertNotRegex(raw, r"<Layout\b[^>]*/>")
+
+
 if __name__ == "__main__":
     unittest.main()

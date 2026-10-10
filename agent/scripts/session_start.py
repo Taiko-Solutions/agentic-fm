@@ -140,6 +140,18 @@ def check_embedded():
                           "check_embedded_agfm.py, no ignores este aviso"), {}
         return SKIP, "nada que comprobar", {}
 
+    addon = [o for o in objects if o.get("kind") == "addon"]
+    outdated = [o for o in addon if o.get("status") == "STALE"]
+    if outdated:
+        detail = ", ".join(f"{o['name']} {o.get('diff', '')}".strip() for o in outdated[:4])
+        return WARN, (f"add-on agentic-fm desactualizado: {detail} — desinstala e instala el paquete "
+                      f"actual (filemaker/addon/agentic-fm.fmaddon)"), {"stale": [o["name"] for o in outdated]}
+    pasted = [o["name"] for o in addon if o.get("status") == "PASTED"]
+    if pasted:
+        return WARN, (f"agentic-fm pegado (sin add-on): {', '.join(pasted[:4])} — borra la carpeta agentic-fm "
+                      f"y la función Context y después instala el add-on (filemaker/addon/agentic-fm.fmaddon)"), \
+            {"pasted": pasted}
+
     drift = [o["name"] for o in objects
              if o.get("status") in ("STALE", "MISSING", "UNREADABLE")]
     if drift:

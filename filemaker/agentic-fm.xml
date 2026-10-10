@@ -66,10 +66,10 @@
       <Step enable="True" id="70" name="End If"/>
       <Step enable="True" id="68" name="If">
         <Restore state="False"/>
-        <Calculation><![CDATA[JSONGetElementType ( $response ; "" ) ≠ JSONObject]]></Calculation>
+        <Calculation><![CDATA[JSONGetElementType ( $response ; "" ) ≠ JSONObject or JSONGetElementType ( $response ; "success" ) ≠ JSONBoolean]]></Calculation>
       </Step>
         <Step enable="True" id="89" name="# (comment)">
-          <Text>A service without /config (the classic companion) answers with a non-JSON 404.</Text>
+          <Text>A service without /config (the classic companion) answers with a 404 that has no boolean "success" ({"error": "Not found"}).</Text>
         </Step>
         <Step enable="True" id="103" name="Exit Script">
           <Calculation><![CDATA[JSONSetElement ( "{}" ;
@@ -430,7 +430,7 @@
       </Step>
       <Step enable="True" id="6" name="Go to Layout">
         <LayoutDestination value="SelectedLayout"/>
-        <Layout id="0" name="AGFM Editor"/>
+        <Layout id="0" name="AGFM Editor"></Layout>
         <Animation value=""/>
       </Step>
     </Script>
