@@ -138,5 +138,31 @@ class TestPathCallers(unittest.TestCase):
             self.assertNotIn("Bad install", "\n".join(calcs(name)), name)
 
 
+class TestStartAndExplode(unittest.TestCase):
+    def test_start_and_explode_are_silent(self):
+        for name in ("AGFM Start", "AGFM Explode"):
+            self.assertFalse(INTERACTIVE & set(step_names(name)), name)
+
+    def test_start_tells_the_app_from_the_classic_companion(self):
+        joined = "\n".join(calcs("AGFM Start"))
+        self.assertIn(COMPANION_BASE + '/health"', joined)
+        self.assertIn('JSONGetElementType ( $health ; "service" ) = JSONObject', joined)
+        self.assertIn('"no_service"', joined)
+
+    def test_explode_runs_start_then_exports_to_the_temporary_folder(self):
+        body = steps("AGFM Explode")
+        called = [st.find("Script").get("name") for st in body
+                  if st.get("name") == "Perform Script" and st.find("Script") is not None]
+        self.assertEqual(called[0], "AGFM Start")
+        joined = "\n".join(calcs("AGFM Explode"))
+        self.assertIn("Get ( TemporaryPath )", joined)
+        self.assertIn(COMPANION_BASE + '/explode"', joined)
+
+    def test_open_editor_goes_to_the_editor_layout(self):
+        layouts = [st.find("Layout").get("name") for st in steps("AGFM Open Editor")
+                   if st.get("name") == "Go to Layout"]
+        self.assertEqual(layouts, ["AGFM Editor"])
+
+
 if __name__ == "__main__":
     unittest.main()
