@@ -424,16 +424,6 @@
         <Calculation><![CDATA[$response]]></Calculation>
       </Step>
     </Script>
-    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="24" name="AGFM Open Editor">
-      <Step enable="True" id="89" name="# (comment)">
-        <Text>PURPOSE: Open the agentic-fm web viewer layout (AGFM Editor). Its button on the add-on template keeps the layout in the package.</Text>
-      </Step>
-      <Step enable="True" id="6" name="Go to Layout">
-        <LayoutDestination value="SelectedLayout"/>
-        <Layout id="0" name="AGFM Editor"></Layout>
-        <Animation value=""/>
-      </Step>
-    </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="3" name="Explode XML">
       <Step enable="True" id="89" name="# (comment)">
         <Text>PURPOSE: Push out solution XML to be parsed for AI use.</Text>

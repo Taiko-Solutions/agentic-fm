@@ -468,6 +468,15 @@ def _addon_entries(scripts_dir, converter, bundle_version, canonical_names):
     return entries
 
 
+def _manifest_scripts(repo_root):
+    """Scripts of the agentic-fm add-on (filemaker/addon/manifest.json), or None without a manifest."""
+    path = repo_root / "filemaker" / "addon" / "manifest.json"
+    try:
+        return set(json.loads(path.read_text(encoding="utf-8"))["scripts"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
 def check(repo_root):
     """Compare embedded objects against the canonical reference.
 
@@ -493,12 +502,20 @@ def check(repo_root):
     enum_map = _enum_label_map(repo_root)
     canonical = _canonical_steps(reference) if reference.exists() else {}
     embedded_index = _index_embedded_scripts(scripts_dir)
+    bundle_version = _version_from_steps(canonical.get(ADDON_VERSION_SCRIPT))
+    addon = _addon_entries(scripts_dir, converter, bundle_version, list(canonical))
+    # Where the add-on is installed, the full bundle's other scripts (web viewer) are not expected.
+    manifest = _manifest_scripts(repo_root)
+    outside_addon = (set(canonical) - manifest
+                     if manifest is not None and any(e["status"] != "PASTED" for e in addon) else set())
 
     with tempfile.TemporaryDirectory(prefix="agfm-freshness-") as tmp:
         workdir = Path(tmp)
         for name in sorted(canonical):
             embedded_path = embedded_index.get(_key(name))
             diff = ""
+            if embedded_path is None and name in outside_addon:
+                continue
             if embedded_path is None:
                 status = "MISSING"
             else:
@@ -529,8 +546,7 @@ def check(repo_root):
         results.append({"name": "Context", "kind": "custom_function",
                         "status": status, "diff": ""})
 
-    bundle_version = _version_from_steps(canonical.get(ADDON_VERSION_SCRIPT))
-    results.extend(_addon_entries(scripts_dir, converter, bundle_version, list(canonical)))
+    results.extend(addon)
 
     any_embedded = bool(embedded_index) or _embedded_context_text(xml_parsed) is not None
     return {"objects": results, "checked": any_embedded,

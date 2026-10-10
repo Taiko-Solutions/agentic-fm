@@ -204,5 +204,42 @@ class TestAddonVersion(unittest.TestCase):
             self.assertEqual(C._addon_entries(Path(tmp), Path("/unused"), None, ["Push Context"]), [])
 
 
+class TestManifestScope(unittest.TestCase):
+    BUNDLE = ('<fmxmlsnippet type="FMObjectList"><Group id="1" name="agentic-fm">'
+              '<Script id="20" name="AGFM Version"><Step enable="True" id="103" name="Exit Script">'
+              '<Calculation><![CDATA["1.0.0"]]></Calculation></Step></Script>'
+              '<Script id="9" name="Agentic-fm Webviewer"><Step enable="True" id="103" name="Exit Script"/></Script>'
+              '</Group></fmxmlsnippet>')
+
+    def _repo(self, tmp, with_manifest):
+        root = Path(tmp)
+        (root / "filemaker" / "addon").mkdir(parents=True)
+        (root / "filemaker" / "agentic-fm.xml").write_text(self.BUNDLE, encoding="utf-8")
+        if with_manifest:
+            (root / "filemaker" / "addon" / "manifest.json").write_text(
+                '{"name": "agentic-fm", "version": "1.0.0", "scripts": ["AGFM Version"], "custom_functions": []}',
+                encoding="utf-8")
+        _snippet_script(root / "agent" / "xml_parsed" / "scripts" / "Demo" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml",
+                        '"1.0.0"')
+        return root
+
+    def test_manifest_scripts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(C._manifest_scripts(self._repo(tmp, True)), {"AGFM Version"})
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(C._manifest_scripts(self._repo(tmp, False)))
+
+    def test_scripts_outside_the_add_on_are_not_missing_where_the_add_on_is_installed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            names = {o["name"]: o["status"] for o in C.check(self._repo(tmp, True))["objects"]}
+        self.assertNotIn("Agentic-fm Webviewer", names)
+        self.assertEqual(names["add-on (Demo)"], "OK")
+
+    def test_without_a_manifest_they_are_still_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            names = {o["name"]: o["status"] for o in C.check(self._repo(tmp, False))["objects"]}
+        self.assertEqual(names["Agentic-fm Webviewer"], "MISSING")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

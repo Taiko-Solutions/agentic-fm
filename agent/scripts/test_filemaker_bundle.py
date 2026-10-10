@@ -158,11 +158,6 @@ class TestStartAndExplode(unittest.TestCase):
         self.assertIn("Get ( TemporaryPath )", joined)
         self.assertIn(COMPANION_BASE + '/explode"', joined)
 
-    def test_open_editor_goes_to_the_editor_layout(self):
-        layouts = [st.find("Layout").get("name") for st in steps("AGFM Open Editor")
-                   if st.get("name") == "Go to Layout"]
-        self.assertEqual(layouts, ["AGFM Editor"])
-
 
 class TestReviewFixes(unittest.TestCase):
     def test_a_json_answer_without_success_is_no_config(self):
@@ -170,9 +165,32 @@ class TestReviewFixes(unittest.TestCase):
         self.assertIn('JSONGetElementType ( $response ; "success" ) ≠ JSONBoolean', "\n".join(calcs("Get agentic-fm path")))
 
     def test_layout_references_use_explicit_close_tags(self):
-        raw = BUNDLE.read_text(encoding="utf-8")
-        self.assertIn('<Layout id="0" name="AGFM Editor"></Layout>', raw)
-        self.assertNotRegex(raw, r"<Layout\b[^>]*/>")
+        self.assertNotRegex(BUNDLE.read_text(encoding="utf-8"), r"<Layout\b[^>]*/>")
+
+
+MANIFEST = BUNDLE.parent / "addon" / "manifest.json"
+WEB_VIEWER_SCRIPTS = {"Agentic-fm Webviewer", "Agentic-fm Menu", "Agentic-fm Paste"}
+
+
+def manifest():
+    import json
+    return json.loads(MANIFEST.read_text(encoding="utf-8"))
+
+
+class TestManifest(unittest.TestCase):
+    def test_manifest_version_matches_agfm_version(self):
+        self.assertEqual(manifest()["version"], bundle_version())
+
+    def test_every_manifest_script_is_in_the_bundle(self):
+        for name in manifest()["scripts"]:
+            script(name)
+
+    def test_no_web_viewer_part_in_the_add_on(self):
+        self.assertFalse(WEB_VIEWER_SCRIPTS & set(manifest()["scripts"]))
+        self.assertNotIn("AGFM Open Editor", all_scripts())
+
+    def test_context_is_the_only_custom_function(self):
+        self.assertEqual(manifest()["custom_functions"], ["Context"])
 
 
 if __name__ == "__main__":

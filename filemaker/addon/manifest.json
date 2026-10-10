@@ -1,0 +1,18 @@
+{
+  "name": "agentic-fm",
+  "version": "1.0.0",
+  "scripts": [
+    "Get agentic-fm path",
+    "AGFM Version",
+    "AGFM Choose Folder",
+    "AGFM Start",
+    "AGFM Explode",
+    "Explode XML",
+    "Push Context",
+    "AGFMGoToLayout",
+    "AGFMScriptBridge",
+    "AGFMEvaluation",
+    "Agentic-fm Debug"
+  ],
+  "custom_functions": ["Context"]
+}

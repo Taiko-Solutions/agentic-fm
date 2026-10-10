@@ -92,10 +92,18 @@ apt-get install libxml2-utils
 
 ## Install as an add-on (recommended)
 
-The whole bundle — the `agentic-fm` script folder, the `Context` custom function, the `AGFM Editor` web viewer
-layout and the `agentic-fm` custom menu set — ships as one FileMaker add-on, `filemaker/addon/agentic-fm`
-(version in the `AGFM Version` script and in the add-on's description). Updating a solution is uninstall +
-install; nothing is pasted by hand.
+The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic-fm`
+(`filemaker/addon/agentic-fm.fmaddon`): `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
+`AGFM Choose Folder`, `Explode XML`, `Push Context` with the `Context` custom function, the `OData` folder and
+`Agentic-fm Debug` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on;
+install them by hand (below) if you use the editor. Updating a solution is uninstall + install; nothing is
+pasted by hand.
+
+Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.py` writes
+`filemaker/addon/agentic-fm-addon.xml` (the bundle restricted to the manifest). Paste `filemaker/context.xml`
+and that snippet into a blank file named `agentic-fm`, add the `__FMAddonTemplateDirectives_en` layout with one
+grouped button running `AGFM Start`, and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
+prefixed `__FMAddonTemplateDirectives_`. Bump `AGFM Version` and `manifest.json` together.
 
 1. **Make the package available on this Mac.** Agentic-FM-APP copies it to
    `~/Library/Application Support/FileMaker/Extensions/AddonModules/`. Without the app, double-click
