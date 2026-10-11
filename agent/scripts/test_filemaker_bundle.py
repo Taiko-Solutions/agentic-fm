@@ -223,5 +223,11 @@ class TestPackage(unittest.TestCase):
         self.assertTrue(archive.is_file() and archive.stat().st_size > 0)
 
 
+class TestExplodeErrorDialog(unittest.TestCase):
+    def test_explode_xml_shows_the_service_error_when_stderr_is_empty(self):
+        """agentic-fm-app's validation errors (400) come in "error", not "stderr": the dialog was blank."""
+        self.assertIn('JSONGetElement ( $response ; "error" )', "\n".join(calcs("Explode XML")))
+
+
 if __name__ == "__main__":
     unittest.main()
