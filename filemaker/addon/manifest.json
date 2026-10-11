@@ -14,5 +14,14 @@
     "AGFMEvaluation",
     "Agentic-fm Debug"
   ],
-  "custom_functions": ["Context"]
+  "custom_functions": [
+    "Context"
+  ],
+  "attribution": "Marco Pérez — based on agentic-fm by Matt Petrowsky",
+  "url": "https://taikosolutions.com",
+  "category": "Developer tools",
+  "description": {
+    "en": "agentic-fm for FileMaker: explode, OData, Push Context and Debug — version {version}",
+    "es": "agentic-fm para FileMaker: explode, OData, Push Context y Debug — versión {version}"
+  }
 }

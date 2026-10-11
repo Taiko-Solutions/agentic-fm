@@ -103,7 +103,9 @@ Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.p
 `filemaker/addon/agentic-fm-addon.xml` (the bundle restricted to the manifest). Paste `filemaker/context.xml`
 and that snippet into a blank file named `agentic-fm`, add the `__FMAddonTemplateDirectives_en` layout with one
 grouped button running `AGFM Start`, and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
-prefixed `__FMAddonTemplateDirectives_`. Bump `AGFM Version` and `manifest.json` together.
+prefixed `__FMAddonTemplateDirectives_`. Then `python3 agent/scripts/build_addon_snippet.py --package` imports
+the built package from `AddonModules`, replaces FileMaker's default metadata ("Created by Claris", placeholder
+description) with the manifest's and repacks `agentic-fm.fmaddon`. Bump `AGFM Version` and `manifest.json` together.
 
 1. **Make the package available on this Mac.** Agentic-FM-APP copies it to
    `~/Library/Application Support/FileMaker/Extensions/AddonModules/`. Without the app, double-click

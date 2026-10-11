@@ -88,5 +88,44 @@ class TestCommittedSnippet(unittest.TestCase):
         self.assertEqual(names(text), set(manifest["scripts"]))
 
 
+class TestPackageMetadata(unittest.TestCase):
+    META = {**MANIFEST, "attribution": "Marco Pérez — based on agentic-fm by Matt Petrowsky",
+            "url": "https://taikosolutions.com", "category": "Developer tools",
+            "description": {"en": "agentic-fm {version}", "es": "agentic-fm versión {version}"}}
+
+    def _package(self, tmp):
+        import tempfile
+        d = Path(tmp) / "agentic-fm"
+        d.mkdir()
+        (d / "info.json").write_text('\ufeff{\n\t"GUID" : "X",\n\t"Attribution" : "Claris",\n\t"URL" : "https://claris.com",\n\t"Version" : "1.0"\n}\n', encoding="utf-8")
+        for lang in ("en", "es", "de"):
+            (d / f"info_{lang}.json").write_text('\ufeff{\n\t"Title" : "agentic-fm",\n\t"Description" : "*** DESCRIPTION MISSING *** - DNL",\n\t"Category" : "___...___"\n}\n', encoding="utf-8")
+        return d
+
+    def _json(self, path):
+        return json.loads(path.read_text(encoding="utf-8-sig"))
+
+    def test_metadata_replaces_filemaker_defaults(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._package(tmp)
+            B.apply_metadata(d, self.META)
+            info = self._json(d / "info.json")
+            self.assertEqual(info["Attribution"], "Marco Pérez — based on agentic-fm by Matt Petrowsky")
+            self.assertEqual(info["URL"], "https://taikosolutions.com")
+            self.assertEqual(info["GUID"], "X")
+            self.assertEqual(self._json(d / "info_es.json")["Description"], "agentic-fm versión 1.0.0")
+            self.assertEqual(self._json(d / "info_de.json")["Description"], "agentic-fm 1.0.0")   # falls back to en
+            self.assertEqual(self._json(d / "info_en.json")["Category"], "Developer tools")
+            self.assertTrue((d / "info_en.json").read_text(encoding="utf-8").startswith("\ufeff"))   # BOM kept
+
+    def test_committed_package_carries_the_manifest_metadata(self):
+        manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+        info = self._json(REPO / "filemaker" / "addon" / "agentic-fm" / "info.json")
+        self.assertEqual(info["Attribution"], manifest["attribution"])
+        self.assertIn("Matt Petrowsky", info["Attribution"])
+        self.assertEqual(info["URL"], manifest["url"])
+
+
 if __name__ == "__main__":
     unittest.main()

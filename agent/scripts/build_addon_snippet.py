@@ -9,9 +9,14 @@ and every script's XML byte for byte (folders left empty are dropped). Paste tha
 
 Spec: agentic-fm-app docs/spec/2026-10-10-agfm-addon-design.md (§3, §5).
 
+After FileMaker builds the package (Save a Copy as Add-on Package), --package imports it from AddonModules,
+replaces FileMaker's default metadata (Attribution "Claris", placeholder description and category) with the
+manifest's, and repacks the distributable .fmaddon (xar) from the edited folder.
+
 Usage:
     python3 agent/scripts/build_addon_snippet.py           # write the add-on snippet
     python3 agent/scripts/build_addon_snippet.py --check   # exit 1 if the committed snippet is stale
+    python3 agent/scripts/build_addon_snippet.py --package # import + metadata + repack the built package
 
 Exit codes: 0 ok / up to date, 1 stale (with --check) or invalid manifest.
 """
@@ -19,6 +24,8 @@ Exit codes: 0 ok / up to date, 1 stale (with --check) or invalid manifest.
 import argparse
 import json
 import re
+import shutil
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -27,6 +34,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = REPO_ROOT / "filemaker" / "agentic-fm.xml"
 MANIFEST = REPO_ROOT / "filemaker" / "addon" / "manifest.json"
 OUTPUT = REPO_ROOT / "filemaker" / "addon" / "agentic-fm-addon.xml"
+PACKAGE = REPO_ROOT / "filemaker" / "addon" / "agentic-fm"
+ARCHIVE = REPO_ROOT / "filemaker" / "addon" / "agentic-fm.fmaddon"
+ADDON_MODULES = Path.home() / "Library" / "Application Support" / "FileMaker" / "Extensions" / "AddonModules"
 
 _NAME_RE = re.compile(r'\bname="([^"]*)"')
 
@@ -87,10 +97,64 @@ def build(bundle_xml, manifest):
     return "\n".join(lines[:first] + _emit(children, keep) + lines[last:]) + "\n"
 
 
+def _set(text, key, value):
+    """Replace one "Key" : "value" pair in FileMaker's own JSON layout (kept as is, BOM included)."""
+    new, count = re.subn(rf'("{key}"\s*:\s*)"[^"]*"', lambda m: m.group(1) + json.dumps(value, ensure_ascii=False), text)
+    if count != 1:
+        raise ValueError(f"{key!r} not found exactly once")
+    return new
+
+
+def apply_metadata(package_dir, manifest):
+    """Write the manifest's attribution, URL, category and per-language description into info*.json."""
+    package_dir = Path(package_dir)
+    version = manifest["version"]
+    descriptions = manifest["description"]
+    info = package_dir / "info.json"
+    text = info.read_text(encoding="utf-8-sig")
+    text = _set(_set(text, "Attribution", manifest["attribution"]), "URL", manifest["url"])
+    info.write_text("\ufeff" + text, encoding="utf-8")
+    for path in sorted(package_dir.glob("info_*.json")):
+        lang = path.stem.split("_", 1)[1]
+        text = path.read_text(encoding="utf-8-sig")
+        text = _set(text, "Description", descriptions.get(lang, descriptions["en"]).format(version=version))
+        text = _set(text, "Category", manifest["category"])
+        path.write_text("\ufeff" + text, encoding="utf-8")
+
+
+def package(manifest):
+    """Import the built package from AddonModules, apply the metadata, repack the .fmaddon (xar)."""
+    source = ADDON_MODULES / manifest["name"]
+    if not source.is_dir():
+        raise ValueError(f"no built package at {source}: run the builder in FileMaker first")
+    if PACKAGE.exists():
+        shutil.rmtree(PACKAGE)
+    shutil.copytree(source, PACKAGE)
+    apply_metadata(PACKAGE, manifest)
+    if shutil.which("xar") is None:
+        raise ValueError("xar not found (macOS only): cannot repack the .fmaddon")
+    ARCHIVE.unlink(missing_ok=True)
+    subprocess.run(["xar", "-cf", ARCHIVE.name, "--compression=gzip", PACKAGE.name], cwd=PACKAGE.parent, check=True)
+    # Refresh this Mac's copy so the install dialog shows the same metadata (after a FileMaker restart).
+    for path in PACKAGE.glob("info*.json"):
+        shutil.copy2(path, source / path.name)
+    shutil.copy2(ARCHIVE, ADDON_MODULES / ARCHIVE.name)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--check", action="store_true", help="exit 1 if the committed snippet is stale")
+    parser.add_argument("--package", action="store_true",
+                        help="import the built package from AddonModules, apply the metadata, repack the .fmaddon")
     args = parser.parse_args(argv)
+    if args.package:
+        try:
+            package(json.loads(MANIFEST.read_text(encoding="utf-8")))
+        except (ValueError, KeyError, OSError, subprocess.CalledProcessError) as exc:
+            print(f"package: {exc}", file=sys.stderr)
+            return 1
+        print(f"packaged {PACKAGE.relative_to(REPO_ROOT)} and {ARCHIVE.relative_to(REPO_ROOT)}")
+        return 0
     try:
         text = build(BUNDLE.read_text(encoding="utf-8"), json.loads(MANIFEST.read_text(encoding="utf-8")))
     except (ValueError, KeyError) as exc:
