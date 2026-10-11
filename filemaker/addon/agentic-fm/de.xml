@@ -1,0 +1,1645 @@
+﻿
+<DynamicTemplateString>
+	<StringID>com.fmi.basetable.59E799C8D64DB245C2EF8BEDD483B48C</StringID>
+	<SourceText>AGFM</SourceText>
+	<TargetText>AGFM</TargetText>
+	<Comment>com.fmi.basetable.AGFM</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.basetable.field.AGFM::76C4D1087E6796EF70CE7A2F1901C476</StringID>
+	<SourceText>PrimaryKey</SourceText>
+	<TargetText>PrimaryKey</TargetText>
+	<Comment>com.fmi.basetable.field.AGFM::PrimaryKey</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.basetable.field.AGFM::text.ABEEF7BAB93FF174F8DA0C82D8754F7A</StringID>
+	<SourceText>Unique identifier of each record in this table</SourceText>
+	<TargetText>Unique identifier of each record in this table</TargetText>
+	<Comment>com.fmi.basetable.field.AGFM::text.Unique identifier of each record in this table</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0217B812A5C5B11AA3E13379C2D6ECD2</StringID>
+	<SourceText>response</SourceText>
+	<TargetText>response</TargetText>
+	<Comment>com.fmi.calculation.text.response</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.028FCEE09043ACC6F84C9B1750E6F866</StringID>
+	<SourceText>agentic-fm-app could not say which clone this file belongs to (</SourceText>
+	<TargetText>agentic-fm-app could not say which clone this file belongs to (</TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm-app could not say which clone this file belongs to (</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4</StringID>
+	<SourceText>Number</SourceText>
+	<TargetText>Number</TargetText>
+	<Comment>com.fmi.calculation.text.Number</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0603E9AAF6BE84D313B16EE91180B4E0</StringID>
+	<SourceText>snapshot-eval.xml</SourceText>
+	<TargetText>snapshot-eval.xml</TargetText>
+	<Comment>com.fmi.calculation.text.snapshot-eval.xml</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91</StringID>
+	<SourceText>include_details</SourceText>
+	<TargetText>include_details</TargetText>
+	<Comment>com.fmi.calculation.text.include_details</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.093D3FB8190E73CA213E3781F406445E</StringID>
+	<SourceText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</SourceText>
+	<TargetText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</TargetText>
+	<Comment>com.fmi.calculation.text.) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.09C3059F754CEEBF41F83512F817CD12</StringID>
+	<SourceText>blob</SourceText>
+	<TargetText>blob</TargetText>
+	<Comment>com.fmi.calculation.text.blob</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0C921C1D5DF8752B4B0BE58C9F034941</StringID>
+	<SourceText>success</SourceText>
+	<TargetText>success</TargetText>
+	<Comment>com.fmi.calculation.text.success</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0D46F215DE6D997B3E93CBAB92A427B4</StringID>
+	<SourceText>SELECT BaseTableName FROM FileMaker_Tables WHERE TableName = ?</SourceText>
+	<TargetText>SELECT BaseTableName FROM FileMaker_Tables WHERE TableName = ?</TargetText>
+	<Comment>com.fmi.calculation.text.SELECT BaseTableName FROM FileMaker_Tables WHERE TableName = ?</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0F6E40E32A281238FC4DDC24D3D2736C</StringID>
+	<SourceText>mode</SourceText>
+	<TargetText>mode</TargetText>
+	<Comment>com.fmi.calculation.text.mode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.1008913D05625D6772346DB6D2548432</StringID>
+	<SourceText>varchar</SourceText>
+	<TargetText>varchar</TargetText>
+	<Comment>com.fmi.calculation.text.varchar</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1</StringID>
+	<SourceText>,</SourceText>
+	<TargetText>,</TargetText>
+	<Comment>com.fmi.calculation.text.,</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.13F0B3D657435C88F32D1F90078D2856</StringID>
+	<SourceText> ISO 8601 UTC timestamp for staleness detection </SourceText>
+	<TargetText> ISO 8601 UTC timestamp for staleness detection </TargetText>
+	<Comment>com.fmi.calculation.text. ISO 8601 UTC timestamp for staleness detection</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA</StringID>
+	<SourceText>standalone_binarydata</SourceText>
+	<TargetText>standalone_binarydata</TargetText>
+	<Comment>com.fmi.calculation.text.standalone_binarydata</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23</StringID>
+	<SourceText>solution_name</SourceText>
+	<TargetText>solution_name</TargetText>
+	<Comment>com.fmi.calculation.text.solution_name</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.1BBFCF62EA170F000E18B8D475AE0D4B</StringID>
+	<SourceText>agent/context/snapshot.xml</SourceText>
+	<TargetText>agent/context/snapshot.xml</TargetText>
+	<Comment>com.fmi.calculation.text.agent/context/snapshot.xml</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.1EC1FEC8EB43A68AC5E03C66047E0F98</StringID>
+	<SourceText>Task: </SourceText>
+	<TargetText>Task: </TargetText>
+	<Comment>com.fmi.calculation.text.Task:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.1FEE49E661BD359FE044633E419AC801</StringID>
+	<SourceText> ===================================================================<CR/>       Assemble final JSON<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Assemble final JSON<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Assemble final JSON_CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.22BF6CD6AF8310A8F54A5EAD58067F84</StringID>
+	<SourceText>date</SourceText>
+	<TargetText>date</TargetText>
+	<Comment>com.fmi.calculation.text.date</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25</StringID>
+	<SourceText>{}</SourceText>
+	<TargetText>{}</TargetText>
+	<Comment>com.fmi.calculation.text.{}</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.23D4BBAA8043BD45E0349EF70E5C0318</StringID>
+	<SourceText>layouts</SourceText>
+	<TargetText>layouts</TargetText>
+	<Comment>com.fmi.calculation.text.layouts</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.243774ED317326455884AF34CB67AA04</StringID>
+	<SourceText> ===================================================================<CR/>       Core variables<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Core variables<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Core variables_CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2</StringID>
+	<SourceText>repo_path</SourceText>
+	<TargetText>repo_path</TargetText>
+	<Comment>com.fmi.calculation.text.repo_path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.27650E8691BFE2195EFA1A173E7A646F</StringID>
+	<SourceText>Go to Layout failed — layout not found: </SourceText>
+	<TargetText>Go to Layout failed — layout not found: </TargetText>
+	<Comment>com.fmi.calculation.text.Go to Layout failed — layout not found:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.2B65BF9A8112A6B2C3B6C5C74D0DB711</StringID>
+	<SourceText>/explode</SourceText>
+	<TargetText>/explode</TargetText>
+	<Comment>com.fmi.calculation.text./explode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.2CA765AB9D7BEE797110A28B7B5E988C</StringID>
+	<SourceText>Time</SourceText>
+	<TargetText>Time</TargetText>
+	<Comment>com.fmi.calculation.text.Time</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.2D9606654C2919094668B970379CFEEE</StringID>
+	<SourceText>current_layout.base_to</SourceText>
+	<TargetText>current_layout.base_to</TargetText>
+	<Comment>com.fmi.calculation.text.current_layout.base_to</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.2E8FCB143FDF31EFC5C15C3BDBA9BB46</StringID>
+	<SourceText>:8765/debug</SourceText>
+	<TargetText>:8765/debug</TargetText>
+	<Comment>com.fmi.calculation.text.:8765/debug</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.31E25382446264CF6DB22793644A3873</StringID>
+	<SourceText>Invalid parameter: expected JSON object</SourceText>
+	<TargetText>Invalid parameter: expected JSON object</TargetText>
+	<Comment>com.fmi.calculation.text.Invalid parameter: expected JSON object</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3242F803163D773964BFEFDAE1C25825</StringID>
+	<SourceText>no_config</SourceText>
+	<TargetText>no_config</TargetText>
+	<Comment>com.fmi.calculation.text.no_config</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.32ED4AFA919748CA8C0EFA6890EC97CF</StringID>
+	<SourceText>companion_url</SourceText>
+	<TargetText>companion_url</TargetText>
+	<Comment>com.fmi.calculation.text.companion_url</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.33F53A7E4CCE631CB160EE666395CC5E</StringID>
+	<SourceText>varbinary</SourceText>
+	<TargetText>varbinary</TargetText>
+	<Comment>com.fmi.calculation.text.varbinary</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3518E21708FDBDEEDC727CFFBB53B037</StringID>
+	<SourceText>value_lists</SourceText>
+	<TargetText>value_lists</TargetText>
+	<Comment>com.fmi.calculation.text.value_lists</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.376DBC1B7F08B577772B651641C61A18</StringID>
+	<SourceText>companion</SourceText>
+	<TargetText>companion</TargetText>
+	<Comment>com.fmi.calculation.text.companion</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3843BD0B8030ACA1CC2C93D2C5E28874</StringID>
+	<SourceText>¶¶</SourceText>
+	<TargetText>¶¶</TargetText>
+	<Comment>com.fmi.calculation.text.¶¶</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.391E0F0842872445ADE66DF55682A751</StringID>
+	<SourceText>exitCode</SourceText>
+	<TargetText>exitCode</TargetText>
+	<Comment>com.fmi.calculation.text.exitCode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4</StringID>
+	<SourceText>0</SourceText>
+	<TargetText>0</TargetText>
+	<Comment>com.fmi.calculation.text.0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.398A014CA75197D5624D03F87D4824CA</StringID>
+	<SourceText>:8765/explode</SourceText>
+	<TargetText>:8765/explode</TargetText>
+	<Comment>com.fmi.calculation.text.:8765/explode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.39F0190861D2037CDF12B458B9D6F114</StringID>
+	<SourceText>current_layout.name</SourceText>
+	<TargetText>current_layout.name</TargetText>
+	<Comment>com.fmi.calculation.text.current_layout.name</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3A06708B28C03B7D755B7A7ECC93CD0D</StringID>
+	<SourceText>Be as descriptive as possible.</SourceText>
+	<TargetText>Be as descriptive as possible.</TargetText>
+	<Comment>com.fmi.calculation.text.Be as descriptive as possible.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF</StringID>
+	<SourceText>Container</SourceText>
+	<TargetText>Container</TargetText>
+	<Comment>com.fmi.calculation.text.Container</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3BDE347834F709F17E6E33AD77767471</StringID>
+	<SourceText>Push Context</SourceText>
+	<TargetText>Push Context</TargetText>
+	<Comment>com.fmi.calculation.text.Push Context</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3DDFAFE1876E7C8CA981DBB59FBE2615</StringID>
+	<SourceText>The XML has been placed into agentic-fm&apos;s xml_parsed folder.</SourceText>
+	<TargetText>The XML has been placed into agentic-fm&apos;s xml_parsed folder.</TargetText>
+	<Comment>com.fmi.calculation.text.The XML has been placed into agentic-fm&apos;s xml_parsed folder.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254</StringID>
+	<SourceText>catalogs_included</SourceText>
+	<TargetText>catalogs_included</TargetText>
+	<Comment>com.fmi.calculation.text.catalogs_included</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.41A9C7B72775DAA1DED9BED2BBB7C325</StringID>
+	<SourceText>1.0.0</SourceText>
+	<TargetText>1.0.0</TargetText>
+	<Comment>com.fmi.calculation.text.1.0.0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.41D994AD52D04D684D69E6297B630195</StringID>
+	<SourceText>datetime</SourceText>
+	<TargetText>datetime</TargetText>
+	<Comment>com.fmi.calculation.text.datetime</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF</StringID>
+	<SourceText>:</SourceText>
+	<TargetText>:</TargetText>
+	<Comment>com.fmi.calculation.text.:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.42FA3A1D2C27D4070FFAC279289FBC62</StringID>
+	<SourceText> ===================================================================<CR/>       Build tables JSON<CR/>       For each unique TO: query FileMaker_Fields for all fields,<CR/>       map SQL types to FileMaker types, and assemble:<CR/>       { &quot;TOName&quot;: { id, base_table, to, to_id, fields: { ... } } }<CR/><CR/>       Keyed by TO name (not base table name) so that multiple TOs<CR/>       sharing the same base table each get their own entry.<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Build tables JSON<CR/>       For each unique TO: query FileMaker_Fields for all fields,<CR/>       map SQL types to FileMaker types, and assemble:<CR/>       { &quot;TOName&quot;: { id, base_table, to, to_id, fields: { ... } } }<CR/><CR/>       Keyed by TO name (not base table name) so that multiple TOs<CR/>       sharing the same base table each get their own entry.<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Build tables JSON_CR/_       For each unique TO: query FileMaker_Fields for all fields,_CR/_       map SQL types to FileMaker types, and assemble:_CR/_       { &quot;TOName&quot;: { id, base_table, to, to_id, fields: { ... } } }_CR/__CR/_       Keyed by TO name (not base table name) so that multiple TOs_CR/_       sharing the same base table each get their own entry._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.42FB9E7BEB6125DB7F2D9FE414DC8C69</StringID>
+	<SourceText>Date</SourceText>
+	<TargetText>Date</TargetText>
+	<Comment>com.fmi.calculation.text.Date</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.42FDB14879A1D57037ACCA5BE72AC509</StringID>
+	<SourceText>Agentic-fm Debug</SourceText>
+	<TargetText>Agentic-fm Debug</TargetText>
+	<Comment>com.fmi.calculation.text.Agentic-fm Debug</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4479EB4EB3719741A5B60C902D683EE2</StringID>
+	<SourceText>current_layout.base_to_id</SourceText>
+	<TargetText>current_layout.base_to_id</TargetText>
+	<Comment>com.fmi.calculation.text.current_layout.base_to_id</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.465E1F4E24F01643AAEAA291F019E952</StringID>
+	<SourceText>script</SourceText>
+	<TargetText>script</TargetText>
+	<Comment>com.fmi.calculation.text.script</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.49AE69F793E196F618E8C5D5A10FA1FD</StringID>
+	<SourceText>timestamp</SourceText>
+	<TargetText>timestamp</TargetText>
+	<Comment>com.fmi.calculation.text.timestamp</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4B3F2A37CCBB0951ED498CA514484590</StringID>
+	<SourceText>scripts</SourceText>
+	<TargetText>scripts</TargetText>
+	<Comment>com.fmi.calculation.text.scripts</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B</StringID>
+	<SourceText>id</SourceText>
+	<TargetText>id</TargetText>
+	<Comment>com.fmi.calculation.text.id</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4DCED210E2B3E9C6167352D5A1CC63A4</StringID>
+	<SourceText>Finished</SourceText>
+	<TargetText>Finished</TargetText>
+	<Comment>com.fmi.calculation.text.Finished</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4E62AEC9B37A5E5155FDE6B79CA92507</StringID>
+	<SourceText> ===================================================================<CR/>       Scripts JSON: { &quot;ScriptName&quot;: { &quot;id&quot;: N }, ... }<CR/>       Includes all scripts in the file.<CR/><CR/>       Built via string concatenation rather than JSONSetElement to avoid<CR/>       issues with script names containing characters that JSONSetElement<CR/>       interprets as path operators ([ ] . &quot; \).<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Scripts JSON: { &quot;ScriptName&quot;: { &quot;id&quot;: N }, ... }<CR/>       Includes all scripts in the file.<CR/><CR/>       Built via string concatenation rather than JSONSetElement to avoid<CR/>       issues with script names containing characters that JSONSetElement<CR/>       interprets as path operators ([ ] . &quot; \).<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Scripts JSON: { &quot;ScriptName&quot;: { &quot;id&quot;: N }, ... }_CR/_       Includes all scripts in the file._CR/__CR/_       Built via string concatenation rather than JSONSetElement to avoid_CR/_       issues with script names containing characters that JSONSetElement_CR/_       interprets as path operators ([ ] . &quot; \)._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA</StringID>
+	<SourceText>split_catalogs</SourceText>
+	<TargetText>split_catalogs</TargetText>
+	<Comment>com.fmi.calculation.text.split_catalogs</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.54996FE58603C566C60F2EF6425BF598</StringID>
+	<SourceText>vars</SourceText>
+	<TargetText>vars</TargetText>
+	<Comment>com.fmi.calculation.text.vars</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.54E849B18DABF84835A15F47C2F1A6EA</StringID>
+	<SourceText>exit_code</SourceText>
+	<TargetText>exit_code</TargetText>
+	<Comment>com.fmi.calculation.text.exit_code</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.54EC61754C07F4CE591386BE52CED175</StringID>
+	<SourceText>That folder is not an agentic-fm clone (no fmparse.sh).</SourceText>
+	<TargetText>That folder is not an agentic-fm clone (no fmparse.sh).</TargetText>
+	<Comment>com.fmi.calculation.text.That folder is not an agentic-fm clone (no fmparse.sh).</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.57AE11E947E3055BAEC10E6EF93D2B58</StringID>
+	<SourceText> Build field object </SourceText>
+	<TargetText> Build field object </TargetText>
+	<Comment>com.fmi.calculation.text. Build field object</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.57D0602899F458CA7D4F10682E0C6CA4</StringID>
+	<SourceText>:8765/health</SourceText>
+	<TargetText>:8765/health</TargetText>
+	<Comment>com.fmi.calculation.text.:8765/health</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.58CA92764771FD910275006E79846B2F</StringID>
+	<SourceText>.xml</SourceText>
+	<TargetText>.xml</TargetText>
+	<Comment>com.fmi.calculation.text..xml</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6</StringID>
+	<SourceText>exploder_bin_path</SourceText>
+	<TargetText>exploder_bin_path</TargetText>
+	<Comment>com.fmi.calculation.text.exploder_bin_path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5A9701DEA0701148E6020B2FDF8B602B</StringID>
+	<SourceText>Please describe the task you&apos;re trying to accomplish with the script.</SourceText>
+	<TargetText>Please describe the task you&apos;re trying to accomplish with the script.</TargetText>
+	<Comment>com.fmi.calculation.text.Please describe the task you&apos;re trying to accomplish with the script.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5E011A4AFD84B55B6E46F99A28AB6346</StringID>
+	<SourceText>numeric</SourceText>
+	<TargetText>numeric</TargetText>
+	<Comment>com.fmi.calculation.text.numeric</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD</StringID>
+	<SourceText>PersistentStoreCatalog<LF/>  BaseDirectoryCatalog<LF/>  FileAccessCatalog<LF/>  ExternalDataSourceCatalog<LF/>  BaseTableCatalog<LF/>  TableOccurrenceCatalog<LF/>  CustomFunctionsCatalog<LF/>  ValueListCatalog<LF/>  FieldCatalog<LF/>  RelationshipCatalog<LF/>  CustomMenuCatalog<LF/>  CustomMenuSetCatalog<LF/>  ScriptCatalog<LF/>  ThemeCatalog<LF/>  LayoutCatalog<LF/>  LibraryCatalog<LF/>  PrivilegeSetsCatalog<LF/>  ExtendedPrivilegesCatalog<LF/>  AccountsCatalog<LF/>  Metadata</SourceText>
+	<TargetText>PersistentStoreCatalog<LF/>  BaseDirectoryCatalog<LF/>  FileAccessCatalog<LF/>  ExternalDataSourceCatalog<LF/>  BaseTableCatalog<LF/>  TableOccurrenceCatalog<LF/>  CustomFunctionsCatalog<LF/>  ValueListCatalog<LF/>  FieldCatalog<LF/>  RelationshipCatalog<LF/>  CustomMenuCatalog<LF/>  CustomMenuSetCatalog<LF/>  ScriptCatalog<LF/>  ThemeCatalog<LF/>  LayoutCatalog<LF/>  LibraryCatalog<LF/>  PrivilegeSetsCatalog<LF/>  ExtendedPrivilegesCatalog<LF/>  AccountsCatalog<LF/>  Metadata</TargetText>
+	<Comment>com.fmi.calculation.text.PersistentStoreCatalog_LF/_  BaseDirectoryCatalog_LF/_  FileAccessCatalog_LF/_  ExternalDataSourceCatalog_LF/_  BaseTableCatalog_LF/_  TableOccurrenceCatalog_LF/_  CustomFunctionsCatalog_LF/_  ValueListCatalog_LF/_  FieldCatalog_LF/_  RelationshipCatalog_LF/_  CustomMenuCatalog_LF/_  CustomMenuSetCatalog_LF/_  ScriptCatalog_LF/_  ThemeCatalog_LF/_  LayoutCatalog_LF/_  LibraryCatalog_LF/_  PrivilegeSetsCatalog_LF/_  ExtendedPrivilegesCatalog_LF/_  AccountsCatalog_LF/_  Metadata</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8</StringID>
+	<SourceText>::</SourceText>
+	<TargetText>::</TargetText>
+	<Comment>com.fmi.calculation.text.::</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5F7E58EE85F2FAEDF9F0B164BF560CE6</StringID>
+	<SourceText>Task description</SourceText>
+	<TargetText>Task description</TargetText>
+	<Comment>com.fmi.calculation.text.Task description</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5F91071A15427802DFBC07D947C43A9F</StringID>
+	<SourceText>Normal</SourceText>
+	<TargetText>Normal</TargetText>
+	<Comment>com.fmi.calculation.text.Normal</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5</StringID>
+	<SourceText>&gt;</SourceText>
+	<TargetText>&gt;</TargetText>
+	<Comment>com.fmi.calculation.text.&gt;</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.616CD86D3D2E667AFA97B562A49F69D4</StringID>
+	<SourceText> ===================================================================<CR/>       Layouts JSON: { &quot;LayoutName&quot;: { &quot;id&quot;: N }, ... }<CR/>       Includes all layouts in the file.<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Layouts JSON: { &quot;LayoutName&quot;: { &quot;id&quot;: N }, ... }<CR/>       Includes all layouts in the file.<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Layouts JSON: { &quot;LayoutName&quot;: { &quot;id&quot;: N }, ... }_CR/_       Includes all layouts in the file._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.61E379EC729D4B339996D762E221A930</StringID>
+	<SourceText>generated_at</SourceText>
+	<TargetText>generated_at</TargetText>
+	<Comment>com.fmi.calculation.text.generated_at</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.625A98FEC999DC9232B494A805DD2EEC</StringID>
+	<SourceText>cached</SourceText>
+	<TargetText>cached</TargetText>
+	<Comment>com.fmi.calculation.text.cached</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.642338EAD675E278C6E7E0D5241ADF1F</StringID>
+	<SourceText>export_path</SourceText>
+	<TargetText>export_path</TargetText>
+	<Comment>com.fmi.calculation.text.export_path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488</StringID>
+	<SourceText>SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</SourceText>
+	<TargetText>SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</TargetText>
+	<Comment>com.fmi.calculation.text.SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.670350C43192A4095590F6B99F90CFA2</StringID>
+	<SourceText>service.app_version</SourceText>
+	<TargetText>service.app_version</TargetText>
+	<Comment>com.fmi.calculation.text.service.app_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.6D92D710BE88E8801B8500344CA9D57B</StringID>
+	<SourceText>filelinux:</SourceText>
+	<TargetText>filelinux:</TargetText>
+	<Comment>com.fmi.calculation.text.filelinux:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.726E76ED685EDB857D776D8A6AE66BDF</StringID>
+	<SourceText>Save as XML failed (error </SourceText>
+	<TargetText>Save as XML failed (error </TargetText>
+	<Comment>com.fmi.calculation.text.Save as XML failed (error</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.730647C6AE3CA09328C96E4B4E9316ED</StringID>
+	<SourceText>Missing required key: layout</SourceText>
+	<TargetText>Missing required key: layout</TargetText>
+	<Comment>com.fmi.calculation.text.Missing required key: layout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.773A03B06826D53FEEF46EDE854440C7</StringID>
+	<SourceText> Map SQL type to FileMaker type </SourceText>
+	<TargetText> Map SQL type to FileMaker type </TargetText>
+	<Comment>com.fmi.calculation.text. Map SQL type to FileMaker type</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.780A3A41DE8C1E4F881A902C12D944E4</StringID>
+	<SourceText>-X POST -H \&quot;Content-Type: application/json\&quot; -d </SourceText>
+	<TargetText>-X POST -H \&quot;Content-Type: application/json\&quot; -d </TargetText>
+	<Comment>com.fmi.calculation.text.-X POST -H \&quot;Content-Type: application/json\&quot; -d</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D</StringID>
+	<SourceText>path</SourceText>
+	<TargetText>path</TargetText>
+	<Comment>com.fmi.calculation.text.path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.798C12D57C2B46AAB8B24B65F78075AE</StringID>
+	<SourceText>CONTEXT.json</SourceText>
+	<TargetText>CONTEXT.json</TargetText>
+	<Comment>com.fmi.calculation.text.CONTEXT.json</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.79A936582B480127A1AA10E8C1DD27C6</StringID>
+	<SourceText>Context written</SourceText>
+	<TargetText>Context written</TargetText>
+	<Comment>com.fmi.calculation.text.Context written</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7A507397EC7314256E067EA99D4C99E1</StringID>
+	<SourceText>httpError</SourceText>
+	<TargetText>httpError</TargetText>
+	<Comment>com.fmi.calculation.text.httpError</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7AB0CF0B494BF45607F92CF97C7D56E7</StringID>
+	<SourceText> ===================================================================<CR/>       Collect unique TOs referenced on the current layout.<CR/>       FieldNames returns related fields as &quot;TOName::FieldName&quot;.<CR/>       We extract the TO prefixes to discover all related TOs.<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Collect unique TOs referenced on the current layout.<CR/>       FieldNames returns related fields as &quot;TOName::FieldName&quot;.<CR/>       We extract the TO prefixes to discover all related TOs.<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Collect unique TOs referenced on the current layout._CR/_       FieldNames returns related fields as &quot;TOName::FieldName&quot;._CR/_       We extract the TO prefixes to discover all related TOs._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7C595C11BD6A09ECDD887FA0D1943FF6</StringID>
+	<SourceText>task</SourceText>
+	<TargetText>task</TargetText>
+	<Comment>com.fmi.calculation.text.task</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3</StringID>
+	<SourceText>[]</SourceText>
+	<TargetText>[]</TargetText>
+	<Comment>com.fmi.calculation.text.[]</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7D530CE6CED94702FB83406CB059277F</StringID>
+	<SourceText>base_table</SourceText>
+	<TargetText>base_table</TargetText>
+	<Comment>com.fmi.calculation.text.base_table</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7E719A7DDFF2C23D0D8DC29791C8531D</StringID>
+	<SourceText>context</SourceText>
+	<TargetText>context</TargetText>
+	<Comment>com.fmi.calculation.text.context</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC</StringID>
+	<SourceText>error</SourceText>
+	<TargetText>error</TargetText>
+	<Comment>com.fmi.calculation.text.error</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.83EAD56030DCD98C910F01FA65F13E73</StringID>
+	<SourceText>companion_host</SourceText>
+	<TargetText>companion_host</TargetText>
+	<Comment>com.fmi.calculation.text.companion_host</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8789B8E55A4F9609E170ABB50247D3D9</StringID>
+	<SourceText>after Insert from URL</SourceText>
+	<TargetText>after Insert from URL</TargetText>
+	<Comment>com.fmi.calculation.text.after Insert from URL</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90</StringID>
+	<SourceText>Text</SourceText>
+	<TargetText>Text</TargetText>
+	<Comment>com.fmi.calculation.text.Text</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8C1F50B8C90D601D1861CDF8AE9B0E3C</StringID>
+	<SourceText>layout</SourceText>
+	<TargetText>layout</TargetText>
+	<Comment>com.fmi.calculation.text.layout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC</StringID>
+	<SourceText>~/bin/fm-xml-export-exploder</SourceText>
+	<TargetText>~/bin/fm-xml-export-exploder</TargetText>
+	<Comment>com.fmi.calculation.text.~/bin/fm-xml-export-exploder</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8DCDD773AD19BE3DE539F0EE0AEAB594</StringID>
+	<SourceText>ddl</SourceText>
+	<TargetText>ddl</TargetText>
+	<Comment>com.fmi.calculation.text.ddl</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8E4D0F0235A6535DD40838E5FC2F8F8D</StringID>
+	<SourceText>You may now use AI to modify or create your script.</SourceText>
+	<TargetText>You may now use AI to modify or create your script.</TargetText>
+	<Comment>com.fmi.calculation.text.You may now use AI to modify or create your script.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8E9225F194347F3C5485A1E312CBFACD</StringID>
+	<SourceText>no_service</SourceText>
+	<TargetText>no_service</TargetText>
+	<Comment>com.fmi.calculation.text.no_service</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8FC8B1E8688C9526F06846CD0975E768</StringID>
+	<SourceText>lastError</SourceText>
+	<TargetText>lastError</TargetText>
+	<Comment>com.fmi.calculation.text.lastError</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.90F3A370125A58B0E78F5289A50B63CD</StringID>
+	<SourceText>to</SourceText>
+	<TargetText>to</TargetText>
+	<Comment>com.fmi.calculation.text.to</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.91F127C4B704FC5AC212BA970EB65F39</StringID>
+	<SourceText>source</SourceText>
+	<TargetText>source</TargetText>
+	<Comment>com.fmi.calculation.text.source</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4</StringID>
+	<SourceText> </SourceText>
+	<TargetText> </TargetText>
+	<Comment>com.fmi.calculation.text.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.93CA15A878BB34A9358B13AAC7C4686D</StringID>
+	<SourceText> ===================================================================<CR/>       Layout Objects: named objects on the current layout as JSON array.<CR/>       Useful for Go to Object[] script steps.<CR/>       LayoutObjectNames returns angle brackets &lt; &gt; to indicate objects<CR/>       nested inside portals, tab controls, etc. These are excluded<CR/>       since they are not valid object names for Go to Object[].<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Layout Objects: named objects on the current layout as JSON array.<CR/>       Useful for Go to Object[] script steps.<CR/>       LayoutObjectNames returns angle brackets &lt; &gt; to indicate objects<CR/>       nested inside portals, tab controls, etc. These are excluded<CR/>       since they are not valid object names for Go to Object[].<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Layout Objects: named objects on the current layout as JSON array._CR/_       Useful for Go to Object[] script steps._CR/_       LayoutObjectNames returns angle brackets &lt; &gt; to indicate objects_CR/_       nested inside portals, tab controls, etc. These are excluded_CR/_       since they are not valid object names for Go to Object[]._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.962252CD479511D60017F3DA7F93965B</StringID>
+	<SourceText>service_version</SourceText>
+	<TargetText>service_version</TargetText>
+	<Comment>com.fmi.calculation.text.service_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.979340E5759F973D013EE4FF0F210D15</StringID>
+	<SourceText>version</SourceText>
+	<TargetText>version</TargetText>
+	<Comment>com.fmi.calculation.text.version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.97BBB266F49214C66591088FF4E5C80C</StringID>
+	<SourceText> Escape the only character that would break a JSON string<CR/><TAB/><TAB/><TAB/>   value: a double quote. Backslashes are theoretically possible<CR/><TAB/><TAB/><TAB/>   but essentially never appear in FM script names.<CR/>               Char(34) = double quote, Char(92) = backslash. </SourceText>
+	<TargetText> Escape the only character that would break a JSON string<CR/><TAB/><TAB/><TAB/>   value: a double quote. Backslashes are theoretically possible<CR/><TAB/><TAB/><TAB/>   but essentially never appear in FM script names.<CR/>               Char(34) = double quote, Char(92) = backslash. </TargetText>
+	<Comment>com.fmi.calculation.text. Escape the only character that would break a JSON string_CR/__TAB/__TAB/__TAB/_   value: a double quote. Backslashes are theoretically possible_CR/__TAB/__TAB/__TAB/_   but essentially never appear in FM script names._CR/_               Char(34) = double quote, Char(92) = backslash.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B</StringID>
+	<SourceText>Timestamp</SourceText>
+	<TargetText>Timestamp</TargetText>
+	<Comment>com.fmi.calculation.text.Timestamp</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.98436D4D16620616303B49CB5343A472</StringID>
+	<SourceText>expression</SourceText>
+	<TargetText>expression</TargetText>
+	<Comment>com.fmi.calculation.text.expression</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.9CD6CD30E4547B3800299B5C2B734FA8</StringID>
+	<SourceText>context_version</SourceText>
+	<TargetText>context_version</TargetText>
+	<Comment>com.fmi.calculation.text.context_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A238CF967B73E6BEB5601066DA31B25A</StringID>
+	<SourceText>text</SourceText>
+	<TargetText>text</TargetText>
+	<Comment>com.fmi.calculation.text.text</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555</StringID>
+	<SourceText>export_file_path</SourceText>
+	<TargetText>export_file_path</TargetText>
+	<Comment>com.fmi.calculation.text.export_file_path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A30D35D2746A01FCB45708FF9073BA88</StringID>
+	<SourceText>Invalid folder</SourceText>
+	<TargetText>Invalid folder</TargetText>
+	<Comment>com.fmi.calculation.text.Invalid folder</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A445D354F10C686D45B587901A5E2A6B</StringID>
+	<SourceText>int</SourceText>
+	<TargetText>int</TargetText>
+	<Comment>com.fmi.calculation.text.int</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A45F223045F8995BEECA79C8FC4676E2</StringID>
+	<SourceText>snapshot_timestamp</SourceText>
+	<TargetText>snapshot_timestamp</TargetText>
+	<Comment>com.fmi.calculation.text.snapshot_timestamp</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A548D8D3BF1DBEA966A3C60FD421DF49</StringID>
+	<SourceText>solution</SourceText>
+	<TargetText>solution</TargetText>
+	<Comment>com.fmi.calculation.text.solution</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A587A64286526D6D74172CD462E02293</StringID>
+	<SourceText> ===================================================================<CR/>       DDL for relationship context<CR/>       GetTableDDL requires a JSON array of TO names.<CR/>       The DDL output includes FOREIGN KEY references and field comments,<CR/>       which provide the AI with relationship information.<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       DDL for relationship context<CR/>       GetTableDDL requires a JSON array of TO names.<CR/>       The DDL output includes FOREIGN KEY references and field comments,<CR/>       which provide the AI with relationship information.<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       DDL for relationship context_CR/_       GetTableDDL requires a JSON array of TO names._CR/_       The DDL output includes FOREIGN KEY references and field comments,_CR/_       which provide the AI with relationship information._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A6971A194BD7C329966322982FC8CAF8</StringID>
+	<SourceText>fmparse.sh</SourceText>
+	<TargetText>fmparse.sh</TargetText>
+	<Comment>com.fmi.calculation.text.fmparse.sh</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB</StringID>
+	<SourceText>&lt;</SourceText>
+	<TargetText>&lt;</TargetText>
+	<Comment>com.fmi.calculation.text.&lt;</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A890BF40BD49C839E350BDAF7E9E7D8D</StringID>
+	<SourceText> Build fields object via inner While </SourceText>
+	<TargetText> Build fields object via inner While </TargetText>
+	<Comment>com.fmi.calculation.text. Build fields object via inner While</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.ABDCBCA52F460146DD60342A77AEC68B</StringID>
+	<SourceText>:8765/config?file=</SourceText>
+	<TargetText>:8765/config?file=</TargetText>
+	<Comment>com.fmi.calculation.text.:8765/config?file=</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.ACAF06A840B580FF9B5ECDF15739695B</StringID>
+	<SourceText>--max-time 3</SourceText>
+	<TargetText>--max-time 3</TargetText>
+	<Comment>com.fmi.calculation.text.--max-time 3</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.AEF6A4C2CC525D591115FA95BA3EE39C</StringID>
+	<SourceText>http://</SourceText>
+	<TargetText>http://</TargetText>
+	<Comment>com.fmi.calculation.text.http://</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.AF57223E36CDC7BFCE5B62C3BEBA0337</StringID>
+	<SourceText>Error</SourceText>
+	<TargetText>Error</TargetText>
+	<Comment>com.fmi.calculation.text.Error</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B3C7F87088E54C241FDDD31D46BA5EAB</StringID>
+	<SourceText>addon_version</SourceText>
+	<TargetText>addon_version</TargetText>
+	<Comment>com.fmi.calculation.text.addon_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B48A868C643A68C639219B68A79CB846</StringID>
+	<SourceText>decimal</SourceText>
+	<TargetText>decimal</TargetText>
+	<Comment>com.fmi.calculation.text.decimal</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B48AB5FC3707D870517A094F1FCC5C01</StringID>
+	<SourceText>stderr</SourceText>
+	<TargetText>stderr</TargetText>
+	<Comment>com.fmi.calculation.text.stderr</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B609E43A579CBB0DFB2258220C871928</StringID>
+	<SourceText>to_id</SourceText>
+	<TargetText>to_id</TargetText>
+	<Comment>com.fmi.calculation.text.to_id</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B8A62ED201439D21A2E0E71E83FEC1FD</StringID>
+	<SourceText>service</SourceText>
+	<TargetText>service</TargetText>
+	<Comment>com.fmi.calculation.text.service</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BA16000A8B737B8B4AF90C0FF29D8808</StringID>
+	<SourceText>tables</SourceText>
+	<TargetText>tables</TargetText>
+	<Comment>com.fmi.calculation.text.tables</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21</StringID>
+	<SourceText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </SourceText>
+	<TargetText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </TargetText>
+	<Comment>com.fmi.calculation.text. Key by TO name — unique, prevents overwrites when_CR/_               multiple TOs share the same base table</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BC8865825FDBA1D62DA39CE1F8066F16</StringID>
+	<SourceText>Missing required key: expression</SourceText>
+	<TargetText>Missing required key: expression</TargetText>
+	<Comment>com.fmi.calculation.text.Missing required key: expression</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BD89B0F8193F8C54FE2F8A873FED1D93</StringID>
+	<SourceText>)</SourceText>
+	<TargetText>)</TargetText>
+	<Comment>com.fmi.calculation.text.)</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BEB06E2CA146960316DC9594614ABD97</StringID>
+	<SourceText>time</SourceText>
+	<TargetText>time</TargetText>
+	<Comment>com.fmi.calculation.text.time</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BF27CA10BA6CC8943349796AD49F4166</StringID>
+	<SourceText>result</SourceText>
+	<TargetText>result</TargetText>
+	<Comment>com.fmi.calculation.text.result</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C088FDC0EC990C1F3F862AB9263C4E97</StringID>
+	<SourceText>agentic-fm not configured</SourceText>
+	<TargetText>agentic-fm not configured</TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm not configured</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9</StringID>
+	<SourceText>{</SourceText>
+	<TargetText>{</TargetText>
+	<Comment>com.fmi.calculation.text.{</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C6E22A4E42A25C7D7950F4B2F19BB80E</StringID>
+	<SourceText>build invoice scripts</SourceText>
+	<TargetText>build invoice scripts</TargetText>
+	<Comment>com.fmi.calculation.text.build invoice scripts</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C7D9C038C45F395E838154F2922DABC0</StringID>
+	<SourceText>localhost</SourceText>
+	<TargetText>localhost</TargetText>
+	<Comment>com.fmi.calculation.text.localhost</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C81174295D29BEDB1E68D3FC3DF46853</StringID>
+	<SourceText>fields</SourceText>
+	<TargetText>fields</TargetText>
+	<Comment>com.fmi.calculation.text.fields</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CB20E10F2DB1FFD2E5DD86A206BD8F99</StringID>
+	<SourceText>Companion server unreachable (error </SourceText>
+	<TargetText>Companion server unreachable (error </TargetText>
+	<Comment>com.fmi.calculation.text.Companion server unreachable (error</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CC0D9FF2979CC7073E85DEF21384D083</StringID>
+	<SourceText>ok</SourceText>
+	<TargetText>ok</TargetText>
+	<Comment>com.fmi.calculation.text.ok</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CD41C8372B8F2EDB4D97EF3EBF1EC337</StringID>
+	<SourceText>stdout</SourceText>
+	<TargetText>stdout</TargetText>
+	<Comment>com.fmi.calculation.text.stdout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CF677D0BB6231AE49AC661E91F15E8D1</StringID>
+	<SourceText>tableOccurrence</SourceText>
+	<TargetText>tableOccurrence</TargetText>
+	<Comment>com.fmi.calculation.text.tableOccurrence</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CF89B62DF482D28D4B22EBB4C6B9A60D</StringID>
+	<SourceText>error_code</SourceText>
+	<TargetText>error_code</TargetText>
+	<Comment>com.fmi.calculation.text.error_code</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CFEBBBB9E18AB138758A59051D3E4AD7</StringID>
+	<SourceText>agent/</SourceText>
+	<TargetText>agent/</TargetText>
+	<Comment>com.fmi.calculation.text.agent/</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D150534FFB8CF9746BB34B7C13EDC788</StringID>
+	<SourceText>Start the companion server first:¶¶python3 agent/scripts/companion_server.py¶¶Then run Explode XML again.</SourceText>
+	<TargetText>Start the companion server first:¶¶python3 agent/scripts/companion_server.py¶¶Then run Explode XML again.</TargetText>
+	<Comment>com.fmi.calculation.text.Start the companion server first:¶¶python3 agent/scripts/companion_server.py¶¶Then run Explode XML again.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D3912A148029E1C96FF5B953CA1B057E</StringID>
+	<SourceText> Query all fields for this TO </SourceText>
+	<TargetText> Query all fields for this TO </TargetText>
+	<Comment>com.fmi.calculation.text. Query all fields for this TO</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D491787BD81ED43CB9E05191BBA37E6C</StringID>
+	<SourceText>T</SourceText>
+	<TargetText>T</TargetText>
+	<Comment>com.fmi.calculation.text.T</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D4B6B420F385A747050CBD182CC5DB43</StringID>
+	<SourceText>current_layout.id</SourceText>
+	<TargetText>current_layout.id</TargetText>
+	<Comment>com.fmi.calculation.text.current_layout.id</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D599E5818751D81F2DC4FE122688D2DF</StringID>
+	<SourceText>app</SourceText>
+	<TargetText>app</TargetText>
+	<Comment>com.fmi.calculation.text.app</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D6291D2122B10478F41037911AC62183</StringID>
+	<SourceText>SELECT BaseTableId FROM FileMaker_BaseTables WHERE BaseTableName = ?</SourceText>
+	<TargetText>SELECT BaseTableId FROM FileMaker_BaseTables WHERE BaseTableName = ?</TargetText>
+	<Comment>com.fmi.calculation.text.SELECT BaseTableId FROM FileMaker_BaseTables WHERE BaseTableName = ?</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D63D1DE4C09E714307A3782F8096AFE2</StringID>
+	<SourceText>Select the agentic-fm folder</SourceText>
+	<TargetText>Select the agentic-fm folder</TargetText>
+	<Comment>com.fmi.calculation.text.Select the agentic-fm folder</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D66EB1912EC8DA70685FA15E9C46DA3B</StringID>
+	<SourceText><CR/> * Context ( task )<CR/> *<CR/> * Generates a JSON context document for AI script generation.<CR/> * Run from the layout where you want the AI to compose a script.<CR/> *<CR/> * Parameter:<CR/> *   task - Text description of what script to create<CR/> *          e.g. &quot;Create a script to add a new line item to the current invoice&quot;<CR/> *<CR/> * Returns: JSON string matching the CONTEXT.json schema used by agentic-fm<CR/> *<CR/> * Output includes:<CR/> *   solution         - file name<CR/> *   task             - the provided description<CR/> *   current_layout   - name, id, base table occurrence<CR/> *   tables           - all TOs referenced on the current layout with complete field lists<CR/> *   ddl              - GetTableDDL output (includes FOREIGN KEY relationships and field comments)<CR/> *   scripts          - all scripts in the file (name + id)<CR/> *   layouts          - all layouts in the file (name + id)<CR/> *   value_lists      - all value lists (name + id + source)<CR/> *   layout_objects   - named objects on the current layout<CR/> *<CR/> * Requires: FileMaker Pro 21.0+<CR/> *<CR/> * Note: Relationship data comes from the ddl section via GetTableDDL&apos;s FOREIGN KEY output.<CR/> *       Both sides of a relationship must be in the TO list for the FK to appear in the DDL.<CR/> *       See: https://help.claris.com/en/pro-help/content/schema-best-practices-for-sql-generation.html<CR/> </SourceText>
+	<TargetText><CR/> * Context ( task )<CR/> *<CR/> * Generates a JSON context document for AI script generation.<CR/> * Run from the layout where you want the AI to compose a script.<CR/> *<CR/> * Parameter:<CR/> *   task - Text description of what script to create<CR/> *          e.g. &quot;Create a script to add a new line item to the current invoice&quot;<CR/> *<CR/> * Returns: JSON string matching the CONTEXT.json schema used by agentic-fm<CR/> *<CR/> * Output includes:<CR/> *   solution         - file name<CR/> *   task             - the provided description<CR/> *   current_layout   - name, id, base table occurrence<CR/> *   tables           - all TOs referenced on the current layout with complete field lists<CR/> *   ddl              - GetTableDDL output (includes FOREIGN KEY relationships and field comments)<CR/> *   scripts          - all scripts in the file (name + id)<CR/> *   layouts          - all layouts in the file (name + id)<CR/> *   value_lists      - all value lists (name + id + source)<CR/> *   layout_objects   - named objects on the current layout<CR/> *<CR/> * Requires: FileMaker Pro 21.0+<CR/> *<CR/> * Note: Relationship data comes from the ddl section via GetTableDDL&apos;s FOREIGN KEY output.<CR/> *       Both sides of a relationship must be in the TO list for the FK to appear in the DDL.<CR/> *       See: https://help.claris.com/en/pro-help/content/schema-best-practices-for-sql-generation.html<CR/> </TargetText>
+	<Comment>com.fmi.calculation.text._CR/_ * Context ( task )_CR/_ *_CR/_ * Generates a JSON context document for AI script generation._CR/_ * Run from the layout where you want the AI to compose a script._CR/_ *_CR/_ * Parameter:_CR/_ *   task - Text description of what script to create_CR/_ *          e.g. &quot;Create a script to add a new line item to the current invoice&quot;_CR/_ *_CR/_ * Returns: JSON string matching the CONTEXT.json schema used by agentic-fm_CR/_ *_CR/_ * Output includes:_CR/_ *   solution         - file name_CR/_ *   task             - the provided description_CR/_ *   current_layout   - name, id, base table occurrence_CR/_ *   tables           - all TOs referenced on the current layout with complete field lists_CR/_ *   ddl              - GetTableDDL output (includes FOREIGN KEY relationships and field comments)_CR/_ *   scripts          - all scripts in the file (name + id)_CR/_ *   layouts          - all layouts in the file (name + id)_CR/_ *   value_lists      - all value lists (name + id + source)_CR/_ *   layout_objects   - named objects on the current layout_CR/_ *_CR/_ * Requires: FileMaker Pro 21.0+_CR/_ *_CR/_ * Note: Relationship data comes from the ddl section via GetTableDDL&apos;s FOREIGN KEY output._CR/_ *       Both sides of a relationship must be in the TO list for the FK to appear in the DDL._CR/_ *       See: https://help.claris.com/en/pro-help/content/schema-best-practices-for-sql-generation.html_CR/_</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D7B4B5F0215CF03E4EA1D091165F2B32</StringID>
+	<SourceText>Companion server not running. Start it with:¶¶python3 agent/scripts/companion_server.py</SourceText>
+	<TargetText>Companion server not running. Start it with:¶¶python3 agent/scripts/companion_server.py</TargetText>
+	<Comment>com.fmi.calculation.text.Companion server not running. Start it with:¶¶python3 agent/scripts/companion_server.py</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.DB1E47D051DC42470965C8C57488E0D2</StringID>
+	<SourceText>lastErrorLocation</SourceText>
+	<TargetText>lastErrorLocation</TargetText>
+	<Comment>com.fmi.calculation.text.lastErrorLocation</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80</StringID>
+	<SourceText>|</SourceText>
+	<TargetText>|</TargetText>
+	<Comment>com.fmi.calculation.text.|</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.DE7E8663EFD34402BA2DAAE96EED740E</StringID>
+	<SourceText> Build table object </SourceText>
+	<TargetText> Build table object </TargetText>
+	<Comment>com.fmi.calculation.text. Build table object</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.DE943A507F1C85CE10AB37927FB59B6F</StringID>
+	<SourceText>snapshot_path</SourceText>
+	<TargetText>snapshot_path</TargetText>
+	<Comment>com.fmi.calculation.text.snapshot_path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E0D07C4BA83637E808A383F87D16857F</StringID>
+	<SourceText>/context</SourceText>
+	<TargetText>/context</TargetText>
+	<Comment>com.fmi.calculation.text./context</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE</StringID>
+	<SourceText>}</SourceText>
+	<TargetText>}</TargetText>
+	<Comment>com.fmi.calculation.text.}</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE</StringID>
+	<SourceText>:{</SourceText>
+	<TargetText>:{</TargetText>
+	<Comment>com.fmi.calculation.text.:{</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E72BCB1D335E6553C46F3FF3DF27ECFE</StringID>
+	<SourceText>Companion server not running</SourceText>
+	<TargetText>Companion server not running</TargetText>
+	<Comment>com.fmi.calculation.text.Companion server not running</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E787FDB029100D6A540DE83BF699C57E</StringID>
+	<SourceText>parameter</SourceText>
+	<TargetText>parameter</TargetText>
+	<Comment>com.fmi.calculation.text.parameter</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E802A6F069CD8738C6E083E04682A3E0</StringID>
+	<SourceText>SELECT ValueListName, ValueListId, Source FROM FileMaker_ValueLists</SourceText>
+	<TargetText>SELECT ValueListName, ValueListId, Source FROM FileMaker_ValueLists</TargetText>
+	<Comment>com.fmi.calculation.text.SELECT ValueListName, ValueListId, Source FROM FileMaker_ValueLists</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E8242F9CA220C53035AFF0819EEDB978</StringID>
+	<SourceText>type</SourceText>
+	<TargetText>type</TargetText>
+	<Comment>com.fmi.calculation.text.type</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.EAB50923DFB521B317FBF79E0523359B</StringID>
+	<SourceText>SELECT FieldName, FieldId, FieldType, FieldClass FROM FileMaker_Fields WHERE TableName = ?</SourceText>
+	<TargetText>SELECT FieldName, FieldId, FieldType, FieldClass FROM FileMaker_Fields WHERE TableName = ?</TargetText>
+	<Comment>com.fmi.calculation.text.SELECT FieldName, FieldId, FieldType, FieldClass FROM FileMaker_Fields WHERE TableName = ?</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.F0CB4A5592988EC535F69A64FBDBC7D0</StringID>
+	<SourceText>Script not found: </SourceText>
+	<TargetText>Script not found: </TargetText>
+	<Comment>com.fmi.calculation.text.Script not found:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.F2468989A740CF4657848C86648BC51E</StringID>
+	<SourceText>label</SourceText>
+	<TargetText>label</TargetText>
+	<Comment>com.fmi.calculation.text.label</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.F4772381677290F3C5F86F74565F7C62</StringID>
+	<SourceText>&amp;host=</SourceText>
+	<TargetText>&amp;host=</TargetText>
+	<Comment>com.fmi.calculation.text.&amp;host=</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.F7EFEBB853CFAA469FB4B8F6C49F50B9</StringID>
+	<SourceText>Z</SourceText>
+	<TargetText>Z</TargetText>
+	<Comment>com.fmi.calculation.text.Z</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.F7F4716EF3BA10458AC611E69C0A0F84</StringID>
+	<SourceText> Escape characters that would break a JSON string value.<CR/>               Char(34) = double quote, Char(92) = backslash. </SourceText>
+	<TargetText> Escape characters that would break a JSON string value.<CR/>               Char(34) = double quote, Char(92) = backslash. </TargetText>
+	<Comment>com.fmi.calculation.text. Escape characters that would break a JSON string value._CR/_               Char(34) = double quote, Char(92) = backslash.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FA448BF879578EC5BE5F32E0CFE60A48</StringID>
+	<SourceText> ===================================================================<CR/>       Value Lists JSON: { &quot;VLName&quot;: { &quot;id&quot;: N, &quot;source&quot;: &quot;Custom&quot; }, ... }<CR/>       =================================================================== </SourceText>
+	<TargetText> ===================================================================<CR/>       Value Lists JSON: { &quot;VLName&quot;: { &quot;id&quot;: N, &quot;source&quot;: &quot;Custom&quot; }, ... }<CR/>       =================================================================== </TargetText>
+	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Value Lists JSON: { &quot;VLName&quot;: { &quot;id&quot;: N, &quot;source&quot;: &quot;Custom&quot; }, ... }_CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FA56F7B1CA6FAB546B4D079941EE0644</StringID>
+	<SourceText>fieldtype</SourceText>
+	<TargetText>fieldtype</TargetText>
+	<Comment>com.fmi.calculation.text.fieldtype</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288</StringID>
+	<SourceText>layout_objects</SourceText>
+	<TargetText>layout_objects</TargetText>
+	<Comment>com.fmi.calculation.text.layout_objects</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.18B505B3B430E5DFB12D6E55FD31A588</StringID>
+	<SourceText>__FMAddonTemplateDirectives_Build</SourceText>
+	<TargetText>__FMAddonTemplateDirectives_Build</TargetText>
+	<Comment>com.fmi.script.__FMAddonTemplateDirectives_Build</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.1AC166A64D85934D31CDFAA8A2B4AC76</StringID>
+	<SourceText>AGFMEvaluation</SourceText>
+	<TargetText>AGFMEvaluation</TargetText>
+	<Comment>com.fmi.script.AGFMEvaluation</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.2136D609ABB62DF5407F15D4807303DA</StringID>
+	<SourceText>Explode XML</SourceText>
+	<TargetText>Explode XML</TargetText>
+	<Comment>com.fmi.script.Explode XML</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.2778A69EC3166CD0C084226AB5516976</StringID>
+	<SourceText>AGFMScriptBridge</SourceText>
+	<TargetText>AGFMScriptBridge</TargetText>
+	<Comment>com.fmi.script.AGFMScriptBridge</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.3BDE347834F709F17E6E33AD77767471</StringID>
+	<SourceText>Push Context</SourceText>
+	<TargetText>Push Context</TargetText>
+	<Comment>com.fmi.script.Push Context</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.42FDB14879A1D57037ACCA5BE72AC509</StringID>
+	<SourceText>Agentic-fm Debug</SourceText>
+	<TargetText>Agentic-fm Debug</TargetText>
+	<Comment>com.fmi.script.Agentic-fm Debug</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.9D72E2AAFB6E345C75FF44E903812444</StringID>
+	<SourceText>AGFM Explode</SourceText>
+	<TargetText>AGFM Explode</TargetText>
+	<Comment>com.fmi.script.AGFM Explode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.D05F422942C101AA14B240015E98C911</StringID>
+	<SourceText>Get agentic-fm path</SourceText>
+	<TargetText>Get agentic-fm path</TargetText>
+	<Comment>com.fmi.script.Get agentic-fm path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.EB5744F9AC3D65D45430632F605FEE94</StringID>
+	<SourceText>AGFM Version</SourceText>
+	<TargetText>AGFM Version</TargetText>
+	<Comment>com.fmi.script.AGFM Version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.F55A872BC2D9365F96881BFEAD5976BC</StringID>
+	<SourceText>AGFMGoToLayout</SourceText>
+	<TargetText>AGFMGoToLayout</TargetText>
+	<Comment>com.fmi.script.AGFMGoToLayout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.F5E2492DC52C8C6521A7E3E5154ACF01</StringID>
+	<SourceText>AGFM Start</SourceText>
+	<TargetText>AGFM Start</TargetText>
+	<Comment>com.fmi.script.AGFM Start</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.F63A4453F6BA67DCAD499656A4A42CEE</StringID>
+	<SourceText>AGFM Choose Folder</SourceText>
+	<TargetText>AGFM Choose Folder</TargetText>
+	<Comment>com.fmi.script.AGFM Choose Folder</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.folder.C55595063F1DD9FDCFE83611B64A6253</StringID>
+	<SourceText>OData</SourceText>
+	<TargetText>OData</TargetText>
+	<Comment>com.fmi.script.folder.OData</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.folder.CD11924B27F31DA5581F9EC6A9F2DC4C</StringID>
+	<SourceText>Extras</SourceText>
+	<TargetText>Extras</TargetText>
+	<Comment>com.fmi.script.folder.Extras</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.folder.DEA3CF9E8D9F055B574DEAD904F6BD24</StringID>
+	<SourceText>agentic-fm</SourceText>
+	<TargetText>agentic-fm</TargetText>
+	<Comment>com.fmi.script.folder.agentic-fm</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.05A1A51864BBD8FDF4D8DB1C149E265A</StringID>
+	<SourceText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</SourceText>
+	<TargetText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</TargetText>
+	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with keys:_CR/_  script    — name of the script to run_CR/_  parameter — value to pass as script parameter (optional)_CR/__CR/_RETURNS: JSON { success, script, result } on success_CR/_         JSON { success, error } on failure_CR/__CR/_CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge_CR/_  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.0AD28F9057B5642643DF8B6458C52EC0</StringID>
+	<SourceText>RETURNS: JSON { ok, source: cached | app, repo_path, solution } or { ok: false, error: no_service | no_config | unknown_solution | ambiguous_solution }. A {&quot;Proceso&quot;:&quot;Inicio&quot;} parameter is accepted and ignored.</SourceText>
+	<TargetText>RETURNS: JSON { ok, source: cached | app, repo_path, solution } or { ok: false, error: no_service | no_config | unknown_solution | ambiguous_solution }. A {&quot;Proceso&quot;:&quot;Inicio&quot;} parameter is accepted and ignored.</TargetText>
+	<Comment>com.fmi.scriptstep.text.RETURNS: JSON { ok, source: cached | app, repo_path, solution } or { ok: false, error: no_service | no_config | unknown_solution | ambiguous_solution }. A {&quot;Proceso&quot;:&quot;Inicio&quot;} parameter is accepted and ignored.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.1C4618C434531AF55B91CE994B08F1AE</StringID>
+	<SourceText>DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</SourceText>
+	<TargetText>DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</TargetText>
+	<Comment>com.fmi.scriptstep.text.DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.242FB64F3B3768D1A064ECAF7CA7A74C</StringID>
+	<SourceText>Save snapshot for agent data context</SourceText>
+	<TargetText>Save snapshot for agent data context</TargetText>
+	<Comment>com.fmi.scriptstep.text.Save snapshot for agent data context</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.246EDFD0175EA9B132094EB5295A341B</StringID>
+	<SourceText>MARK: Server mode</SourceText>
+	<TargetText>MARK: Server mode</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK: Server mode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.2540D36A0A127352ECB15AE12572FA8B</StringID>
+	<SourceText>PURPOSE: Write runtime debug state to agent/debug/output.json for agent inspection.</SourceText>
+	<TargetText>PURPOSE: Write runtime debug state to agent/debug/output.json for agent inspection.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Write runtime debug state to agent/debug/output.json for agent inspection.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.27D3D8CBE6902B886757C7522221FD26</StringID>
+	<SourceText>Navigate to the requested layout before generating context (keeps both operations in the same FM session)</SourceText>
+	<TargetText>Navigate to the requested layout before generating context (keeps both operations in the same FM session)</TargetText>
+	<Comment>com.fmi.scriptstep.text.Navigate to the requested layout before generating context (keeps both operations in the same FM session)</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.28D121056880998035E03419B375EF10</StringID>
+	<SourceText>RETURNS: the service&apos;s /explode JSON { success, exit_code, stdout, stderr } or { success: false, error }.</SourceText>
+	<TargetText>RETURNS: the service&apos;s /explode JSON { success, exit_code, stdout, stderr } or { success: false, error }.</TargetText>
+	<Comment>com.fmi.scriptstep.text.RETURNS: the service&apos;s /explode JSON { success, exit_code, stdout, stderr } or { success: false, error }.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.2952025F3F2EF2296A82BA91CEA76E34</StringID>
+	<SourceText>PURPOSE: Silent explode of this file through agentic-fm-app (or the classic companion). No dialogs; Explode XML stays for the interactive case.</SourceText>
+	<TargetText>PURPOSE: Silent explode of this file through agentic-fm-app (or the classic companion). No dialogs; Explode XML stays for the interactive case.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Silent explode of this file through agentic-fm-app (or the classic companion). No dialogs; Explode XML stays for the interactive case.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.2A74E3A0803B13964DDF1DBB389415B8</StringID>
+	<SourceText>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</SourceText>
+	<TargetText>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.2B3305FD478AD63B7FDBEF1D28E5BBCF</StringID>
+	<SourceText>CALLED BY: agent via OData → AGFMScriptBridge<CR/><CR/>PARAMETER: JSON object<CR/>  expression — the FM calculation string to evaluate (required)<CR/>  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)<CR/><CR/>RETURNS:<CR/>  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/>  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/><CR/>SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification.<CR/>  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name.<CR/><CR/>EXAMPLE call via AGFMScriptBridge:<CR/>  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</SourceText>
+	<TargetText>CALLED BY: agent via OData → AGFMScriptBridge<CR/><CR/>PARAMETER: JSON object<CR/>  expression — the FM calculation string to evaluate (required)<CR/>  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)<CR/><CR/>RETURNS:<CR/>  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/>  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/><CR/>SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification.<CR/>  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name.<CR/><CR/>EXAMPLE call via AGFMScriptBridge:<CR/>  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</TargetText>
+	<Comment>com.fmi.scriptstep.text.CALLED BY: agent via OData → AGFMScriptBridge_CR/__CR/_PARAMETER: JSON object_CR/_  expression — the FM calculation string to evaluate (required)_CR/_  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)_CR/__CR/_RETURNS:_CR/_  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot; }_CR/_  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot; }_CR/__CR/_SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification._CR/_  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name._CR/__CR/_EXAMPLE call via AGFMScriptBridge:_CR/_  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.318A838C4952FA63B84838AF591E218A</StringID>
+	<SourceText>MARK:Input</SourceText>
+	<TargetText>MARK:Input</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK:Input</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.46AB1E36C2593E6DE6F488F0733AE170</StringID>
+	<SourceText>Evaluate — EvaluationError returns 0 if valid, FM error code otherwise</SourceText>
+	<TargetText>Evaluate — EvaluationError returns 0 if valid, FM error code otherwise</TargetText>
+	<Comment>com.fmi.scriptstep.text.Evaluate — EvaluationError returns 0 if valid, FM error code otherwise</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.54E741E888EA09F11FDDDF4DB288D1C4</StringID>
+	<SourceText>The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</SourceText>
+	<TargetText>The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</TargetText>
+	<Comment>com.fmi.scriptstep.text.The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.58ED9C6FE2DCB8CEC45BC361194B7A87</StringID>
+	<SourceText>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</SourceText>
+	<TargetText>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.601ED2BD9324E4929762A71B60C4873B</StringID>
+	<SourceText>Save verification snapshot for agent context check</SourceText>
+	<TargetText>Save verification snapshot for agent context check</TargetText>
+	<Comment>com.fmi.scriptstep.text.Save verification snapshot for agent context check</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.638D70A6F338364789458C414571465E</StringID>
+	<SourceText>Capture caller&apos;s error state before any other step can reset Get(LastError) to 0</SourceText>
+	<TargetText>Capture caller&apos;s error state before any other step can reset Get(LastError) to 0</TargetText>
+	<Comment>com.fmi.scriptstep.text.Capture caller&apos;s error state before any other step can reset Get(LastError) to 0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.63E44F18801088B1B164B11292A14F30</StringID>
+	<SourceText>Parse parameters</SourceText>
+	<TargetText>Parse parameters</TargetText>
+	<Comment>com.fmi.scriptstep.text.Parse parameters</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.679D36D0BD4B9E023503684DD8BE2470</StringID>
+	<SourceText>PURPOSE: Push the current layout context to agentic-fm.</SourceText>
+	<TargetText>PURPOSE: Push the current layout context to agentic-fm.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Push the current layout context to agentic-fm.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.6D0BB34F40C7ECC5A6360A5B3AA5DAE8</StringID>
+	<SourceText>Example of how to call Agentic-fm Debug</SourceText>
+	<TargetText>Example of how to call Agentic-fm Debug</TargetText>
+	<Comment>com.fmi.scriptstep.text.Example of how to call Agentic-fm Debug</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.707C64F024EFC5C2C9EDC7CF49B0ED91</StringID>
+	<SourceText>Navigate to layout if provided</SourceText>
+	<TargetText>Navigate to layout if provided</TargetText>
+	<Comment>com.fmi.scriptstep.text.Navigate to layout if provided</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.79B9C8E5115811804678C5F947A90664</StringID>
+	<SourceText>PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</SourceText>
+	<TargetText>PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.7F2A0D1FA10645439CB191FC631CB7CA</StringID>
+	<SourceText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Saves XML to the temporary folder, POSTs to the companion (agentic-fm-app) /explode.<CR/>  Requires companion server running and $$AGENTIC.FM configured.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    export_path   — absolute POSIX path where FMS will write the XML export (must be host-accessible)<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    solution_name — (optional) override solution name; defaults to Get(FileName)<CR/><CR/>  NOTE: export_path must be a path FMS can write to AND the companion server host can read.<CR/>  On a Linux FMS container with a host-mounted Data dir, use that mount path.<CR/>  The FM path is constructed as &quot;filelinux:&quot; &amp; export_path — adjust prefix for other OS.<CR/><CR/>RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</SourceText>
+	<TargetText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Saves XML to the temporary folder, POSTs to the companion (agentic-fm-app) /explode.<CR/>  Requires companion server running and $$AGENTIC.FM configured.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    export_path   — absolute POSIX path where FMS will write the XML export (must be host-accessible)<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    solution_name — (optional) override solution name; defaults to Get(FileName)<CR/><CR/>  NOTE: export_path must be a path FMS can write to AND the companion server host can read.<CR/>  On a Linux FMS container with a host-mounted Data dir, use that mount path.<CR/>  The FM path is constructed as &quot;filelinux:&quot; &amp; export_path — adjust prefix for other OS.<CR/><CR/>RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</TargetText>
+	<Comment>com.fmi.scriptstep.text.INTERACTIVE MODE (FM Pro):_CR/_  Run with no parameter. Saves XML to the temporary folder, POSTs to the companion (agentic-fm-app) /explode._CR/_  Requires companion server running and $$AGENTIC.FM configured._CR/__CR/_SERVER MODE (OData via AGFMScriptBridge):_CR/_  Pass JSON parameter with keys:_CR/_    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host_CR/_    export_path   — absolute POSIX path where FMS will write the XML export (must be host-accessible)_CR/_    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)_CR/_    solution_name — (optional) override solution name; defaults to Get(FileName)_CR/__CR/_  NOTE: export_path must be a path FMS can write to AND the companion server host can read._CR/_  On a Linux FMS container with a host-mounted Data dir, use that mount path._CR/_  The FM path is constructed as &quot;filelinux:&quot; &amp; export_path — adjust prefix for other OS._CR/__CR/_RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.8D76B3884C7A3174925673AC5D33283E</StringID>
+	<SourceText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Prompts for task description, writes CONTEXT.json directly via file steps.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    task          — task description string<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    layout        — (optional) layout name to navigate to before generating context<CR/><CR/>  CONTEXT.json is written by the companion server at {repo_path}/agent/CONTEXT.json.<CR/><CR/>RETURNS (server mode): JSON { success, path } or { success, error }</SourceText>
+	<TargetText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Prompts for task description, writes CONTEXT.json directly via file steps.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    task          — task description string<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    layout        — (optional) layout name to navigate to before generating context<CR/><CR/>  CONTEXT.json is written by the companion server at {repo_path}/agent/CONTEXT.json.<CR/><CR/>RETURNS (server mode): JSON { success, path } or { success, error }</TargetText>
+	<Comment>com.fmi.scriptstep.text.INTERACTIVE MODE (FM Pro):_CR/_  Run with no parameter. Prompts for task description, writes CONTEXT.json directly via file steps._CR/__CR/_SERVER MODE (OData via AGFMScriptBridge):_CR/_  Pass JSON parameter with keys:_CR/_    task          — task description string_CR/_    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host_CR/_    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)_CR/_    layout        — (optional) layout name to navigate to before generating context_CR/__CR/_  CONTEXT.json is written by the companion server at {repo_path}/agent/CONTEXT.json._CR/__CR/_RETURNS (server mode): JSON { success, path } or { success, error }</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.9B8295148D09E002D1DF542395E1D3E4</StringID>
+	<SourceText>MARK:Execute</SourceText>
+	<TargetText>MARK:Execute</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK:Execute</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.B0DCC46D0A3125896071A9B935FCE9CA</StringID>
+	<SourceText>lastError and lastErrorLocation are captured as the very first step so they<CR/>reflect the caller&apos;s error state — any successful Set Variable resets Get(LastError) to 0.<CR/><CR/>PARAMETER FORMAT:<CR/>  JSONSetElement ( &quot;{}&quot; ;<CR/>    [ &quot;label&quot; ; &quot;description of this debug point&quot; ; JSONString ] ;<CR/>    [ &quot;vars&quot;  ; JSONSetElement ( &quot;{}&quot; ;<CR/>        [ &quot;myVar&quot; ; $myVar ; JSONString ]<CR/>      ) ; JSONRaw ]<CR/>  )<CR/><CR/>To capture current line number (no real error), force a harmless error<CR/>immediately before Perform Script in the calling script:<CR/>  Set Error Capture [ On ]<CR/>  Set Field []<CR/>  Perform Script [ &quot;Agentic-fm Debug&quot; ; Parameter: ... ]<CR/>  Set Error Capture [ Off ]</SourceText>
+	<TargetText>lastError and lastErrorLocation are captured as the very first step so they<CR/>reflect the caller&apos;s error state — any successful Set Variable resets Get(LastError) to 0.<CR/><CR/>PARAMETER FORMAT:<CR/>  JSONSetElement ( &quot;{}&quot; ;<CR/>    [ &quot;label&quot; ; &quot;description of this debug point&quot; ; JSONString ] ;<CR/>    [ &quot;vars&quot;  ; JSONSetElement ( &quot;{}&quot; ;<CR/>        [ &quot;myVar&quot; ; $myVar ; JSONString ]<CR/>      ) ; JSONRaw ]<CR/>  )<CR/><CR/>To capture current line number (no real error), force a harmless error<CR/>immediately before Perform Script in the calling script:<CR/>  Set Error Capture [ On ]<CR/>  Set Field []<CR/>  Perform Script [ &quot;Agentic-fm Debug&quot; ; Parameter: ... ]<CR/>  Set Error Capture [ Off ]</TargetText>
+	<Comment>com.fmi.scriptstep.text.lastError and lastErrorLocation are captured as the very first step so they_CR/_reflect the caller&apos;s error state — any successful Set Variable resets Get(LastError) to 0._CR/__CR/_PARAMETER FORMAT:_CR/_  JSONSetElement ( &quot;{}&quot; ;_CR/_    [ &quot;label&quot; ; &quot;description of this debug point&quot; ; JSONString ] ;_CR/_    [ &quot;vars&quot;  ; JSONSetElement ( &quot;{}&quot; ;_CR/_        [ &quot;myVar&quot; ; $myVar ; JSONString ]_CR/_      ) ; JSONRaw ]_CR/_  )_CR/__CR/_To capture current line number (no real error), force a harmless error_CR/_immediately before Perform Script in the calling script:_CR/_  Set Error Capture [ On ]_CR/_  Set Field []_CR/_  Perform Script [ &quot;Agentic-fm Debug&quot; ; Parameter: ... ]_CR/_  Set Error Capture [ Off ]</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.B85A07F27F6CAEF51FBAC5E8ED727E84</StringID>
+	<SourceText>PURPOSE: Set $$AGENTIC.FM (clone path) and $$AGENTIC.FM.COMPANION.IP from agentic-fm-app (GET /config). Silent: no dialogs.</SourceText>
+	<TargetText>PURPOSE: Set $$AGENTIC.FM (clone path) and $$AGENTIC.FM.COMPANION.IP from agentic-fm-app (GET /config). Silent: no dialogs.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Set $$AGENTIC.FM (clone path) and $$AGENTIC.FM.COMPANION.IP from agentic-fm-app (GET /config). Silent: no dialogs.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.C1ABC3C8D68BB2F1F544EAFEA05088E4</StringID>
+	<SourceText>MARK: Interactive mode</SourceText>
+	<TargetText>MARK: Interactive mode</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK: Interactive mode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.CAB2DC0D2901B530B49BD1FD3B40AE0E</StringID>
+	<SourceText>PURPOSE: Interactive fallback when Get agentic-fm path cannot ask agentic-fm-app: pick the agentic-fm clone folder by hand. Returns True / False.</SourceText>
+	<TargetText>PURPOSE: Interactive fallback when Get agentic-fm path cannot ask agentic-fm-app: pick the agentic-fm clone folder by hand. Returns True / False.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Interactive fallback when Get agentic-fm path cannot ask agentic-fm-app: pick the agentic-fm clone folder by hand. Returns True / False.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.CD94C681A361593DB0EF1EEFE311EA40</StringID>
+	<SourceText>PURPOSE: Push out solution XML to be parsed for AI use.</SourceText>
+	<TargetText>PURPOSE: Push out solution XML to be parsed for AI use.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Push out solution XML to be parsed for AI use.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.D2CF19611D513834455F4B97739A8C38</StringID>
+	<SourceText>RETURNS: JSON { ok, mode: app | companion, repo_path, service_version, addon_version } or { ok: false, error, mode?, addon_version }.</SourceText>
+	<TargetText>RETURNS: JSON { ok, mode: app | companion, repo_path, service_version, addon_version } or { ok: false, error, mode?, addon_version }.</TargetText>
+	<Comment>com.fmi.scriptstep.text.RETURNS: JSON { ok, mode: app | companion, repo_path, service_version, addon_version } or { ok: false, error, mode?, addon_version }.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.D4BA71564D9E9CBE88B3204695E295AB</StringID>
+	<SourceText>MARK:Resolve</SourceText>
+	<TargetText>MARK:Resolve</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK:Resolve</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.DACA4F5122CC699F2AA346CB940137BF</StringID>
+	<SourceText>PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</SourceText>
+	<TargetText>PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.DBD1594BCF7F306A2C4977B90C1646B9</StringID>
+	<SourceText>Called by other scripts via Perform Script with a JSON parameter.</SourceText>
+	<TargetText>Called by other scripts via Perform Script with a JSON parameter.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Called by other scripts via Perform Script with a JSON parameter.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.E3C7F781F4C767B87CB8A01C730DB1C5</StringID>
+	<SourceText>Build FM path: filelinux: prefix for FMS on Linux. Adjust for other OS.</SourceText>
+	<TargetText>Build FM path: filelinux: prefix for FMS on Linux. Adjust for other OS.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Build FM path: filelinux: prefix for FMS on Linux. Adjust for other OS.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.E837B9A26D9BBFA5D10947ABBBB8333E</StringID>
+	<SourceText>Check for a valid install.</SourceText>
+	<TargetText>Check for a valid install.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Check for a valid install.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.EBA8EE89A6D69DDCA770C7ED69BEC712</StringID>
+	<SourceText>PURPOSE: Silent start-up check: is agentic-fm-app (or a classic companion) answering, and which clone is this file? For OnFirstWindowOpen and for scripts that need a service. No dialogs.</SourceText>
+	<TargetText>PURPOSE: Silent start-up check: is agentic-fm-app (or a classic companion) answering, and which clone is this file? For OnFirstWindowOpen and for scripts that need a service. No dialogs.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Silent start-up check: is agentic-fm-app (or a classic companion) answering, and which clone is this file? For OnFirstWindowOpen and for scripts that need a service. No dialogs.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.EC5A056F413DED93008EEB260BDCCD6E</StringID>
+	<SourceText>A service without /config (the classic companion) answers with a 404 that has no boolean &quot;success&quot; ({&quot;error&quot;: &quot;Not found&quot;}).</SourceText>
+	<TargetText>A service without /config (the classic companion) answers with a 404 that has no boolean &quot;success&quot; ({&quot;error&quot;: &quot;Not found&quot;}).</TargetText>
+	<Comment>com.fmi.scriptstep.text.A service without /config (the classic companion) answers with a 404 that has no boolean &quot;success&quot; ({&quot;error&quot;: &quot;Not found&quot;}).</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.F7BC47EC37CF944EABB8959608754073</StringID>
+	<SourceText>PARAMETER: JSON object with key:<CR/>  layout — exact name of the layout to navigate to<CR/><CR/>RETURNS: JSON { success, layout, tableOccurrence } on success<CR/>         JSON { success, error } on failure<CR/><CR/>EXAMPLE call via AGFMBridge:<CR/>  { &quot;script&quot;: &quot;AGFMGoToLayout&quot;, &quot;parameter&quot;: &quot;{\&quot;layout\&quot;: \&quot;Invoices\&quot;}&quot; }</SourceText>
+	<TargetText>PARAMETER: JSON object with key:<CR/>  layout — exact name of the layout to navigate to<CR/><CR/>RETURNS: JSON { success, layout, tableOccurrence } on success<CR/>         JSON { success, error } on failure<CR/><CR/>EXAMPLE call via AGFMBridge:<CR/>  { &quot;script&quot;: &quot;AGFMGoToLayout&quot;, &quot;parameter&quot;: &quot;{\&quot;layout\&quot;: \&quot;Invoices\&quot;}&quot; }</TargetText>
+	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with key:_CR/_  layout — exact name of the layout to navigate to_CR/__CR/_RETURNS: JSON { success, layout, tableOccurrence } on success_CR/_         JSON { success, error } on failure_CR/__CR/_EXAMPLE call via AGFMBridge:_CR/_  { &quot;script&quot;: &quot;AGFMGoToLayout&quot;, &quot;parameter&quot;: &quot;{\&quot;layout\&quot;: \&quot;Invoices\&quot;}&quot; }</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.tableoccurrence.59E799C8D64DB245C2EF8BEDD483B48C</StringID>
+	<SourceText>AGFM</SourceText>
+	<TargetText>AGFM</TargetText>
+	<Comment>com.fmi.tableoccurrence.AGFM</Comment>
+</DynamicTemplateString>

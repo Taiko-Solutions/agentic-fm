@@ -193,5 +193,35 @@ class TestManifest(unittest.TestCase):
         self.assertEqual(manifest()["custom_functions"], ["Context"])
 
 
+class TestPackage(unittest.TestCase):
+    PACKAGE = BUNDLE.parent / "addon" / "agentic-fm"
+
+    def _info(self, lang):
+        import json
+        return json.loads((self.PACKAGE / f"info_{lang}.json").read_text(encoding="utf-8-sig"))
+
+    def test_package_title_and_description_carry_the_version(self):
+        for lang in ("en", "es"):
+            info = self._info(lang)
+            self.assertEqual(info["Title"], "agentic-fm")
+            self.assertIn(bundle_version(), info["Description"])
+            self.assertNotIn("DESCRIPTION MISSING", info["Description"])
+
+    def test_package_contains_exactly_the_manifest_scripts(self):
+        strings = (self.PACKAGE / "en.xml").read_text(encoding="utf-8-sig")
+        for name in manifest()["scripts"]:
+            self.assertIn(f"<SourceText>{name}</SourceText>", strings, name)
+        for name in WEB_VIEWER_SCRIPTS:
+            self.assertNotIn(f"<SourceText>{name}</SourceText>", strings, name)
+
+    def test_package_has_no_layout(self):
+        template = (self.PACKAGE / "template.xml").read_text(encoding="utf-8-sig")
+        self.assertIn('<LayoutCatalog membercount="0">', template)
+
+    def test_distributable_archive_exists(self):
+        archive = BUNDLE.parent / "addon" / "agentic-fm.fmaddon"
+        self.assertTrue(archive.is_file() and archive.stat().st_size > 0)
+
+
 if __name__ == "__main__":
     unittest.main()
