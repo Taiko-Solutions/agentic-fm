@@ -7,10 +7,14 @@ function names, and HTML/XML entities where literal operators belong.
 
 import re
 
-from ..engine import rule, LintRule
-from ..literals import has_unclosed_literal, mask_string_literals
+from ..engine import LintRule, rule
+from ..literals import (
+    CALC_CLOSE_PARENS,
+    CALC_OPEN_PARENS,
+    has_unclosed_literal,
+    mask_string_literals,
+)
 from ..types import Diagnostic, Severity
-
 
 # Steps where bracket content is literal text, not a FM calculation.
 # These must be skipped by rules that analyze calculation expressions.
@@ -102,9 +106,9 @@ class UnbalancedParens(LintRule):
         stripped = _strip_strings(text)
         depth = 0
         for ch in stripped:
-            if ch == "(":
+            if ch in CALC_OPEN_PARENS:
                 depth += 1
-            elif ch == ")":
+            elif ch in CALC_CLOSE_PARENS:
                 depth -= 1
             if depth < 0:
                 return "Extra closing parenthesis ')' in calculation"
@@ -216,10 +220,15 @@ class KnownFunction(LintRule):
         "textcolorremove", "sortvalues", "uniquevalues",
     }
 
-    # Regex to find function-call-like patterns: name followed by (
-    # Dots are part of the name so namespaced custom functions
+    # Regex to find function-call-like patterns: name followed by ( .
+    # (Taiko) Dots are part of the name so namespaced custom functions
     # (e.g. transaction.SetError) are captured whole, not as their suffix.
-    _FUNC_CALL_RE = re.compile(r'(?<![\w.])([A-Za-z_][\w.]*\w|[A-Za-z_])\s*\(')
+    # (upstream) FileMaker reads ``﹙`` and ``（`` as ``(`` (``Upper （ "x" ）`` is a
+    # call), and accepts U+180E, U+200B, U+2060 and U+FEFF between a name and its
+    # ``(`` beside the characters ``\s`` matches.
+    _FUNC_CALL_RE = re.compile(
+        r'(?<![\w.])([A-Za-z_][\w.]*\w|[A-Za-z_])[\s\u180e\u200b\u2060\ufeff]*[(\ufe59\uff08]'
+    )
 
     # Names to skip (not functions, but look like them)
     _SKIP = {"and", "or", "not", "xor", "true", "false"}
