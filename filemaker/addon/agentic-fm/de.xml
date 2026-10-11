@@ -49,13 +49,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91</StringID>
-	<SourceText>include_details</SourceText>
-	<TargetText>include_details</TargetText>
-	<Comment>com.fmi.calculation.text.include_details</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.093D3FB8190E73CA213E3781F406445E</StringID>
 	<SourceText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</SourceText>
 	<TargetText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</TargetText>
@@ -109,13 +102,6 @@
 	<SourceText> ISO 8601 UTC timestamp for staleness detection </SourceText>
 	<TargetText> ISO 8601 UTC timestamp for staleness detection </TargetText>
 	<Comment>com.fmi.calculation.text. ISO 8601 UTC timestamp for staleness detection</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA</StringID>
-	<SourceText>standalone_binarydata</SourceText>
-	<TargetText>standalone_binarydata</TargetText>
-	<Comment>com.fmi.calculation.text.standalone_binarydata</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -322,13 +308,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254</StringID>
-	<SourceText>catalogs_included</SourceText>
-	<TargetText>catalogs_included</TargetText>
-	<Comment>com.fmi.calculation.text.catalogs_included</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.41A9C7B72775DAA1DED9BED2BBB7C325</StringID>
 	<SourceText>1.0.0</SourceText>
 	<TargetText>1.0.0</TargetText>
@@ -420,13 +399,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA</StringID>
-	<SourceText>split_catalogs</SourceText>
-	<TargetText>split_catalogs</TargetText>
-	<Comment>com.fmi.calculation.text.split_catalogs</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.54996FE58603C566C60F2EF6425BF598</StringID>
 	<SourceText>vars</SourceText>
 	<TargetText>vars</TargetText>
@@ -487,13 +459,6 @@
 	<SourceText>numeric</SourceText>
 	<TargetText>numeric</TargetText>
 	<Comment>com.fmi.calculation.text.numeric</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD</StringID>
-	<SourceText>PersistentStoreCatalog<LF/>  BaseDirectoryCatalog<LF/>  FileAccessCatalog<LF/>  ExternalDataSourceCatalog<LF/>  BaseTableCatalog<LF/>  TableOccurrenceCatalog<LF/>  CustomFunctionsCatalog<LF/>  ValueListCatalog<LF/>  FieldCatalog<LF/>  RelationshipCatalog<LF/>  CustomMenuCatalog<LF/>  CustomMenuSetCatalog<LF/>  ScriptCatalog<LF/>  ThemeCatalog<LF/>  LayoutCatalog<LF/>  LibraryCatalog<LF/>  PrivilegeSetsCatalog<LF/>  ExtendedPrivilegesCatalog<LF/>  AccountsCatalog<LF/>  Metadata</SourceText>
-	<TargetText>PersistentStoreCatalog<LF/>  BaseDirectoryCatalog<LF/>  FileAccessCatalog<LF/>  ExternalDataSourceCatalog<LF/>  BaseTableCatalog<LF/>  TableOccurrenceCatalog<LF/>  CustomFunctionsCatalog<LF/>  ValueListCatalog<LF/>  FieldCatalog<LF/>  RelationshipCatalog<LF/>  CustomMenuCatalog<LF/>  CustomMenuSetCatalog<LF/>  ScriptCatalog<LF/>  ThemeCatalog<LF/>  LayoutCatalog<LF/>  LibraryCatalog<LF/>  PrivilegeSetsCatalog<LF/>  ExtendedPrivilegesCatalog<LF/>  AccountsCatalog<LF/>  Metadata</TargetText>
-	<Comment>com.fmi.calculation.text.PersistentStoreCatalog_LF/_  BaseDirectoryCatalog_LF/_  FileAccessCatalog_LF/_  ExternalDataSourceCatalog_LF/_  BaseTableCatalog_LF/_  TableOccurrenceCatalog_LF/_  CustomFunctionsCatalog_LF/_  ValueListCatalog_LF/_  FieldCatalog_LF/_  RelationshipCatalog_LF/_  CustomMenuCatalog_LF/_  CustomMenuSetCatalog_LF/_  ScriptCatalog_LF/_  ThemeCatalog_LF/_  LayoutCatalog_LF/_  LibraryCatalog_LF/_  PrivilegeSetsCatalog_LF/_  ExtendedPrivilegesCatalog_LF/_  AccountsCatalog_LF/_  Metadata</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -746,13 +711,6 @@
 	<SourceText>source</SourceText>
 	<TargetText>source</TargetText>
 	<Comment>com.fmi.calculation.text.source</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4</StringID>
-	<SourceText> </SourceText>
-	<TargetText> </TargetText>
-	<Comment>com.fmi.calculation.text.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
