@@ -70,6 +70,23 @@ class CheckEmbeddedAddonTests(unittest.TestCase):
         self.assertIn("add-on", msg)
         self.assertNotIn("repegar", msg)
 
+    def test_outdated_add_on_with_local_edits_keeps_the_diff_warning(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Demo)", "kind": "addon", "status": "STALE", "diff": "0.9.0 → 1.0.0"},
+            {"name": "Explode XML", "kind": "script", "status": "STALE", "diff": "+x"}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("desinstala", msg)
+        self.assertIn("Explode XML", msg)
+        self.assertIn("--diff", msg)
+
+    def test_current_add_on_with_edited_scripts_does_not_say_re_paste(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Demo)", "kind": "addon", "status": "OK", "diff": ""},
+            {"name": "Explode XML", "kind": "script", "status": "STALE", "diff": "+x"}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("Explode XML", msg)
+        self.assertNotIn("repegar", msg)
+
     def test_outdated_add_on_says_uninstall_and_install(self):
         status, msg, _ = self._report([
             {"name": "add-on (Demo)", "kind": "addon", "status": "STALE", "diff": "0.9.0 → 1.0.0"}])
