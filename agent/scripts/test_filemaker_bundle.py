@@ -123,7 +123,7 @@ class TestChooseFolder(unittest.TestCase):
 
 
 class TestPathCallers(unittest.TestCase):
-    CALLERS = ("Explode XML", "Push Context", "Agentic-fm Webviewer")
+    CALLERS = ("Explode XML", "Push Context")
 
     def test_callers_read_ok_from_the_json_and_fall_back_to_the_picker(self):
         for name in self.CALLERS:
@@ -239,6 +239,28 @@ class TestTemplateLocation(unittest.TestCase):
         template = (BUNDLE.parent / "addon" / "template" / "agentic-fm.fmp12").read_bytes()
         self.assertNotEqual(full, template)
 
+
+
+class TestWebViewerCallsByName(unittest.TestCase):
+    """The web viewer scripts are installed by hand next to the add-on: their calls into the add-on must be by
+    name, or an add-on update (uninstall + install) leaves them <unknown>."""
+
+    def _calls(self, name):
+        by_ref = [st.find("Script").get("name") for st in steps(name)
+                  if st.get("name") == "Perform Script" and st.find("Script") is not None]
+        by_name = [st.findtext("Calculated/Calculation") for st in steps(name)
+                   if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
+        return by_ref, by_name
+
+    def test_web_viewer_scripts_call_add_on_scripts_by_name_only(self):
+        addon = set(manifest()["scripts"])
+        for name in WEB_VIEWER_SCRIPTS:
+            by_ref, by_name = self._calls(name)
+            self.assertFalse(addon & set(by_ref), name)
+        _, by_name = self._calls("Agentic-fm Webviewer")
+        self.assertIn('"Get agentic-fm path"', by_name)
+        self.assertIn('"AGFM Choose Folder"', by_name)
+        self.assertIn('not JSONGetElement ( $pathResult ; "ok" )', calcs("Agentic-fm Webviewer"))
 
 
 if __name__ == "__main__":

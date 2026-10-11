@@ -127,5 +127,57 @@ class TestPackageMetadata(unittest.TestCase):
         self.assertEqual(info["URL"], manifest["url"])
 
 
+class TestWebViewerSnippet(unittest.TestCase):
+    def test_committed_web_viewer_snippet_has_only_the_scripts_outside_the_add_on(self):
+        manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+        bundle = names((REPO / "filemaker" / "agentic-fm.xml").read_text(encoding="utf-8"))
+        text = (REPO / "filemaker" / "addon" / "agentic-fm-webviewer.xml").read_text(encoding="utf-8")
+        self.assertEqual(names(text), bundle - set(manifest["scripts"]))
+
+
+class TestPackageMatchesBundle(unittest.TestCase):
+    """A stale package (bundle edited, package not rebuilt) must fail here, not ship."""
+
+    def test_every_calculation_of_the_manifest_scripts_is_in_the_package(self):
+        import html
+        import re
+        literal = re.compile(r'"(?:[^"\\]|\\.)*"')
+        token = re.compile(r'"com\.fmi\.calculation\.text\.[0-9A-Fa-f]+"')   # how template.xml stores literals
+
+        def norm(text):
+            return re.sub(r"\s+", " ", text).strip()
+
+        manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+        template = html.unescape((REPO / "filemaker" / "addon" / "agentic-fm" / "template.xml").read_text(encoding="utf-8-sig"))
+        template = norm(token.sub('""', template))
+        root = ET.parse(REPO / "filemaker" / "agentic-fm.xml").getroot()
+        missing = []
+        for script in root.iter("Script"):
+            if script.get("name") in manifest["scripts"] and script.find("Step") is not None:
+                for calc in script.iter("Calculation"):
+                    code = norm(literal.sub('""', calc.text or ""))
+                    if len(code) >= 3 and code not in template:
+                        missing.append((script.get("name"), code[:80]))
+        self.assertEqual(missing, [], "package is stale: rebuild it in FileMaker, then build_addon_snippet.py --package")
+
+    def test_package_version_matches_the_manifest(self):
+        manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+        B.check_package_version(REPO / "filemaker" / "addon" / "agentic-fm", manifest)
+
+    def test_a_package_with_another_version_is_refused(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "en.xml").write_text("<SourceText>0.9.0</SourceText>", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                B.check_package_version(Path(tmp), {"version": "1.0.0"})
+
+
+class TestRunInCI(unittest.TestCase):
+    def test_ci_checks_runs_the_add_on_tests(self):
+        ci = (REPO / "agent" / "scripts" / "ci_checks.py").read_text(encoding="utf-8")
+        self.assertIn("agent/scripts/test_build_addon_snippet.py", ci)
+        self.assertIn("agent/scripts/test_filemaker_bundle.py", ci)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1433,7 +1433,9 @@
         </Step>
         <Step enable="True" id="89" name="# (comment)"/>
         <Step enable="True" id="1" name="Perform Script">
-          <Script id="2" name="Get agentic-fm path"/>
+          <Calculated>
+            <Calculation><![CDATA["Get agentic-fm path"]]></Calculation>
+          </Calculated>
         </Step>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
@@ -1449,7 +1451,9 @@
           <Calculation><![CDATA[not JSONGetElement ( $pathResult ; "ok" )]]></Calculation>
         </Step>
         <Step enable="True" id="1" name="Perform Script">
-          <Script id="23" name="AGFM Choose Folder"/>
+          <Calculated>
+            <Calculation><![CDATA["AGFM Choose Folder"]]></Calculation>
+          </Calculated>
         </Step>
         <Step enable="True" id="68" name="If">
           <Restore state="False"/>

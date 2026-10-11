@@ -34,6 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 BUNDLE = REPO_ROOT / "filemaker" / "agentic-fm.xml"
 MANIFEST = REPO_ROOT / "filemaker" / "addon" / "manifest.json"
 OUTPUT = REPO_ROOT / "filemaker" / "addon" / "agentic-fm-addon.xml"
+WEBVIEWER_OUTPUT = REPO_ROOT / "filemaker" / "addon" / "agentic-fm-webviewer.xml"
 PACKAGE = REPO_ROOT / "filemaker" / "addon" / "agentic-fm"
 ARCHIVE = REPO_ROOT / "filemaker" / "addon" / "agentic-fm.fmaddon"
 ADDON_MODULES = Path.home() / "Library" / "Application Support" / "FileMaker" / "Extensions" / "AddonModules"
@@ -97,6 +98,13 @@ def build(bundle_xml, manifest):
     return "\n".join(lines[:first] + _emit(children, keep) + lines[last:]) + "\n"
 
 
+def web_viewer_scripts(bundle_xml, manifest):
+    """The bundle's scripts outside the add-on (the web viewer): pasted by hand next to the add-on."""
+    root = ET.fromstring(bundle_xml.encode("utf-8"))
+    defined = {s.get("name") for s in root.iter("Script") if s.find("Step") is not None}
+    return defined - set(manifest["scripts"])
+
+
 def _set(text, key, value):
     """Replace one "Key" : "value" pair in FileMaker's own JSON layout (kept as is, BOM included)."""
     new, count = re.subn(rf'("{key}"\s*:\s*)"[^"]*"', lambda m: m.group(1) + json.dumps(value, ensure_ascii=False), text)
@@ -122,17 +130,26 @@ def apply_metadata(package_dir, manifest):
         path.write_text("\ufeff" + text, encoding="utf-8")
 
 
+def check_package_version(package_dir, manifest):
+    """The built package must carry the manifest version (AGFM Version's literal, kept in en.xml's strings)."""
+    strings = (Path(package_dir) / "en.xml").read_text(encoding="utf-8-sig")
+    if f"<SourceText>{manifest['version']}</SourceText>" not in strings:
+        raise ValueError(f"the built package is not version {manifest['version']}: rebuild it in FileMaker "
+                         f"(AGFM Version and manifest.json must match)")
+
+
 def package(manifest):
     """Import the built package from AddonModules, apply the metadata, repack the .fmaddon (xar)."""
     source = ADDON_MODULES / manifest["name"]
     if not source.is_dir():
         raise ValueError(f"no built package at {source}: run the builder in FileMaker first")
+    check_package_version(source, manifest)
+    if shutil.which("xar") is None:
+        raise ValueError("xar not found (macOS only): cannot repack the .fmaddon")
     if PACKAGE.exists():
         shutil.rmtree(PACKAGE)
     shutil.copytree(source, PACKAGE)
     apply_metadata(PACKAGE, manifest)
-    if shutil.which("xar") is None:
-        raise ValueError("xar not found (macOS only): cannot repack the .fmaddon")
     ARCHIVE.unlink(missing_ok=True)
     subprocess.run(["xar", "-cf", ARCHIVE.name, "--compression=gzip", PACKAGE.name], cwd=PACKAGE.parent, check=True)
     # Refresh this Mac's copy so the install dialog shows the same metadata (after a FileMaker restart).
@@ -156,19 +173,25 @@ def main(argv=None):
         print(f"packaged {PACKAGE.relative_to(REPO_ROOT)} and {ARCHIVE.relative_to(REPO_ROOT)}")
         return 0
     try:
-        text = build(BUNDLE.read_text(encoding="utf-8"), json.loads(MANIFEST.read_text(encoding="utf-8")))
+        bundle = BUNDLE.read_text(encoding="utf-8")
+        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        outputs = {OUTPUT: build(bundle, manifest),
+                   WEBVIEWER_OUTPUT: build(bundle, {"scripts": sorted(web_viewer_scripts(bundle, manifest))})}
     except (ValueError, KeyError) as exc:
         print(f"invalid manifest: {exc}", file=sys.stderr)
         return 1
     if args.check:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.exists() else ""
-        if current != text:
-            print(f"{OUTPUT.relative_to(REPO_ROOT)} is stale: run python3 agent/scripts/build_addon_snippet.py")
+        stale = [path for path, text in outputs.items()
+                 if (path.read_text(encoding="utf-8") if path.exists() else "") != text]
+        for path in stale:
+            print(f"{path.relative_to(REPO_ROOT)} is stale: run python3 agent/scripts/build_addon_snippet.py")
+        if stale:
             return 1
-        print("add-on snippet up to date")
+        print("add-on and web viewer snippets up to date")
         return 0
-    OUTPUT.write_text(text, encoding="utf-8")
-    print(f"wrote {OUTPUT.relative_to(REPO_ROOT)}")
+    for path, text in outputs.items():
+        path.write_text(text, encoding="utf-8")
+        print(f"wrote {path.relative_to(REPO_ROOT)}")
     return 0
 
 

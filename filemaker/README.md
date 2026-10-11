@@ -95,8 +95,9 @@ apt-get install libxml2-utils
 The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic-fm`
 (`filemaker/addon/agentic-fm.fmaddon`): `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
 `AGFM Choose Folder`, `Explode XML`, `Push Context` with the `Context` custom function, the `OData` folder and
-`Agentic-fm Debug` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on;
-install them by hand (below) if you use the editor. Updating a solution is uninstall + install; nothing is
+`Agentic-fm Debug` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on; if you use the editor, paste
+`filemaker/addon/agentic-fm-webviewer.xml` (only `Agentic-fm Webviewer`, `Menu` and `Paste`; their calls into the
+add-on are by name) — never the full `agentic-fm.xml` on top of the add-on, which would duplicate its scripts. Updating a solution is uninstall + install; nothing is
 pasted by hand.
 
 Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.py` writes
