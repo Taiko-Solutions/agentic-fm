@@ -359,6 +359,17 @@ def _looks_like_converter_loss(canon_line, emb_line, enum_map=None):
     return len(b) < len(a) and _is_subsequence(b, a)
 
 
+_XML_OPTIONS_RE = re.compile(r' ; Specify options as JSON: .*?\n\s*\) \]', re.S)
+
+
+def _without_engine_xml_options(canon_hr, emb_hr):
+    """FileMaker 26 adds its default "Specify options as JSON" to every pasted Save a Copy as XML. When the
+    bundle specifies no options, the embedded ones are the engine's, not a local change."""
+    if "Specify options as JSON:" in canon_hr:
+        return emb_hr
+    return _XML_OPTIONS_RE.sub(" ]", emb_hr)
+
+
 def _compare_hr(canon_hr, emb_hr, enum_map=None):
     """Compare two HR renderings. Returns (status, diff_text).
 
@@ -369,6 +380,10 @@ def _compare_hr(canon_hr, emb_hr, enum_map=None):
     b = emb_hr.splitlines()
     if a == b:
         return "OK", ""
+    full_diff = "\n".join(difflib.unified_diff(a, b, "bundled", "embedded", lineterm="", n=2))
+    b = _without_engine_xml_options(canon_hr, emb_hr).splitlines()
+    if a == b:
+        return "OK~", full_diff
 
     def key(lines):
         out = [_norm(l).lower() for l in lines]
@@ -390,9 +405,7 @@ def _compare_hr(canon_hr, emb_hr, enum_map=None):
         real_drift = True
         break
 
-    diff = "\n".join(difflib.unified_diff(a, b, "bundled", "embedded",
-                                          lineterm="", n=2))
-    return ("STALE" if real_drift else "OK~"), diff
+    return ("STALE" if real_drift else "OK~"), full_diff
 
 
 # ---------------------------------------------------------------------------

@@ -241,5 +241,27 @@ class TestManifestScope(unittest.TestCase):
         self.assertEqual(names["Agentic-fm Webviewer"], "MISSING")
 
 
+class TestSaveAsXmlEngineOptions(unittest.TestCase):
+    CANON = "Set Variable [ $o ; Value: 1 ]\nSave a Copy as XML [ $output ; Get ( WindowName ) ]\nExit Script"
+    EMB = ('Set Variable [ $o ; Value: 1 ]\nSave a Copy as XML [ $output ; Get ( WindowName ) ; '
+           'Specify options as JSON: JSONSetElement ( "{}" ;\n  [ "catalogs_included" ; JSONMakeArray (\n'
+           '  "ScriptCatalog\n  Metadata"\n  ; " " ; JSONString ) ; JSONArray ] ;\n'
+           '  [ "include_details" ; False ; JSONBoolean ]\n) ]\nExit Script')
+
+    def test_options_added_by_filemaker_26_on_paste_are_noise(self):
+        status, diff = C._compare_hr(self.CANON, self.EMB)
+        self.assertEqual(status, "OK~")
+        self.assertIn("Specify options as JSON", diff)
+
+    def test_other_changes_next_to_the_options_still_drift(self):
+        status, _ = C._compare_hr(self.CANON, self.EMB.replace("Exit Script", "Exit Script [ 1 ]"))
+        self.assertEqual(status, "STALE")
+
+    def test_options_in_the_bundle_are_compared_normally(self):
+        canon = self.EMB.replace("ScriptCatalog", "LayoutCatalog")
+        status, _ = C._compare_hr(canon, self.EMB)
+        self.assertEqual(status, "STALE")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
