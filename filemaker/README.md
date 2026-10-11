@@ -101,7 +101,8 @@ pasted by hand.
 
 Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.py` writes
 `filemaker/addon/agentic-fm-addon.xml` (the bundle restricted to the manifest). Paste `filemaker/context.xml`
-and that snippet into a blank file named `agentic-fm`, add the `__FMAddonTemplateDirectives_en` layout with one
+and that snippet into the template `filemaker/addon/template/agentic-fm.fmp12` (a blank file: the add-on takes the
+file's name; table `AGFM` with `PrimaryKey` only, no other layout), add the `__FMAddonTemplateDirectives_en` layout with one
 grouped button running `AGFM Start`, and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
 prefixed `__FMAddonTemplateDirectives_`. Then `python3 agent/scripts/build_addon_snippet.py --package` imports
 the built package from `AddonModules`, replaces FileMaker's default metadata ("Created by Claris", placeholder

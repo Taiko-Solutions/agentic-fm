@@ -229,5 +229,17 @@ class TestExplodeErrorDialog(unittest.TestCase):
         self.assertIn('JSONGetElement ( $response ; "error" )', "\n".join(calcs("Explode XML")))
 
 
+class TestTemplateLocation(unittest.TestCase):
+    def test_template_lives_under_addon_and_keeps_the_add_on_name(self):
+        """The add-on takes the template file's name, and filemaker/agentic-fm.fmp12 is the upstream full bundle."""
+        self.assertTrue((BUNDLE.parent / "addon" / "template" / "agentic-fm.fmp12").is_file())
+
+    def test_upstream_bundle_file_is_not_the_template(self):
+        full = (BUNDLE.parent / "agentic-fm.fmp12").read_bytes()
+        template = (BUNDLE.parent / "addon" / "template" / "agentic-fm.fmp12").read_bytes()
+        self.assertNotEqual(full, template)
+
+
+
 if __name__ == "__main__":
     unittest.main()
