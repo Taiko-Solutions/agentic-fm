@@ -359,15 +359,40 @@ def _looks_like_converter_loss(canon_line, emb_line, enum_map=None):
     return len(b) < len(a) and _is_subsequence(b, a)
 
 
-_XML_OPTIONS_RE = re.compile(r' ; Specify options as JSON: .*?\n\s*\) \]', re.S)
+_XML_OPTIONS_MARK = " ; Specify options as JSON: "
+_STEP_CLOSE_RE = re.compile(r"^\s*\) \]\s*$")
 
 
 def _without_engine_xml_options(canon_hr, emb_hr):
     """FileMaker 26 adds its default "Specify options as JSON" to every pasted Save a Copy as XML. When the
-    bundle specifies no options, the embedded ones are the engine's, not a local change."""
+    bundle specifies no options, the embedded ones are the engine's, not a local change. Line by line, so the
+    removal never runs past its own step: a one-line form ends with " ]" on the same line, the multi-line
+    JSONSetElement form at the next line that is only ") ]"."""
     if "Specify options as JSON:" in canon_hr:
         return emb_hr
-    return _XML_OPTIONS_RE.sub(" ]", emb_hr)
+    out, lines, i = [], emb_hr.splitlines(), 0
+    while i < len(lines):
+        line = lines[i]
+        mark = line.find(_XML_OPTIONS_MARK)
+        if mark < 0:
+            out.append(line)
+            i += 1
+            continue
+        head = line[:mark]
+        if line.rstrip().endswith(" ]"):                     # one-line options: "... ; Specify options as JSON: $o ]"
+            out.append(head + " ]")
+            i += 1
+            continue
+        j = i + 1                                          # multi-line: skip to the step's own ") ]"
+        while j < len(lines) and not _STEP_CLOSE_RE.match(lines[j]):
+            j += 1
+        if j == len(lines):                                # no close found: leave the text as it is
+            out.append(line)
+            i += 1
+            continue
+        out.append(head + " ]")
+        i = j + 1
+    return "\n".join(out)
 
 
 def _compare_hr(canon_hr, emb_hr, enum_map=None):

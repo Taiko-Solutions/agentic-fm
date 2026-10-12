@@ -257,6 +257,13 @@ class TestSaveAsXmlEngineOptions(unittest.TestCase):
         status, _ = C._compare_hr(self.CANON, self.EMB.replace("Exit Script", "Exit Script [ 1 ]"))
         self.assertEqual(status, "STALE")
 
+    def test_one_line_options_do_not_swallow_the_following_steps(self):
+        canon = ('Save a Copy as XML [ $out ; Get ( WindowName ) ]\nSet Variable [ $x ; Value: Let ( [\n  a = 1\n] ; a\n) ]'
+                 '\nExit Script')
+        emb = canon.replace("Get ( WindowName ) ]", "Get ( WindowName ) ; Specify options as JSON: $opts ]", 1)
+        status, _ = C._compare_hr(canon, emb)
+        self.assertEqual(status, "OK~")                                  # was a false STALE: the Let got swallowed
+
     def test_options_in_the_bundle_are_compared_normally(self):
         canon = self.EMB.replace("ScriptCatalog", "LayoutCatalog")
         status, _ = C._compare_hr(canon, self.EMB)
