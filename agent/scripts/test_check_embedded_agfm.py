@@ -171,5 +171,97 @@ class TestContextSignature(unittest.TestCase):
                          C._context_signature(b, fold_case=True))
 
 
+def _snippet_script(path, exit_calc):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('<fmxmlsnippet type="FMObjectList"><Step enable="True" id="103" name="Exit Script">'
+                    f'<Calculation><![CDATA[{exit_calc}]]></Calculation></Step></fmxmlsnippet>', encoding="utf-8")
+
+
+class TestAddonVersion(unittest.TestCase):
+    def test_version_from_a_quoted_literal(self):
+        import xml.etree.ElementTree as ET
+        steps = ET.fromstring('<x><Step name="# (comment)"/><Step name="Exit Script">'
+                              '<Calculation>"1.2.3"</Calculation></Step></x>').findall("Step")
+        self.assertEqual(C._version_from_steps(steps), "1.2.3")
+        self.assertIsNone(C._version_from_steps([]))
+
+    def test_current_outdated_and_pasted_per_solution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp) / "scripts"
+            _snippet_script(scripts / "Current" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", '"1.0.0"')
+            _snippet_script(scripts / "Old" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", '"0.9.0"')
+            _snippet_script(scripts / "Pasted" / "agentic-fm - ID 1" / "Push Context - ID 4.xml", '""')
+            _snippet_script(scripts / "Unrelated" / "Misc - ID 1" / "Hello - ID 1.xml", '""')
+            entries = {e["name"]: e for e in C._addon_entries(scripts, Path("/unused"), "1.0.0", ["Push Context", "AGFM Version"])}
+        self.assertEqual(entries["add-on (Current)"]["status"], "OK")
+        self.assertEqual(entries["add-on (Old)"]["status"], "STALE")
+        self.assertEqual(entries["add-on (Old)"]["diff"], "0.9.0 → 1.0.0")
+        self.assertEqual(entries["add-on (Pasted)"]["status"], "PASTED")
+        self.assertNotIn("add-on (Unrelated)", entries)
+
+    def test_no_bundle_version_means_no_entries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(C._addon_entries(Path(tmp), Path("/unused"), None, ["Push Context"]), [])
+
+
+class TestManifestScope(unittest.TestCase):
+    BUNDLE = ('<fmxmlsnippet type="FMObjectList"><Group id="1" name="agentic-fm">'
+              '<Script id="20" name="AGFM Version"><Step enable="True" id="103" name="Exit Script">'
+              '<Calculation><![CDATA["1.0.0"]]></Calculation></Step></Script>'
+              '<Script id="9" name="Agentic-fm Webviewer"><Step enable="True" id="103" name="Exit Script"/></Script>'
+              '</Group></fmxmlsnippet>')
+
+    def _repo(self, tmp, with_manifest):
+        root = Path(tmp)
+        (root / "filemaker" / "addon").mkdir(parents=True)
+        (root / "filemaker" / "agentic-fm.xml").write_text(self.BUNDLE, encoding="utf-8")
+        if with_manifest:
+            (root / "filemaker" / "addon" / "manifest.json").write_text(
+                '{"name": "agentic-fm", "version": "1.0.0", "scripts": ["AGFM Version"], "custom_functions": []}',
+                encoding="utf-8")
+        _snippet_script(root / "agent" / "xml_parsed" / "scripts" / "Demo" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml",
+                        '"1.0.0"')
+        return root
+
+    def test_manifest_scripts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(C._manifest_scripts(self._repo(tmp, True)), {"AGFM Version"})
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(C._manifest_scripts(self._repo(tmp, False)))
+
+    def test_scripts_outside_the_add_on_are_not_missing_where_the_add_on_is_installed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            names = {o["name"]: o["status"] for o in C.check(self._repo(tmp, True))["objects"]}
+        self.assertNotIn("Agentic-fm Webviewer", names)
+        self.assertEqual(names["add-on (Demo)"], "OK")
+
+    def test_without_a_manifest_they_are_still_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            names = {o["name"]: o["status"] for o in C.check(self._repo(tmp, False))["objects"]}
+        self.assertEqual(names["Agentic-fm Webviewer"], "MISSING")
+
+
+class TestSaveAsXmlEngineOptions(unittest.TestCase):
+    CANON = "Set Variable [ $o ; Value: 1 ]\nSave a Copy as XML [ $output ; Get ( WindowName ) ]\nExit Script"
+    EMB = ('Set Variable [ $o ; Value: 1 ]\nSave a Copy as XML [ $output ; Get ( WindowName ) ; '
+           'Specify options as JSON: JSONSetElement ( "{}" ;\n  [ "catalogs_included" ; JSONMakeArray (\n'
+           '  "ScriptCatalog\n  Metadata"\n  ; " " ; JSONString ) ; JSONArray ] ;\n'
+           '  [ "include_details" ; False ; JSONBoolean ]\n) ]\nExit Script')
+
+    def test_options_added_by_filemaker_26_on_paste_are_noise(self):
+        status, diff = C._compare_hr(self.CANON, self.EMB)
+        self.assertEqual(status, "OK~")
+        self.assertIn("Specify options as JSON", diff)
+
+    def test_other_changes_next_to_the_options_still_drift(self):
+        status, _ = C._compare_hr(self.CANON, self.EMB.replace("Exit Script", "Exit Script [ 1 ]"))
+        self.assertEqual(status, "STALE")
+
+    def test_options_in_the_bundle_are_compared_normally(self):
+        canon = self.EMB.replace("ScriptCatalog", "LayoutCatalog")
+        status, _ = C._compare_hr(canon, self.EMB)
+        self.assertEqual(status, "STALE")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

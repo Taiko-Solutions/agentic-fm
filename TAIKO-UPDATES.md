@@ -4,6 +4,18 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-10 — agentic-fm como add-on de FileMaker (1.0.0)
+
+**Acción requerida:** en cada archivo con agentic-fm pegado, borra la carpeta de guiones `agentic-fm` y la función `Context` y **después** instala el add-on (`filemaker/addon/agentic-fm.fmaddon`; Modo Presentación › Add-ons › Instalar, selecciona `agentic-fm` y pulsa Intro). Cambia a «por nombre» las llamadas de tus guiones a `Agentic-fm Debug` y `Get agentic-fm path`. La ruta del repo la da Agentic-FM-APP (`GET /config`); sin la app, Explode XML y Push Context piden la carpeta.
+
+- `Get agentic-fm path` ya no pregunta: pide la ruta del clon a Agentic-FM-APP (`GET /config`), rellena `$$AGENTIC.FM` y `$$AGENTIC.FM.COMPANION.IP` y devuelve JSON (`ok`, `source`, `error`). Si la app no responde, Explode XML, Push Context y el webviewer ofrecen elegir la carpeta (`AGFM Choose Folder`).
+- Nuevos: `AGFM Start` (comprobación silenciosa de servicio y clon), `AGFM Explode` (explode silencioso), `AGFM Version` (1.0.0).
+- El add-on lleva solo explode, OData, Push Context (+ `Context`) y Agentic-fm Debug: el visor web se instala a mano si se usa. Lista en `filemaker/addon/manifest.json`; `agent/scripts/build_addon_snippet.py` genera `filemaker/addon/agentic-fm-addon.xml`, lo que se pega en la plantilla.
+- Todos los guiones usan `$$AGENTIC.FM.COMPANION.IP` (por defecto `localhost`); Explode XML exporta a `Get ( TemporaryPath )`.
+- `check_embedded_agfm.py` informa de la versión del add-on por solución (al día / desactualizado / pegado).
+- Tests nuevos: `agent/scripts/test_filemaker_bundle.py` (invariantes del bundle y del manifiesto), `test_build_addon_snippet.py`, y `TestAddonVersion` / `TestManifestScope` en `test_check_embedded_agfm.py`.
+- Comprobado en FileMaker 26.0.3 (spike del 2026-10-10): la carpeta entera entra en el paquete, el acceso total y el menú del layout se conservan, la llamada por nombre sobrevive a reinstalar y la llamada por referencia no.
+
 ## 2026-10-09 — Upstream (petrowsky) hasta el 24-sep: 27 arreglos de catálogo y conversores
 
 **Acción opcional:** si regeneraste con el conversor (Python o webviewer) guiones con `Configure AI Account`, `Generate Response from Model`, `Fine-Tune Model`, `Loop` con «Flush: Minimum» o `Sort Records` con «Restore», vuelve a convertirlos: ahora salen como los escribe FileMaker 2026.

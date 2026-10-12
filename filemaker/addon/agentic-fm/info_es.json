@@ -1,0 +1,18 @@
+﻿{
+	"Title" : "agentic-fm",
+
+	"Description" : "agentic-fm para FileMaker: explode, OData, Push Context y Debug — versión 1.0.0",
+
+	"Category" : "Developer tools",
+
+	"Features" :
+		[
+			
+		],
+
+	"Optimized" :
+		[
+			"Desktop", "Tablet", "Mobile"
+
+		]
+}

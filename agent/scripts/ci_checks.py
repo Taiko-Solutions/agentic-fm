@@ -94,7 +94,9 @@ def main() -> int:
                               ("sync_clone tests", "agent/scripts/test_sync_clone.py"),
                               ("session_start tests", "agent/scripts/test_session_start.py"),
                               ("analyze layouts tests", "agent/scripts/test_analyze_layouts.py"),
-                              ("clipboard tests", "agent/scripts/test_clipboard.py")):
+                              ("clipboard tests", "agent/scripts/test_clipboard.py"),
+                              ("add-on bundle tests", "agent/scripts/test_filemaker_bundle.py"),
+                              ("add-on snippet tests", "agent/scripts/test_build_addon_snippet.py")):
             checks.append((label, lambda label=label, script=script: run_cmd(
                 label, [sys.executable, script])))
         checks.append(("explode layouts tests (fmparse.sh + fmcontext.sh)", lambda: run_cmd(

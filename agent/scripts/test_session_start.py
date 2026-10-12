@@ -50,5 +50,50 @@ class CheckGitTests(unittest.TestCase):
         self.assertEqual(status, ss.OK)
 
 
+class CheckEmbeddedAddonTests(unittest.TestCase):
+    def _report(self, objects):
+        import json
+        from unittest import mock
+        root = Path(tempfile.mkdtemp())
+        (root / "agent" / "xml_parsed").mkdir(parents=True)
+        (root / "agent" / "scripts").mkdir(parents=True)
+        (root / "agent" / "scripts" / "check_embedded_agfm.py").write_text("", encoding="utf-8")
+        report = json.dumps({"objects": objects, "checked": True, "explode_present": True})
+        with mock.patch.object(ss, "REPO_ROOT", root), mock.patch.object(ss, "_run", return_value=(1, report)):
+            return ss.check_embedded()
+
+    def test_pasted_bundle_points_to_the_add_on_not_to_re_pasting(self):
+        status, msg, _ = self._report([
+            {"name": "AGFM Start", "kind": "script", "status": "MISSING", "diff": ""},
+            {"name": "add-on (Demo)", "kind": "addon", "status": "PASTED", "diff": ""}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("add-on", msg)
+        self.assertNotIn("repegar", msg)
+
+    def test_outdated_add_on_with_local_edits_keeps_the_diff_warning(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Demo)", "kind": "addon", "status": "STALE", "diff": "0.9.0 → 1.0.0"},
+            {"name": "Explode XML", "kind": "script", "status": "STALE", "diff": "+x"}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("desinstala", msg)
+        self.assertIn("Explode XML", msg)
+        self.assertIn("--diff", msg)
+
+    def test_current_add_on_with_edited_scripts_does_not_say_re_paste(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Demo)", "kind": "addon", "status": "OK", "diff": ""},
+            {"name": "Explode XML", "kind": "script", "status": "STALE", "diff": "+x"}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("Explode XML", msg)
+        self.assertNotIn("repegar", msg)
+
+    def test_outdated_add_on_says_uninstall_and_install(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Demo)", "kind": "addon", "status": "STALE", "diff": "0.9.0 → 1.0.0"}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("desinstala", msg)
+        self.assertIn("0.9.0 → 1.0.0", msg)
+
+
 if __name__ == "__main__":
     unittest.main()

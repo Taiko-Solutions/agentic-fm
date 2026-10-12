@@ -90,7 +90,49 @@ apt-get install libxml2-utils
 
 ---
 
-## Installation Steps
+## Install as an add-on (recommended)
+
+The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic-fm`
+(`filemaker/addon/agentic-fm.fmaddon`): `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
+`AGFM Choose Folder`, `Explode XML`, `Push Context` with the `Context` custom function, the `OData` folder and
+`Agentic-fm Debug` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on; if you use the editor, paste
+`filemaker/addon/agentic-fm-webviewer.xml` (only `Agentic-fm Webviewer`, `Menu` and `Paste`; their calls into the
+add-on are by name) — never the full `agentic-fm.xml` on top of the add-on, which would duplicate its scripts. Updating a solution is uninstall + install; nothing is
+pasted by hand.
+
+Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.py` writes
+`filemaker/addon/agentic-fm-addon.xml` (the bundle restricted to the manifest). Paste `filemaker/context.xml`
+and that snippet into the template `filemaker/addon/template/agentic-fm.fmp12` (a blank file: the add-on takes the
+file's name; table `AGFM` with `PrimaryKey` only, no other layout), add the `__FMAddonTemplateDirectives_en` layout with one
+grouped button running `AGFM Start`, and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
+prefixed `__FMAddonTemplateDirectives_`. Then `python3 agent/scripts/build_addon_snippet.py --package` imports
+the built package from `AddonModules`, replaces FileMaker's default metadata ("Created by Claris", placeholder
+description) with the manifest's and repacks `agentic-fm.fmaddon`. Bump `AGFM Version` and `manifest.json` together.
+
+1. **Make the package available on this Mac.** Agentic-FM-APP copies it to
+   `~/Library/Application Support/FileMaker/Extensions/AddonModules/`. Without the app, double-click
+   `filemaker/addon/agentic-fm.fmaddon`.
+2. **Coming from a pasted copy? Delete it first.** Remove the pasted `agentic-fm` script folder and the
+   `Context` custom function **before** installing. Installed over a pasted copy, the add-on's scripts arrive
+   renamed (`Explode XML 2`, …) and the old `Context` is kept instead of the add-on's.
+3. **Install.** Layout mode → Add-ons tab → Install Add-on → **select `agentic-fm` and press Return**. With
+   several add-ons in the list, clicking one and pressing *Choose* can install the first add-on of the list
+   instead.
+4. **Call agentic-fm scripts by name only.** Your own scripts must call agentic-fm scripts with
+   `Perform Script` by calculated name (e.g. `"Agentic-fm Debug"`), and your calculations must not use
+   `Context ( )`. Uninstall + install gives the add-on's objects new internal IDs: by-reference calls and
+   custom-function uses in your solution then show `<unknown>` / `<Function Missing>`; by-name calls keep
+   working.
+5. **Update** = right-click the add-on → Uninstall Add-on, then install the new version (an installed add-on
+   cannot be installed again on top).
+6. **Start-up (optional).** `OnFirstWindowOpen` may call `AGFM Start` by name: it is silent and returns JSON
+   (`ok`, `mode`, `repo_path`, `addon_version`, `error`).
+
+The repo path comes from Agentic-FM-APP (`GET /config`, which knows the clone of each registered solution), so
+the per-account `If Get ( AccountName )` blocks of older setups are no longer needed. The companion host is
+`$$AGENTIC.FM.COMPANION.IP` (default `localhost`).
+
+## Installation Steps (manual install, without the add-on)
 
 For the full first-run workflow, see the main [QUICKSTART.md](../QUICKSTART.md#-one-time-filemaker-setup), especially the `One-time FileMaker setup` section.
 
@@ -126,9 +168,7 @@ Switch to FileMaker, open the **Script Workspace** (**Scripts > Script Workspace
 
 ### 3. Configure the repo path
 
-Run the **Get agentic-fm path** script once (from the Scripts menu or Script Workspace). A folder picker will appear. Select the root of the agentic-fm repo folder. The path is stored in `$$AGENTIC.FM` and persists for the session.
-
-> This script must be run again each time FileMaker is relaunched, as global variables do not persist across sessions. Consider adding a call to it in your solution's startup script.
+**Get agentic-fm path** asks Agentic-FM-APP for this file's clone (`GET /config`) and stores it in `$$AGENTIC.FM`; it shows no dialog and returns JSON (`ok`, `source`, `repo_path`, `error`). When the app does not answer (not running, or the classic companion, which has no `/config`), **Explode XML** and **Push Context** offer a folder picker (`AGFM Choose Folder`): select the root of the agentic-fm repo folder. The path lasts for the session.
 
 ### 3.5. Start the companion server
 

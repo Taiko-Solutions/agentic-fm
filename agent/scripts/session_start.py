@@ -140,12 +140,34 @@ def check_embedded():
                           "check_embedded_agfm.py, no ignores este aviso"), {}
         return SKIP, "nada que comprobar", {}
 
+    addon = [o for o in objects if o.get("kind") == "addon"]
+    outdated = [o for o in addon if o.get("status") == "STALE"]
+    pasted = [o["name"] for o in addon if o.get("status") == "PASTED"]
     drift = [o["name"] for o in objects
-             if o.get("status") in ("STALE", "MISSING", "UNREADABLE")]
+             if o.get("kind") != "addon" and o.get("status") in ("STALE", "MISSING", "UNREADABLE")]
+    parts = []
+    if outdated:
+        detail = ", ".join(f"{o['name']} {o.get('diff', '')}".strip() for o in outdated[:4])
+        parts.append(f"add-on agentic-fm desactualizado: {detail} — desinstala e instala el paquete actual "
+                     f"(filemaker/addon/agentic-fm.fmaddon)")
+    if pasted:
+        parts.append(f"agentic-fm pegado (sin add-on): {', '.join(pasted[:4])} — borra la carpeta agentic-fm y la "
+                     f"función Context y después instala el add-on (filemaker/addon/agentic-fm.fmaddon)")
     if drift:
-        return WARN, (f"deriva en código agentic-fm embebido: {', '.join(drift[:4])} — "
-                      f"revisa el diff (check_embedded_agfm.py --diff) ANTES de repegar: "
-                      f"puede llevar cambios locales deliberados"), {"stale": drift}
+        if addon:
+            # An add-on is in play: reinstalling it (or installing it over a pasted copy) discards local edits.
+            parts.append(f"deriva en código agentic-fm embebido: {', '.join(drift[:4])} — revisa el diff "
+                         f"(check_embedded_agfm.py --diff) ANTES de instalar o reinstalar el add-on: puede llevar "
+                         f"cambios locales deliberados que se perderían")
+        else:
+            parts.append(f"deriva en código agentic-fm embebido: {', '.join(drift[:4])} — "
+                         f"revisa el diff (check_embedded_agfm.py --diff) ANTES de repegar: "
+                         f"puede llevar cambios locales deliberados")
+    if parts:
+        data = {"stale": [o["name"] for o in outdated] + drift}
+        if pasted:
+            data["pasted"] = pasted
+        return WARN, " · ".join(parts), data
     if any(o.get("status") == "OK~" for o in objects):
         return OK, "código embebido al día (con ruido conocido del conversor)", {}
     return OK, "código embebido al día", {}

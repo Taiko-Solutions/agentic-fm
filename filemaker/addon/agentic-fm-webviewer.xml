@@ -1,0 +1,533 @@
+<?xml version="1.0"?>
+<fmxmlsnippet type="FMObjectList">
+  <Group groupCollapsed="False" includeInMenu="False" id="1" name="agentic-fm">
+    <Group groupCollapsed="False" includeInMenu="False" id="11" name="Extras">
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="9" name="Agentic-fm Webviewer">
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>PURPOSE: Start or stop the agentic-fm webviewer from within FileMaker.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765"]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$server</Name>
+        </Step>
+        <Step enable="True" id="61" name="Insert Text">
+          <SelectAll state="True"/>
+          <Text>&lt;!DOCTYPE html&gt;&lt;html lang="en"&gt;&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;&lt;style&gt;*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;width:100%}body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,sans-serif;background:#0f0f0f;color:#e4e4e7;display:flex;align-items:center;justify-content:center;user-select:none}.card{text-align:center;padding:2rem;max-width:560px;width:100%}.icon{width:52px;height:52px;border-radius:50%;background:#1f1f1f;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:1.4rem}h1{font-size:1rem;font-weight:600;color:#f4f4f5;letter-spacing:-.01em;margin-bottom:.4rem}p{font-size:.8125rem;color:#71717a;line-height:1.65;margin-bottom:1.25rem}pre{background:#161616;border:1px solid #262626;border-radius:7px;padding:.65rem .9rem;font-family:ui-monospace,"SF Mono","Cascadia Code",monospace;font-size:.75rem;color:#a1a1aa;text-align:left;overflow:auto}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;div class="card"&gt;&lt;div class="icon"&gt;&#x26A1;&lt;/div&gt;&lt;h1&gt;Companion server offline&lt;/h1&gt;&lt;p&gt;Start the server, then run the script 'Agentic-fm webviewer' to launch agentic-fm.&lt;/p&gt;&lt;pre&gt;python3 agent/scripts/companion_server.py&lt;/pre&gt;&lt;/div&gt;&lt;/body&gt;&lt;/html&gt;</Text>
+          <Field>$html</Field>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="1" name="Perform Script">
+          <Calculated>
+            <Calculation><![CDATA["Get agentic-fm path"]]></Calculation>
+          </Calculated>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$pathResult</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[not JSONGetElement ( $pathResult ; "ok" )]]></Calculation>
+        </Step>
+        <Step enable="True" id="1" name="Perform Script">
+          <Calculated>
+            <Calculation><![CDATA["AGFM Choose Folder"]]></Calculation>
+          </Calculated>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[not Get ( ScriptResult )]]></Calculation>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["agentic-fm not configured"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA["agentic-fm-app could not say which clone this file belongs to (" & JSONGetElement ( $pathResult ; "error" ) & ") and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution's clone there if it is in several clones."]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["OK"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Check webviewer status.</Text>
+        </Step>
+        <Step enable="True" id="160" name="Insert from URL">
+          <NoInteract state="True"/>
+          <DontEncodeURL state="False"/>
+          <SelectAll state="True"/>
+          <VerifySSLCertificates state="False"/>
+          <Calculation><![CDATA[$server & "/webviewer/status"]]></Calculation>
+          <Text/>
+          <Field>$response</Field>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$httpError</Name>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$httpError ≠ 0]]></Calculation>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["Companion server not running"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA["Start the companion server first:¶¶python3 agent/scripts/companion_server.py¶¶Then run Start agentic-fm again."]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["OK"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONGetElement ( $response ; "running" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$running</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[$running]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$state</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ]
+)]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$payload</Name>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$running]]></Calculation>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["Stop webviewer?"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA["The agentic-fm webviewer is running at:¶¶http://localhost:8080¶¶Stop it?"]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["Stop"]]></Calculation>
+            </Button>
+            <Button CommitState="False">
+              <Calculation><![CDATA["Cancel"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[Get ( LastMessageChoice ) = 1]]></Calculation>
+        </Step>
+        <Step enable="True" id="160" name="Insert from URL">
+          <NoInteract state="True"/>
+          <DontEncodeURL state="False"/>
+          <SelectAll state="True"/>
+          <VerifySSLCertificates state="False"/>
+          <CURLOptions>
+            <Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation>
+          </CURLOptions>
+          <Calculation><![CDATA[$server & "/webviewer/stop"]]></Calculation>
+          <Text/>
+          <Field>$response</Field>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$httpError</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$httpError ≠ 0 or not JSONGetElement ( $response ; "success" )]]></Calculation>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["Error"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA[If ( $httpError ≠ 0 ; "Could not reach the companion server." ; JSONGetElement ( $response ; "error" ) )]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["OK"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="69" name="Else">
+          <Restore state="False"/>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["Webviewer stopped"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA["The agentic-fm webviewer has been stopped."]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["OK"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[False]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$state</Name>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="69" name="Else">
+          <Restore state="False"/>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Start the webviewer.</Text>
+        </Step>
+        <Step enable="True" id="160" name="Insert from URL">
+          <NoInteract state="True"/>
+          <DontEncodeURL state="False"/>
+          <SelectAll state="True"/>
+          <VerifySSLCertificates state="False"/>
+          <CURLOptions>
+            <Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation>
+          </CURLOptions>
+          <Calculation><![CDATA[$server & "/webviewer/start"]]></Calculation>
+          <Text/>
+          <Field>$response</Field>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$httpError</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$httpError ≠ 0 or not JSONGetElement ( $response ; "success" )]]></Calculation>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["Error"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA[If ( $httpError ≠ 0 ; "Could not reach the companion server." ; JSONGetElement ( $response ; "error" ) )]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["OK"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="69" name="Else">
+          <Restore state="False"/>
+        </Step>
+        <Step enable="True" id="87" name="Show Custom Dialog">
+          <Title>
+            <Calculation><![CDATA["Webviewer started"]]></Calculation>
+          </Title>
+          <Message>
+            <Calculation><![CDATA["The agentic-fm webviewer is now running at:¶¶http://localhost:8080"]]></Calculation>
+          </Message>
+          <Buttons>
+            <Button CommitState="True">
+              <Calculation><![CDATA["OK"]]></Calculation>
+            </Button>
+            <Button CommitState="False"/>
+            <Button CommitState="False"/>
+          </Buttons>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[True]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$state</Name>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Refresh any agentic-fm web viewer.</Text>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[Position ( LayoutObjectNames ( Get ( FileName ) ; Get ( LayoutName ) ) ; "agentic-fm" ; 1 ; 1 )]]></Calculation>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$state = True]]></Calculation>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[""]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$html</Name>
+        </Step>
+        <Step enable="True" id="146" name="Set Web Viewer">
+          <Action value="Reset"/>
+          <ObjectName>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </ObjectName>
+        </Step>
+        <Step enable="True" id="69" name="Else">
+          <Restore state="False"/>
+        </Step>
+        <Step enable="True" id="146" name="Set Web Viewer">
+          <Action value="GoToURL"/>
+          <ObjectName>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </ObjectName>
+          <URL custom="False">
+            <Calculation><![CDATA[$html]]></Calculation>
+          </URL>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="103" name="Exit Script"/>
+      </Script>
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="5" name="Agentic-fm Menu">
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>PURPOSE: Handle all menu calls from a custom menu and pass through to a web viewer.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>NOTE: This relies on a custom menu set being attached to the layout where the agentic-fm web viewer object is being used.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( ScriptParameter )]]></Calculation>
+          </Value>
+          <Name>$action</Name>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[Left ( $action ; 5 ) = "agfm."]]></Calculation>
+        </Step>
+        <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+          <ObjectName>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </ObjectName>
+          <FunctionName>
+            <Calculation><![CDATA["triggerAppAction"]]></Calculation>
+          </FunctionName>
+          <Parameters Count="1">
+            <P>
+              <Calculation><![CDATA[$action]]></Calculation>
+            </P>
+          </Parameters>
+        </Step>
+        <Step enable="True" id="125" name="Else If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$action = "editor.action.clipboardPasteAction"]]></Calculation>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Handle special case of pasting when clipboard has more than just text.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>WebKit paste fails when rich/binary formats (XMSS, RTF, scrap styles) are on the pasteboard.</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Known issue with MBS: If FileMaker objects are copied to the clipboard they won't paste unless switching out of FileMaker and coming back.</Text>
+        </Step>
+        <Step enable="True" id="48" name="Paste">
+          <NoStyle state="True"/>
+          <SelectAll state="True"/>
+          <LinkAvail state="False"/>
+          <Field table="Table" id="13" name="CLIPBOARD"/>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Table::CLIPBOARD]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$text</Name>
+        </Step>
+        <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+          <ObjectName>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </ObjectName>
+          <FunctionName>
+            <Calculation><![CDATA["insertAtEditorCursor"]]></Calculation>
+          </FunctionName>
+          <Parameters Count="1">
+            <P>
+              <Calculation><![CDATA[$text]]></Calculation>
+            </P>
+          </Parameters>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="69" name="Else">
+          <Restore state="False"/>
+        </Step>
+        <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+          <ObjectName>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </ObjectName>
+          <FunctionName>
+            <Calculation><![CDATA["triggerEditorAction"]]></Calculation>
+          </FunctionName>
+          <Parameters Count="1">
+            <P>
+              <Calculation><![CDATA[$action]]></Calculation>
+            </P>
+          </Parameters>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+      </Script>
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="18" name="Agentic-fm Paste">
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>PURPOSE: Open a script tab in Script Workspace. Used by Tier 2 deployment via companion /trigger.</Text>
+        </Step>
+        <Step enable="False" id="61" name="Insert Text">
+          <SelectAll state="False"/>
+          <Text>CALLED BY: companion server /trigger endpoint via AppleScript&#xD;  The companion sets the job via POST /pending before firing do script.&#xD;  This script GETs /pending to retrieve: target (script name).&#xD;&#xD;PARAMETERS (from /pending JSON):&#xD;  target &#x2014; name of the script to open in Script Workspace&#xD;&#xD;RETURNS: JSON { success, script } or { success, error }&#xD;&#xD;REQUIRES: MBS Plugin with ScriptWorkspace functions&#xD;&#xD;NOTE: This script only OPENS the target script tab. The actual paste&#xD;  (AXPress tab focus + Cmd+A + Delete + Cmd+V + Cmd+S) is handled by&#xD;  deploy.py via a second raw_applescript call through the companion.&#xD;  AXPress must run from outside FM &#x2014; Perform AppleScript within FM&#xD;  causes Script Workspace to lose focus on the step editor.</Text>
+          <Field>$README</Field>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Fetch the pending job from the companion server</Text>
+        </Step>
+        <Step enable="True" id="160" name="Insert from URL">
+          <NoInteract state="True"/>
+          <DontEncodeURL state="False"/>
+          <SelectAll state="False"/>
+          <VerifySSLCertificates state="False"/>
+          <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/pending"]]></Calculation>
+          <Text/>
+          <Field>$pendingJSON</Field>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONGetElement ( $pendingJSON ; "target" )]]></Calculation>
+          </Value>
+          <Name>$target</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[IsEmpty ( $target )]]></Calculation>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error" ; "No pending job — companion /pending returned empty" ; JSONString ]
+)]]></Calculation>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>Bring FM to front before opening Script Workspace</Text>
+        </Step>
+        <Step enable="True" id="67" name="Perform AppleScript">
+          <ContentType value="Text"/>
+          <Text>tell me to activate</Text>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="88" name="Open Script Workspace"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[MBS ( "ScriptWorkspace.OpenScript" ; $target )]]></Calculation>
+          </Value>
+          <Name>$openResult</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[Left ( $openResult ; 5 ) ≠ "OK"]]></Calculation>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error" ; "ScriptWorkspace.OpenScript failed: " & $openResult ; JSONString ]
+)]]></Calculation>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; True ; JSONBoolean ] ;
+	[ "script" ; $target ; JSONString ]
+)]]></Calculation>
+        </Step>
+      </Script>
+    </Group>
+  </Group>
+</fmxmlsnippet>
