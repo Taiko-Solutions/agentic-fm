@@ -4,11 +4,20 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-12 — Herramientas del add-on: correcciones
+
+**Acción requerida (si aplica):** si un guion tuyo llama a `Get agentic-fm path` y comprueba `not Get ( ScriptResult )`, cámbialo a `not JSONGetElement ( Get ( ScriptResult ) ; "ok" )`: desde el add-on 1.0.0 el guion devuelve JSON, y un JSON no se evalúa como verdadero.
+
+- Los tests que crean commits (`test_sync_clone`, `test_session_start`, `test_check_pushed_paths`) usan una configuración de git propia (`agent/scripts/git_test_env.py`): ya no se cuelgan si la firma de commits con un gestor de contraseñas está bloqueada.
+- `check_embedded_agfm.py`: una versión del add-on ilegible sale como `UNREADABLE` (antes «desactualizada») y `session_start.py` avisa; se aceptan versiones de cualquier número de partes (`1.1`); el filtro de las opciones que FileMaker 26 añade a `Save a Copy as XML` ya no se come pasos que no son suyos.
+- `build_addon_snippet.py`: una etiqueta de cierre que falta o está mal sangrada es un error con nombre y línea (antes podía fusionar dos guiones sin avisar); los textos del manifiesto con comillas sobreviven a varias ejecuciones de `--package`; el `.fmaddon` se empaqueta con `xar --distribution` (sin usuario, grupo ni atributos de macOS).
+- `filemaker/README.md`: carpeta y archivo del paquete explicados por separado; `--package` también escribe en tu `AddonModules`.
+
 ## 2026-10-10 — agentic-fm como add-on de FileMaker (1.0.0)
 
 **Acción requerida:** en cada archivo con agentic-fm pegado, borra la carpeta de guiones `agentic-fm` y la función `Context` y **después** instala el add-on (`filemaker/addon/agentic-fm.fmaddon`; Modo Presentación › Add-ons › Instalar, selecciona `agentic-fm` y pulsa Intro). Cambia a «por nombre» las llamadas de tus guiones a `Agentic-fm Debug` y `Get agentic-fm path`. La ruta del repo la da Agentic-FM-APP (`GET /config`); sin la app, Explode XML y Push Context piden la carpeta.
 
-- `Get agentic-fm path` ya no pregunta: pide la ruta del clon a Agentic-FM-APP (`GET /config`), rellena `$$AGENTIC.FM` y `$$AGENTIC.FM.COMPANION.IP` y devuelve JSON (`ok`, `source`, `error`). Si la app no responde, Explode XML, Push Context y el webviewer ofrecen elegir la carpeta (`AGFM Choose Folder`).
+- `Get agentic-fm path` ya no pregunta: pide la ruta del clon a Agentic-FM-APP (`GET /config`), rellena `$$AGENTIC.FM` y `$$AGENTIC.FM.COMPANION.IP` y devuelve JSON (`ok`, `source`, `error`). Si la app no responde, Explode XML y Push Context (y, en el bundle completo, el webviewer, que no va en el add-on) ofrecen elegir la carpeta (`AGFM Choose Folder`).
 - Nuevos: `AGFM Start` (comprobación silenciosa de servicio y clon), `AGFM Explode` (explode silencioso), `AGFM Version` (1.0.0).
 - El add-on lleva solo explode, OData, Push Context (+ `Context`) y Agentic-fm Debug: el visor web se instala a mano si se usa. Lista en `filemaker/addon/manifest.json`; `agent/scripts/build_addon_snippet.py` genera `filemaker/addon/agentic-fm-addon.xml`, lo que se pega en la plantilla.
 - Todos los guiones usan `$$AGENTIC.FM.COMPANION.IP` (por defecto `localhost`); Explode XML exporta a `Get ( TemporaryPath )`.
