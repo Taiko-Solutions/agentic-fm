@@ -156,7 +156,7 @@ describe('field / variable repetitions', () => {
         + '<ScanFrom type="Field"><Field table="Invoices" id="31" repetition="2" name="Description"></Field>'
         + '</ScanFrom><Barcodes types="4194303"/></DeviceOptions></Step></fmxmlsnippet>',
       ),
-    ).toContain('source=Invoices::Description[2]');
+    ).toContain('Scan from: Invoices::Description[2]');
   });
 
   it('renders a step-level repetition as a subscript', () => {
@@ -190,8 +190,7 @@ describe('field / variable repetitions', () => {
     );
     expect(
       hrToXml(
-        'Insert from Device [ Type: Barcode ; Target: $out ; Device: '
-        + 'ScanFrom=(type=Field, source=Invoices::Description[2]), Barcodes=(types=4194303) ]',
+        'Insert from Device [ $out ; Type: Barcode ; Scan from: Invoices::Description[2] ]',
       ).xml,
     ).toContain('<Field table="Invoices" id="0" repetition="2" name="Description"/>');
   });
