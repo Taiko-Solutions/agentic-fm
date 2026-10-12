@@ -107,7 +107,9 @@ def web_viewer_scripts(bundle_xml, manifest):
 
 def _set(text, key, value):
     """Replace one "Key" : "value" pair in FileMaker's own JSON layout (kept as is, BOM included)."""
-    new, count = re.subn(rf'("{key}"\s*:\s*)"[^"]*"', lambda m: m.group(1) + json.dumps(value, ensure_ascii=False), text)
+    # the value may hold escaped quotes written by an earlier run: match a whole JSON string, not up to the first "
+    new, count = re.subn(rf'("{key}"\s*:\s*)"(?:[^"\\]|\\.)*"',
+                         lambda m: m.group(1) + json.dumps(value, ensure_ascii=False), text)
     if count != 1:
         raise ValueError(f"{key!r} not found exactly once")
     return new

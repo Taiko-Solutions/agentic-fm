@@ -119,6 +119,17 @@ class TestPackageMetadata(unittest.TestCase):
             self.assertEqual(self._json(d / "info_en.json")["Category"], "Developer tools")
             self.assertTrue((d / "info_en.json").read_text(encoding="utf-8").startswith("\ufeff"))   # BOM kept
 
+    def test_quotes_in_the_manifest_survive_repeated_runs(self):
+        import tempfile
+        meta = {**self.META, "attribution": 'Marco "Taiko" Pérez',
+                "description": {"en": 'the "agentic-fm" add-on {version}'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._package(tmp)
+            B.apply_metadata(d, meta)
+            B.apply_metadata(d, meta)                                   # --package run twice
+            self.assertEqual(self._json(d / "info.json")["Attribution"], 'Marco "Taiko" Pérez')
+            self.assertEqual(self._json(d / "info_es.json")["Description"], 'the "agentic-fm" add-on 1.0.0')
+
     def test_committed_package_carries_the_manifest_metadata(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
         info = self._json(REPO / "filemaker" / "addon" / "agentic-fm" / "info.json")
