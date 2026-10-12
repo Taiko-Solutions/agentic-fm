@@ -140,6 +140,12 @@ def check_package_version(package_dir, manifest):
                          f"(AGFM Version and manifest.json must match)")
 
 
+def xar_command(archive_name, folder_name):
+    """xar invocation for the .fmaddon: --distribution keeps only the properties a distributed archive needs (no
+    user, group, extended attributes or times from the maintainer's Mac)."""
+    return ["xar", "-cf", archive_name, "--compression=gzip", "--distribution", folder_name]
+
+
 def package(manifest):
     """Import the built package from AddonModules, apply the metadata, repack the .fmaddon (xar)."""
     source = ADDON_MODULES / manifest["name"]
@@ -153,7 +159,7 @@ def package(manifest):
     shutil.copytree(source, PACKAGE)
     apply_metadata(PACKAGE, manifest)
     ARCHIVE.unlink(missing_ok=True)
-    subprocess.run(["xar", "-cf", ARCHIVE.name, "--compression=gzip", PACKAGE.name], cwd=PACKAGE.parent, check=True)
+    subprocess.run(xar_command(ARCHIVE.name, PACKAGE.name), cwd=PACKAGE.parent, check=True)
     # Refresh this Mac's copy so the install dialog shows the same metadata (after a FileMaker restart).
     for path in PACKAGE.glob("info*.json"):
         shutil.copy2(path, source / path.name)

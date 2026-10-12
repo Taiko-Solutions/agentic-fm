@@ -130,6 +130,12 @@ class TestPackageMetadata(unittest.TestCase):
             self.assertEqual(self._json(d / "info.json")["Attribution"], 'Marco "Taiko" Pérez')
             self.assertEqual(self._json(d / "info_es.json")["Description"], 'the "agentic-fm" add-on 1.0.0')
 
+    def test_archive_carries_no_machine_metadata(self):
+        """--distribution leaves out user, group, extended attributes and times: no maintainer's data in the
+        archive and the same bytes for the same files."""
+        self.assertEqual(B.xar_command("agentic-fm.fmaddon", "agentic-fm"),
+                         ["xar", "-cf", "agentic-fm.fmaddon", "--compression=gzip", "--distribution", "agentic-fm"])
+
     def test_committed_package_carries_the_manifest_metadata(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
         info = self._json(REPO / "filemaker" / "addon" / "agentic-fm" / "info.json")
