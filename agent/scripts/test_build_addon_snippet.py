@@ -76,6 +76,27 @@ class TestBuild(unittest.TestCase):
             B.build(BUNDLE, {**MANIFEST, "scripts": ["Keep", "Missing"]})
 
 
+class TestMalformedBundle(unittest.TestCase):
+    def test_a_script_without_its_close_tag_is_named(self):
+        broken = BUNDLE.replace("    </Script>\n    <Script includeInMenu=\"False\" SiriShortcutVisible=\"False\" runFullAccess=\"False\" id=\"3\"",
+                                "     </Script>\n    <Script includeInMenu=\"False\" SiriShortcutVisible=\"False\" runFullAccess=\"False\" id=\"3\"", 1)
+        with self.assertRaisesRegex(ValueError, r"<Script> 'Keep' .*no matching </Script>"):
+            B.build(broken, MANIFEST)
+
+    def test_a_folder_with_a_misplaced_close_tag_is_named(self):
+        """Well-formed XML (the XML parser is happy) but the close tag is not at the folder's indentation."""
+        broken = BUNDLE.replace("    </Group>\n    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"",
+                                "     </Group>\n    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"", 1)
+        with self.assertRaisesRegex(ValueError, r"<Group> 'Sub' .*no matching </Group>"):
+            B.build(broken, MANIFEST)
+
+    def test_malformed_xml_is_a_clear_error(self):
+        broken = BUNDLE.replace("    </Group>\n    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"",
+                                "    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"", 1)
+        with self.assertRaisesRegex(ValueError, r"not well-formed XML"):
+            B.build(broken, MANIFEST)
+
+
 class TestCommittedSnippet(unittest.TestCase):
     def test_committed_add_on_snippet_is_up_to_date(self):
         result = subprocess.run([sys.executable, str(REPO / "agent" / "scripts" / "build_addon_snippet.py"), "--check"],
