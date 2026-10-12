@@ -263,5 +263,19 @@ class TestSaveAsXmlEngineOptions(unittest.TestCase):
         self.assertEqual(status, "STALE")
 
 
+class TestAddonVersionReadability(unittest.TestCase):
+    def test_an_unreadable_version_is_unreadable_not_outdated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp) / "scripts"
+            _snippet_script(scripts / "Odd" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", "$version")
+            entry = C._addon_entries(scripts, Path("/unused"), "1.0.0", ["AGFM Version"])[0]
+        self.assertEqual(entry["status"], "UNREADABLE")
+
+    def test_versions_with_any_number_of_parts(self):
+        import xml.etree.ElementTree as ET
+        steps = ET.fromstring('<x><Step name="Exit Script"><Calculation>"1.1"</Calculation></Step></x>').findall("Step")
+        self.assertEqual(C._version_from_steps(steps), "1.1")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

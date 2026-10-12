@@ -446,12 +446,12 @@ def _canonical_steps(reference_path):
     return best
 
 
-_VERSION_RE = re.compile(r'^"(\d+\.\d+\.\d+)"$')
+_VERSION_RE = re.compile(r'^"(\d+(?:\.\d+)+)"$')
 ADDON_VERSION_SCRIPT = "AGFM Version"
 
 
 def _version_from_steps(steps):
-    """The add-on version: the quoted x.y.z literal of AGFM Version's Exit Script, or None."""
+    """The add-on version: the quoted dotted literal of AGFM Version's Exit Script (1.0.0, 1.1), or None."""
     for step in steps or []:
         if step.get("name") == "Exit Script":
             match = _VERSION_RE.match((step.findtext("Calculation") or "").strip())
@@ -475,8 +475,11 @@ def _addon_entries(scripts_dir, converter, bundle_version, canonical_names):
                 entries.append({"name": f"add-on ({solution.name})", "kind": "addon", "status": "PASTED", "diff": ""})
             continue
         found = _version_from_steps(_steps_from_embedded(version_file, converter))
-        status = "OK" if found == bundle_version else "STALE"
-        diff = "" if status == "OK" else f"{found or '?'} \u2192 {bundle_version}"
+        if found is None:                       # not a literal / unconvertible: say so, it is not "outdated"
+            status, diff = "UNREADABLE", ""
+        else:
+            status = "OK" if found == bundle_version else "STALE"
+            diff = "" if status == "OK" else f"{found} \u2192 {bundle_version}"
         entries.append({"name": f"add-on ({solution.name})", "kind": "addon", "status": status, "diff": diff})
     return entries
 
