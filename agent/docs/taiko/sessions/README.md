@@ -2,7 +2,8 @@
 
 Lo que antes eran prompts en Obsidian. Los invoca el plugin `taiko-filemaker` del marketplace `taiko`
 (skills `fm-sesion` y `fm-nuevo-proyecto`, hook `SessionStart`) y los puede ejecutar cualquier agente
-que lea este repo. Los pasos marcados **[app]** los asumirá Agentic-FM-APP (fases F6/F7).
+que lea este repo. El camino por defecto es con Agentic-FM-APP (app de escritorio + add-on `agentic-fm`);
+el camino clásico (companion, `fmparse.sh`) queda como sección aparte en `fm-nuevo-proyecto.md`.
 
 | Fichero | Lo lee | Cuándo |
 |---|---|---|
