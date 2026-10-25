@@ -11,11 +11,13 @@ Si no tienes el resumen en contexto: `python3 agent/scripts/session_start.py`. L
 | `git` WARN "estás en la rama taiko de un clon" | Propón `agentic-fm-sync --migrar` (una vez) y espera el OK; nunca trabajes en `taiko`. |
 | `git` WARN "N commit(s) por detrás … novedades: …" | Propón `agentic-fm-sync`; resume las novedades que lista (vienen de `TAIKO-UPDATES.md`). Si alguna dice "Acción requerida", díselo al desarrollador antes de seguir. |
 | `env` FAIL (no macOS / sin osascript) | Lee `agent/docs/SANDBOXED_ENVIRONMENT.md`. |
-| `embedded` STALE/MISSING | Avisa: el código agentic-fm embebido en la solución está desfasado; re-pegar desde `filemaker/` **[app]**. |
-| `companion` sin responder | `agentic-fm-start` **[app]**; si no arranca, sigue en Tier 1 (clipboard) y dilo. |
+| `embedded` STALE/MISSING / add-on desactualizado o pegado | Avisa y sigue lo que dice la línea: add-on desactualizado → desinstalar e instalar el paquete actual (la app lo deja en FileMaker con *Instalar en FileMaker*); agentic-fm pegado → borrar la carpeta `agentic-fm` y la CF `Context` y después instalar el add-on. Revisa antes `check_embedded_agfm.py --diff` si la línea lo pide. |
+| `companion` sin responder | Con Agentic-FM-APP: abre la app (es dueña del 8765). Sin la app: `agentic-fm-start`. Si no arranca, sigue en Tier 1 (clipboard) y dilo. |
 | `companion` plug-in instalado pero no usable | Ruta OSS; como mucho un aviso en la sesión. |
 | `proofkit` SKIP | Flujo estático. Si la tarea necesita estado vivo, pide correr *"Connect To ProofKit MCP"* en FileMaker. |
 | `context` ausente/rancio/otro layout | Propón `python3 agent/scripts/refresh_context.py --task "…" [--layout X]` (espera OK → `--yes`) o Push Context manual. |
+
+Con Agentic-FM-APP los scripts de `agent/scripts/bin/` pueden no estar en `~/bin`: `agentic-fm-sync [--migrar]` equivale a `python3 agent/scripts/sync_clone.py [--migrar]` en el clon, y *Actualizar clon* en la app hace lo mismo sin `--migrar`.
 
 ## 2. Contexto de equipo (Obsidian)
 
