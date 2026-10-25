@@ -165,6 +165,43 @@ class TestPackageMetadata(unittest.TestCase):
         self.assertEqual(info["URL"], manifest["url"])
 
 
+class TestDraggableObject(unittest.TestCase):
+    """--package refuses a package whose template.xml places nothing (spec 10.1: empty <Directives/>)."""
+
+    def _package(self, tmp, directives):
+        d = Path(tmp)
+        (d / "template.xml").write_text(
+            f'<?xml version="1.0" encoding="UTF-8"?>\n<FMAdd_on version="2.3.0.0">\n\t<Structure/>\n\t{directives}\n</FMAdd_on>\n',
+            encoding="utf-8")
+        return d
+
+    def test_an_empty_directives_element_is_a_named_error(self):
+        import tempfile
+        for empty in ("<Directives></Directives>", "<Directives/>", "<Directives>\n\t</Directives>"):
+            with tempfile.TemporaryDirectory() as tmp:
+                with self.assertRaises(ValueError) as ctx:
+                    B.check_draggable_object(self._package(tmp, empty))
+                self.assertIn("the package has no draggable object: template.xml <Directives/> is empty", str(ctx.exception))
+                self.assertIn("__FMAddonTemplateDirectives_en", str(ctx.exception))
+
+    def test_a_package_without_directives_is_refused_too(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaises(ValueError):
+                B.check_draggable_object(self._package(tmp, ""))
+
+    def test_a_group_inside_directives_passes(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            xml = '<Directives><Layout name="x"><LayoutObject type="Group"><LayoutObject type="Button"/></LayoutObject></Layout></Directives>'
+            B.check_draggable_object(self._package(tmp, xml))
+
+    def test_package_runs_the_check_before_touching_the_repo(self):
+        import inspect
+        source = inspect.getsource(B.package)
+        self.assertLess(source.index("check_draggable_object"), source.index("shutil.rmtree"))
+
+
 class TestWebViewerSnippet(unittest.TestCase):
     def test_committed_web_viewer_snippet_has_only_the_scripts_outside_the_add_on(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
@@ -299,7 +336,7 @@ class TestAgentSnippets(unittest.TestCase):
         self.assertEqual(manifest["version"], "1.1.0")
         self.assertEqual(manifest["agent_version"], "1.0.0")
         self.assertIn("AGFM Agent", manifest["scripts"])
-        self.assertNotIn("AGFM Explode Solution", manifest["scripts"])
+        self.assertIn("AGFM Explode Solution", manifest["scripts"])
         self.assertIn('"1.0.0"', self.steps)                 # Set Variable [ $version ; "1.0.0" ]
 
     def test_context_calculation_is_byte_for_byte_the_inlined_function(self):

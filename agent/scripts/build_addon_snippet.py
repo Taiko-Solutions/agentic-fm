@@ -15,7 +15,7 @@ tool fills it from filemaker/Context.fmfn (the source of truth), so every output
 It also writes filemaker/addon/agfm-agent.xml (one <Script>) and agfm-agent-steps.xml (the steps only).
 
 After FileMaker builds the package (Save a Copy as Add-on Package), --package imports it from AddonModules,
-replaces FileMaker's default metadata (Attribution "Claris", placeholder description and category) with the
+refuses a package whose template.xml <Directives/> is empty (nothing to drag onto a layout), replaces FileMaker's default metadata (Attribution "Claris", placeholder description and category) with the
 manifest's, and repacks the distributable .fmaddon (xar) from the edited folder.
 
 Usage:
@@ -250,6 +250,16 @@ def check_package_version(package_dir, manifest):
                          f"(AGFM Version and manifest.json must match)")
 
 
+def check_draggable_object(package_dir):
+    """The package must place something when dropped on a layout: template.xml <Directives> holds the template's
+    draggable object group (spec 10.1: the 1.0 package had an empty <Directives/> and placed nothing)."""
+    root = ET.parse(Path(package_dir) / "template.xml").getroot()
+    directives = root.find("Directives")
+    if directives is None or next(directives.iter("LayoutObject"), None) is None:
+        raise ValueError("the package has no draggable object: template.xml <Directives/> is empty — put exactly one "
+                         "object group on __FMAddonTemplateDirectives_en and rebuild")
+
+
 def xar_command(archive_name, folder_name):
     """xar invocation for the .fmaddon: --distribution keeps only the properties a distributed archive needs (no
     user, group, extended attributes or times from the maintainer's Mac)."""
@@ -262,6 +272,7 @@ def package(manifest):
     if not source.is_dir():
         raise ValueError(f"no built package at {source}: run the builder in FileMaker first")
     check_package_version(source, manifest)
+    check_draggable_object(source)
     if shutil.which("xar") is None:
         raise ValueError("xar not found (macOS only): cannot repack the .fmaddon")
     if PACKAGE.exists():
