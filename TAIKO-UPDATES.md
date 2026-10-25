@@ -14,6 +14,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - `build_addon_snippet.py --package` falla si el paquete no tiene objeto arrastrable (`<Directives/>` vacío en `template.xml`).
 - Plantilla (a mano): layout `AGFM Explode` con el visor web `agfm` y, en `__FMAddonTemplateDirectives_en`, un único grupo con el botón. Pasos en `filemaker/README.md`.
 
+## 2026-10-24 — Alta de cliente nuevo: camino con Agentic-FM-APP por defecto
+
+- `agent/docs/taiko/sessions/fm-nuevo-proyecto.md`: el camino por defecto es con la app + add-on. Sin `~/bin/fm-xml-export-exploder` (la app pasa su exploder 0.7.1 con `FM_XML_EXPLODER_BIN`), sin scripts de terminal en `~/bin` ni companion que arrancar (la app es dueña del 8765); `automation.json` solo para OData; `trace.py` opcional. El primer *Explode XML* de cada fichero pide la carpeta del clon (`/config` aún no lo conoce) y crea el proyecto en la app. El camino clásico (companion, `fmparse.sh`) queda como sección aparte.
+- `fm-sesion.md`: la línea `embedded` remite al add-on (desinstalar + instalar), `companion` sin responder → abrir la app, y equivalencia de `agentic-fm-sync` cuando no está en `~/bin`.
+
 ## 2026-10-12 — Herramientas del add-on: correcciones
 
 **Acción requerida (si aplica):** si un guion tuyo llama a `Get agentic-fm path` y comprueba `not Get ( ScriptResult )`, cámbialo a `not JSONGetElement ( Get ( ScriptResult ) ; "ok" )`: desde el add-on 1.0.0 el guion devuelve JSON, y un JSON no se evalúa como verdadero.
