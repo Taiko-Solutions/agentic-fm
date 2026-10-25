@@ -74,5 +74,35 @@ class ReadTests(unittest.TestCase):
         self.assertIn('ut16 (Menu)', err)
 
 
+GROUP_XML = ('<?xml version="1.0"?>\n<fmxmlsnippet type="FMObjectList">\n'
+             '  <Group groupCollapsed="False" includeInMenu="False" id="1" name="agentic-fm">\n'
+             '    <Script includeInMenu="False" runFullAccess="False" id="2" name="Hello">\n'
+             '      <Step enable="True" id="89" name="# (comment)"><Text>hi</Text></Step>\n'
+             '    </Script>\n  </Group>\n</fmxmlsnippet>\n')
+
+
+class DetectClassTests(unittest.TestCase):
+    """Una carpeta de guiones (<Group> con <Script> dentro) se pega como guiones (XMSC), nunca como pasos."""
+
+    def test_script_folder_is_scripts(self):
+        self.assertEqual(cb.detect_class_from_xml(GROUP_XML), 'XMSC')
+
+    def test_malformed_script_folder_is_still_scripts(self):
+        self.assertEqual(cb.detect_class_from_xml(GROUP_XML.replace('</fmxmlsnippet>', '')), 'XMSC')
+
+    def test_windows_module_agrees(self):
+        import clipboard_win as cbw
+        self.assertEqual(cbw.detect_class_from_xml(GROUP_XML), 'XMSC')
+        self.assertEqual(cbw.detect_class_from_xml(GROUP_XML.replace('</fmxmlsnippet>', '')), 'XMSC')
+
+    def test_other_classes_unchanged(self):
+        steps = '<fmxmlsnippet type="FMObjectList"><Step enable="True" id="89" name="# (comment)"/></fmxmlsnippet>'
+        script = ('<fmxmlsnippet type="FMObjectList"><Script id="1" name="S">'
+                  '<Step id="89" name="# (comment)"/></Script></fmxmlsnippet>')
+        self.assertEqual(cb.detect_class_from_xml(steps), 'XMSS')
+        self.assertEqual(cb.detect_class_from_xml(script), 'XMSC')
+        self.assertEqual(cb.detect_class_from_xml(MENU_XML), 'ut16')
+
+
 if __name__ == '__main__':
     unittest.main()

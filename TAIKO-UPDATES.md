@@ -4,6 +4,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-25 — `clipboard.py`: una carpeta de guiones se copia como guiones
+
+- `clipboard.py write` (y `clipboard_win.py`) detecta un snippet que empieza por `<Group>` (carpeta de guiones con sus `<Script>`, como `filemaker/agentic-fm.xml`, `filemaker/addon/agentic-fm-addon.xml` o `agentic-fm-webviewer.xml`) como **XMSC** (guiones). Antes lo copiaba como XMSS (pasos sueltos) y al pegarlo en el Gestor de guiones no se creaba la carpeta ni los guiones; había que añadir `--class XMSC`. El resto de snippets sale con la misma clase que antes.
+- Tests en `agent/scripts/test_clipboard.py` (`DetectClassTests`).
+
 ## 2026-10-25 — add-on 1.1.0: un solo add-on por solución
 
 **Acción requerida:** actualiza el add-on en el archivo principal (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`); pega `AGFM Agent` en los demás archivos de la solución (Agentic-FM-APP: «Copiar AGFM Agent»); autoriza el archivo principal en cada secundario (Seguridad ▸ Acceso a archivos); y apunta las llamadas a Debug de los secundarios a `AGFM Agent` por nombre, con `{"mode": "debug", …}`.
