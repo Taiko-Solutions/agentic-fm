@@ -196,7 +196,7 @@ class TestManifest(unittest.TestCase):
 class TestPackage(unittest.TestCase):
     PACKAGE = BUNDLE.parent / "addon" / "agentic-fm"
     # Until the package is rebuilt in FileMaker with AGFM Agent (add-on 1.1.0) the committed package is the old one.
-    REBUILT = "AGFM Agent" in (PACKAGE / "template.xml").read_text(encoding="utf-8-sig")
+    REBUILT = "<SourceText>AGFM Agent</SourceText>" in (PACKAGE / "en.xml").read_text(encoding="utf-8-sig")
 
     def _info(self, lang):
         import json

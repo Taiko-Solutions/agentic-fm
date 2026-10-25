@@ -175,14 +175,17 @@ class TestWebViewerSnippet(unittest.TestCase):
 
 def package_has_agent():
     """False until the package is rebuilt in FileMaker with AGFM Agent in the template (Task 11)."""
-    template = REPO / "filemaker" / "addon" / "agentic-fm" / "template.xml"
-    return "AGFM Agent" in template.read_text(encoding="utf-8-sig")
+    strings = REPO / "filemaker" / "addon" / "agentic-fm" / "en.xml"      # real script names live here, not in template.xml
+    return "<SourceText>AGFM Agent</SourceText>" in strings.read_text(encoding="utf-8-sig")
 
 
-@unittest.skipUnless(package_has_agent(), "package not rebuilt yet with AGFM Agent / version 1.1.0 (rebuild in FileMaker, then --package)")
+PENDING = unittest.skipUnless(package_has_agent(), "package not rebuilt yet with AGFM Agent / version 1.1.0 (rebuild in FileMaker, then --package)")
+
+
 class TestPackageMatchesBundle(unittest.TestCase):
     """A stale package (bundle edited, package not rebuilt) must fail here, not ship."""
 
+    @PENDING
     def test_every_calculation_of_the_manifest_scripts_is_in_the_package(self):
         import html
         import re
@@ -195,7 +198,7 @@ class TestPackageMatchesBundle(unittest.TestCase):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
         template = html.unescape((REPO / "filemaker" / "addon" / "agentic-fm" / "template.xml").read_text(encoding="utf-8-sig"))
         template = norm(token.sub('""', template))
-        root = ET.parse(REPO / "filemaker" / "agentic-fm.xml").getroot()
+        root = ET.fromstring(B.fill_context(real_bundle(), real_fmfn()).encode("utf-8"))
         missing = []
         for script in root.iter("Script"):
             if script.get("name") in manifest["scripts"] and script.find("Step") is not None:
@@ -205,6 +208,7 @@ class TestPackageMatchesBundle(unittest.TestCase):
                         missing.append((script.get("name"), code[:80]))
         self.assertEqual(missing, [], "package is stale: rebuild it in FileMaker, then build_addon_snippet.py --package")
 
+    @PENDING
     def test_package_version_matches_the_manifest(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
         B.check_package_version(REPO / "filemaker" / "addon" / "agentic-fm", manifest)
@@ -297,6 +301,31 @@ class TestAgentSnippets(unittest.TestCase):
         self.assertIn("AGFM Agent", manifest["scripts"])
         self.assertNotIn("AGFM Explode Solution", manifest["scripts"])
         self.assertIn('"1.0.0"', self.steps)                 # Set Variable [ $version ; "1.0.0" ]
+
+    def test_context_calculation_is_byte_for_byte_the_inlined_function(self):
+        expected = B.inline_context(real_fmfn())
+        for text in (self.script, self.steps):
+            root = ET.fromstring(text.encode("utf-8"))
+            calcs = [c.text for c in root.iter("Calculation") if c.text and c.text.startswith("Let ( task = $task ;")]
+            self.assertEqual(calcs, [expected])
+
+    def test_dedent_keeps_a_multiline_literal_of_a_calculation(self):
+        bundle = BUNDLE.replace('<Calculation><![CDATA["a" & "b"]]></Calculation>',
+                                '<Calculation><![CDATA["x\n    indented\n  ]]></Calculation>').replace('name="Keep"', 'name="AGFM Agent"', 1)
+        _, steps = B.agent_snippets(bundle)
+        self.assertIn('"x\n    indented\n  ]]>', steps)
+
+    def test_debug_mode_checks_success_of_the_answer_without_a_dialog(self):
+        root = ET.fromstring(real_bundle().encode("utf-8"))
+        agent = next(s for s in root.iter("Script") if s.get("name") == "AGFM Agent" and s.find("Step") is not None)
+        stepsx = agent.findall("Step")
+        i = next(k for k, st in enumerate(stepsx) if st.findtext("Calculation") == '$mode = "debug"')
+        j = next(k for k, st in enumerate(stepsx) if k > i and st.get("name") in ("Else If", "Else"))
+        block = stepsx[i:j]
+        self.assertNotIn("Show Custom Dialog", [st.get("name") for st in block])
+        post_to_exit = "\n".join(c.text for st in block[-3:] for c in st.iter("Calculation"))
+        self.assertIn('JSONGetElement ( $response ; "success" )', post_to_exit)
+        self.assertIn('JSONGetElement ( $response ; "error" )', post_to_exit)
 
     def test_longest_calculation_is_within_the_limit(self):
         self.assertLessEqual(B.longest_calculation(self.script), B.MAX_CALC_CHARS)

@@ -187,11 +187,19 @@ def agent_snippets(bundle_xml):
     script, indent = _agent_lines(bundle_xml)
     head = '<?xml version="1.0"?>\n<fmxmlsnippet type="FMObjectList">\n'
     tail = "\n</fmxmlsnippet>\n"
-    def dedent(line, width):                  # only indentation: a calculation's own lines are kept as they are
-        return line[min(width, len(line) - len(line.lstrip(" "))):]
+    def dedent(lines, width):
+        """Re-indent the XML structure lines; a calculation's own lines (inside <![CDATA[ ... ]]>) are text and
+        stay byte for byte."""
+        out, in_cdata = [], False
+        for line in lines:
+            out.append(line if in_cdata else line[min(width, len(line) - len(line.lstrip(" "))):])
+            tail = line[line.rfind("<![CDATA["):] if not in_cdata and "<![CDATA[" in line else line
+            if in_cdata or "<![CDATA[" in line:
+                in_cdata = "]]>" not in tail
+        return out
 
-    as_script = "\n".join(dedent(l, indent) for l in script)
-    steps = "\n".join(dedent(l, indent + 2) for l in script[1:-1])
+    as_script = "\n".join(dedent(script, indent))
+    steps = "\n".join(dedent(script[1:-1], indent + 2))
     for text in (as_script, steps):
         ET.fromstring((head + text + tail).encode("utf-8"))          # well-formed or a named failure
     longest = longest_calculation(head + as_script + tail)
