@@ -193,6 +193,51 @@ class TestManifest(unittest.TestCase):
         self.assertEqual(manifest()["custom_functions"], ["Context"])
 
 
+class TestExplodeSolution(unittest.TestCase):
+    NAME = "AGFM Explode Solution"
+
+    def test_it_is_in_the_add_on_and_not_full_access(self):
+        self.assertIn(self.NAME, manifest()["scripts"])
+        self.assertEqual(script(self.NAME).get("runFullAccess"), "False")
+
+    def test_without_a_parameter_it_starts_the_service_and_opens_the_card_by_layout_name(self):
+        body = steps(self.NAME)
+        joined = "\n".join(calcs(self.NAME))
+        self.assertEqual(body[0].get("name"), "# (comment)")
+        windows = [st for st in body if st.get("name") == "New Window"]
+        self.assertEqual(len(windows), 1)
+        self.assertEqual(windows[0].find("NewWndStyles").get("Style"), "Card")
+        self.assertEqual(windows[0].findtext("Name/Calculation"), '"agentic-fm"')
+        goto = [st for st in body if st.get("name") == "Go to Layout"]
+        self.assertEqual(goto[0].find("LayoutDestination").get("value"), "LayoutNameByCalc")
+        self.assertEqual(goto[0].findtext("Layout/Calculation"), '"AGFM Explode"')
+        self.assertIn(COMPANION_BASE + '/addon/card?file=" & GetAsURLEncoded ( Get ( FileName ) )', joined)
+        self.assertIn("Falta el layout AGFM Explode", joined)
+
+    def test_files_are_called_by_name_with_the_retry_for_closed_files(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('$dataSource & "::AGFM Agent"', joined)
+        self.assertIn("$callError = 104 and not $wasOpen", joined)
+        self.assertIn('Get ( TemporaryPath ) & "agfm/" & Get ( UUID ) & "/"', joined)
+        by_name = [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
+        self.assertEqual(len(by_name), 2)
+
+    def test_it_reports_to_the_card_and_posts_explode(self):
+        joined = "\n".join(calcs(self.NAME))
+        functions = [st.findtext("FunctionName/Calculation") for st in steps(self.NAME)
+                     if st.get("name") == "Perform JavaScript in Web Viewer"]
+        self.assertIn('"agfm.progress"', functions)
+        self.assertEqual(functions[-1], '"agfm.done"')
+        self.assertIn(COMPANION_BASE + '/explode"', joined)
+        self.assertIn('"~/bin/fm-xml-export-exploder"', joined)
+        self.assertIn('"agentic-fm-app no responde"', joined)
+
+    def test_the_only_dialogs_are_before_the_card_opens(self):
+        body = steps(self.NAME)
+        loop = next(i for i, st in enumerate(body) if st.get("name") == "Loop")
+        self.assertFalse([st for st in body[loop:] if st.get("name") == "Show Custom Dialog"])
+
+
 class TestPackage(unittest.TestCase):
     PACKAGE = BUNDLE.parent / "addon" / "agentic-fm"
     # Until the package is rebuilt in FileMaker with AGFM Agent (add-on 1.1.0) the committed package is the old one.
