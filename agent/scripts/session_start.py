@@ -150,6 +150,10 @@ def check_embedded():
         detail = ", ".join(f"{o['name']} {o.get('diff', '')}".strip() for o in outdated[:4])
         parts.append(f"add-on agentic-fm desactualizado: {detail} — desinstala e instala el paquete actual "
                      f"(filemaker/addon/agentic-fm.fmaddon)")
+    unreadable = [o["name"] for o in addon if o.get("status") == "UNREADABLE"]
+    if unreadable:
+        parts.append(f"versión del add-on agentic-fm ilegible: {', '.join(unreadable[:4])} — revisa el guion "
+                     f"AGFM Version (check_embedded_agfm.py --diff)")
     if pasted:
         parts.append(f"agentic-fm pegado (sin add-on): {', '.join(pasted[:4])} — borra la carpeta agentic-fm y la "
                      f"función Context y después instala el add-on (filemaker/addon/agentic-fm.fmaddon)")
@@ -164,7 +168,7 @@ def check_embedded():
                          f"revisa el diff (check_embedded_agfm.py --diff) ANTES de repegar: "
                          f"puede llevar cambios locales deliberados")
     if parts:
-        data = {"stale": [o["name"] for o in outdated] + drift}
+        data = {"stale": [o["name"] for o in outdated] + unreadable + drift}
         if pasted:
             data["pasted"] = pasted
         return WARN, " · ".join(parts), data

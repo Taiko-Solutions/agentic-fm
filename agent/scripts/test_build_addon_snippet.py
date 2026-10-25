@@ -76,6 +76,27 @@ class TestBuild(unittest.TestCase):
             B.build(BUNDLE, {**MANIFEST, "scripts": ["Keep", "Missing"]})
 
 
+class TestMalformedBundle(unittest.TestCase):
+    def test_a_script_without_its_close_tag_is_named(self):
+        broken = BUNDLE.replace("    </Script>\n    <Script includeInMenu=\"False\" SiriShortcutVisible=\"False\" runFullAccess=\"False\" id=\"3\"",
+                                "     </Script>\n    <Script includeInMenu=\"False\" SiriShortcutVisible=\"False\" runFullAccess=\"False\" id=\"3\"", 1)
+        with self.assertRaisesRegex(ValueError, r"<Script> 'Keep' .*no matching </Script>"):
+            B.build(broken, MANIFEST)
+
+    def test_a_folder_with_a_misplaced_close_tag_is_named(self):
+        """Well-formed XML (the XML parser is happy) but the close tag is not at the folder's indentation."""
+        broken = BUNDLE.replace("    </Group>\n    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"",
+                                "     </Group>\n    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"", 1)
+        with self.assertRaisesRegex(ValueError, r"<Group> 'Sub' .*no matching </Group>"):
+            B.build(broken, MANIFEST)
+
+    def test_malformed_xml_is_a_clear_error(self):
+        broken = BUNDLE.replace("    </Group>\n    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"",
+                                "    <Group groupCollapsed=\"False\" includeInMenu=\"False\" id=\"6\"", 1)
+        with self.assertRaisesRegex(ValueError, r"not well-formed XML"):
+            B.build(broken, MANIFEST)
+
+
 class TestCommittedSnippet(unittest.TestCase):
     def test_committed_add_on_snippet_is_up_to_date(self):
         result = subprocess.run([sys.executable, str(REPO / "agent" / "scripts" / "build_addon_snippet.py"), "--check"],
@@ -118,6 +139,23 @@ class TestPackageMetadata(unittest.TestCase):
             self.assertEqual(self._json(d / "info_de.json")["Description"], "agentic-fm 1.0.0")   # falls back to en
             self.assertEqual(self._json(d / "info_en.json")["Category"], "Developer tools")
             self.assertTrue((d / "info_en.json").read_text(encoding="utf-8").startswith("\ufeff"))   # BOM kept
+
+    def test_quotes_in_the_manifest_survive_repeated_runs(self):
+        import tempfile
+        meta = {**self.META, "attribution": 'Marco "Taiko" Pérez',
+                "description": {"en": 'the "agentic-fm" add-on {version}'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._package(tmp)
+            B.apply_metadata(d, meta)
+            B.apply_metadata(d, meta)                                   # --package run twice
+            self.assertEqual(self._json(d / "info.json")["Attribution"], 'Marco "Taiko" Pérez')
+            self.assertEqual(self._json(d / "info_es.json")["Description"], 'the "agentic-fm" add-on 1.0.0')
+
+    def test_archive_carries_no_machine_metadata(self):
+        """--distribution leaves out user, group, extended attributes and times: no maintainer's data in the
+        archive and the same bytes for the same files."""
+        self.assertEqual(B.xar_command("agentic-fm.fmaddon", "agentic-fm"),
+                         ["xar", "-cf", "agentic-fm.fmaddon", "--compression=gzip", "--distribution", "agentic-fm"])
 
     def test_committed_package_carries_the_manifest_metadata(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))

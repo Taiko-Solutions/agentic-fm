@@ -46,27 +46,52 @@ def _indent(line):
     return line[: len(line) - len(line.lstrip())]
 
 
-def _parse(lines, start, end_marker):
-    """Children of a folder as ("script", name, [lines]) / ("group", open_line, children, close_line)."""
+def _opens_object(stripped):
+    return stripped.startswith("<Group ") or (stripped.startswith("<Script ") and not stripped.endswith("/>"))
+
+
+def _malformed(kind, line, number, close):
+    name = _NAME_RE.search(line)
+    return ValueError(f"bundle: <{kind}> {name.group(1)!r} at line {number} has no matching {close} at the same "
+                      f"indentation")
+
+
+def _parse(lines, start, end_marker, offset=0, owner=None):
+    """Children of a folder as ("script", name, [lines]) / ("group", open_line, children, close_line).
+    A sibling or outer object opening before a script's or folder's close tag means that tag is missing."""
     children, i = [], start
+    level = len(end_marker) - len(end_marker.lstrip()) if end_marker is not None else -1
     while i < len(lines):
         line, stripped = lines[i], lines[i].strip()
         if end_marker is not None and line == end_marker:
             return children, i
+        indent = len(line) - len(line.lstrip())
+        if owner is not None and indent <= level and (_opens_object(stripped) or stripped == "</Group>"):
+            raise _malformed("Group", owner[0], owner[1], "</Group>")
         if stripped.startswith("<Group ") and stripped.endswith("/>"):
             i += 1                                       # an empty folder: nothing to keep
         elif stripped.startswith("<Group "):
             close = _indent(line) + "</Group>"
-            sub, j = _parse(lines, i + 1, close)
+            sub, j = _parse(lines, i + 1, close, offset, (line, offset + i + 1))
             children.append(("group", line, sub, lines[j]))
             i = j + 1
         elif stripped.startswith("<Script ") and not stripped.endswith("/>"):
             close = _indent(line) + "</Script>"
-            j = lines.index(close, i + 1)
+            j = i + 1
+            while j < len(lines) and lines[j] != close:
+                inner = lines[j]
+                if len(inner) - len(inner.lstrip()) <= indent and (_opens_object(inner.strip())
+                                                                   or inner.strip() == "</Group>"):
+                    raise _malformed("Script", line, offset + i + 1, "</Script>")
+                j += 1
+            if j == len(lines):
+                raise _malformed("Script", line, offset + i + 1, "</Script>")
             children.append(("script", _NAME_RE.search(line).group(1), lines[i:j + 1]))
             i = j + 1
         else:
             i += 1
+    if owner is not None:
+        raise _malformed("Group", owner[0], owner[1], "</Group>")
     return children, i
 
 
@@ -85,7 +110,10 @@ def _emit(children, keep):
 
 def build(bundle_xml, manifest):
     """The bundle restricted to the manifest's scripts (folder structure kept, empty folders dropped)."""
-    root = ET.fromstring(bundle_xml.encode("utf-8"))
+    try:
+        root = ET.fromstring(bundle_xml.encode("utf-8"))
+    except ET.ParseError as exc:
+        raise ValueError(f"bundle is not well-formed XML: {exc}") from exc
     defined = {s.get("name") for s in root.iter("Script") if s.find("Step") is not None}
     keep = set(manifest["scripts"])
     unknown = sorted(keep - defined)
@@ -94,7 +122,7 @@ def build(bundle_xml, manifest):
     lines = bundle_xml.splitlines()
     first = next(i for i, l in enumerate(lines) if l.strip().startswith("<Group "))
     last = max(i for i, l in enumerate(lines) if l.strip() == "</fmxmlsnippet>")
-    children, _ = _parse(lines[first:last], 0, None)
+    children, _ = _parse(lines[first:last], 0, None, offset=first)
     return "\n".join(lines[:first] + _emit(children, keep) + lines[last:]) + "\n"
 
 
@@ -107,7 +135,9 @@ def web_viewer_scripts(bundle_xml, manifest):
 
 def _set(text, key, value):
     """Replace one "Key" : "value" pair in FileMaker's own JSON layout (kept as is, BOM included)."""
-    new, count = re.subn(rf'("{key}"\s*:\s*)"[^"]*"', lambda m: m.group(1) + json.dumps(value, ensure_ascii=False), text)
+    # the value may hold escaped quotes written by an earlier run: match a whole JSON string, not up to the first "
+    new, count = re.subn(rf'("{key}"\s*:\s*)"(?:[^"\\]|\\.)*"',
+                         lambda m: m.group(1) + json.dumps(value, ensure_ascii=False), text)
     if count != 1:
         raise ValueError(f"{key!r} not found exactly once")
     return new
@@ -138,6 +168,12 @@ def check_package_version(package_dir, manifest):
                          f"(AGFM Version and manifest.json must match)")
 
 
+def xar_command(archive_name, folder_name):
+    """xar invocation for the .fmaddon: --distribution keeps only the properties a distributed archive needs (no
+    user, group, extended attributes or times from the maintainer's Mac)."""
+    return ["xar", "-cf", archive_name, "--compression=gzip", "--distribution", folder_name]
+
+
 def package(manifest):
     """Import the built package from AddonModules, apply the metadata, repack the .fmaddon (xar)."""
     source = ADDON_MODULES / manifest["name"]
@@ -151,7 +187,7 @@ def package(manifest):
     shutil.copytree(source, PACKAGE)
     apply_metadata(PACKAGE, manifest)
     ARCHIVE.unlink(missing_ok=True)
-    subprocess.run(["xar", "-cf", ARCHIVE.name, "--compression=gzip", PACKAGE.name], cwd=PACKAGE.parent, check=True)
+    subprocess.run(xar_command(ARCHIVE.name, PACKAGE.name), cwd=PACKAGE.parent, check=True)
     # Refresh this Mac's copy so the install dialog shows the same metadata (after a FileMaker restart).
     for path in PACKAGE.glob("info*.json"):
         shutil.copy2(path, source / path.name)
@@ -178,7 +214,7 @@ def main(argv=None):
         outputs = {OUTPUT: build(bundle, manifest),
                    WEBVIEWER_OUTPUT: build(bundle, {"scripts": sorted(web_viewer_scripts(bundle, manifest))})}
     except (ValueError, KeyError) as exc:
-        print(f"invalid manifest: {exc}", file=sys.stderr)
+        print(f"invalid bundle or manifest: {exc}", file=sys.stderr)
         return 1
     if args.check:
         stale = [path for path, text in outputs.items()

@@ -87,6 +87,12 @@ class CheckEmbeddedAddonTests(unittest.TestCase):
         self.assertIn("Explode XML", msg)
         self.assertNotIn("repegar", msg)
 
+    def test_unreadable_add_on_version_warns(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Demo)", "kind": "addon", "status": "UNREADABLE", "diff": ""}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("ilegible", msg)
+
     def test_outdated_add_on_says_uninstall_and_install(self):
         status, msg, _ = self._report([
             {"name": "add-on (Demo)", "kind": "addon", "status": "STALE", "diff": "0.9.0 → 1.0.0"}])

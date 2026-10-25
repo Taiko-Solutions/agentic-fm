@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import git_test_env  # noqa: F401 — private git config: no signing prompt in tests
 import sync_clone as sc
 
 

@@ -257,10 +257,31 @@ class TestSaveAsXmlEngineOptions(unittest.TestCase):
         status, _ = C._compare_hr(self.CANON, self.EMB.replace("Exit Script", "Exit Script [ 1 ]"))
         self.assertEqual(status, "STALE")
 
+    def test_one_line_options_do_not_swallow_the_following_steps(self):
+        canon = ('Save a Copy as XML [ $out ; Get ( WindowName ) ]\nSet Variable [ $x ; Value: Let ( [\n  a = 1\n] ; a\n) ]'
+                 '\nExit Script')
+        emb = canon.replace("Get ( WindowName ) ]", "Get ( WindowName ) ; Specify options as JSON: $opts ]", 1)
+        status, _ = C._compare_hr(canon, emb)
+        self.assertEqual(status, "OK~")                                  # was a false STALE: the Let got swallowed
+
     def test_options_in_the_bundle_are_compared_normally(self):
         canon = self.EMB.replace("ScriptCatalog", "LayoutCatalog")
         status, _ = C._compare_hr(canon, self.EMB)
         self.assertEqual(status, "STALE")
+
+
+class TestAddonVersionReadability(unittest.TestCase):
+    def test_an_unreadable_version_is_unreadable_not_outdated(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp) / "scripts"
+            _snippet_script(scripts / "Odd" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", "$version")
+            entry = C._addon_entries(scripts, Path("/unused"), "1.0.0", ["AGFM Version"])[0]
+        self.assertEqual(entry["status"], "UNREADABLE")
+
+    def test_versions_with_any_number_of_parts(self):
+        import xml.etree.ElementTree as ET
+        steps = ET.fromstring('<x><Step name="Exit Script"><Calculation>"1.1"</Calculation></Step></x>').findall("Step")
+        self.assertEqual(C._version_from_steps(steps), "1.1")
 
 
 if __name__ == "__main__":

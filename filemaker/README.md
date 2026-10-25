@@ -92,8 +92,9 @@ apt-get install libxml2-utils
 
 ## Install as an add-on (recommended)
 
-The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic-fm`
-(`filemaker/addon/agentic-fm.fmaddon`): `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
+The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic-fm`: the package folder
+`filemaker/addon/agentic-fm/` (what FileMaker loads from `AddonModules`) and the same package as one file,
+`filemaker/addon/agentic-fm.fmaddon` (double-click to install it on a Mac). It holds `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
 `AGFM Choose Folder`, `Explode XML`, `Push Context` with the `Context` custom function, the `OData` folder and
 `Agentic-fm Debug` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on; if you use the editor, paste
 `filemaker/addon/agentic-fm-webviewer.xml` (only `Agentic-fm Webviewer`, `Menu` and `Paste`; their calls into the
@@ -107,7 +108,10 @@ file's name; table `AGFM` with `PrimaryKey` only, no other layout), add the `__F
 grouped button running `AGFM Start`, and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
 prefixed `__FMAddonTemplateDirectives_`. Then `python3 agent/scripts/build_addon_snippet.py --package` imports
 the built package from `AddonModules`, replaces FileMaker's default metadata ("Created by Claris", placeholder
-description) with the manifest's and repacks `agentic-fm.fmaddon`. Bump `AGFM Version` and `manifest.json` together.
+description) with the manifest's and repacks `agentic-fm.fmaddon` (`xar --distribution`: no user, group or extended
+attributes). It also writes into **your** `AddonModules`: the edited `info*.json` go back into
+`AddonModules/agentic-fm/` and the archive is copied next to it, so this Mac's install dialog shows the same metadata
+after a FileMaker restart. Bump `AGFM Version` and `manifest.json` together.
 
 1. **Make the package available on this Mac.** Agentic-FM-APP copies it to
    `~/Library/Application Support/FileMaker/Extensions/AddonModules/`. Without the app, double-click
