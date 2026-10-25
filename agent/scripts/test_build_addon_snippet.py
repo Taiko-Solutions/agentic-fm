@@ -227,20 +227,24 @@ class TestPackageMatchesBundle(unittest.TestCase):
         import html
         import re
         literal = re.compile(r'"(?:[^"\\]|\\.)*"')
-        token = re.compile(r'"com\.fmi\.calculation\.text\.[0-9A-Fa-f]+"')   # how template.xml stores literals
+
+        block_comment = re.compile(r"/\*.*?\*/", re.S)   # template.xml stores comments as /*com.fmi.calculation.text.HEX*/
 
         def norm(text):
             return re.sub(r"\s+", " ", text).strip()
 
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
-        template = html.unescape((REPO / "filemaker" / "addon" / "agentic-fm" / "template.xml").read_text(encoding="utf-8-sig"))
-        template = norm(token.sub('""', template))
+        raw = (REPO / "filemaker" / "addon" / "agentic-fm" / "template.xml").read_text(encoding="utf-8-sig")
+        # template.xml keeps long literals as "com.fmi.calculation.text.HEX" tokens and short ones inline: neutralise all of them,
+        # comments first (they may hold a stray quote), inside each <Calculation> only so XML attributes are not touched.
+        blocks = re.findall(r"<Calculation[^>]*>(.*?)</Calculation>", raw, re.S)
+        template = norm(" ".join(literal.sub('""', block_comment.sub("/**/", html.unescape(b))) for b in blocks))
         root = ET.fromstring(B.fill_context(real_bundle(), real_fmfn()).encode("utf-8"))
         missing = []
         for script in root.iter("Script"):
             if script.get("name") in manifest["scripts"] and script.find("Step") is not None:
                 for calc in script.iter("Calculation"):
-                    code = norm(literal.sub('""', calc.text or ""))
+                    code = norm(literal.sub('""', block_comment.sub("/**/", calc.text or "")))   # comments first: they may hold a stray quote
                     if len(code) >= 3 and code not in template:
                         missing.append((script.get("name"), code[:80]))
         self.assertEqual(missing, [], "package is stale: rebuild it in FileMaker, then build_addon_snippet.py --package")

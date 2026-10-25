@@ -280,9 +280,25 @@ class TestPackage(unittest.TestCase):
         for name in WEB_VIEWER_SCRIPTS:
             self.assertNotIn(f"<SourceText>{name}</SourceText>", strings, name)
 
-    def test_package_has_no_layout(self):
+    def test_package_has_the_card_layout_and_a_draggable_group(self):
+        """1.1.0 packages exactly one layout (AGFM Explode) with the Web Viewer `agfm`, plus a draggable group."""
+        import re
         template = (self.PACKAGE / "template.xml").read_text(encoding="utf-8-sig")
-        self.assertIn('<LayoutCatalog membercount="0">', template)
+        strings = (self.PACKAGE / "en.xml").read_text(encoding="utf-8-sig")
+
+        def source_text(token):
+            found = re.search(r"<StringID>" + re.escape(token) + r"</StringID>\s*<SourceText>(.*?)</SourceText>", strings, re.S)
+            return found.group(1) if found else None
+
+        self.assertIn('<LayoutCatalog membercount="1">', template)
+        catalog = template[template.index("<LayoutCatalog"):template.index("</LayoutCatalog>")]
+        layout = re.search(r'<Layout id="\d+" name="(com\.fmi\.layout\.[0-9A-Fa-f]+)"', catalog)
+        self.assertIsNotNone(layout)
+        self.assertEqual(source_text(layout.group(1)), "AGFM Explode")
+        viewers = re.findall(r'<LayoutObject [^>]*type="Web Viewer" name="(com\.fmi\.layoutobject\.[0-9A-Fa-f]+)"', catalog)
+        self.assertIn("agfm", [source_text(token) for token in viewers])
+        directives = template[template.index("<Directives>"):template.index("</Directives>")]
+        self.assertRegex(directives, r'<LayoutObject [^>]*type="Group"')
 
     def test_distributable_archive_exists(self):
         archive = BUNDLE.parent / "addon" / "agentic-fm.fmaddon"
