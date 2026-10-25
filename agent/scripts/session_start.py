@@ -143,8 +143,11 @@ def check_embedded():
     addon = [o for o in objects if o.get("kind") == "addon"]
     outdated = [o for o in addon if o.get("status") == "STALE"]
     pasted = [o["name"] for o in addon if o.get("status") == "PASTED"]
+    agents = [o for o in objects if o.get("kind") == "agent"]   # MISSING is advisory: no warning
+    agent_old = [o for o in agents if o.get("status") == "OUTDATED"]
+    agent_bad = [o["name"] for o in agents if o.get("status") == "UNREADABLE"]
     drift = [o["name"] for o in objects
-             if o.get("kind") != "addon" and o.get("status") in ("STALE", "MISSING", "UNREADABLE")]
+             if o.get("kind") not in ("addon", "agent") and o.get("status") in ("STALE", "MISSING", "UNREADABLE")]
     parts = []
     if outdated:
         detail = ", ".join(f"{o['name']} {o.get('diff', '')}".strip() for o in outdated[:4])
@@ -154,6 +157,13 @@ def check_embedded():
     if unreadable:
         parts.append(f"versión del add-on agentic-fm ilegible: {', '.join(unreadable[:4])} — revisa el guion "
                      f"AGFM Version (check_embedded_agfm.py --diff)")
+    if agent_old:
+        detail = ", ".join(f"{o['name']} {o.get('diff', '')}".strip() for o in agent_old[:4])
+        parts.append(f"AGFM Agent desactualizado: {detail} — actualízalo con «Copiar pasos (actualizar)» "
+                     f"en agentic-fm-app")
+    if agent_bad:
+        parts.append(f"versión de AGFM Agent ilegible: {', '.join(agent_bad[:4])} — revisa el guion "
+                     f"(`$version` debe ser un literal)")
     if pasted:
         parts.append(f"agentic-fm pegado (sin add-on): {', '.join(pasted[:4])} — borra la carpeta agentic-fm y la "
                      f"función Context y después instala el add-on (filemaker/addon/agentic-fm.fmaddon)")
@@ -168,7 +178,8 @@ def check_embedded():
                          f"revisa el diff (check_embedded_agfm.py --diff) ANTES de repegar: "
                          f"puede llevar cambios locales deliberados")
     if parts:
-        data = {"stale": [o["name"] for o in outdated] + unreadable + drift}
+        data = {"stale": [o["name"] for o in outdated] + unreadable + drift
+                + [o["name"] for o in agent_old] + agent_bad}
         if pasted:
             data["pasted"] = pasted
         return WARN, " · ".join(parts), data

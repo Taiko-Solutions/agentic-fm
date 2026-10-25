@@ -42,10 +42,31 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.03A9095309FE0B07AA9C2BBDA545A6B0</StringID>
+	<SourceText>export needs a folder</SourceText>
+	<TargetText>export needs a folder</TargetText>
+	<Comment>com.fmi.calculation.text.export needs a folder</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.0603E9AAF6BE84D313B16EE91180B4E0</StringID>
 	<SourceText>snapshot-eval.xml</SourceText>
 	<TargetText>snapshot-eval.xml</TargetText>
 	<Comment>com.fmi.calculation.text.snapshot-eval.xml</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.07221A81D49D1E8A1C64AFCE1A819F3A</StringID>
+	<SourceText>agentic-fm-app no responde. Ábrela y vuelve a intentarlo.</SourceText>
+	<TargetText>agentic-fm-app no responde. Ábrela y vuelve a intentarlo.</TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm-app no responde. Ábrela y vuelve a intentarlo.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.07F1749B27B4492E0FFE4DDFA28D03C6</StringID>
+	<SourceText>Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon.</SourceText>
+	<TargetText>Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon.</TargetText>
+	<Comment>com.fmi.calculation.text.Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -63,10 +84,31 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0A2A6F666A2955B3C0D398EA50924A61</StringID>
+	<SourceText>code</SourceText>
+	<TargetText>code</TargetText>
+	<Comment>com.fmi.calculation.text.code</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0C57C15E27766B10219401DD8F584E5B</StringID>
+	<SourceText>debug</SourceText>
+	<TargetText>debug</TargetText>
+	<Comment>com.fmi.calculation.text.debug</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.0C921C1D5DF8752B4B0BE58C9F034941</StringID>
 	<SourceText>success</SourceText>
 	<TargetText>success</TargetText>
 	<Comment>com.fmi.calculation.text.success</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0CF14DB6992833A6BDC4E1E49DD8B28D</StringID>
+	<SourceText>message</SourceText>
+	<TargetText>message</TargetText>
+	<Comment>com.fmi.calculation.text.message</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -102,6 +144,13 @@
 	<SourceText> ISO 8601 UTC timestamp for staleness detection </SourceText>
 	<TargetText> ISO 8601 UTC timestamp for staleness detection </TargetText>
 	<Comment>com.fmi.calculation.text. ISO 8601 UTC timestamp for staleness detection</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.163898A55E87D78BDBE14F4B2F38B592</StringID>
+	<SourceText>).</SourceText>
+	<TargetText>).</TargetText>
+	<Comment>com.fmi.calculation.text.).</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -165,6 +214,13 @@
 	<SourceText>repo_path</SourceText>
 	<TargetText>repo_path</TargetText>
 	<Comment>com.fmi.calculation.text.repo_path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.26C208519EA3F6250E511551E4190864</StringID>
+	<SourceText>Save a Copy as XML failed (error </SourceText>
+	<TargetText>Save a Copy as XML failed (error </TargetText>
+	<Comment>com.fmi.calculation.text.Save a Copy as XML failed (error</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -252,6 +308,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.38F658EA84907201F99DFA3233B3F43C</StringID>
+	<SourceText>warnings</SourceText>
+	<TargetText>warnings</TargetText>
+	<Comment>com.fmi.calculation.text.warnings</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.391E0F0842872445ADE66DF55682A751</StringID>
 	<SourceText>exitCode</SourceText>
 	<TargetText>exitCode</TargetText>
@@ -270,6 +333,13 @@
 	<SourceText>:8765/explode</SourceText>
 	<TargetText>:8765/explode</TargetText>
 	<Comment>com.fmi.calculation.text.:8765/explode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.39CB351A1A565577E068043EAF288D12</StringID>
+	<SourceText>Falta el layout AGFM Explode: instala el add-on agentic-fm 1.1 en este archivo.</SourceText>
+	<TargetText>Falta el layout AGFM Explode: instala el add-on agentic-fm 1.1 en este archivo.</TargetText>
+	<Comment>com.fmi.calculation.text.Falta el layout AGFM Explode: instala el add-on agentic-fm 1.1 en este archivo.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -357,6 +427,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.458AC5FEEA8E46D8DAB550CF18DC8CFF</StringID>
+	<SourceText>::AGFM Agent</SourceText>
+	<TargetText>::AGFM Agent</TargetText>
+	<Comment>com.fmi.calculation.text.::AGFM Agent</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.465E1F4E24F01643AAEAA291F019E952</StringID>
 	<SourceText>script</SourceText>
 	<TargetText>script</TargetText>
@@ -368,6 +445,13 @@
 	<SourceText>timestamp</SourceText>
 	<TargetText>timestamp</TargetText>
 	<Comment>com.fmi.calculation.text.timestamp</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4B325585B173040737A37BFBCE4D667D</StringID>
+	<SourceText>agentic-fm-app no responde</SourceText>
+	<TargetText>agentic-fm-app no responde</TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm-app no responde</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -396,6 +480,13 @@
 	<SourceText> ===================================================================<CR/>       Scripts JSON: { &quot;ScriptName&quot;: { &quot;id&quot;: N }, ... }<CR/>       Includes all scripts in the file.<CR/><CR/>       Built via string concatenation rather than JSONSetElement to avoid<CR/>       issues with script names containing characters that JSONSetElement<CR/>       interprets as path operators ([ ] . &quot; \).<CR/>       =================================================================== </SourceText>
 	<TargetText> ===================================================================<CR/>       Scripts JSON: { &quot;ScriptName&quot;: { &quot;id&quot;: N }, ... }<CR/>       Includes all scripts in the file.<CR/><CR/>       Built via string concatenation rather than JSONSetElement to avoid<CR/>       issues with script names containing characters that JSONSetElement<CR/>       interprets as path operators ([ ] . &quot; \).<CR/>       =================================================================== </TargetText>
 	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Scripts JSON: { &quot;ScriptName&quot;: { &quot;id&quot;: N }, ... }_CR/_       Includes all scripts in the file._CR/__CR/_       Built via string concatenation rather than JSONSetElement to avoid_CR/_       issues with script names containing characters that JSONSetElement_CR/_       interprets as path operators ([ ] . &quot; \)._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4F7547D511D4027C7F8C079F08091F50</StringID>
+	<SourceText>action</SourceText>
+	<TargetText>action</TargetText>
+	<Comment>com.fmi.calculation.text.action</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -434,6 +525,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.58B49423274AD6D01CB39BC2A19A4E13</StringID>
+	<SourceText>check</SourceText>
+	<TargetText>check</TargetText>
+	<Comment>com.fmi.calculation.text.check</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.58CA92764771FD910275006E79846B2F</StringID>
 	<SourceText>.xml</SourceText>
 	<TargetText>.xml</TargetText>
@@ -452,6 +550,13 @@
 	<SourceText>Please describe the task you&apos;re trying to accomplish with the script.</SourceText>
 	<TargetText>Please describe the task you&apos;re trying to accomplish with the script.</TargetText>
 	<Comment>com.fmi.calculation.text.Please describe the task you&apos;re trying to accomplish with the script.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5BA18FB81724A715DCE471C107DB2BC2</StringID>
+	<SourceText>Sé lo más descriptivo posible.</SourceText>
+	<TargetText>Sé lo más descriptivo posible.</TargetText>
+	<Comment>com.fmi.calculation.text.Sé lo más descriptivo posible.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -532,10 +637,38 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.67A313AF2A6949D7FC99EB5345721BA1</StringID>
+	<SourceText>agfm.progress</SourceText>
+	<TargetText>agfm.progress</TargetText>
+	<Comment>com.fmi.calculation.text.agfm.progress</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.6A99A0EF25C10C7C76246488E2BA0A47</StringID>
+	<SourceText>errors</SourceText>
+	<TargetText>errors</TargetText>
+	<Comment>com.fmi.calculation.text.errors</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.6CED07D25810BE439CBB7A50AF5B6E18</StringID>
+	<SourceText>:8765/addon/card?file=</SourceText>
+	<TargetText>:8765/addon/card?file=</TargetText>
+	<Comment>com.fmi.calculation.text.:8765/addon/card?file=</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.6D92D710BE88E8801B8500344CA9D57B</StringID>
 	<SourceText>filelinux:</SourceText>
 	<TargetText>filelinux:</TargetText>
 	<Comment>com.fmi.calculation.text.filelinux:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7244C589DB346A548428B91A8360C02B</StringID>
+	<SourceText>Contexto enviado: ya puedes pedir el guion a la IA.</SourceText>
+	<TargetText>Contexto enviado: ya puedes pedir el guion a la IA.</TargetText>
+	<Comment>com.fmi.calculation.text.Contexto enviado: ya puedes pedir el guion a la IA.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -550,6 +683,20 @@
 	<SourceText>Missing required key: layout</SourceText>
 	<TargetText>Missing required key: layout</TargetText>
 	<Comment>com.fmi.calculation.text.Missing required key: layout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7482EC73E1AC2B40592862BBE21EC249</StringID>
+	<SourceText>No se pudo iniciar agentic-fm: </SourceText>
+	<TargetText>No se pudo iniciar agentic-fm: </TargetText>
+	<Comment>com.fmi.calculation.text.No se pudo iniciar agentic-fm:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.748A3BFDEB48D64FF17B269161711518</StringID>
+	<SourceText>unknown mode: </SourceText>
+	<TargetText>unknown mode: </TargetText>
+	<Comment>com.fmi.calculation.text.unknown mode:</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -630,6 +777,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.805BD271E037F171956E812B23B37F3C</StringID>
+	<SourceText>agfm</SourceText>
+	<TargetText>agfm</TargetText>
+	<Comment>com.fmi.calculation.text.agfm</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC</StringID>
 	<SourceText>error</SourceText>
 	<TargetText>error</TargetText>
@@ -641,6 +795,13 @@
 	<SourceText>companion_host</SourceText>
 	<TargetText>companion_host</TargetText>
 	<Comment>com.fmi.calculation.text.companion_host</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.86F6AFC4C4F592E0B10A34FA068BDD24</StringID>
+	<SourceText>agentic-fm-app no responde: ábrela y vuelve a intentarlo.</SourceText>
+	<TargetText>agentic-fm-app no responde: ábrela y vuelve a intentarlo.</TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm-app no responde: ábrela y vuelve a intentarlo.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -658,10 +819,38 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8829CC299D157E018B9166081D22B18C</StringID>
+	<SourceText>agfm.done</SourceText>
+	<TargetText>agfm.done</TargetText>
+	<Comment>com.fmi.calculation.text.agfm.done</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.885BF69DC0168F3624435346D7BF4836</StringID>
+	<SourceText>/</SourceText>
+	<TargetText>/</TargetText>
+	<Comment>com.fmi.calculation.text./</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8B59CB433E1D38C67176F03A59229D61</StringID>
+	<SourceText>Tarea: </SourceText>
+	<TargetText>Tarea: </TargetText>
+	<Comment>com.fmi.calculation.text.Tarea:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.8C1F50B8C90D601D1861CDF8AE9B0E3C</StringID>
 	<SourceText>layout</SourceText>
 	<TargetText>layout</TargetText>
 	<Comment>com.fmi.calculation.text.layout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8C276620D14E871FEDBCA6F29518E3EF</StringID>
+	<SourceText>Descripción de la tarea</SourceText>
+	<TargetText>Descripción de la tarea</TargetText>
+	<Comment>com.fmi.calculation.text.Descripción de la tarea</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -693,6 +882,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.8F9E581E20A2D136B9D3D532FBCAAD1B</StringID>
+	<SourceText>AGFM Agent no devolvió resultado</SourceText>
+	<TargetText>AGFM Agent no devolvió resultado</TargetText>
+	<Comment>com.fmi.calculation.text.AGFM Agent no devolvió resultado</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.8FC8B1E8688C9526F06846CD0975E768</StringID>
 	<SourceText>lastError</SourceText>
 	<TargetText>lastError</TargetText>
@@ -707,6 +903,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.91A32062847916BDD446ECE3D2D43326</StringID>
+	<SourceText>repo_posix</SourceText>
+	<TargetText>repo_posix</TargetText>
+	<Comment>com.fmi.calculation.text.repo_posix</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.91F127C4B704FC5AC212BA970EB65F39</StringID>
 	<SourceText>source</SourceText>
 	<TargetText>source</TargetText>
@@ -714,10 +917,24 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.93262644888BB971075F26415B0C4708</StringID>
+	<SourceText>exporting</SourceText>
+	<TargetText>exporting</TargetText>
+	<Comment>com.fmi.calculation.text.exporting</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.93CA15A878BB34A9358B13AAC7C4686D</StringID>
 	<SourceText> ===================================================================<CR/>       Layout Objects: named objects on the current layout as JSON array.<CR/>       Useful for Go to Object[] script steps.<CR/>       LayoutObjectNames returns angle brackets &lt; &gt; to indicate objects<CR/>       nested inside portals, tab controls, etc. These are excluded<CR/>       since they are not valid object names for Go to Object[].<CR/>       =================================================================== </SourceText>
 	<TargetText> ===================================================================<CR/>       Layout Objects: named objects on the current layout as JSON array.<CR/>       Useful for Go to Object[] script steps.<CR/>       LayoutObjectNames returns angle brackets &lt; &gt; to indicate objects<CR/>       nested inside portals, tab controls, etc. These are excluded<CR/>       since they are not valid object names for Go to Object[].<CR/>       =================================================================== </TargetText>
 	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Layout Objects: named objects on the current layout as JSON array._CR/_       Useful for Go to Object[] script steps._CR/_       LayoutObjectNames returns angle brackets &lt; &gt; to indicate objects_CR/_       nested inside portals, tab controls, etc. These are excluded_CR/_       since they are not valid object names for Go to Object[]._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.961FDB05B2D5206D083C326D451EF773</StringID>
+	<SourceText>unknown_solution</SourceText>
+	<TargetText>unknown_solution</TargetText>
+	<Comment>com.fmi.calculation.text.unknown_solution</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -756,10 +973,45 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.9C8594B9AD7B3EF9EEDFED1B364668D1</StringID>
+	<SourceText>ambiguous_solution</SourceText>
+	<TargetText>ambiguous_solution</TargetText>
+	<Comment>com.fmi.calculation.text.ambiguous_solution</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.9CD6CD30E4547B3800299B5C2B734FA8</StringID>
 	<SourceText>context_version</SourceText>
 	<TargetText>context_version</TargetText>
 	<Comment>com.fmi.calculation.text.context_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.9D72E2AAFB6E345C75FF44E903812444</StringID>
+	<SourceText>AGFM Explode</SourceText>
+	<TargetText>AGFM Explode</TargetText>
+	<Comment>com.fmi.calculation.text.AGFM Explode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A01D9CE7C65C265B2EF7FAACF3CCB276</StringID>
+	<SourceText>duration</SourceText>
+	<TargetText>duration</TargetText>
+	<Comment>com.fmi.calculation.text.duration</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A0677CE5142F300091007F4D9E32C048</StringID>
+	<SourceText>files</SourceText>
+	<TargetText>files</TargetText>
+	<Comment>com.fmi.calculation.text.files</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A1859B9F98BE74F55AA5BEAADE2B11A5</StringID>
+	<SourceText>agentic-fm-app no pudo guardar el contexto: </SourceText>
+	<TargetText>agentic-fm-app no pudo guardar el contexto: </TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm-app no pudo guardar el contexto:</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -798,6 +1050,20 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A4C116F187ECCF1A8D3DC55E2BFB2108</StringID>
+	<SourceText>state</SourceText>
+	<TargetText>state</TargetText>
+	<Comment>com.fmi.calculation.text.state</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A4C4465718E827AE1E96EE2459B4BB46</StringID>
+	<SourceText>data_source</SourceText>
+	<TargetText>data_source</TargetText>
+	<Comment>com.fmi.calculation.text.data_source</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.A548D8D3BF1DBEA966A3C60FD421DF49</StringID>
 	<SourceText>solution</SourceText>
 	<TargetText>solution</TargetText>
@@ -826,6 +1092,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.A885273C8732BD3BA5DBED43BC254411</StringID>
+	<SourceText>[</SourceText>
+	<TargetText>[</TargetText>
+	<Comment>com.fmi.calculation.text.[</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.A890BF40BD49C839E350BDAF7E9E7D8D</StringID>
 	<SourceText> Build fields object via inner While </SourceText>
 	<TargetText> Build fields object via inner While </TargetText>
@@ -837,6 +1110,13 @@
 	<SourceText>:8765/config?file=</SourceText>
 	<TargetText>:8765/config?file=</TargetText>
 	<Comment>com.fmi.calculation.text.:8765/config?file=</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.ACA5337DCA3DE218533E907E896F0564</StringID>
+	<SourceText>file</SourceText>
+	<TargetText>file</TargetText>
+	<Comment>com.fmi.calculation.text.file</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -858,6 +1138,13 @@
 	<SourceText>Error</SourceText>
 	<TargetText>Error</TargetText>
 	<Comment>com.fmi.calculation.text.Error</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B0ED615352E2C73BFF168FE6F2E78D1A</StringID>
+	<SourceText>agfm/</SourceText>
+	<TargetText>agfm/</TargetText>
+	<Comment>com.fmi.calculation.text.agfm/</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -952,6 +1239,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C4408A9992D10656FB1FCF9D0C5309FB</StringID>
+	<SourceText>push</SourceText>
+	<TargetText>push</TargetText>
+	<Comment>com.fmi.calculation.text.push</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.C6E22A4E42A25C7D7950F4B2F19BB80E</StringID>
 	<SourceText>build invoice scripts</SourceText>
 	<TargetText>build invoice scripts</TargetText>
@@ -973,6 +1267,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C99C0C7F74BCC3E4887D0CE11E1AA46B</StringID>
+	<SourceText>agent_version</SourceText>
+	<TargetText>agent_version</TargetText>
+	<Comment>com.fmi.calculation.text.agent_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.CB20E10F2DB1FFD2E5DD86A206BD8F99</StringID>
 	<SourceText>Companion server unreachable (error </SourceText>
 	<TargetText>Companion server unreachable (error </TargetText>
@@ -991,6 +1292,13 @@
 	<SourceText>stdout</SourceText>
 	<TargetText>stdout</TargetText>
 	<Comment>com.fmi.calculation.text.stdout</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CF0569E8A860B3E58C6B328607D719DA</StringID>
+	<SourceText>:8765/context</SourceText>
+	<TargetText>:8765/context</TargetText>
+	<Comment>com.fmi.calculation.text.:8765/context</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1022,6 +1330,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D368224758B103B0BB2EFF5175339335</StringID>
+	<SourceText>]</SourceText>
+	<TargetText>]</TargetText>
+	<Comment>com.fmi.calculation.text.]</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.D3912A148029E1C96FF5B953CA1B057E</StringID>
 	<SourceText> Query all fields for this TO </SourceText>
 	<TargetText> Query all fields for this TO </TargetText>
@@ -1047,6 +1362,13 @@
 	<SourceText>app</SourceText>
 	<TargetText>app</TargetText>
 	<Comment>com.fmi.calculation.text.app</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D5DCDB6BA2B443002F70071DBA8AC0EE</StringID>
+	<SourceText>agentic-fm-app no responde (error </SourceText>
+	<TargetText>agentic-fm-app no responde (error </TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm-app no responde (error</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1078,10 +1400,31 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D8F7949C6C0C8313618BAB73807E1E03</StringID>
+	<SourceText>1.1.0</SourceText>
+	<TargetText>1.1.0</TargetText>
+	<Comment>com.fmi.calculation.text.1.1.0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D9A9E0F5D2E0BAFC47CEC71F53CB7597</StringID>
+	<SourceText>AGFM Agent</SourceText>
+	<TargetText>AGFM Agent</TargetText>
+	<Comment>com.fmi.calculation.text.AGFM Agent</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.DB1E47D051DC42470965C8C57488E0D2</StringID>
 	<SourceText>lastErrorLocation</SourceText>
 	<TargetText>lastErrorLocation</TargetText>
 	<Comment>com.fmi.calculation.text.lastErrorLocation</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.DB55169D5CFECBDCC91C05CC1DE72CF4</StringID>
+	<SourceText>.fmp12</SourceText>
+	<TargetText>.fmp12</TargetText>
+	<Comment>com.fmi.calculation.text..fmp12</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1106,6 +1449,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.DEA3CF9E8D9F055B574DEAD904F6BD24</StringID>
+	<SourceText>agentic-fm</SourceText>
+	<TargetText>agentic-fm</TargetText>
+	<Comment>com.fmi.calculation.text.agentic-fm</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.E0D07C4BA83637E808A383F87D16857F</StringID>
 	<SourceText>/context</SourceText>
 	<TargetText>/context</TargetText>
@@ -1117,6 +1467,20 @@
 	<SourceText>}</SourceText>
 	<TargetText>}</TargetText>
 	<Comment>com.fmi.calculation.text.}</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E2D68F5240C76FF7864FAC04AE85966F</StringID>
+	<SourceText>export</SourceText>
+	<TargetText>export</TargetText>
+	<Comment>com.fmi.calculation.text.export</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E2E1DEEE7169F633A85602FAA2ECF7DE</StringID>
+	<SourceText>Describe la tarea que quieres hacer con el guion.</SourceText>
+	<TargetText>Describe la tarea que quieres hacer con el guion.</TargetText>
+	<Comment>com.fmi.calculation.text.Describe la tarea que quieres hacer con el guion.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1152,6 +1516,13 @@
 	<SourceText>type</SourceText>
 	<TargetText>type</TargetText>
 	<Comment>com.fmi.calculation.text.type</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E8BBA4CF91F2C89BBD2F72245FD15DDF</StringID>
+	<SourceText>No se pudo guardar el snapshot (error </SourceText>
+	<TargetText>No se pudo guardar el snapshot (error </TargetText>
+	<Comment>com.fmi.calculation.text.No se pudo guardar el snapshot (error</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1211,10 +1582,45 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FB6D08BD99B42440C049EF4ABC0583B8</StringID>
+	<SourceText>folder</SourceText>
+	<TargetText>folder</TargetText>
+	<Comment>com.fmi.calculation.text.folder</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288</StringID>
 	<SourceText>layout_objects</SourceText>
 	<TargetText>layout_objects</TargetText>
 	<Comment>com.fmi.calculation.text.layout_objects</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.layout.9D72E2AAFB6E345C75FF44E903812444</StringID>
+	<SourceText>AGFM Explode</SourceText>
+	<TargetText>AGFM Explode</TargetText>
+	<Comment>com.fmi.layout.AGFM Explode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.layoutobject.805BD271E037F171956E812B23B37F3C</StringID>
+	<SourceText>agfm</SourceText>
+	<TargetText>agfm</TargetText>
+	<Comment>com.fmi.layoutobject.agfm</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.layoutobject.text.DEA3CF9E8D9F055B574DEAD904F6BD24</StringID>
+	<SourceText>agentic-fm</SourceText>
+	<TargetText>agentic-fm</TargetText>
+	<Comment>com.fmi.layoutobject.text.agentic-fm</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.172F7F1A6340A03D1BBA92F975CAD624</StringID>
+	<SourceText>AGFM Explode Solution</SourceText>
+	<TargetText>AGFM Explode Solution</TargetText>
+	<Comment>com.fmi.script.AGFM Explode Solution</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1271,6 +1677,13 @@
 	<SourceText>Get agentic-fm path</SourceText>
 	<TargetText>Get agentic-fm path</TargetText>
 	<Comment>com.fmi.script.Get agentic-fm path</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.D9A9E0F5D2E0BAFC47CEC71F53CB7597</StringID>
+	<SourceText>AGFM Agent</SourceText>
+	<TargetText>AGFM Agent</TargetText>
+	<Comment>com.fmi.script.AGFM Agent</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1414,6 +1827,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.47598652466B3D7D4669B965462ADD9E</StringID>
+	<SourceText>MARK: Run (called by the card)</SourceText>
+	<TargetText>MARK: Run (called by the card)</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK: Run (called by the card)</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.54E741E888EA09F11FDDDF4DB288D1C4</StringID>
 	<SourceText>The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</SourceText>
 	<TargetText>The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</TargetText>
@@ -1425,6 +1845,13 @@
 	<SourceText>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</SourceText>
 	<TargetText>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</TargetText>
 	<Comment>com.fmi.scriptstep.text.PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.5F2368FD7C9F84EE0E3B1876E2ACED70</StringID>
+	<SourceText>Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</SourceText>
+	<TargetText>Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</TargetText>
+	<Comment>com.fmi.scriptstep.text.Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1484,6 +1911,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.85118B106F0A01F988C946505DBE6960</StringID>
+	<SourceText>Spike: a file that is not open answers 104 the first time; one more try opens it.</SourceText>
+	<TargetText>Spike: a file that is not open answers 104 the first time; one more try opens it.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Spike: a file that is not open answers 104 the first time; one more try opens it.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.8D76B3884C7A3174925673AC5D33283E</StringID>
 	<SourceText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Prompts for task description, writes CONTEXT.json directly via file steps.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    task          — task description string<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    layout        — (optional) layout name to navigate to before generating context<CR/><CR/>  CONTEXT.json is written by the companion server at {repo_path}/agent/CONTEXT.json.<CR/><CR/>RETURNS (server mode): JSON { success, path } or { success, error }</SourceText>
 	<TargetText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Prompts for task description, writes CONTEXT.json directly via file steps.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    task          — task description string<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    layout        — (optional) layout name to navigate to before generating context<CR/><CR/>  CONTEXT.json is written by the companion server at {repo_path}/agent/CONTEXT.json.<CR/><CR/>RETURNS (server mode): JSON { success, path } or { success, error }</TargetText>
@@ -1495,6 +1929,20 @@
 	<SourceText>MARK:Execute</SourceText>
 	<TargetText>MARK:Execute</TargetText>
 	<Comment>com.fmi.scriptstep.text.MARK:Execute</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.AAAB54475350818A93CA4FA4816595C0</StringID>
+	<SourceText>MARK: Open the card</SourceText>
+	<TargetText>MARK: Open the card</TargetText>
+	<Comment>com.fmi.scriptstep.text.MARK: Open the card</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.AB96F25B04D597E3631F432A0A9D3040</StringID>
+	<SourceText>RETURNS: nothing. Progress goes to the card: agfm.progress per file { solution, state, code, message, warnings, agent_version } and agfm.done { action, ok, errors }. No dialogs once the card is open.</SourceText>
+	<TargetText>RETURNS: nothing. Progress goes to the card: agfm.progress per file { solution, state, code, message, warnings, agent_version } and agfm.done { action, ok, errors }. No dialogs once the card is open.</TargetText>
+	<Comment>com.fmi.scriptstep.text.RETURNS: nothing. Progress goes to the card: agfm.progress per file { solution, state, code, message, warnings, agent_version } and agfm.done { action, ok, errors }. No dialogs once the card is open.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1516,6 +1964,20 @@
 	<SourceText>MARK: Interactive mode</SourceText>
 	<TargetText>MARK: Interactive mode</TargetText>
 	<Comment>com.fmi.scriptstep.text.MARK: Interactive mode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.C8054D2E7E8705DDF8054286C728D3B8</StringID>
+	<SourceText>PARAMETER: JSON { action: &quot;export&quot; | &quot;check&quot;, files: [ { solution, data_source } ] }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</SourceText>
+	<TargetText>PARAMETER: JSON { action: &quot;export&quot; | &quot;check&quot;, files: [ { solution, data_source } ] }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON { action: &quot;export&quot; | &quot;check&quot;, files: [ { solution, data_source } ] }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.CA5E29BA6385F5DFDE69D3DCDAEC2D3C</StringID>
+	<SourceText>RETURNS: JSON { error, message, ... } through Exit Script. Capture the caller&apos;s error state before any other step resets it.</SourceText>
+	<TargetText>RETURNS: JSON { error, message, ... } through Exit Script. Capture the caller&apos;s error state before any other step resets it.</TargetText>
+	<Comment>com.fmi.scriptstep.text.RETURNS: JSON { error, message, ... } through Exit Script. Capture the caller&apos;s error state before any other step resets it.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1547,6 +2009,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.D779DDAAD03D7AD5B21BBB35AAE592A2</StringID>
+	<SourceText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</SourceText>
+	<TargetText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.DACA4F5122CC699F2AA346CB940137BF</StringID>
 	<SourceText>PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</SourceText>
 	<TargetText>PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</TargetText>
@@ -1568,6 +2037,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.E584EA6EBD4AE9EF6FD315A227EC431D</StringID>
+	<SourceText>PURPOSE: The add-on&apos;s one button. Without a parameter it opens the agentic-fm card (layout AGFM Explode, web viewer agfm). With a parameter it explodes or checks the files the card lists, reporting each one to the card.</SourceText>
+	<TargetText>PURPOSE: The add-on&apos;s one button. Without a parameter it opens the agentic-fm card (layout AGFM Explode, web viewer agfm). With a parameter it explodes or checks the files the card lists, reporting each one to the card.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: The add-on&apos;s one button. Without a parameter it opens the agentic-fm card (layout AGFM Explode, web viewer agfm). With a parameter it explodes or checks the files the card lists, reporting each one to the card.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.E837B9A26D9BBFA5D10947ABBBB8333E</StringID>
 	<SourceText>Check for a valid install.</SourceText>
 	<TargetText>Check for a valid install.</TargetText>
@@ -1586,6 +2062,13 @@
 	<SourceText>A service without /config (the classic companion) answers with a 404 that has no boolean &quot;success&quot; ({&quot;error&quot;: &quot;Not found&quot;}).</SourceText>
 	<TargetText>A service without /config (the classic companion) answers with a 404 that has no boolean &quot;success&quot; ({&quot;error&quot;: &quot;Not found&quot;}).</TargetText>
 	<Comment>com.fmi.scriptstep.text.A service without /config (the classic companion) answers with a 404 that has no boolean &quot;success&quot; ({&quot;error&quot;: &quot;Not found&quot;}).</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.EDEA0D720B3C71F9AB8CBAA0DFAFF14F</StringID>
+	<SourceText>Transactional scripts must not stop: no dialog in this mode.</SourceText>
+	<TargetText>Transactional scripts must not stop: no dialog in this mode.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Transactional scripts must not stop: no dialog in this mode.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>

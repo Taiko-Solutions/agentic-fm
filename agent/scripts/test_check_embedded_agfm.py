@@ -11,6 +11,8 @@ Usage:
     python3 agent/scripts/test_check_embedded_agfm.py
 """
 
+import contextlib
+import io
 import sys
 import tempfile
 import unittest
@@ -282,6 +284,88 @@ class TestAddonVersionReadability(unittest.TestCase):
         import xml.etree.ElementTree as ET
         steps = ET.fromstring('<x><Step name="Exit Script"><Calculation>"1.1"</Calculation></Step></x>').findall("Step")
         self.assertEqual(C._version_from_steps(steps), "1.1")
+
+
+def _agent_script(path, version):
+    """An exploded AGFM Agent reduced to what the check reads: Set Variable [ $version ; "x.y.z" ]."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    value = f'"{version}"' if version else "Get ( ScriptParameter )"
+    path.write_text('<fmxmlsnippet type="FMObjectList"><Step enable="True" id="141" name="Set Variable">'
+                    f'<Value><Calculation><![CDATA[{value}]]></Calculation></Value>'
+                    '<Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$version</Name></Step>'
+                    '</fmxmlsnippet>', encoding="utf-8")
+
+
+class TestAgentVersion(unittest.TestCase):
+    HR_TOOL = Path(__file__).resolve().parent / "snippet_to_hr.py"
+    AGENT = "AGFM Agent - ID 24.xml"
+
+    def _entries(self, layout, agent_version="1.0.0"):
+        """layout: {solution: agent version | None (no agent) | "" (unreadable)}; every solution carries the add-on."""
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp) / "scripts"
+            for solution, version in layout.items():
+                _snippet_script(scripts / solution / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml", '"1.1.0"')
+                if version is not None:
+                    _agent_script(scripts / solution / "agentic-fm - ID 1" / self.AGENT, version or None)
+            with tempfile.TemporaryDirectory() as work:
+                entries = C._agent_entries(scripts, Path("/unused"), self.HR_TOOL, Path(work), agent_version)
+        return {e["name"]: e for e in entries}
+
+    def test_reports_the_agent_version(self):
+        entries = self._entries({"Main": "1.0.0"})
+        self.assertEqual(entries["AGFM Agent (Main)"]["status"], "CURRENT")
+        self.assertEqual(entries["AGFM Agent (Main)"]["kind"], "agent")
+
+    def test_an_older_agent_is_outdated_and_says_from_which_version(self):
+        entry = self._entries({"Second": "0.9.0"})["AGFM Agent (Second)"]
+        self.assertEqual(entry["status"], "OUTDATED")
+        self.assertEqual(entry["diff"], "0.9.0 \u2192 1.0.0")
+
+    def test_a_solution_with_the_add_on_but_no_agent_is_missing(self):
+        self.assertEqual(self._entries({"Main": None})["AGFM Agent (Main)"]["status"], "MISSING")
+
+    def test_an_agent_whose_version_is_not_a_literal_is_unreadable(self):
+        self.assertEqual(self._entries({"Odd": ""})["AGFM Agent (Odd)"]["status"], "UNREADABLE")
+
+    def test_a_solution_with_only_the_agent_is_reported_too(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            scripts = Path(tmp) / "scripts"
+            _agent_script(scripts / "Secondary" / "agentic-fm - ID 1" / self.AGENT, "1.0.0")
+            with tempfile.TemporaryDirectory() as work:
+                entries = C._agent_entries(scripts, Path("/unused"), self.HR_TOOL, Path(work), "1.0.0")
+        self.assertEqual([e["status"] for e in entries], ["CURRENT"])
+
+    def test_without_an_agent_version_there_is_nothing_to_compare(self):
+        self.assertEqual(self._entries({"Main": "1.0.0"}, agent_version=None), {})
+
+    def test_check_reports_agents_and_an_outdated_one_is_drift(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = TestManifestScope()._repo(tmp, True)
+            manifest = root / "filemaker" / "addon" / "manifest.json"
+            manifest.write_text('{"name": "agentic-fm", "version": "1.0.0", "agent_version": "1.0.0", '
+                                '"scripts": ["AGFM Version"], "custom_functions": []}', encoding="utf-8")
+            (root / "agent" / "scripts").symlink_to(Path(__file__).resolve().parent)    # the real HR tool
+            scripts = root / "agent" / "xml_parsed" / "scripts"
+            _agent_script(scripts / "Demo" / "agentic-fm - ID 1" / self.AGENT, "0.9.0")
+            report = C.check(root)
+            self.assertEqual({o["name"]: o["status"] for o in report["objects"]}["AGFM Agent (Demo)"], "OUTDATED")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(C.main(["--repo-root", str(root)]), 1)
+                _agent_script(scripts / "Demo" / "agentic-fm - ID 1" / self.AGENT, "1.0.0")
+                self.assertEqual(C.main(["--repo-root", str(root)]), 0)
+
+    def test_a_missing_agent_is_advisory_and_does_not_change_the_exit_code(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = TestManifestScope()._repo(tmp, True)
+            (root / "filemaker" / "addon" / "manifest.json").write_text(
+                '{"name": "agentic-fm", "version": "1.0.0", "agent_version": "1.0.0", '
+                '"scripts": ["AGFM Version"], "custom_functions": []}', encoding="utf-8")
+            (root / "agent" / "scripts").symlink_to(Path(__file__).resolve().parent)
+            report = C.check(root)
+            self.assertEqual({o["name"]: o["status"] for o in report["objects"]}["AGFM Agent (Demo)"], "MISSING")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(C.main(["--repo-root", str(root)]), 0)
 
 
 if __name__ == "__main__":

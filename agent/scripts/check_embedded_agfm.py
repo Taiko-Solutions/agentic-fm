@@ -63,7 +63,8 @@ Options:
 
 Exit codes:
     0  all embedded objects match, OR no agentic-fm objects were found
-    1  at least one object is STALE or MISSING (unless --advisory)
+    1  at least one object is STALE, MISSING or UNREADABLE, or an OUTDATED / UNREADABLE AGFM Agent
+       (a MISSING AGFM Agent is only reported) (unless --advisory)
 """
 
 import argparse
@@ -471,6 +472,14 @@ def _canonical_steps(reference_path):
     return best
 
 
+DRIFT = ("STALE", "MISSING", "UNREADABLE", "OUTDATED")   # OUTDATED: an older AGFM Agent, like a STALE add-on
+
+
+def _is_drift(obj):
+    """A missing AGFM Agent is advisory (clones that keep the 1.0 add-on or the pasted bundle have none)."""
+    if obj["kind"] == "agent" and obj["status"] == "MISSING":
+        return False
+    return obj["status"] in DRIFT
 _VERSION_RE = re.compile(r'^"(\d+(?:\.\d+)+)"$')
 ADDON_VERSION_SCRIPT = "AGFM Version"
 
@@ -509,6 +518,41 @@ def _addon_entries(scripts_dir, converter, bundle_version, canonical_names):
     return entries
 
 
+AGENT_SCRIPT = "AGFM Agent"
+# The app's regex (core/addon_package.py) on its stored body, plus the optional "Value:" label snippet_to_hr.py prints.
+_AGENT_VERSION_RE = re.compile(r'\$version(?:\[1\])?\s*;\s*(?:Value:\s*)?"(\d+(?:\.\d+)+)"')
+
+
+def _agent_entries(scripts_dir, converter, hr_tool, workdir, agent_version):
+    """One entry per exploded solution that has AGFM Agent (the one script every secondary file carries) or the
+    add-on (which must carry it): CURRENT / OUTDATED (older literal than the manifest's agent_version; the diff
+    says from which) / MISSING (add-on without the script) / UNREADABLE (no `$version ; "x.y.z"` literal)."""
+    if agent_version is None or not scripts_dir.is_dir():
+        return []
+    entries = []
+    for solution in sorted(p for p in scripts_dir.iterdir() if p.is_dir()):
+        files = list(solution.rglob("*.xml"))
+        agent_file = next((f for f in files if _key(_stem_without_id(f)) == _key(AGENT_SCRIPT)), None)
+        has_addon = any(_key(_stem_without_id(f)) == _key(ADDON_VERSION_SCRIPT) for f in files)
+        if agent_file is None and not has_addon:
+            continue
+        diff = ""
+        if agent_file is None:
+            status = "MISSING"
+        else:
+            steps = _steps_from_embedded(agent_file, converter)
+            text = _hr_from_steps(steps, hr_tool, workdir) if steps is not None else None
+            match = _AGENT_VERSION_RE.search(text or "")
+            if match is None:
+                status = "UNREADABLE"
+            elif match.group(1) == agent_version:
+                status = "CURRENT"
+            else:
+                status, diff = "OUTDATED", f"{match.group(1)} \u2192 {agent_version}"
+        entries.append({"name": f"{AGENT_SCRIPT} ({solution.name})", "kind": "agent", "status": status, "diff": diff})
+    return entries
+
+
 def _manifest_scripts(repo_root):
     """Scripts of the agentic-fm add-on (filemaker/addon/manifest.json), or None without a manifest."""
     path = repo_root / "filemaker" / "addon" / "manifest.json"
@@ -518,12 +562,23 @@ def _manifest_scripts(repo_root):
         return None
 
 
+def _manifest_agent_version(repo_root):
+    """The AGFM Agent version of the current add-on (manifest.json agent_version), or None."""
+    path = repo_root / "filemaker" / "addon" / "manifest.json"
+    try:
+        value = json.loads(path.read_text(encoding="utf-8")).get("agent_version")
+    except (OSError, ValueError, AttributeError):
+        return None
+    return value if isinstance(value, str) else None
+
+
 def check(repo_root):
     """Compare embedded objects against the canonical reference.
 
     Returns a dict with:
       objects           [{name, kind, status, diff}]  status in
                         OK / OK~ / STALE / MISSING / UNREADABLE
+                        (AGFM Agent per solution: CURRENT / OUTDATED / MISSING / UNREADABLE)
       checked           True when at least one embedded object was recognised
       explode_present   True when an explode exists on disk. explode_present
                         without checked means the explode could not be read --
@@ -553,6 +608,8 @@ def check(repo_root):
     with tempfile.TemporaryDirectory(prefix="agfm-freshness-") as tmp:
         workdir = Path(tmp)
         for name in sorted(canonical):
+            if name == AGENT_SCRIPT:
+                continue          # judged per solution by its $version literal (the bundle holds a placeholder)
             embedded_path = embedded_index.get(_key(name))
             diff = ""
             if embedded_path is None and name in outside_addon:
@@ -588,6 +645,9 @@ def check(repo_root):
                         "status": status, "diff": ""})
 
     results.extend(addon)
+    with tempfile.TemporaryDirectory(prefix="agfm-agent-") as tmp:
+        results.extend(_agent_entries(scripts_dir, converter, hr_tool, Path(tmp),
+                                      _manifest_agent_version(repo_root)))
 
     any_embedded = bool(embedded_index) or _embedded_context_text(xml_parsed) is not None
     return {"objects": results, "checked": any_embedded,
@@ -609,12 +669,12 @@ def _print_table(report, show_diff=False):
             print("No agentic-fm objects found in the exploded solution — nothing to check.")
             print("(Run 'Explode XML' on a solution that has agentic-fm installed to enable this check.)")
         return
-    drift = [o for o in objs if o["status"] in ("STALE", "MISSING", "UNREADABLE")]
+    drift = [o for o in objs if _is_drift(o)]
     noise = [o for o in objs if o["status"] == "OK~"]
     width = max((len(o["name"]) for o in objs), default=4)
     print("Embedded agentic-fm code vs bundled reference:\n")
     for o in objs:
-        mark = {"OK": "✓", "OK~": "✓", "STALE": "✗",
+        mark = {"OK": "✓", "OK~": "✓", "CURRENT": "✓", "STALE": "✗", "OUTDATED": "✗",
                 "MISSING": "•", "UNREADABLE": "?", "PASTED": "·"}.get(o["status"], "?")
         print(f"  {mark} {o['name']:<{width}}  {o['status']:<10} ({o['kind']})")
     print()
@@ -627,6 +687,9 @@ def _print_table(report, show_diff=False):
         print("   Context custom function into this solution from filemaker/ to resync.")
         print("   Review the diff first (--diff): an embedded object may carry a")
         print("   deliberate local change that a blind re-paste would destroy.")
+        if any(o["kind"] == "agent" for o in drift):
+            print("   AGFM Agent: copy it again from the app (\u00abCopiar pasos (actualizar)\u00bb), select all its "
+                  "steps in the file and paste.")
         if any(o["kind"] == "addon" for o in drift):
             print("   Outdated add-on: uninstall it and install the current package "
                   "(filemaker/addon/agentic-fm.fmaddon).")
@@ -665,8 +728,7 @@ def main(argv=None):
     if not report["checked"]:
         # An unreadable explode is a failure; a missing one is not.
         return 1 if report.get("explode_present") else 0
-    drift = any(o["status"] in ("STALE", "MISSING", "UNREADABLE")
-                for o in report["objects"])
+    drift = any(_is_drift(o) for o in report["objects"])
     return 1 if drift else 0
 
 

@@ -123,7 +123,7 @@
         <Text>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Text>
       </Step>
       <Step enable="True" id="103" name="Exit Script">
-        <Calculation><![CDATA["1.0.0"]]></Calculation>
+        <Calculation><![CDATA["1.1.0"]]></Calculation>
       </Step>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="23" name="AGFM Choose Folder">
@@ -422,6 +422,703 @@
       <Step enable="True" id="70" name="End If"/>
       <Step enable="True" id="103" name="Exit Script">
         <Calculation><![CDATA[$response]]></Calculation>
+      </Step>
+    </Script>
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="25" name="AGFM Explode Solution">
+      <Step enable="True" id="89" name="# (comment)">
+        <Text>PURPOSE: The add-on's one button. Without a parameter it opens the agentic-fm card (layout AGFM Explode, web viewer agfm). With a parameter it explodes or checks the files the card lists, reporting each one to the card.</Text>
+      </Step>
+      <Step enable="True" id="89" name="# (comment)">
+        <Text>PARAMETER: JSON { action: "export" | "check", files: [ { solution, data_source } ] }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</Text>
+      </Step>
+      <Step enable="True" id="89" name="# (comment)">
+        <Text>RETURNS: nothing. Progress goes to the card: agfm.progress per file { solution, state, code, message, warnings, agent_version } and agfm.done { action, ok, errors }. No dialogs once the card is open.</Text>
+      </Step>
+      <Step enable="True" id="86" name="Set Error Capture">
+        <Set state="True"/>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[Get ( ScriptParameter )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$p</Name>
+      </Step>
+      <Step enable="True" id="68" name="If">
+        <Restore state="False"/>
+        <Calculation><![CDATA[IsEmpty ( $p )]]></Calculation>
+      </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>MARK: Open the card</Text>
+        </Step>
+        <Step enable="True" id="1" name="Perform Script">
+          <Script id="21" name="AGFM Start"/>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$start</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[not JSONGetElement ( $start ; "ok" )]]></Calculation>
+        </Step>
+          <Step enable="True" id="87" name="Show Custom Dialog">
+            <Title>
+              <Calculation><![CDATA["agentic-fm"]]></Calculation>
+            </Title>
+            <Message>
+              <Calculation><![CDATA["No se pudo iniciar agentic-fm: " & Case (
+	JSONGetElement ( $start ; "error" ) = "no_service" ; "agentic-fm-app no responde: ábrela y vuelve a intentarlo." ;
+	JSONGetElement ( $start ; "error" ) = "unknown_solution" or JSONGetElement ( $start ; "error" ) = "ambiguous_solution" ; "Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon." ;
+	JSONGetElement ( $start ; "error" )
+)]]></Calculation>
+            </Message>
+            <Buttons>
+              <Button CommitState="True">
+                <Calculation><![CDATA["OK"]]></Calculation>
+              </Button>
+            </Buttons>
+          </Step>
+          <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="122" name="New Window">
+          <LayoutDestination value="SelectedLayout"/>
+          <Name>
+            <Calculation><![CDATA["agentic-fm"]]></Calculation>
+          </Name>
+          <Height>
+            <Calculation><![CDATA[640]]></Calculation>
+          </Height>
+          <Width>
+            <Calculation><![CDATA[520]]></Calculation>
+          </Width>
+          <DistanceFromTop>
+            <Calculation><![CDATA[]]></Calculation>
+          </DistanceFromTop>
+          <DistanceFromLeft>
+            <Calculation><![CDATA[]]></Calculation>
+          </DistanceFromLeft>
+          <NewWndStyles DimParentWindow="Yes" Toolbars="No" MenuBar="No" Style="Card" Close="Yes" Minimize="No" Maximize="No" Resize="No" Styles="3222339600"/>
+          <Layout id="0" name=""></Layout>
+        </Step>
+        <Step enable="True" id="6" name="Go to Layout">
+          <LayoutDestination value="LayoutNameByCalc"/>
+          <Layout id="0" name="">
+            <Calculation><![CDATA["AGFM Explode"]]></Calculation>
+          </Layout>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$layoutError</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$layoutError ≠ 0]]></Calculation>
+        </Step>
+          <Step enable="True" id="87" name="Show Custom Dialog">
+            <Title>
+              <Calculation><![CDATA["agentic-fm"]]></Calculation>
+            </Title>
+            <Message>
+              <Calculation><![CDATA["Falta el layout AGFM Explode: instala el add-on agentic-fm 1.1 en este archivo."]]></Calculation>
+            </Message>
+            <Buttons>
+              <Button CommitState="True">
+                <Calculation><![CDATA["OK"]]></Calculation>
+              </Button>
+            </Buttons>
+          </Step>
+          <Step enable="True" id="121" name="Close Window">
+            <LimitToWindowsOfCurrentFile state="True"/>
+            <Window value="Current"/>
+          </Step>
+          <Step enable="True" id="103" name="Exit Script"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="146" name="Set Web Viewer">
+          <Action value="GoToURL"/>
+          <ObjectName>
+            <Calculation><![CDATA["agfm"]]></Calculation>
+          </ObjectName>
+          <URL custom="True">
+            <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/addon/card?file=" & GetAsURLEncoded ( Get ( FileName ) )]]></Calculation>
+          </URL>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script"/>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="89" name="# (comment)">
+        <Text>MARK: Run (called by the card)</Text>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[JSONGetElement ( $p ; "action" )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$action</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[JSONGetElement ( $p ; "files" )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$files</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[Get ( WindowName )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$cardWindow</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[""]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$startError</Name>
+      </Step>
+      <Step enable="True" id="68" name="If">
+        <Restore state="False"/>
+        <Calculation><![CDATA[IsEmpty ( $$AGENTIC.FM )]]></Calculation>
+      </Step>
+        <Step enable="True" id="1" name="Perform Script">
+          <Script id="21" name="AGFM Start"/>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$start</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[not JSONGetElement ( $start ; "ok" )]]></Calculation>
+        </Step>
+          <Step enable="True" id="141" name="Set Variable">
+            <Value>
+              <Calculation><![CDATA[JSONGetElement ( $start ; "error" )]]></Calculation>
+            </Value>
+            <Repetition>
+              <Calculation><![CDATA[1]]></Calculation>
+            </Repetition>
+            <Name>$startError</Name>
+          </Step>
+        <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[Get ( TemporaryPath ) & "agfm/" & Get ( UUID ) & "/"]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$runFolder</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[ValueCount ( JSONListKeys ( $files ; "" ) )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$count</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[0]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$i</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[0]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$ok</Name>
+      </Step>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[0]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$errors</Name>
+      </Step>
+      <Step enable="True" id="71" name="Loop">
+        <Restore state="False"/>
+        <FlushType value="Always"/>
+      </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[$i + 1]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$i</Name>
+        </Step>
+        <Step enable="True" id="72" name="Exit Loop If">
+          <Calculation><![CDATA[$i > $count]]></Calculation>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONGetElement ( $files ; "[" & $i - 1 & "]" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$item</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONGetElement ( $item ; "solution" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$solution</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[If ( JSONGetElementType ( $item ; "data_source" ) = JSONString ; JSONGetElement ( $item ; "data_source" ) ; "" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$dataSource</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONSetElement ( "{}" ;
+          	[ "solution" ; $solution ; JSONString ] ;
+          	[ "state" ; "exporting" ; JSONString ]
+          )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$event</Name>
+        </Step>
+        <Step enable="True" id="123" name="Select Window">
+          <LimitToWindowsOfCurrentFile state="True"/>
+          <Window value="ByName"/>
+          <Name>
+            <Calculation><![CDATA[$cardWindow]]></Calculation>
+          </Name>
+        </Step>
+        <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+          <ObjectName>
+            <Calculation><![CDATA["agfm"]]></Calculation>
+          </ObjectName>
+          <FunctionName>
+            <Calculation><![CDATA["agfm.progress"]]></Calculation>
+          </FunctionName>
+          <Parameters Count="1">
+            <P>
+              <Calculation><![CDATA[$event]]></Calculation>
+            </P>
+          </Parameters>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Substitute ( $solution ; ".fmp12" ; "" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$base</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[not IsEmpty ( FilterValues ( Lower ( DatabaseNames ) ; Lower ( $base ) & ¶ & Lower ( $base ) & ".fmp12" ) )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$wasOpen</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$action = "export" and not IsEmpty ( $startError )]]></Calculation>
+        </Step>
+          <Step enable="True" id="141" name="Set Variable">
+            <Value>
+              <Calculation><![CDATA[JSONSetElement ( "{}" ;
+            	[ "solution" ; $solution ; JSONString ] ;
+            	[ "state" ; "error" ; JSONString ] ;
+            	[ "message" ; $startError ; JSONString ]
+            )]]></Calculation>
+            </Value>
+            <Repetition>
+              <Calculation><![CDATA[1]]></Calculation>
+            </Repetition>
+            <Name>$event</Name>
+          </Step>
+        <Step enable="True" id="69" name="Else">
+          <Restore state="False"/>
+        </Step>
+          <Step enable="True" id="141" name="Set Variable">
+            <Value>
+              <Calculation><![CDATA[If ( IsEmpty ( $dataSource ) ; "AGFM Agent" ; $dataSource & "::AGFM Agent" )]]></Calculation>
+            </Value>
+            <Repetition>
+              <Calculation><![CDATA[1]]></Calculation>
+            </Repetition>
+            <Name>$target</Name>
+          </Step>
+          <Step enable="True" id="141" name="Set Variable">
+            <Value>
+              <Calculation><![CDATA[If ( $action = "check" ;
+            	JSONSetElement ( "{}" ; [ "mode" ; "version" ; JSONString ] ) ;
+            	JSONSetElement ( "{}" ;
+            		[ "mode" ; "export" ; JSONString ] ;
+            		[ "folder" ; $runFolder ; JSONString ]
+            	)
+            )]]></Calculation>
+            </Value>
+            <Repetition>
+              <Calculation><![CDATA[1]]></Calculation>
+            </Repetition>
+            <Name>$agentParam</Name>
+          </Step>
+          <Step enable="True" id="1" name="Perform Script">
+            <Calculated>
+              <Calculation><![CDATA[$target]]></Calculation>
+            </Calculated>
+            <Calculation><![CDATA[$agentParam]]></Calculation>
+          </Step>
+          <Step enable="True" id="141" name="Set Variable">
+            <Value>
+              <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+            </Value>
+            <Repetition>
+              <Calculation><![CDATA[1]]></Calculation>
+            </Repetition>
+            <Name>$callError</Name>
+          </Step>
+          <Step enable="True" id="141" name="Set Variable">
+            <Value>
+              <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
+            </Value>
+            <Repetition>
+              <Calculation><![CDATA[1]]></Calculation>
+            </Repetition>
+            <Name>$result</Name>
+          </Step>
+          <Step enable="True" id="123" name="Select Window">
+            <LimitToWindowsOfCurrentFile state="True"/>
+            <Window value="ByName"/>
+            <Name>
+              <Calculation><![CDATA[$cardWindow]]></Calculation>
+            </Name>
+          </Step>
+          <Step enable="True" id="89" name="# (comment)">
+            <Text>Spike: a file that is not open answers 104 the first time; one more try opens it.</Text>
+          </Step>
+          <Step enable="True" id="68" name="If">
+            <Restore state="False"/>
+            <Calculation><![CDATA[$callError = 104 and not $wasOpen]]></Calculation>
+          </Step>
+            <Step enable="True" id="1" name="Perform Script">
+              <Calculated>
+                <Calculation><![CDATA[$target]]></Calculation>
+              </Calculated>
+              <Calculation><![CDATA[$agentParam]]></Calculation>
+            </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$callError</Name>
+            </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$result</Name>
+            </Step>
+            <Step enable="True" id="123" name="Select Window">
+              <LimitToWindowsOfCurrentFile state="True"/>
+              <Window value="ByName"/>
+              <Name>
+                <Calculation><![CDATA[$cardWindow]]></Calculation>
+              </Name>
+            </Step>
+          <Step enable="True" id="70" name="End If"/>
+          <Step enable="True" id="68" name="If">
+            <Restore state="False"/>
+            <Calculation><![CDATA[$callError ≠ 0]]></Calculation>
+          </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[JSONSetElement ( "{}" ;
+              	[ "solution" ; $solution ; JSONString ] ;
+              	[ "state" ; "error" ; JSONString ] ;
+              	[ "code" ; $callError ; JSONNumber ] ;
+              	[ "message" ; "" ; JSONString ]
+              )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$event</Name>
+            </Step>
+          <Step enable="True" id="125" name="Else If">
+            <Restore state="False"/>
+            <Calculation><![CDATA[JSONGetElementType ( $result ; "error" ) ≠ JSONNumber]]></Calculation>
+          </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[JSONSetElement ( "{}" ;
+              	[ "solution" ; $solution ; JSONString ] ;
+              	[ "state" ; "error" ; JSONString ] ;
+              	[ "message" ; "AGFM Agent no devolvió resultado" ; JSONString ]
+              )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$event</Name>
+            </Step>
+          <Step enable="True" id="125" name="Else If">
+            <Restore state="False"/>
+            <Calculation><![CDATA[JSONGetElement ( $result ; "error" ) ≠ 0]]></Calculation>
+          </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[JSONSetElement ( "{}" ;
+              	[ "solution" ; $solution ; JSONString ] ;
+              	[ "state" ; "error" ; JSONString ] ;
+              	[ "code" ; JSONGetElement ( $result ; "error" ) ; JSONNumber ] ;
+              	[ "message" ; JSONGetElement ( $result ; "message" ) ; JSONString ]
+              )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$event</Name>
+            </Step>
+          <Step enable="True" id="125" name="Else If">
+            <Restore state="False"/>
+            <Calculation><![CDATA[$action = "check"]]></Calculation>
+          </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[JSONSetElement ( "{}" ;
+              	[ "solution" ; $solution ; JSONString ] ;
+              	[ "state" ; "ok" ; JSONString ] ;
+              	[ "agent_version" ; JSONGetElement ( $result ; "version" ) ; JSONString ]
+              )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$event</Name>
+            </Step>
+          <Step enable="True" id="69" name="Else">
+            <Restore state="False"/>
+          </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[JSONSetElement ( "{}" ;
+              	[ "solution_name" ; JSONGetElement ( $result ; "file" ) ; JSONString ] ;
+              	[ "export_file_path" ; JSONGetElement ( $result ; "path" ) ; JSONString ] ;
+              	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ] ;
+              	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ]
+              )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$payload</Name>
+            </Step>
+            <Step enable="True" id="160" name="Insert from URL">
+              <NoInteract state="True"/>
+              <DontEncodeURL state="False"/>
+              <SelectAll state="True"/>
+              <VerifySSLCertificates state="False"/>
+              <CURLOptions>
+                <Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation>
+              </CURLOptions>
+              <Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/explode"]]></Calculation>
+              <Text/>
+              <Field>$response</Field>
+            </Step>
+            <Step enable="True" id="141" name="Set Variable">
+              <Value>
+                <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+              </Value>
+              <Repetition>
+                <Calculation><![CDATA[1]]></Calculation>
+              </Repetition>
+              <Name>$httpError</Name>
+            </Step>
+            <Step enable="True" id="123" name="Select Window">
+              <LimitToWindowsOfCurrentFile state="True"/>
+              <Window value="ByName"/>
+              <Name>
+                <Calculation><![CDATA[$cardWindow]]></Calculation>
+              </Name>
+            </Step>
+            <Step enable="True" id="68" name="If">
+              <Restore state="False"/>
+              <Calculation><![CDATA[$httpError ≠ 0]]></Calculation>
+            </Step>
+              <Step enable="True" id="141" name="Set Variable">
+                <Value>
+                  <Calculation><![CDATA[JSONSetElement ( "{}" ;
+                	[ "solution" ; $solution ; JSONString ] ;
+                	[ "state" ; "error" ; JSONString ] ;
+                	[ "message" ; "agentic-fm-app no responde" ; JSONString ]
+                )]]></Calculation>
+                </Value>
+                <Repetition>
+                  <Calculation><![CDATA[1]]></Calculation>
+                </Repetition>
+                <Name>$event</Name>
+              </Step>
+            <Step enable="True" id="125" name="Else If">
+              <Restore state="False"/>
+              <Calculation><![CDATA[JSONGetElement ( $response ; "success" ) = 1]]></Calculation>
+            </Step>
+              <Step enable="True" id="141" name="Set Variable">
+                <Value>
+                  <Calculation><![CDATA[JSONSetElement ( "{}" ;
+                	[ "solution" ; $solution ; JSONString ] ;
+                	[ "state" ; "ok" ; JSONString ] ;
+                	[ "warnings" ; If ( JSONGetElementType ( $response ; "warnings" ) = JSONArray ; JSONGetElement ( $response ; "warnings" ) ; "[]" ) ; JSONRaw ] ;
+                	[ "agent_version" ; JSONGetElement ( $result ; "version" ) ; JSONString ]
+                )]]></Calculation>
+                </Value>
+                <Repetition>
+                  <Calculation><![CDATA[1]]></Calculation>
+                </Repetition>
+                <Name>$event</Name>
+              </Step>
+            <Step enable="True" id="69" name="Else">
+              <Restore state="False"/>
+            </Step>
+              <Step enable="True" id="141" name="Set Variable">
+                <Value>
+                  <Calculation><![CDATA[JSONSetElement ( "{}" ;
+                	[ "solution" ; $solution ; JSONString ] ;
+                	[ "state" ; "error" ; JSONString ] ;
+                	[ "message" ; If ( IsEmpty ( JSONGetElement ( $response ; "stderr" ) ) ; JSONGetElement ( $response ; "error" ) ; JSONGetElement ( $response ; "stderr" ) ) ; JSONString ]
+                )]]></Calculation>
+                </Value>
+                <Repetition>
+                  <Calculation><![CDATA[1]]></Calculation>
+                </Repetition>
+                <Name>$event</Name>
+              </Step>
+            <Step enable="True" id="70" name="End If"/>
+          <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[$ok + If ( JSONGetElement ( $event ; "state" ) = "ok" ; 1 ; 0 )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$ok</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[$errors + If ( JSONGetElement ( $event ; "state" ) = "error" ; 1 ; 0 )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$errors</Name>
+        </Step>
+        <Step enable="True" id="123" name="Select Window">
+          <LimitToWindowsOfCurrentFile state="True"/>
+          <Window value="ByName"/>
+          <Name>
+            <Calculation><![CDATA[$cardWindow]]></Calculation>
+          </Name>
+        </Step>
+        <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+          <ObjectName>
+            <Calculation><![CDATA["agfm"]]></Calculation>
+          </ObjectName>
+          <FunctionName>
+            <Calculation><![CDATA["agfm.progress"]]></Calculation>
+          </FunctionName>
+          <Parameters Count="1">
+            <P>
+              <Calculation><![CDATA[$event]]></Calculation>
+            </P>
+          </Parameters>
+        </Step>
+      <Step enable="True" id="73" name="End Loop"/>
+      <Step enable="True" id="141" name="Set Variable">
+        <Value>
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+        	[ "action" ; $action ; JSONString ] ;
+        	[ "ok" ; $ok ; JSONNumber ] ;
+        	[ "errors" ; $errors ; JSONNumber ]
+        )]]></Calculation>
+        </Value>
+        <Repetition>
+          <Calculation><![CDATA[1]]></Calculation>
+        </Repetition>
+        <Name>$event</Name>
+      </Step>
+      <Step enable="True" id="123" name="Select Window">
+        <LimitToWindowsOfCurrentFile state="True"/>
+        <Window value="ByName"/>
+        <Name>
+          <Calculation><![CDATA[$cardWindow]]></Calculation>
+        </Name>
+      </Step>
+      <Step enable="True" id="175" name="Perform JavaScript in Web Viewer">
+        <ObjectName>
+          <Calculation><![CDATA["agfm"]]></Calculation>
+        </ObjectName>
+        <FunctionName>
+          <Calculation><![CDATA["agfm.done"]]></Calculation>
+        </FunctionName>
+        <Parameters Count="1">
+          <P>
+            <Calculation><![CDATA[$event]]></Calculation>
+          </P>
+        </Parameters>
       </Step>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="3" name="Explode XML">
@@ -1106,6 +1803,131 @@
       <Step enable="True" id="89" name="# (comment)"/>
       <Step enable="True" id="103" name="Exit Script"/>
       <Step enable="True" id="89" name="# (comment)"/>
+    </Script>
+    <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="24" name="AGFM Agent">
+      <Step enable="True" id="89" name="# (comment)"><Text>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</Text></Step>
+      <Step enable="True" id="89" name="# (comment)"><Text>RETURNS: JSON { error, message, ... } through Exit Script. Capture the caller's error state before any other step resets it.</Text></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$callerError</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastErrorLocation )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$callerErrorLocation</Name></Step>
+      <Step enable="True" id="86" name="Set Error Capture"><Set state="True"/></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA["1.0.0"]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$version</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( ScriptParameter )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$p</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[If ( IsEmpty ( $p ) ; "push" ; JSONGetElement ( $p ; "mode" ) )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$mode</Name></Step>
+      <Step enable="True" id="89" name="# (comment)"/>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$mode = "version"]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; 0 ; JSONNumber ] ;
+	[ "version" ; $version ; JSONString ] ;
+	[ "file" ; Get ( FileName ) ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="125" name="Else If"><Restore state="False"/><Calculation><![CDATA[$mode = "export"]]></Calculation></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $p ; "folder" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$folder</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[IsEmpty ( $folder )]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; -1 ; JSONNumber ] ;
+	[ "message" ; "export needs a folder" ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[$folder & Get ( FileName ) & ".xml"]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$path</Name></Step>
+      <Step enable="True" id="190" name="Create Data File"><CreateDirectories state="True"/><UniversalPathList>$path</UniversalPathList></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( CurrentTimeUTCMilliseconds )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$start</Name></Step>
+      <Step enable="True" id="3" name="Save a Copy as XML"><Option state="False"/><UniversalPathList>$path</UniversalPathList><Calculation><![CDATA[""]]></Calculation></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$saveError</Name></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; $saveError ; JSONNumber ] ;
+	[ "message" ; If ( $saveError = 0 ; "" ; "Save a Copy as XML failed (error " & $saveError & ")" ) ; JSONString ] ;
+	[ "file" ; Get ( FileName ) ; JSONString ] ;
+	[ "path" ; ConvertFromFileMakerPath ( $path ; 1 ) ; JSONString ] ;
+	[ "duration" ; ( Get ( CurrentTimeUTCMilliseconds ) - $start ) / 1000 ; JSONNumber ] ;
+	[ "version" ; $version ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="125" name="Else If"><Restore state="False"/><Calculation><![CDATA[$mode = "debug"]]></Calculation></Step>
+      <Step enable="True" id="89" name="# (comment)"><Text>Transactional scripts must not stop: no dialog in this mode.</Text></Step>
+      <Step enable="True" id="160" name="Insert from URL"><NoInteract state="True"/><DontEncodeURL state="True"/><SelectAll state="True"/><VerifySSLCertificates state="False"/><CURLOptions><Calculation><![CDATA["--max-time 3"]]></Calculation></CURLOptions><Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/config?file=" & GetAsURLEncoded ( Get ( FileName ) )]]></Calculation><Text/><Field>$config</Field></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$httpError</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[$httpError = 0 and JSONGetElement ( $config ; "success" ) = 1]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$configOk</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "label" ; JSONGetElement ( $p ; "label" ) ; JSONString ] ;
+	[ "vars" ; JSONGetElement ( $p ; "vars" ) ; JSONRaw ] ;
+	[ "timestamp" ; Get ( CurrentTimestamp ) ; JSONString ] ;
+	[ "lastError" ; $callerError ; JSONNumber ] ;
+	[ "lastErrorLocation" ; $callerErrorLocation ; JSONString ]
+)]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$payload</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$configOk]]></Calculation></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONSetElement ( $payload ;
+	[ "repo_path" ; JSONGetElement ( $config ; "repo_posix" ) ; JSONString ]
+)]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$payload</Name></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="160" name="Insert from URL"><NoInteract state="True"/><DontEncodeURL state="False"/><SelectAll state="True"/><VerifySSLCertificates state="False"/><CURLOptions><Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation></CURLOptions><Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/debug"]]></Calculation><Text/><Field>$response</Field></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$httpError</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[$httpError = 0 and JSONGetElement ( $response ; "success" ) = 1]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$ok</Name></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; If ( $ok ; 0 ; If ( $httpError ≠ 0 ; $httpError ; -1 ) ) ; JSONNumber ] ;
+	[ "message" ; If ( $ok ; "" ; If ( $httpError ≠ 0 ; "agentic-fm-app no responde (error " & $httpError & ")" ; JSONGetElement ( $response ; "error" ) ) ) ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="125" name="Else If"><Restore state="False"/><Calculation><![CDATA[$mode = "context" or $mode = "push"]]></Calculation></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$mode = "push"]]></Calculation></Step>
+      <Step enable="True" id="160" name="Insert from URL"><NoInteract state="True"/><DontEncodeURL state="True"/><SelectAll state="True"/><VerifySSLCertificates state="False"/><CURLOptions><Calculation><![CDATA["--max-time 3"]]></Calculation></CURLOptions><Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/config?file=" & GetAsURLEncoded ( Get ( FileName ) )]]></Calculation><Text/><Field>$config</Field></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$httpError</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[$httpError = 0 and JSONGetElement ( $config ; "success" ) = 1]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$configOk</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[not $configOk]]></Calculation></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $config ; "error" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$reason</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Case ( $reason = "unknown_solution" or $reason = "ambiguous_solution" ; "Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon." ; "agentic-fm-app no responde. Ábrela y vuelve a intentarlo." )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$message</Name></Step>
+      <Step enable="True" id="87" name="Show Custom Dialog"><Title><Calculation><![CDATA["agentic-fm"]]></Calculation></Title><Message><Calculation><![CDATA[$message]]></Calculation></Message><Buttons><Button CommitState="True"><Calculation><![CDATA["OK"]]></Calculation></Button><Button CommitState="False"/><Button CommitState="False"/></Buttons></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; If ( $httpError ≠ 0 ; $httpError ; -1 ) ; JSONNumber ] ;
+	[ "message" ; $message ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA["Sé lo más descriptivo posible."]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$task</Name></Step>
+      <Step enable="True" id="87" name="Show Custom Dialog"><Title><Calculation><![CDATA["Descripción de la tarea"]]></Calculation></Title><Message><Calculation><![CDATA["Describe la tarea que quieres hacer con el guion."]]></Calculation></Message><Buttons><Button CommitState="True"><Calculation><![CDATA["OK"]]></Calculation></Button><Button CommitState="False"><Calculation><![CDATA["Cancelar"]]></Calculation></Button><Button CommitState="False"/></Buttons><InputFields><InputField UsePasswordCharacter="False"><Field>$task</Field><Label><Calculation><![CDATA["Tarea: "]]></Calculation></Label></InputField><InputField UsePasswordCharacter="False"><Field table="" id="0" name=""/></InputField><InputField UsePasswordCharacter="False"><Field table="" id="0" name=""/></InputField></InputFields></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[Get ( LastMessageChoice ) = 2]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; 1 ; JSONNumber ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="69" name="Else"><Restore state="False"/></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $p ; "task" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$task</Name></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="89" name="# (comment)"><Text>Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</Text></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[__AGFM_CONTEXT_BODY__]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$context</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$mode = "context"]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[$context]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONSetElement ( $context ;
+	[ "snapshot_path" ; "agent/context/snapshot.xml" ; JSONString ] ;
+	[ "snapshot_timestamp" ; GetAsText ( Get ( CurrentTimestamp ) ) ; JSONString ]
+)]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$context</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $config ; "repo_path" ) & "agent/context/snapshot.xml"]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$snapshotPath</Name></Step>
+      <Step enable="True" id="152" name="Save Records as Snapshot Link"><CreateDirectories state="True"/><CreateEmail state="False"/><SaveType value="BrowsedRecords"/><UniversalPathList>$snapshotPath</UniversalPathList></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$snapshotError</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$snapshotError ≠ 0]]></Calculation></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA["No se pudo guardar el snapshot (error " & $snapshotError & ")."]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$message</Name></Step>
+      <Step enable="True" id="87" name="Show Custom Dialog"><Title><Calculation><![CDATA["agentic-fm"]]></Calculation></Title><Message><Calculation><![CDATA[$message]]></Calculation></Message><Buttons><Button CommitState="True"><Calculation><![CDATA["OK"]]></Calculation></Button><Button CommitState="False"/><Button CommitState="False"/></Buttons></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; $snapshotError ; JSONNumber ] ;
+	[ "message" ; $message ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "repo_path" ; JSONGetElement ( $config ; "repo_posix" ) ; JSONString ] ;
+	[ "context" ; $context ; JSONString ]
+)]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$payload</Name></Step>
+      <Step enable="True" id="160" name="Insert from URL"><NoInteract state="True"/><DontEncodeURL state="False"/><SelectAll state="True"/><VerifySSLCertificates state="False"/><CURLOptions><Calculation><![CDATA["-X POST -H \"Content-Type: application/json\" -d " & Quote ( $payload )]]></Calculation></CURLOptions><Calculation><![CDATA["http://" & If ( IsEmpty ( $$AGENTIC.FM.COMPANION.IP ) ; "localhost" ; $$AGENTIC.FM.COMPANION.IP ) & ":8765/context"]]></Calculation><Text/><Field>$response</Field></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$httpError</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[$httpError = 0 and JSONGetElement ( $response ; "success" ) = 1]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$ok</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[If ( $ok ; "Contexto enviado: ya puedes pedir el guion a la IA." ; If ( $httpError ≠ 0 ; "agentic-fm-app no responde (error " & $httpError & ")." ; "agentic-fm-app no pudo guardar el contexto: " & JSONGetElement ( $response ; "error" ) ) )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$message</Name></Step>
+      <Step enable="True" id="87" name="Show Custom Dialog"><Title><Calculation><![CDATA["agentic-fm"]]></Calculation></Title><Message><Calculation><![CDATA[$message]]></Calculation></Message><Buttons><Button CommitState="True"><Calculation><![CDATA["OK"]]></Calculation></Button><Button CommitState="False"/><Button CommitState="False"/></Buttons></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; If ( $ok ; 0 ; If ( $httpError ≠ 0 ; $httpError ; -1 ) ) ; JSONNumber ] ;
+	[ "message" ; If ( $ok ; "" ; $message ) ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="69" name="Else"><Restore state="False"/></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; -1 ; JSONNumber ] ;
+	[ "message" ; "unknown mode: " & $mode ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
     </Script>
     <Group groupCollapsed="False" includeInMenu="False" id="13" name="OData">
       <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="14" name="AGFMGoToLayout">
