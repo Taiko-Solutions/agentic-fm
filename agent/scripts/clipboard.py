@@ -59,6 +59,9 @@ FM_CLASSES = {
 # Map the first XML element found inside an fmxmlsnippet to its clipboard class.
 # Elements that map to 'ut16' are stored as UTF-16 Unicode text, not binary descriptors.
 XML_ELEMENT_TO_CLASS = {
+    # A script folder (<Group> holding <Script>s) is pasted as scripts. First, so the regex fallback
+    # finds it before the <Step> elements nested inside its scripts.
+    'Group':             'XMSC',
     'Step':              'XMSS',
     'Script':            'XMSC',
     'CustomFunction':    'XMFN',

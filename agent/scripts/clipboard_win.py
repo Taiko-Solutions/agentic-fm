@@ -64,6 +64,9 @@ FM_CLASSES = {
 }
 
 XML_ELEMENT_TO_CLASS = {
+    # A script folder (<Group> holding <Script>s) is pasted as scripts. First, so the regex fallback
+    # finds it before the <Step> elements nested inside its scripts.
+    'Group':          'XMSC',
     'Step':           'XMSS',
     'Script':         'XMSC',
     'CustomFunction': 'XMFN',

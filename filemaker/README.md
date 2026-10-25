@@ -138,8 +138,9 @@ carries only the script `AGFM Agent`.
   layout: you get the button «agentic-fm», which opens the card (list of files, Export, Check).
 - **Each secondary file** needs `AGFM Agent`: in Agentic-FM-APP use «Copiar AGFM Agent» (to update it later,
   «Copiar pasos (actualizar)»: select all the steps of the existing script and paste). Nothing else is pasted.
-- **Authorise the main file in each secondary file**: Manage Security → Security Settings → File Access
-  (add the main file). Without it the card reports error 825 for that file.
+- **Authorise the main file** in a secondary file only when that file has «Require full access privileges to use
+  references to this file» ticked (Manage Security → Advanced → File Access; on by default in files created with
+  recent FileMaker, off in many older ones): add the main file there. Without it the card reports error 825.
 - **Data sources:** the main file must have a FileMaker data source for every secondary file. The card lists any
   file that has none: add a data source with that name in the main file (Manage → External Data Sources).
 - **Debug in secondary files:** point your Debug callers at `AGFM Agent` by name with
