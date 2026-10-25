@@ -101,6 +101,8 @@ The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic
 add-on are by name) — never the full `agentic-fm.xml` on top of the add-on, which would duplicate its scripts. Updating a solution is uninstall + install; nothing is
 pasted by hand.
 
+`filemaker/addon/agfm-agent.xml` (the clipboard copy of `AGFM Agent` the app offers) is a loose `<Script>` with no `agentic-fm` folder, by design: pasting it creates the script at the top level of the Script Workspace; you may move it into a folder of your own.
+
 Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.py` writes
 `filemaker/addon/agentic-fm-addon.xml` (the bundle restricted to the manifest). Paste `filemaker/context.xml`
 and that snippet into the template `filemaker/addon/template/agentic-fm.fmp12` (a blank file: the add-on takes the

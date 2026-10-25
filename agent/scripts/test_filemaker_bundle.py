@@ -222,6 +222,23 @@ class TestExplodeSolution(unittest.TestCase):
         by_name = [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
         self.assertEqual(len(by_name), 2)
 
+    def test_a_failed_start_only_marks_files_as_errors_for_export(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('$action = "export" and not IsEmpty ( $startError )', joined)
+        self.assertNotIn("\n" + "not IsEmpty ( $startError )", "\n" + joined)
+
+    def test_the_start_dialog_translates_the_service_codes(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn("agentic-fm-app no responde: ábrela y vuelve a intentarlo.", joined)
+        self.assertIn("Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon.", joined)
+        self.assertIn('= "no_service"', joined)
+        self.assertIn('= "unknown_solution"', joined)
+        self.assertIn('= "ambiguous_solution"', joined)
+
+    def test_was_open_ignores_case(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('FilterValues ( Lower ( DatabaseNames ) ; Lower ( $base ) & ¶ & Lower ( $base ) & ".fmp12" )', joined)
+
     def test_it_reports_to_the_card_and_posts_explode(self):
         joined = "\n".join(calcs(self.NAME))
         functions = [st.findtext("FunctionName/Calculation") for st in steps(self.NAME)

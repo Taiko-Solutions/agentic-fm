@@ -474,7 +474,11 @@
               <Calculation><![CDATA["agentic-fm"]]></Calculation>
             </Title>
             <Message>
-              <Calculation><![CDATA["No se pudo iniciar agentic-fm: " & JSONGetElement ( $start ; "error" )]]></Calculation>
+              <Calculation><![CDATA["No se pudo iniciar agentic-fm: " & Case (
+	JSONGetElement ( $start ; "error" ) = "no_service" ; "agentic-fm-app no responde: ábrela y vuelve a intentarlo." ;
+	JSONGetElement ( $start ; "error" ) = "unknown_solution" or JSONGetElement ( $start ; "error" ) = "ambiguous_solution" ; "Registra el clon de este archivo en agentic-fm-app (Proyectos) o elige allí su clon." ;
+	JSONGetElement ( $start ; "error" )
+)]]></Calculation>
             </Message>
             <Buttons>
               <Button CommitState="True">
@@ -754,7 +758,7 @@
         </Step>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
-            <Calculation><![CDATA[not IsEmpty ( FilterValues ( DatabaseNames ; $base & ¶ & $base & ".fmp12" ) )]]></Calculation>
+            <Calculation><![CDATA[not IsEmpty ( FilterValues ( Lower ( DatabaseNames ) ; Lower ( $base ) & ¶ & Lower ( $base ) & ".fmp12" ) )]]></Calculation>
           </Value>
           <Repetition>
             <Calculation><![CDATA[1]]></Calculation>
@@ -763,7 +767,7 @@
         </Step>
         <Step enable="True" id="68" name="If">
           <Restore state="False"/>
-          <Calculation><![CDATA[not IsEmpty ( $startError )]]></Calculation>
+          <Calculation><![CDATA[$action = "export" and not IsEmpty ( $startError )]]></Calculation>
         </Step>
           <Step enable="True" id="141" name="Set Variable">
             <Value>
