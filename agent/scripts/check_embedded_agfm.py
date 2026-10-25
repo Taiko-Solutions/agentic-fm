@@ -63,7 +63,8 @@ Options:
 
 Exit codes:
     0  all embedded objects match, OR no agentic-fm objects were found
-    1  at least one object is STALE, MISSING, UNREADABLE or an OUTDATED AGFM Agent (unless --advisory)
+    1  at least one object is STALE, MISSING or UNREADABLE, or an OUTDATED / UNREADABLE AGFM Agent
+       (a MISSING AGFM Agent is only reported) (unless --advisory)
 """
 
 import argparse
@@ -472,6 +473,13 @@ def _canonical_steps(reference_path):
 
 
 DRIFT = ("STALE", "MISSING", "UNREADABLE", "OUTDATED")   # OUTDATED: an older AGFM Agent, like a STALE add-on
+
+
+def _is_drift(obj):
+    """A missing AGFM Agent is advisory (clones that keep the 1.0 add-on or the pasted bundle have none)."""
+    if obj["kind"] == "agent" and obj["status"] == "MISSING":
+        return False
+    return obj["status"] in DRIFT
 _VERSION_RE = re.compile(r'^"(\d+(?:\.\d+)+)"$')
 ADDON_VERSION_SCRIPT = "AGFM Version"
 
@@ -661,7 +669,7 @@ def _print_table(report, show_diff=False):
             print("No agentic-fm objects found in the exploded solution — nothing to check.")
             print("(Run 'Explode XML' on a solution that has agentic-fm installed to enable this check.)")
         return
-    drift = [o for o in objs if o["status"] in DRIFT]
+    drift = [o for o in objs if _is_drift(o)]
     noise = [o for o in objs if o["status"] == "OK~"]
     width = max((len(o["name"]) for o in objs), default=4)
     print("Embedded agentic-fm code vs bundled reference:\n")
@@ -720,7 +728,7 @@ def main(argv=None):
     if not report["checked"]:
         # An unreadable explode is a failure; a missing one is not.
         return 1 if report.get("explode_present") else 0
-    drift = any(o["status"] in DRIFT for o in report["objects"])
+    drift = any(_is_drift(o) for o in report["objects"])
     return 1 if drift else 0
 
 

@@ -125,7 +125,7 @@ After pasting the snippet, the template needs two layouts:
 
 Then run `Save a Copy as Add-on Package` and `python3 agent/scripts/build_addon_snippet.py --package`. The
 package step now fails with «the package has no draggable object» when the built `template.xml` has an empty
-`<Directives/>` (the layout was missing, or had no group or more than one).
+`<Directives/>`. It only checks that `<Directives>` holds a layout object; make sure the layout has exactly one group.
 
 ### One add-on per solution (user guide)
 
@@ -143,6 +143,8 @@ carries only the script `AGFM Agent`.
 - **Debug in secondary files:** point your Debug callers at `AGFM Agent` by name with
   `{"mode": "debug", …}` (`Perform Script` by calculated name, parameter JSON).
 - `AGFM Agent` needs full-access privileges in each file (card error 9: «sin acceso total»).
+
+### Install steps
 
 1. **Make the package available on this Mac.** Agentic-FM-APP copies it to
    `~/Library/Application Support/FileMaker/Extensions/AddonModules/`. Without the app, double-click

@@ -100,6 +100,29 @@ class CheckEmbeddedAddonTests(unittest.TestCase):
         self.assertIn("desinstala", msg)
         self.assertIn("0.9.0 → 1.0.0", msg)
 
+    def test_outdated_agent_warns_with_the_update_hint_not_the_add_on_advice(self):
+        status, msg, _ = self._report([
+            {"name": "add-on (Main)", "kind": "addon", "status": "OK", "diff": ""},
+            {"name": "AGFM Agent (Second)", "kind": "agent", "status": "OUTDATED", "diff": "0.9.0 → 1.0.0"}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("AGFM Agent (Second)", msg)
+        self.assertIn("0.9.0 → 1.0.0", msg)
+        self.assertIn("Copiar pasos (actualizar)", msg)
+        self.assertNotIn("reinstalar el add-on", msg)
+
+    def test_unreadable_agent_warns(self):
+        status, msg, _ = self._report([
+            {"name": "AGFM Agent (Odd)", "kind": "agent", "status": "UNREADABLE", "diff": ""}])
+        self.assertEqual(status, ss.WARN)
+        self.assertIn("AGFM Agent (Odd)", msg)
+        self.assertNotIn("reinstalar el add-on", msg)
+
+    def test_missing_agent_is_advisory_no_warning(self):
+        status, _, _ = self._report([
+            {"name": "add-on (Main)", "kind": "addon", "status": "OK", "diff": ""},
+            {"name": "AGFM Agent (Main)", "kind": "agent", "status": "MISSING", "diff": ""}])
+        self.assertNotEqual(status, ss.WARN)
+
 
 if __name__ == "__main__":
     unittest.main()

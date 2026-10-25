@@ -10,7 +10,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 - Nuevo `AGFM Explode Solution`: el botón «agentic-fm» (el objeto que se arrastra desde Add-ons) abre una tarjeta con los archivos de la solución y exporta o comprueba cada uno; no abre un diálogo por archivo.
 - Nuevo `AGFM Agent` (1.0.0): el único guion de los archivos secundarios (modos `version`, `export`, `push`, `debug`, `context`); lleva `Context` incorporado, sin función personalizada.
-- `check_embedded_agfm.py` informa de `AGFM Agent` por solución (CURRENT / OUTDATED / MISSING); uno desactualizado o ausente cuenta como deriva.
+- `check_embedded_agfm.py` informa de `AGFM Agent` por solución (CURRENT / OUTDATED / MISSING); uno desactualizado cuenta como deriva; uno ausente solo se informa.
 - `build_addon_snippet.py --package` falla si el paquete no tiene objeto arrastrable (`<Directives/>` vacío en `template.xml`).
 - Plantilla (a mano): layout `AGFM Explode` con el visor web `agfm` y, en `__FMAddonTemplateDirectives_en`, un único grupo con el botón. Pasos en `filemaker/README.md`.
 

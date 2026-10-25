@@ -11,6 +11,8 @@ Usage:
     python3 agent/scripts/test_check_embedded_agfm.py
 """
 
+import contextlib
+import io
 import sys
 import tempfile
 import unittest
@@ -348,9 +350,22 @@ class TestAgentVersion(unittest.TestCase):
             _agent_script(scripts / "Demo" / "agentic-fm - ID 1" / self.AGENT, "0.9.0")
             report = C.check(root)
             self.assertEqual({o["name"]: o["status"] for o in report["objects"]}["AGFM Agent (Demo)"], "OUTDATED")
-            self.assertEqual(C.main(["--repo-root", str(root)]), 1)
-            _agent_script(scripts / "Demo" / "agentic-fm - ID 1" / self.AGENT, "1.0.0")
-            self.assertEqual(C.main(["--repo-root", str(root)]), 0)
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(C.main(["--repo-root", str(root)]), 1)
+                _agent_script(scripts / "Demo" / "agentic-fm - ID 1" / self.AGENT, "1.0.0")
+                self.assertEqual(C.main(["--repo-root", str(root)]), 0)
+
+    def test_a_missing_agent_is_advisory_and_does_not_change_the_exit_code(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = TestManifestScope()._repo(tmp, True)
+            (root / "filemaker" / "addon" / "manifest.json").write_text(
+                '{"name": "agentic-fm", "version": "1.0.0", "agent_version": "1.0.0", '
+                '"scripts": ["AGFM Version"], "custom_functions": []}', encoding="utf-8")
+            (root / "agent" / "scripts").symlink_to(Path(__file__).resolve().parent)
+            report = C.check(root)
+            self.assertEqual({o["name"]: o["status"] for o in report["objects"]}["AGFM Agent (Demo)"], "MISSING")
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(C.main(["--repo-root", str(root)]), 0)
 
 
 if __name__ == "__main__":
