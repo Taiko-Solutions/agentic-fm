@@ -11,7 +11,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 ## 2026-10-25 — add-on 1.1.0: un solo add-on por solución
 
-**Acción requerida:** actualiza el add-on en el archivo principal (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`); pega `AGFM Agent` en los demás archivos de la solución (Agentic-FM-APP: «Copiar AGFM Agent»); autoriza el archivo principal en cada secundario (Seguridad ▸ Acceso a archivos); y apunta las llamadas a Debug de los secundarios a `AGFM Agent` por nombre, con `{"mode": "debug", …}`.
+**Acción requerida:** actualiza el add-on en el archivo principal (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`); pega `AGFM Agent` en los demás archivos de la solución (Agentic-FM-APP: «Copiar AGFM Agent»); autoriza el archivo principal en los secundarios que tengan marcada «Requerir privilegios de acceso total para usar referencias a este archivo» (Seguridad ▸ Acceso a archivos; los archivos antiguos suelen tenerla desmarcada y no lo necesitan); y apunta las llamadas a Debug de los secundarios a `AGFM Agent` por nombre, con `{"mode": "debug", …}`.
 
 - Nuevo `AGFM Explode Solution`: el botón «agentic-fm» (el objeto que se arrastra desde Add-ons) abre una tarjeta con los archivos de la solución y exporta o comprueba cada uno; no abre un diálogo por archivo.
 - Nuevo `AGFM Agent` (1.0.0): el único guion de los archivos secundarios (modos `version`, `export`, `push`, `debug`, `context`); lleva `Context` incorporado, sin función personalizada.
