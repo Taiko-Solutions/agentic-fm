@@ -4,6 +4,16 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-25 — add-on 1.1.0: un solo add-on por solución
+
+**Acción requerida:** actualiza el add-on en el archivo principal (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`); pega `AGFM Agent` en los demás archivos de la solución (Agentic-FM-APP: «Copiar AGFM Agent»); autoriza el archivo principal en cada secundario (Seguridad ▸ Acceso a archivos); y apunta las llamadas a Debug de los secundarios a `AGFM Agent` por nombre, con `{"mode": "debug", …}`.
+
+- Nuevo `AGFM Explode Solution`: el botón «agentic-fm» (el objeto que se arrastra desde Add-ons) abre una tarjeta con los archivos de la solución y exporta o comprueba cada uno; no abre un diálogo por archivo.
+- Nuevo `AGFM Agent` (1.0.0): el único guion de los archivos secundarios (modos `version`, `export`, `push`, `debug`, `context`); lleva `Context` incorporado, sin función personalizada.
+- `check_embedded_agfm.py` informa de `AGFM Agent` por solución (CURRENT / OUTDATED / MISSING); uno desactualizado o ausente cuenta como deriva.
+- `build_addon_snippet.py --package` falla si el paquete no tiene objeto arrastrable (`<Directives/>` vacío en `template.xml`).
+- Plantilla (a mano): layout `AGFM Explode` con el visor web `agfm` y, en `__FMAddonTemplateDirectives_en`, un único grupo con el botón. Pasos en `filemaker/README.md`.
+
 ## 2026-10-12 — Herramientas del add-on: correcciones
 
 **Acción requerida (si aplica):** si un guion tuyo llama a `Get agentic-fm path` y comprueba `not Get ( ScriptResult )`, cámbialo a `not JSONGetElement ( Get ( ScriptResult ) ; "ok" )`: desde el add-on 1.0.0 el guion devuelve JSON, y un JSON no se evalúa como verdadero.

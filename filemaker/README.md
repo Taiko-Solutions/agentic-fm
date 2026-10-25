@@ -96,7 +96,7 @@ The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic
 `filemaker/addon/agentic-fm/` (what FileMaker loads from `AddonModules`) and the same package as one file,
 `filemaker/addon/agentic-fm.fmaddon` (double-click to install it on a Mac). It holds `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
 `AGFM Choose Folder`, `Explode XML`, `Push Context` with the `Context` custom function, the `OData` folder and
-`Agentic-fm Debug` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on; if you use the editor, paste
+`Agentic-fm Debug`, and since 1.1.0 `AGFM Explode Solution` and `AGFM Agent` (list in `filemaker/addon/manifest.json`). The web viewer scripts are not in the add-on; if you use the editor, paste
 `filemaker/addon/agentic-fm-webviewer.xml` (only `Agentic-fm Webviewer`, `Menu` and `Paste`; their calls into the
 add-on are by name) — never the full `agentic-fm.xml` on top of the add-on, which would duplicate its scripts. Updating a solution is uninstall + install; nothing is
 pasted by hand.
@@ -104,14 +104,45 @@ pasted by hand.
 Building the package (maintainers): `python3 agent/scripts/build_addon_snippet.py` writes
 `filemaker/addon/agentic-fm-addon.xml` (the bundle restricted to the manifest). Paste `filemaker/context.xml`
 and that snippet into the template `filemaker/addon/template/agentic-fm.fmp12` (a blank file: the add-on takes the
-file's name; table `AGFM` with `PrimaryKey` only, no other layout), add the `__FMAddonTemplateDirectives_en` layout with one
-grouped button running `AGFM Start`, and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
+file's name; table `AGFM` with `PrimaryKey` only, no other layout), do the template steps below (layout `AGFM Explode`, draggable button), and run `Save a Copy as Add-on Package` (Replace UUIDs off) from a script
 prefixed `__FMAddonTemplateDirectives_`. Then `python3 agent/scripts/build_addon_snippet.py --package` imports
 the built package from `AddonModules`, replaces FileMaker's default metadata ("Created by Claris", placeholder
 description) with the manifest's and repacks `agentic-fm.fmaddon` (`xar --distribution`: no user, group or extended
 attributes). It also writes into **your** `AddonModules`: the edited `info*.json` go back into
 `AddonModules/agentic-fm/` and the archive is copied next to it, so this Mac's install dialog shows the same metadata
 after a FileMaker restart. Bump `AGFM Version` and `manifest.json` together.
+
+### Template steps for 1.1.0 (maintainers, in FileMaker)
+
+After pasting the snippet, the template needs two layouts:
+
+1. **Layout `AGFM Explode`** on table `AGFM`, with one web viewer named `agfm` (Inspector → Position → Name).
+   Turn **Allow JavaScript to perform FileMaker scripts** ON; leave its URL empty, `AGFM Explode Solution` sets it.
+   The script opens this layout by name in a card window, so it must be named exactly that.
+2. **Layout `__FMAddonTemplateDirectives_en`** with exactly **one** object group: a button «agentic-fm» whose
+   action is `Perform Script [ AGFM Explode Solution ]` (no parameter). That group is the add-on's draggable
+   object; the layout itself is not packaged.
+
+Then run `Save a Copy as Add-on Package` and `python3 agent/scripts/build_addon_snippet.py --package`. The
+package step now fails with «the package has no draggable object» when the built `template.xml` has an empty
+`<Directives/>` (the layout was missing, or had no group or more than one).
+
+### One add-on per solution (user guide)
+
+A solution can span several FileMaker files. You install the add-on **once**, in the main file; every other file
+carries only the script `AGFM Agent`.
+
+- **Main file** = the file where you install the add-on. Drag the add-on from the Add-ons tab onto a developer
+  layout: you get the button «agentic-fm», which opens the card (list of files, Export, Check).
+- **Each secondary file** needs `AGFM Agent`: in Agentic-FM-APP use «Copiar AGFM Agent» (to update it later,
+  «Copiar pasos (actualizar)»: select all the steps of the existing script and paste). Nothing else is pasted.
+- **Authorise the main file in each secondary file**: Manage Security → Security Settings → File Access
+  (add the main file). Without it the card reports error 825 for that file.
+- **Data sources:** the main file must have a FileMaker data source for every secondary file. The card lists any
+  file that has none: add a data source with that name in the main file (Manage → External Data Sources).
+- **Debug in secondary files:** point your Debug callers at `AGFM Agent` by name with
+  `{"mode": "debug", …}` (`Perform Script` by calculated name, parameter JSON).
+- `AGFM Agent` needs full-access privileges in each file (card error 9: «sin acceso total»).
 
 1. **Make the package available on this Mac.** Agentic-FM-APP copies it to
    `~/Library/Application Support/FileMaker/Extensions/AddonModules/`. Without the app, double-click
