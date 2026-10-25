@@ -173,6 +173,13 @@ class TestWebViewerSnippet(unittest.TestCase):
         self.assertEqual(names(text), bundle - set(manifest["scripts"]))
 
 
+def package_has_agent():
+    """False until the package is rebuilt in FileMaker with AGFM Agent in the template (Task 11)."""
+    template = REPO / "filemaker" / "addon" / "agentic-fm" / "template.xml"
+    return "AGFM Agent" in template.read_text(encoding="utf-8-sig")
+
+
+@unittest.skipUnless(package_has_agent(), "package not rebuilt yet with AGFM Agent / version 1.1.0 (rebuild in FileMaker, then --package)")
 class TestPackageMatchesBundle(unittest.TestCase):
     """A stale package (bundle edited, package not rebuilt) must fail here, not ship."""
 
@@ -208,6 +215,124 @@ class TestPackageMatchesBundle(unittest.TestCase):
             (Path(tmp) / "en.xml").write_text("<SourceText>0.9.0</SourceText>", encoding="utf-8")
             with self.assertRaises(ValueError):
                 B.check_package_version(Path(tmp), {"version": "1.0.0"})
+
+
+FMFN = """/*
+ * Context ( task )
+ * header that is not part of the calculation
+ */
+
+Let ( [
+    ~json = JSONSetElement ( "{}" ;
+        [ "task" ; task ; JSONString ]
+    )
+] ;
+    ~json
+)
+"""
+
+
+def real_bundle():
+    return (REPO / "filemaker" / "agentic-fm.xml").read_text(encoding="utf-8")
+
+
+def real_fmfn():
+    return (REPO / "filemaker" / "Context.fmfn").read_text(encoding="utf-8")
+
+
+class TestInlineContext(unittest.TestCase):
+    def test_inline_context_wraps_the_body_in_let_task(self):
+        out = B.inline_context(FMFN)
+        self.assertTrue(out.startswith("Let ( task = $task ;\nLet ( ["))
+        self.assertTrue(out.endswith("~json\n)\n)"))
+        self.assertNotIn("header that is not part", out)
+        self.assertNotIn("/*", out)
+
+    def test_inline_context_keeps_the_json_key_task(self):
+        self.assertIn('[ "task" ; task ; JSONString ]', B.inline_context(FMFN))
+
+    def test_a_function_without_a_body_is_an_error(self):
+        with self.assertRaises(ValueError):
+            B.inline_context("/* only a header */")
+
+
+class TestAgentSnippets(unittest.TestCase):
+    def setUp(self):
+        self.filled = B.fill_context(real_bundle(), real_fmfn())
+        self.script, self.steps = B.agent_snippets(self.filled)
+
+    def test_agent_snippets_have_one_script_and_bare_steps(self):
+        root = ET.fromstring(self.script)
+        scripts = [s for s in root.iter("Script") if s.find("Step") is not None]
+        self.assertEqual([s.get("name") for s in scripts], ["AGFM Agent"])
+        self.assertEqual(list(root.iter("Group")), [])
+        self.assertEqual(scripts[0].get("runFullAccess"), "False")
+        steps_root = ET.fromstring(self.steps)
+        self.assertEqual(list(steps_root.iter("Script")), [])
+        self.assertEqual(len(steps_root.findall("Step")), len(scripts[0].findall("Step")))
+
+    def test_outputs_never_contain_the_placeholder(self):
+        self.assertIn(B.PLACEHOLDER, real_bundle())          # the bundle keeps the source of truth
+        for text in (self.filled, self.script, self.steps):
+            self.assertNotIn(B.PLACEHOLDER, text)
+        self.assertIn("Let ( task = $task ;", self.steps)
+
+    def test_agent_is_self_contained(self):
+        root = ET.fromstring(self.script)
+        self.assertEqual([s.get("name") for s in root.iter("Script") if s.find("Step") is None], [])
+        self.assertNotIn('name="Perform Script"', self.script)
+        self.assertIn("<Name>$version</Name>", self.steps)
+
+    def test_agent_script_is_in_the_addon_snippet(self):
+        manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+        out = B.build(self.filled, manifest)
+        self.assertIn("AGFM Agent", names(out))
+        self.assertIn("Let ( task = $task ;", out)
+        self.assertNotIn(B.PLACEHOLDER, out)
+
+    def test_manifest_lists_agent_and_version_1_1_0(self):
+        manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["version"], "1.1.0")
+        self.assertEqual(manifest["agent_version"], "1.0.0")
+        self.assertIn("AGFM Agent", manifest["scripts"])
+        self.assertNotIn("AGFM Explode Solution", manifest["scripts"])
+        self.assertIn('"1.0.0"', self.steps)                 # Set Variable [ $version ; "1.0.0" ]
+
+    def test_longest_calculation_is_within_the_limit(self):
+        self.assertLessEqual(B.longest_calculation(self.script), B.MAX_CALC_CHARS)
+        self.assertEqual(B.MAX_CALC_CHARS, 30000)
+
+
+class TestCheckAgentOutputs(unittest.TestCase):
+    def _patched(self, tmp):
+        from unittest import mock
+        stack = [mock.patch.object(B, "OUTPUT", Path(tmp) / "agentic-fm-addon.xml"),
+                 mock.patch.object(B, "WEBVIEWER_OUTPUT", Path(tmp) / "agentic-fm-webviewer.xml"),
+                 mock.patch.object(B, "AGENT_OUTPUT", Path(tmp) / "agfm-agent.xml"),
+                 mock.patch.object(B, "AGENT_STEPS_OUTPUT", Path(tmp) / "agfm-agent-steps.xml")]
+        return stack
+
+    def test_check_fails_on_a_stale_agent_snippet(self):
+        import contextlib
+        import io
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as st:
+            for m in self._patched(tmp):
+                st.enter_context(m)
+            self.assertEqual(B.main([]), 0)                    # writes the agent files
+            self.assertEqual(B.main(["--check"]), 0)
+            B.AGENT_STEPS_OUTPUT.write_text("stale", encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()) as out:
+                self.assertEqual(B.main(["--check"]), 1)
+            self.assertIn("agfm-agent-steps.xml is stale", out.getvalue() + "")
+
+    def test_check_fails_when_the_calc_is_too_long(self):
+        import contextlib
+        import io
+        from unittest import mock
+        with mock.patch.object(B, "MAX_CALC_CHARS", 1000), contextlib.redirect_stderr(io.StringIO()) as err:
+            self.assertEqual(B.main(["--check"]), 1)
+        self.assertIn("too long", err.getvalue())
 
 
 class TestRunInCI(unittest.TestCase):

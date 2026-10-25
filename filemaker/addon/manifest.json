@@ -1,6 +1,7 @@
 {
   "name": "agentic-fm",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "agent_version": "1.0.0",
   "scripts": [
     "Get agentic-fm path",
     "AGFM Version",
@@ -12,7 +13,8 @@
     "AGFMGoToLayout",
     "AGFMScriptBridge",
     "AGFMEvaluation",
-    "Agentic-fm Debug"
+    "Agentic-fm Debug",
+    "AGFM Agent"
   ],
   "custom_functions": [
     "Context"
