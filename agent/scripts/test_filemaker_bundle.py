@@ -71,7 +71,7 @@ def bundle_version():
 
 class TestVersion(unittest.TestCase):
     def test_version_is_a_quoted_semver_literal(self):
-        self.assertEqual(bundle_version(), "1.1.0")
+        self.assertEqual(bundle_version(), "1.2.0")
 
     def test_version_script_lives_in_the_top_folder(self):
         top = _ROOT.find("Group")
@@ -253,6 +253,31 @@ class TestExplodeSolution(unittest.TestCase):
         body = steps(self.NAME)
         loop = next(i for i, st in enumerate(body) if st.get("name") == "Loop")
         self.assertFalse([st for st in body[loop:] if st.get("name") == "Show Custom Dialog"])
+
+
+def explode_payloads(name):
+    """The calculations of the `$payload` variables a script POSTs to /explode."""
+    return [st.findtext("Value/Calculation") or "" for st in steps(name)
+            if st.get("name") == "Set Variable" and st.findtext("Name") == "$payload"
+            and "export_file_path" in (st.findtext("Value/Calculation") or "")]
+
+
+class TestExplodeCommentAndOrigin(unittest.TestCase):
+    """1.2.0: the explode records what the person typed in the card and who triggered it (agentic-fm-app F6b)."""
+
+    def test_the_card_forwards_its_comment_and_says_card(self):
+        payloads = explode_payloads("AGFM Explode Solution")
+        self.assertTrue(payloads)
+        for text in payloads:
+            self.assertIn('[ "comment" ; JSONGetElement ( $p ; "comment" ) ; JSONString ]', text)
+            self.assertIn('[ "origin" ; "card" ; JSONString ]', text)
+
+    def test_explode_xml_says_explode_xml_and_sends_no_comment(self):
+        payloads = explode_payloads("Explode XML")
+        self.assertEqual(len(payloads), 2)                      # app path and classic companion path
+        for text in payloads:
+            self.assertIn('[ "origin" ; "explode-xml" ; JSONString ]', text)
+            self.assertNotIn('"comment"', text)
 
 
 class TestPackage(unittest.TestCase):
