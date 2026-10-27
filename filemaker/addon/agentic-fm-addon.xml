@@ -123,7 +123,7 @@
         <Text>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Text>
       </Step>
       <Step enable="True" id="103" name="Exit Script">
-        <Calculation><![CDATA["1.1.0"]]></Calculation>
+        <Calculation><![CDATA["1.2.0"]]></Calculation>
       </Step>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="23" name="AGFM Choose Folder">
@@ -380,7 +380,8 @@
 	[ "solution_name" ; Get ( FileName ) ; JSONString ] ;
 	[ "export_file_path" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;
 	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ] ;
-	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ]
+	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ] ;
+	[ "origin" ; "explode-xml" ; JSONString ]
 )]]></Calculation>
         </Value>
         <Repetition>
@@ -958,7 +959,9 @@
               	[ "solution_name" ; JSONGetElement ( $result ; "file" ) ; JSONString ] ;
               	[ "export_file_path" ; JSONGetElement ( $result ; "path" ) ; JSONString ] ;
               	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ] ;
-              	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ]
+              	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ] ;
+              	[ "comment" ; JSONGetElement ( $p ; "comment" ) ; JSONString ] ;
+              	[ "origin" ; "card" ; JSONString ]
               )]]></Calculation>
               </Value>
               <Repetition>
@@ -1208,7 +1211,8 @@
           <Calculation><![CDATA[JSONSetElement ( "{}" ;
 	[ "solution_name" ; $solutionName ; JSONString ] ;
 	[ "export_file_path" ; $exportPath ; JSONString ] ;
-	[ "repo_path" ; $repoPath ; JSONString ]
+	[ "repo_path" ; $repoPath ; JSONString ] ;
+	[ "origin" ; "explode-xml" ; JSONString ]
 )]]></Calculation>
         </Value>
         <Name>$payload</Name>
@@ -1317,7 +1321,8 @@
 	[ "solution_name" ; Get ( FileName ) ; JSONString ] ;
 	[ "export_file_path" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;
 	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ] ;
-	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ]
+	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ] ;
+	[ "origin" ; "explode-xml" ; JSONString ]
 )]]></Calculation>
         </Value>
         <Repetition>

@@ -4,6 +4,13 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-27 — add-on 1.2.0: comentario y origen del explode
+
+**Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). `AGFM Agent` no cambia (sigue en 1.0.0): los archivos secundarios no se tocan. Necesita Agentic-FM-APP 0.8.0.
+
+- `AGFM Explode Solution` envía a `/explode` el comentario que se escribe en la tarjeta (`comment`) y `origin: "card"`; `Explode XML` y `AGFM Explode` (el explode silencioso) envían `origin: "explode-xml"`. La app los guarda con el explode (`fm_diff`, `fm_report`) y, con la publicación en Gitea activada, el comentario es el mensaje del commit.
+- Con un add-on anterior la tarjeta funciona igual, pero el comentario no llega a la app.
+
 ## 2026-10-25 — `clipboard.py`: una carpeta de guiones se copia como guiones
 
 - `clipboard.py write` (y `clipboard_win.py`) detecta un snippet que empieza por `<Group>` (carpeta de guiones con sus `<Script>`, como `filemaker/agentic-fm.xml`, `filemaker/addon/agentic-fm-addon.xml` o `agentic-fm-webviewer.xml`) como **XMSC** (guiones). Antes lo copiaba como XMSS (pasos sueltos) y al pegarlo en el Gestor de guiones no se creaba la carpeta ni los guiones; había que añadir `--class XMSC`. El resto de snippets sale con la misma clase que antes.

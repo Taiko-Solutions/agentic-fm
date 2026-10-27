@@ -335,9 +335,9 @@ class TestAgentSnippets(unittest.TestCase):
         self.assertIn("Let ( task = $task ;", out)
         self.assertNotIn(B.PLACEHOLDER, out)
 
-    def test_manifest_lists_agent_and_version_1_1_0(self):
+    def test_manifest_lists_agent_and_version_1_2_0(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "1.1.0")
+        self.assertEqual(manifest["version"], "1.2.0")
         self.assertEqual(manifest["agent_version"], "1.0.0")
         self.assertIn("AGFM Agent", manifest["scripts"])
         self.assertIn("AGFM Explode Solution", manifest["scripts"])

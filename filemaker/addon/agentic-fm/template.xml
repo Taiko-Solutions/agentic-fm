@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-10-25T19:56:56">
+<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-10-27T14:37:18">
 	<Structure membercount="1">
 		<AddAction membercount="11">
 			<BaseTableCatalog membercount="1">
@@ -111,7 +111,7 @@
 			</CustomMenuCatalog>
 			<PasteIndexList membercount="0"></PasteIndexList>
 			<ScriptCatalog membercount="19">
-				<UUID modifications="7" userName="" accountName="" timestamp="2026-10-25T19:39:20">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
+				<UUID modifications="11" userName="" accountName="" timestamp="2026-10-27T14:36:13">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
 				<TagList></TagList>
 				<Script id="36" name="com.fmi.script.folder.DEA3CF9E8D9F055B574DEAD904F6BD24" isFolder="True">
 					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">C63107CF-E36B-4563-B4F7-97143AFDE943</UUID>
@@ -124,7 +124,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="38" name="com.fmi.script.EB5744F9AC3D65D45430632F605FEE94">
-					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
+					<UUID modifications="2" userName="" accountName="" timestamp="2026-10-27T14:30:00">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -139,7 +139,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="41" name="com.fmi.script.9D72E2AAFB6E345C75FF44E903812444">
-					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">443716F9-92D6-47C0-A5CA-632FB4529747</UUID>
+					<UUID modifications="2" userName="" accountName="" timestamp="2026-10-27T14:30:31">443716F9-92D6-47C0-A5CA-632FB4529747</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -149,7 +149,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="43" name="com.fmi.script.2136D609ABB62DF5407F15D4807303DA">
-					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">5E74A8F6-689C-4A67-A9AF-AE142487D2EC</UUID>
+					<UUID modifications="3" userName="" accountName="" timestamp="2026-10-27T14:36:13">5E74A8F6-689C-4A67-A9AF-AE142487D2EC</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -649,15 +649,15 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="7234A358457D6264CF8EB84547CE5573" index="1" id="103" name="Exit Script" enable="True">
-							<UUID>49EE1956-9AEC-4694-9C28-0BC9EC495423</UUID>
+						<Step hash="EB31B45BF18C9A004AEA50AAA7879F1E" index="1" id="103" name="Exit Script" enable="True">
+							<UUID>71FDB32A-C67A-4A17-8586-37D00DC37AB9</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
-											<Text><![CDATA["com.fmi.calculation.text.D8F7949C6C0C8313618BAB73807E1E03"]]></Text>
+											<Text><![CDATA["com.fmi.calculation.text.55FC176B66736B669AA1B64EB32992D3"]]></Text>
 										</Calculation>
 									</Calculation>
 								</Parameter>
@@ -1348,11 +1348,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="6F645DB18AB4CDC7699AC08DBDE8F77C" index="9" id="3" name="Save a Copy as XML" enable="True">
+						<Step hash="A2451E23074662E1A99C487368E4EC12" index="9" id="3" name="Save a Copy as XML" enable="True">
 							<UUID>64FF454E-71B9-466D-B853-5D2EB9E2CD19</UUID>
 							<OwnerID></OwnerID>
 							<Options>16416</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -1375,6 +1375,20 @@
 								</Parameter>
 								<Parameter type="Boolean">
 									<Boolean type="Specify options as JSON" id="32768" value="False"></Boolean>
+								</Parameter>
+								<Parameter type="JSONOutput">
+									<Calculation datatype="1" position="1">
+										<Calculation>
+											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;
+  [ "com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254" ; JSONMakeArray (
+  "com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD"
+  ; "com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4" ; JSONString ) ; JSONArray ] ;
+  [ "com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA" ; False ; JSONBoolean ]
+)]]></Text>
+										</Calculation>
+									</Calculation>
 								</Parameter>
 							</ParameterValues>
 						</Step>
@@ -1438,8 +1452,8 @@
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="6FD0ADC81C85C5A2121ADB104CBEC97D" index="14" id="141" name="Set Variable" enable="True">
-							<UUID>8CF0C0F3-D8D5-48D4-94AF-4BEEAE30D693</UUID>
+						<Step hash="0B45BD5906A52F11C0621AF001CF5667" index="14" id="141" name="Set Variable" enable="True">
+							<UUID>80B5F417-DC8C-4F3D-B6C2-C4FD59561BAA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -1447,7 +1461,7 @@
 									<value>
 										<Calculation datatype="1" position="1">
 											<Calculation>
-												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; Get ( FileName ) ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ])]]></Text>
+												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;              	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; JSONGetElement ( $result ; "com.fmi.calculation.text.ACA5337DCA3DE218533E907E896F0564" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; JSONGetElement ( $result ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;              	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ] ;              	[ "com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302" ; JSONGetElement ( $p ; "com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A" ; "com.fmi.calculation.text.E7C60D1725E2259EAF1B9AF1D4DD88B8" ; JSONString ]              )]]></Text>
 											</Calculation>
 										</Calculation>
 									</value>
@@ -3648,11 +3662,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="6E46677C31E327D135EBB89F88CACE14" index="12" id="3" name="Save a Copy as XML" enable="True">
+						<Step hash="2546590DA7B530B137AC8715508624E9" index="12" id="3" name="Save a Copy as XML" enable="True">
 							<UUID>8F63C4F5-E0A6-4873-A635-40F2DC5E8252</UUID>
 							<OwnerID></OwnerID>
 							<Options>16416</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -3675,6 +3689,20 @@
 								</Parameter>
 								<Parameter type="Boolean">
 									<Boolean type="Specify options as JSON" id="32768" value="False"></Boolean>
+								</Parameter>
+								<Parameter type="JSONOutput">
+									<Calculation datatype="1" position="1">
+										<Calculation>
+											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;
+  [ "com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254" ; JSONMakeArray (
+  "com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD"
+  ; "com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4" ; JSONString ) ; JSONArray ] ;
+  [ "com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA" ; False ; JSONBoolean ]
+)]]></Text>
+										</Calculation>
+									</Calculation>
 								</Parameter>
 							</ParameterValues>
 						</Step>
@@ -3742,8 +3770,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E1AC28F7A5EACAF52222A8724A3F77DF" index="18" id="141" name="Set Variable" enable="True">
-							<UUID>FB395084-FB32-411C-B6CF-A2C651C476CC</UUID>
+						<Step hash="34FC1646BD45C2542F54DD8D060592AC" index="18" id="141" name="Set Variable" enable="True">
+							<UUID>D88ED33B-6392-4C0D-97EF-25C45843F9F0</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -3751,7 +3779,7 @@
 									<value>
 										<Calculation datatype="1" position="1">
 											<Calculation>
-												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; $solutionName ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; $exportPath ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; $repoPath ; JSONString ])]]></Text>
+												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; $solutionName ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; $exportPath ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; $repoPath ; JSONString ] ;	[ "com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A" ; "com.fmi.calculation.text.5FED2681A5D8498A41DF33FBF4391B55" ; JSONString ])]]></Text>
 											</Calculation>
 										</Calculation>
 									</value>
@@ -4083,11 +4111,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="1662184ADA62468DA3C072AA16105321" index="41" id="3" name="Save a Copy as XML" enable="True">
+						<Step hash="80EBF68DA048ACB10F93B2BAF58FC1F1" index="41" id="3" name="Save a Copy as XML" enable="True">
 							<UUID>4BE17530-4A36-4E88-AEE2-806CD26739A1</UUID>
 							<OwnerID></OwnerID>
 							<Options>16416</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -4111,6 +4139,20 @@
 								<Parameter type="Boolean">
 									<Boolean type="Specify options as JSON" id="32768" value="False"></Boolean>
 								</Parameter>
+								<Parameter type="JSONOutput">
+									<Calculation datatype="1" position="1">
+										<Calculation>
+											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;
+  [ "com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254" ; JSONMakeArray (
+  "com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD"
+  ; "com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4" ; JSONString ) ; JSONArray ] ;
+  [ "com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA" ; False ; JSONBoolean ]
+)]]></Text>
+										</Calculation>
+									</Calculation>
+								</Parameter>
 							</ParameterValues>
 						</Step>
 						<Step hash="00AA73C535FDAC24241940B876FF1C95" index="42" id="89" name="# (comment)" enable="True">
@@ -4123,8 +4165,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E9008618111072BBAFE995A77A97DCB9" index="43" id="141" name="Set Variable" enable="True">
-							<UUID>9BAF37CF-7B4F-4057-860F-D276C099CC4F</UUID>
+						<Step hash="B09DEA1AF01B1473FA7D182C28BFD99A" index="43" id="141" name="Set Variable" enable="True">
+							<UUID>25667AD2-2DBC-4713-9011-63DC075B1694</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -4132,7 +4174,7 @@
 									<value>
 										<Calculation datatype="1" position="1">
 											<Calculation>
-												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; Get ( FileName ) ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ])]]></Text>
+												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; Get ( FileName ) ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ] ;	[ "com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A" ; "com.fmi.calculation.text.5FED2681A5D8498A41DF33FBF4391B55" ; JSONString ])]]></Text>
 											</Calculation>
 										</Calculation>
 									</value>
@@ -4147,8 +4189,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="8DD20B28D13CBCB5EA7AD6570E0ECE46" index="44" id="89" name="# (comment)" enable="True">
-							<UUID>B9B827A5-0A1C-4DB9-9518-E8DE702188F6</UUID>
+						<Step hash="2F976D0D8B9E62C162F00C7B7198B6BF" index="44" id="89" name="# (comment)" enable="True">
+							<UUID>0990D2F4-887F-4B1A-AA00-7412C88B66A8</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
