@@ -8,7 +8,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). `AGFM Agent` no cambia (sigue en 1.0.0): los archivos secundarios no se tocan. Necesita Agentic-FM-APP 0.8.0.
 
-- `AGFM Explode Solution` envía a `/explode` el comentario que se escribe en la tarjeta (`comment`) y `origin: "card"`; `Explode XML` envía `origin: "explode-xml"`. La app los guarda con el explode (`fm_diff`, `fm_report`) y, con la publicación en Gitea activada, el comentario es el mensaje del commit.
+- `AGFM Explode Solution` envía a `/explode` el comentario que se escribe en la tarjeta (`comment`) y `origin: "card"`; `Explode XML` y `AGFM Explode` (el explode silencioso) envían `origin: "explode-xml"`. La app los guarda con el explode (`fm_diff`, `fm_report`) y, con la publicación en Gitea activada, el comentario es el mensaje del commit.
 - Con un add-on anterior la tarjeta funciona igual, pero el comentario no llega a la app.
 
 ## 2026-10-25 — `clipboard.py`: una carpeta de guiones se copia como guiones

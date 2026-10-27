@@ -70,6 +70,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91</StringID>
+	<SourceText>include_details</SourceText>
+	<TargetText>include_details</TargetText>
+	<Comment>com.fmi.calculation.text.include_details</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.093D3FB8190E73CA213E3781F406445E</StringID>
 	<SourceText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</SourceText>
 	<TargetText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</TargetText>
@@ -144,6 +151,13 @@
 	<SourceText> ISO 8601 UTC timestamp for staleness detection </SourceText>
 	<TargetText> ISO 8601 UTC timestamp for staleness detection </TargetText>
 	<Comment>com.fmi.calculation.text. ISO 8601 UTC timestamp for staleness detection</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA</StringID>
+	<SourceText>standalone_binarydata</SourceText>
+	<TargetText>standalone_binarydata</TargetText>
+	<Comment>com.fmi.calculation.text.standalone_binarydata</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -378,6 +392,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254</StringID>
+	<SourceText>catalogs_included</SourceText>
+	<TargetText>catalogs_included</TargetText>
+	<Comment>com.fmi.calculation.text.catalogs_included</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.41A9C7B72775DAA1DED9BED2BBB7C325</StringID>
 	<SourceText>1.0.0</SourceText>
 	<TargetText>1.0.0</TargetText>
@@ -490,6 +511,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA</StringID>
+	<SourceText>split_catalogs</SourceText>
+	<TargetText>split_catalogs</TargetText>
+	<Comment>com.fmi.calculation.text.split_catalogs</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.54996FE58603C566C60F2EF6425BF598</StringID>
 	<SourceText>vars</SourceText>
 	<TargetText>vars</TargetText>
@@ -508,6 +536,13 @@
 	<SourceText>That folder is not an agentic-fm clone (no fmparse.sh).</SourceText>
 	<TargetText>That folder is not an agentic-fm clone (no fmparse.sh).</TargetText>
 	<Comment>com.fmi.calculation.text.That folder is not an agentic-fm clone (no fmparse.sh).</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.55FC176B66736B669AA1B64EB32992D3</StringID>
+	<SourceText>1.2.0</SourceText>
+	<TargetText>1.2.0</TargetText>
+	<Comment>com.fmi.calculation.text.1.2.0</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -567,6 +602,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD</StringID>
+	<SourceText>PersistentStoreCatalog<LF/>  BaseDirectoryCatalog<LF/>  FileAccessCatalog<LF/>  ExternalDataSourceCatalog<LF/>  BaseTableCatalog<LF/>  TableOccurrenceCatalog<LF/>  CustomFunctionsCatalog<LF/>  ValueListCatalog<LF/>  FieldCatalog<LF/>  RelationshipCatalog<LF/>  CustomMenuCatalog<LF/>  CustomMenuSetCatalog<LF/>  ScriptCatalog<LF/>  ThemeCatalog<LF/>  LayoutCatalog<LF/>  LibraryCatalog<LF/>  PrivilegeSetsCatalog<LF/>  ExtendedPrivilegesCatalog<LF/>  AccountsCatalog<LF/>  Metadata</SourceText>
+	<TargetText>PersistentStoreCatalog<LF/>  BaseDirectoryCatalog<LF/>  FileAccessCatalog<LF/>  ExternalDataSourceCatalog<LF/>  BaseTableCatalog<LF/>  TableOccurrenceCatalog<LF/>  CustomFunctionsCatalog<LF/>  ValueListCatalog<LF/>  FieldCatalog<LF/>  RelationshipCatalog<LF/>  CustomMenuCatalog<LF/>  CustomMenuSetCatalog<LF/>  ScriptCatalog<LF/>  ThemeCatalog<LF/>  LayoutCatalog<LF/>  LibraryCatalog<LF/>  PrivilegeSetsCatalog<LF/>  ExtendedPrivilegesCatalog<LF/>  AccountsCatalog<LF/>  Metadata</TargetText>
+	<Comment>com.fmi.calculation.text.PersistentStoreCatalog_LF/_  BaseDirectoryCatalog_LF/_  FileAccessCatalog_LF/_  ExternalDataSourceCatalog_LF/_  BaseTableCatalog_LF/_  TableOccurrenceCatalog_LF/_  CustomFunctionsCatalog_LF/_  ValueListCatalog_LF/_  FieldCatalog_LF/_  RelationshipCatalog_LF/_  CustomMenuCatalog_LF/_  CustomMenuSetCatalog_LF/_  ScriptCatalog_LF/_  ThemeCatalog_LF/_  LayoutCatalog_LF/_  LibraryCatalog_LF/_  PrivilegeSetsCatalog_LF/_  ExtendedPrivilegesCatalog_LF/_  AccountsCatalog_LF/_  Metadata</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8</StringID>
 	<SourceText>::</SourceText>
 	<TargetText>::</TargetText>
@@ -585,6 +627,13 @@
 	<SourceText>Normal</SourceText>
 	<TargetText>Normal</TargetText>
 	<Comment>com.fmi.calculation.text.Normal</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.5FED2681A5D8498A41DF33FBF4391B55</StringID>
+	<SourceText>explode-xml</SourceText>
+	<TargetText>explode-xml</TargetText>
+	<Comment>com.fmi.calculation.text.explode-xml</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -746,6 +795,13 @@
 	<SourceText> ===================================================================<CR/>       Collect unique TOs referenced on the current layout.<CR/>       FieldNames returns related fields as &quot;TOName::FieldName&quot;.<CR/>       We extract the TO prefixes to discover all related TOs.<CR/>       =================================================================== </SourceText>
 	<TargetText> ===================================================================<CR/>       Collect unique TOs referenced on the current layout.<CR/>       FieldNames returns related fields as &quot;TOName::FieldName&quot;.<CR/>       We extract the TO prefixes to discover all related TOs.<CR/>       =================================================================== </TargetText>
 	<Comment>com.fmi.calculation.text. ===================================================================_CR/_       Collect unique TOs referenced on the current layout._CR/_       FieldNames returns related fields as &quot;TOName::FieldName&quot;._CR/_       We extract the TO prefixes to discover all related TOs._CR/_       ===================================================================</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A</StringID>
+	<SourceText>origin</SourceText>
+	<TargetText>origin</TargetText>
+	<Comment>com.fmi.calculation.text.origin</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -914,6 +970,13 @@
 	<SourceText>source</SourceText>
 	<TargetText>source</TargetText>
 	<Comment>com.fmi.calculation.text.source</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4</StringID>
+	<SourceText> </SourceText>
+	<TargetText> </TargetText>
+	<Comment>com.fmi.calculation.text.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1239,6 +1302,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302</StringID>
+	<SourceText>comment</SourceText>
+	<TargetText>comment</TargetText>
+	<Comment>com.fmi.calculation.text.comment</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.C4408A9992D10656FB1FCF9D0C5309FB</StringID>
 	<SourceText>push</SourceText>
 	<TargetText>push</TargetText>
@@ -1400,13 +1470,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.D8F7949C6C0C8313618BAB73807E1E03</StringID>
-	<SourceText>1.1.0</SourceText>
-	<TargetText>1.1.0</TargetText>
-	<Comment>com.fmi.calculation.text.1.1.0</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.D9A9E0F5D2E0BAFC47CEC71F53CB7597</StringID>
 	<SourceText>AGFM Agent</SourceText>
 	<TargetText>AGFM Agent</TargetText>
@@ -1502,6 +1565,13 @@
 	<SourceText>parameter</SourceText>
 	<TargetText>parameter</TargetText>
 	<Comment>com.fmi.calculation.text.parameter</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E7C60D1725E2259EAF1B9AF1D4DD88B8</StringID>
+	<SourceText>card</SourceText>
+	<TargetText>card</TargetText>
+	<Comment>com.fmi.calculation.text.card</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>

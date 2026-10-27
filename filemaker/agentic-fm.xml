@@ -380,7 +380,8 @@
 	[ "solution_name" ; Get ( FileName ) ; JSONString ] ;
 	[ "export_file_path" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;
 	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ] ;
-	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ]
+	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ] ;
+	[ "origin" ; "explode-xml" ; JSONString ]
 )]]></Calculation>
         </Value>
         <Repetition>

@@ -272,6 +272,11 @@ class TestExplodeCommentAndOrigin(unittest.TestCase):
             self.assertIn('[ "comment" ; JSONGetElement ( $p ; "comment" ) ; JSONString ]', text)
             self.assertIn('[ "origin" ; "card" ; JSONString ]', text)
 
+    def test_the_silent_explode_says_explode_xml(self):
+        payloads = explode_payloads("AGFM Explode")
+        self.assertEqual(len(payloads), 1)
+        self.assertIn('[ "origin" ; "explode-xml" ; JSONString ]', payloads[0])
+
     def test_explode_xml_says_explode_xml_and_sends_no_comment(self):
         payloads = explode_payloads("Explode XML")
         self.assertEqual(len(payloads), 2)                      # app path and classic companion path
