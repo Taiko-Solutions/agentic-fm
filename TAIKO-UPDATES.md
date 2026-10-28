@@ -4,6 +4,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-28 — Documentación del MCP `agentic-fm-app` al día (v0.8.1)
+
+- `.claude/CLAUDE.md` deja de listar las herramientas del índice a mano: nombra las clave (`fm_search`, `fm_find`/`fm_get`, `fm_refs`/`fm_impact`, `kb_search`) y remite a la nota de Obsidian `Organización/Skills/FileMaker/Indice-Agentic-FM-App.md` (skill `taiko-filemaker:fm-indice`) para qué herramienta usar y a `docs/mcp.md` de agentic-fm-app para los parámetros. La jerarquía de búsqueda no cambia.
+- `fm-sesion.md` y `fm-nuevo-proyecto.md` (botón *Register MCP*) apuntan a lo mismo. La skill `trace` se actualiza en una PR aparte (las skills viven en `.cursor/skills/` y `paths.conf` aún no lo permitía).
+
 ## 2026-10-27 — add-on 1.2.0: comentario y origen del explode
 
 **Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). `AGFM Agent` no cambia (sigue en 1.0.0): los archivos secundarios no se tocan. Necesita Agentic-FM-APP 0.8.0.
