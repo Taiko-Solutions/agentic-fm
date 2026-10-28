@@ -123,7 +123,7 @@
         <Text>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Text>
       </Step>
       <Step enable="True" id="103" name="Exit Script">
-        <Calculation><![CDATA["1.2.0"]]></Calculation>
+        <Calculation><![CDATA["1.3.0"]]></Calculation>
       </Step>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="23" name="AGFM Choose Folder">
@@ -430,7 +430,7 @@
         <Text>PURPOSE: The add-on's one button. Without a parameter it opens the agentic-fm card (layout AGFM Explode, web viewer agfm). With a parameter it explodes or checks the files the card lists, reporting each one to the card.</Text>
       </Step>
       <Step enable="True" id="89" name="# (comment)">
-        <Text>PARAMETER: JSON { action: "export" | "check", files: [ { solution, data_source } ] }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</Text>
+        <Text>PARAMETER: JSON { action: "export" | "check", files: [ { solution, data_source } ], comment?, migration_mark? }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</Text>
       </Step>
       <Step enable="True" id="89" name="# (comment)">
         <Text>RETURNS: nothing. Progress goes to the card: agfm.progress per file { solution, state, code, message, warnings, agent_version } and agfm.done { action, ok, errors }. No dialogs once the card is open.</Text>
@@ -961,7 +961,8 @@
               	[ "repo_path" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "path" ) ; 1 ) ; JSONString ] ;
               	[ "exploder_bin_path" ; "~/bin/fm-xml-export-exploder" ; JSONString ] ;
               	[ "comment" ; JSONGetElement ( $p ; "comment" ) ; JSONString ] ;
-              	[ "origin" ; "card" ; JSONString ]
+              	[ "origin" ; "card" ; JSONString ] ;
+              	[ "migration_mark" ; JSONGetElement ( $p ; "migration_mark" ) = 1 ; JSONBoolean ]
               )]]></Calculation>
               </Value>
               <Repetition>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-10-27T14:37:18">
+<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-10-28T15:55:04">
 	<Structure membercount="1">
 		<AddAction membercount="11">
 			<BaseTableCatalog membercount="1">
@@ -111,7 +111,7 @@
 			</CustomMenuCatalog>
 			<PasteIndexList membercount="0"></PasteIndexList>
 			<ScriptCatalog membercount="19">
-				<UUID modifications="11" userName="" accountName="" timestamp="2026-10-27T14:36:13">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
+				<UUID modifications="17" userName="" accountName="" timestamp="2026-10-28T15:52:28">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
 				<TagList></TagList>
 				<Script id="36" name="com.fmi.script.folder.DEA3CF9E8D9F055B574DEAD904F6BD24" isFolder="True">
 					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">C63107CF-E36B-4563-B4F7-97143AFDE943</UUID>
@@ -124,7 +124,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="38" name="com.fmi.script.EB5744F9AC3D65D45430632F605FEE94">
-					<UUID modifications="2" userName="" accountName="" timestamp="2026-10-27T14:30:00">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
+					<UUID modifications="5" userName="" accountName="" timestamp="2026-10-28T15:36:59">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -139,12 +139,12 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="41" name="com.fmi.script.9D72E2AAFB6E345C75FF44E903812444">
-					<UUID modifications="2" userName="" accountName="" timestamp="2026-10-27T14:30:31">443716F9-92D6-47C0-A5CA-632FB4529747</UUID>
+					<UUID modifications="3" userName="" accountName="" timestamp="2026-10-28T15:51:29">443716F9-92D6-47C0-A5CA-632FB4529747</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
 				<Script id="42" name="com.fmi.script.172F7F1A6340A03D1BBA92F975CAD624">
-					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">186781F8-0243-408D-A478-5750DAD151A3</UUID>
+					<UUID modifications="3" userName="" accountName="" timestamp="2026-10-28T15:52:28">186781F8-0243-408D-A478-5750DAD151A3</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -225,7 +225,7 @@
 				</BinaryData>
 			</LibraryCatalog>
 			<LayoutCatalog membercount="1">
-				<UUID modifications="20" userName="" accountName="" timestamp="2026-10-25T19:43:09">2686B568-8364-4B58-9F1C-88EEF669867F</UUID>
+				<UUID modifications="21" userName="" accountName="" timestamp="2026-10-25T19:43:09">2686B568-8364-4B58-9F1C-88EEF669867F</UUID>
 				<TagList></TagList>
 				<Layout id="3" name="com.fmi.layout.9D72E2AAFB6E345C75FF44E903812444" width="530">
 					<TableOccurrenceReference id="1065089" name="com.fmi.tableoccurrence.59E799C8D64DB245C2EF8BEDD483B48C" UUID="8FEF98FE-534E-4DF4-828D-6781257D710B"></TableOccurrenceReference>
@@ -649,7 +649,7 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="EB31B45BF18C9A004AEA50AAA7879F1E" index="1" id="103" name="Exit Script" enable="True">
+						<Step hash="3145E28DFDC30FD6BB4E9559C596A188" index="1" id="103" name="Exit Script" enable="True">
 							<UUID>71FDB32A-C67A-4A17-8586-37D00DC37AB9</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
@@ -657,7 +657,7 @@
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
-											<Text><![CDATA["com.fmi.calculation.text.55FC176B66736B669AA1B64EB32992D3"]]></Text>
+											<Text><![CDATA["com.fmi.calculation.text.0998BDA6B76150B5509DDE8D55BD86AE"]]></Text>
 										</Calculation>
 									</Calculation>
 								</Parameter>
@@ -1452,7 +1452,7 @@
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="0B45BD5906A52F11C0621AF001CF5667" index="14" id="141" name="Set Variable" enable="True">
+						<Step hash="D2530460A484D9607825640271F078E0" index="14" id="141" name="Set Variable" enable="True">
 							<UUID>80B5F417-DC8C-4F3D-B6C2-C4FD59561BAA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
@@ -1461,7 +1461,7 @@
 									<value>
 										<Calculation datatype="1" position="1">
 											<Calculation>
-												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;              	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; JSONGetElement ( $result ; "com.fmi.calculation.text.ACA5337DCA3DE218533E907E896F0564" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; JSONGetElement ( $result ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;              	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ] ;              	[ "com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302" ; JSONGetElement ( $p ; "com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A" ; "com.fmi.calculation.text.E7C60D1725E2259EAF1B9AF1D4DD88B8" ; JSONString ]              )]]></Text>
+												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; Get ( FileName ) ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; ConvertFromFileMakerPath ( $output ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ] ;	[ "com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A" ; "com.fmi.calculation.text.5FED2681A5D8498A41DF33FBF4391B55" ; JSONString ])]]></Text>
 											</Calculation>
 										</Calculation>
 									</value>
@@ -1608,13 +1608,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="C0329FC570CAB00BC1F9617F264F718B" index="1" id="89" name="# (comment)" enable="True">
+						<Step hash="F4262501C9FB37053DC46C646A4D9FB2" index="1" id="89" name="# (comment)" enable="True">
 							<UUID>A6E3C294-A304-4F05-AE5E-81F03F1B4ABB</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
 								<Parameter type="Comment">
-									<Comment value="com.fmi.scriptstep.text.C8054D2E7E8705DDF8054286C728D3B8"></Comment>
+									<Comment value="com.fmi.scriptstep.text.729E7655BE428A722B86CD8E8A61A6FF"></Comment>
 								</Parameter>
 							</ParameterValues>
 						</Step>
@@ -3050,7 +3050,7 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="D8B4BA1FCD868113D6B60A01216F1B83" index="77" id="141" name="Set Variable" enable="True">
+						<Step hash="E98A7B9400B1EF36DE332AE4A0ED7119" index="77" id="141" name="Set Variable" enable="True">
 							<UUID>D0BB19CD-241E-43BE-9C04-EC7D1BE0979A</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
@@ -3059,7 +3059,7 @@
 									<value>
 										<Calculation datatype="1" position="1">
 											<Calculation>
-												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;              	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; JSONGetElement ( $result ; "com.fmi.calculation.text.ACA5337DCA3DE218533E907E896F0564" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; JSONGetElement ( $result ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; JSONString ] ;              	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;              	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ]              )]]></Text>
+												<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23" ; JSONGetElement ( $result ; "com.fmi.calculation.text.ACA5337DCA3DE218533E907E896F0564" ) ; JSONString ] ;	[ "com.fmi.calculation.text.A2677BC3F1C2CA80F8E0C336C1F5E555" ; JSONGetElement ( $result ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; JSONString ] ;	[ "com.fmi.calculation.text.24A06343015AFBAF7786DC1E95FFA4C2" ; ConvertFromFileMakerPath ( JSONGetElement ( $$AGENTIC.FM ; "com.fmi.calculation.text.788EE9EFEBF64250EEB2FF73611D249D" ) ; 1 ) ; JSONString ] ;	[ "com.fmi.calculation.text.5A1A3FA9D3CA552A5F30178DAD87CFF6" ; "com.fmi.calculation.text.8D03BF1EDECF22B6AF379105E55801EC" ; JSONString ] ;	[ "com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302" ; JSONGetElement ( $p ; "com.fmi.calculation.text.C19649B8C669AD5A06EC361520204302" ) ; JSONString ] ;	[ "com.fmi.calculation.text.7B8E733A76D642C6B3AF1DD766E90D2A" ; "com.fmi.calculation.text.E7C60D1725E2259EAF1B9AF1D4DD88B8" ; JSONString ] ;	[ "com.fmi.calculation.text.D9EF10A3BDBB7FB3FDF01E1683B4597F" ; JSONGetElement ( $p ; "com.fmi.calculation.text.D9EF10A3BDBB7FB3FDF01E1683B4597F" ) = 1 ; JSONBoolean ])]]></Text>
 											</Calculation>
 										</Calculation>
 									</value>
@@ -6042,11 +6042,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="A57E5844BDC02216D2B42DF0CDEC0080" index="19" id="3" name="Save a Copy as XML" enable="True">
+						<Step hash="BECC68E2AD30E4342D5FF238EB6B1377" index="19" id="3" name="Save a Copy as XML" enable="True">
 							<UUID>58975438-ECEF-464A-B306-95D419AC903C</UUID>
 							<OwnerID></OwnerID>
 							<Options>16416</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -6069,6 +6069,20 @@
 								</Parameter>
 								<Parameter type="Boolean">
 									<Boolean type="Specify options as JSON" id="32768" value="False"></Boolean>
+								</Parameter>
+								<Parameter type="JSONOutput">
+									<Calculation datatype="1" position="1">
+										<Calculation>
+											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;
+  [ "com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254" ; JSONMakeArray (
+  "com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD"
+  ; "com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4" ; JSONString ) ; JSONArray ] ;
+  [ "com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA" ; False ; JSONBoolean ] ;
+  [ "com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA" ; False ; JSONBoolean ]
+)]]></Text>
+										</Calculation>
+									</Calculation>
 								</Parameter>
 							</ParameterValues>
 						</Step>
@@ -8609,13 +8623,13 @@
 		<Layout>
 			<ByLocalesList>
 				<locale ISO639_1="en">
-					<LayoutObject hash="E032A55A179D6203D3752339C5FEBD3A" id="4" type="Group" name="" kind="8">
-						<Bounds top="31" left="38" bottom="106" right="208"></Bounds>
+					<LayoutObject hash="3918BA7BF31F85E17AD06C247D37F8F6" id="4" type="Group" name="" kind="8">
+						<Bounds top="16" left="33" bottom="74" right="203"></Bounds>
 						<Options>805306368</Options>
 						<GroupedButton>
 							<ObjectList membercount="2">
-								<LayoutObject hash="F088C1C2D2DBFC7A5FFA4823386D177A" id="3" type="Button" name="" kind="10">
-									<Bounds top="17" left="52" bottom="58" right="118"></Bounds>
+								<LayoutObject hash="E8DB9BD153AFD2C0730A928818FF7C0F" id="3" type="Button" name="" kind="10">
+									<Bounds top="12" left="52" bottom="42" right="118"></Bounds>
 									<Options>805306376</Options>
 									<Button>
 										<Options>0</Options>
@@ -8784,8 +8798,8 @@ self:normal .baseline
 }
 ]]></FullCSS>
 								</LayoutObject>
-								<LayoutObject hash="8AEE6311A4C155927338DE12100E6ED1" id="2" type="Button" name="" kind="10">
-									<Bounds top="0" left="0" bottom="75" right="170"></Bounds>
+								<LayoutObject hash="D7BE9944A99149A561B989E422574451" id="2" type="Button" name="" kind="10">
+									<Bounds top="0" left="0" bottom="58" right="170"></Bounds>
 									<Options>805371912</Options>
 									<Button>
 										<Options>0</Options>
@@ -8793,7 +8807,15 @@ self:normal .baseline
 											<Text>
 												<Options>2</Options>
 												<StyledText>
-													<Data><![CDATA[com.fmi.layoutobject.text.DEA3CF9E8D9F055B574DEAD904F6BD24]]></Data>
+													<Data><![CDATA[com.fmi.layoutobject.text.3F868D17CFB579ECA89E032F15EDD204]]></Data>
+													<CharacterStyleList membercount="1">
+														<CharacterStyle Start="11" End="4294967295">
+															<Text><![CDATA[1.3.0]]></Text>
+															<Style>
+																<FontStyle mask="2"></FontStyle>
+															</Style>
+														</CharacterStyle>
+													</CharacterStyleList>
 												</StyledText>
 											</Text>
 										</Label>
