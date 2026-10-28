@@ -20,6 +20,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 - `AGFM Explode Solution` reenvía a `/explode` el `migration_mark` que manda la tarjeta con «Exportar y marcar como migrado», junto al comentario y `origin: "card"` de 1.2.0. La app explota cada archivo marcado y crea la marca de migración (tag `migracion/<archivo>/<fecha>` en el repo de historial). Sin la publicación activada la app rechaza el explode con `publishing_disabled` y la tarjeta lo explica.
 - `Explode XML` no marca nunca. Con un add-on anterior el botón de la tarjeta exporta sin marcar; marca con `agfm migration mark`.
+- Corrige dos fallos del paquete 1.2.0 (la plantilla no tenía los guiones de 1.2): el comentario de la tarjeta no llegaba a la app, y `AGFM Explode` (el explode silencioso) enviaba el payload de la tarjeta, con nombre de archivo y ruta vacíos. Ahora la tarjeta envía `comment` y `origin: "card"`, y `AGFM Explode` su propio payload con `origin: "explode-xml"`.
 
 ## 2026-10-27 — add-on 1.2.0: comentario y origen del explode
 
