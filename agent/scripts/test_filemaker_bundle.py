@@ -71,7 +71,7 @@ def bundle_version():
 
 class TestVersion(unittest.TestCase):
     def test_version_is_a_quoted_semver_literal(self):
-        self.assertEqual(bundle_version(), "1.2.0")
+        self.assertEqual(bundle_version(), "1.3.0")
 
     def test_version_script_lives_in_the_top_folder(self):
         top = _ROOT.find("Group")
@@ -283,6 +283,22 @@ class TestExplodeCommentAndOrigin(unittest.TestCase):
         for text in payloads:
             self.assertIn('[ "origin" ; "explode-xml" ; JSONString ]', text)
             self.assertNotIn('"comment"', text)
+
+
+class TestExplodeMigrationMark(unittest.TestCase):
+    """1.3.0: «Exportar y marcar como migrado» in the card asks the app to record a migration mark (agentic-fm-app F11a)."""
+
+    def test_the_card_forwards_migration_mark_as_a_boolean(self):
+        payloads = explode_payloads("AGFM Explode Solution")
+        self.assertTrue(payloads)
+        for text in payloads:
+            self.assertIn('[ "migration_mark" ; JSONGetElement ( $p ; "migration_mark" ) = 1 ; JSONBoolean ]', text)
+            self.assertIn('[ "comment" ; JSONGetElement ( $p ; "comment" ) ; JSONString ]', text)
+            self.assertIn('[ "origin" ; "card" ; JSONString ]', text)
+
+    def test_explode_xml_never_marks(self):
+        for text in explode_payloads("Explode XML"):
+            self.assertNotIn("migration_mark", text)
 
 
 class TestPackage(unittest.TestCase):

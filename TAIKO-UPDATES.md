@@ -14,6 +14,13 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 - `.claude/CLAUDE.md` deja de listar las herramientas del índice a mano: nombra las clave (`fm_search`, `fm_find`/`fm_get`, `fm_refs`/`fm_impact`, `kb_search`) y remite a la nota de Obsidian `Organización/Skills/FileMaker/Indice-Agentic-FM-App.md` (skill `taiko-filemaker:fm-indice`) para qué herramienta usar y a `docs/mcp.md` de agentic-fm-app para los parámetros. La jerarquía de búsqueda no cambia.
 - `fm-sesion.md` y `fm-nuevo-proyecto.md` (botón *Register MCP*) apuntan a lo mismo. La skill `trace` también: los usos en cálculos y las llamadas entre ficheros explotados ya están en `fm_refs`; el texto dinámico se marca, no se resuelve; `fm_search` para «dónde aparece este nombre».
 
+## 2026-10-28 — add-on 1.3.0: marcar migraciones desde la tarjeta
+
+**Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). `AGFM Agent` no cambia (sigue en 1.0.0): los archivos secundarios no se tocan. Necesita Agentic-FM-APP con F11a (migraciones) y la publicación en Gitea activada en el proyecto.
+
+- `AGFM Explode Solution` reenvía a `/explode` el `migration_mark` que manda la tarjeta con «Exportar y marcar como migrado», junto al comentario y `origin: "card"` de 1.2.0. La app explota cada archivo marcado y crea la marca de migración (tag `migracion/<archivo>/<fecha>` en el repo de historial). Sin la publicación activada la app rechaza el explode con `publishing_disabled` y la tarjeta lo explica.
+- `Explode XML` no marca nunca. Con un add-on anterior el botón de la tarjeta exporta sin marcar; marca con `agfm migration mark`.
+
 ## 2026-10-27 — add-on 1.2.0: comentario y origen del explode
 
 **Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). `AGFM Agent` no cambia (sigue en 1.0.0): los archivos secundarios no se tocan. Necesita Agentic-FM-APP 0.8.0.
