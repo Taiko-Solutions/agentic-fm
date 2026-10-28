@@ -4,6 +4,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-28 — `paths.conf` permite `.cursor/skills/`
+
+- `.claude/skills` es un enlace simbólico a `.cursor/skills` (estructura de upstream), así que cualquier cambio en una skill sube como `.cursor/skills/...`. La regla `[allow]` no lo incluía y `paths-and-sanity` bloqueaba toda PR que tocase una skill. Ahora `^\.cursor/skills/` está en `[allow]` y en `[changelog-trigger]`; el resto de `.cursor/` sigue bloqueado.
+- **Acción opcional:** `agentic-fm-sync` en los clones para que el hook `pre-push` local use la regla nueva.
+
 ## 2026-10-27 — add-on 1.2.0: comentario y origen del explode
 
 **Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). `AGFM Agent` no cambia (sigue en 1.0.0): los archivos secundarios no se tocan. Necesita Agentic-FM-APP 0.8.0.
