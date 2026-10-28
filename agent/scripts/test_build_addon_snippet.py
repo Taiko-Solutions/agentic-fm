@@ -216,6 +216,56 @@ def package_has_agent():
     return "<SourceText>AGFM Agent</SourceText>" in strings.read_text(encoding="utf-8-sig")
 
 
+CALC_TOKEN = r"com\.fmi\.calculation\.text\.[0-9A-F]{32}"
+
+
+def calc_norm(text):
+    """Comments dropped, whitespace collapsed: what a calculation keeps between the bundle and the package."""
+    import re
+    return re.sub(r"\s+", " ", re.sub(r"/\*.*?\*/", "", text, flags=re.S)).strip()
+
+
+def package_scripts(package_dir):
+    """{script name: its step calculations as one normalised text}, from a built package. template.xml keeps names
+    and literals as com.fmi.* tokens; en.xml holds their text."""
+    import html
+    import re
+    strings = {sid: html.unescape(src) for sid, src in re.findall(
+        r"<StringID>(.*?)</StringID>\s*<SourceText>(.*?)</SourceText>",
+        (package_dir / "en.xml").read_text(encoding="utf-8-sig"), re.S)}
+    resolve = lambda text: re.sub(CALC_TOKEN, lambda m: strings.get(m.group(0), m.group(0)), text)
+    root = ET.fromstring((package_dir / "template.xml").read_text(encoding="utf-8-sig").encode("utf-8"))
+    scripts = {}
+    for steps in root.iter("StepsForScripts"):
+        for entry in steps:
+            ref = entry.find("ScriptReference")
+            if ref is not None:
+                name = strings.get(ref.get("name"), ref.get("name"))
+                scripts[name] = calc_norm(" ".join(resolve(t.text or "") for t in entry.iter("Text")))
+    return scripts
+
+
+def script_mismatches(package):
+    """(script, calculation) pairs of the manifest's bundle scripts that are not in that same script of `package`
+    (literals included). Button labels are skipped: the package keeps them outside the step calculations."""
+    manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
+    root = ET.fromstring(B.fill_context(real_bundle(), real_fmfn()).encode("utf-8"))
+    labels = {id(c) for button in root.iter("Button") for c in button.iter("Calculation")}
+    out = []
+    for script in root.iter("Script"):
+        name = script.get("name")
+        if name not in manifest["scripts"] or script.find("Step") is None:
+            continue
+        text = package.get(name)
+        if text is None:
+            continue    # a script missing from the package is the whole-package check's job
+        for calc in script.iter("Calculation"):
+            code = calc_norm(calc.text or "")
+            if id(calc) not in labels and len(code) >= 3 and code not in text:
+                out.append((name, code[:80]))
+    return out
+
+
 PENDING = unittest.skipUnless(package_has_agent(), "package not rebuilt yet with AGFM Agent / version 1.1.0 (rebuild in FileMaker, then --package)")
 
 
@@ -248,6 +298,20 @@ class TestPackageMatchesBundle(unittest.TestCase):
                     if len(code) >= 3 and code not in template:
                         missing.append((script.get("name"), code[:80]))
         self.assertEqual(missing, [], "package is stale: rebuild it in FileMaker, then build_addon_snippet.py --package")
+
+    @PENDING
+    def test_each_script_of_the_package_matches_its_bundle_script(self):
+        """Script by script, literals included: the 1.2.0 package had the card's /explode payload in AGFM Explode and
+        the 1.1 payload in AGFM Explode Solution, and the whole-package check above still passed."""
+        package = package_scripts(REPO / "filemaker" / "addon" / "agentic-fm")
+        self.assertEqual(script_mismatches(package), [],
+                         "package is stale: rebuild it in FileMaker, then build_addon_snippet.py --package")
+
+    def test_a_script_missing_its_calculations_is_caught(self):
+        package = {"AGFM Explode": "", "AGFM Explode Solution": ""}
+        names = {name for name, _ in script_mismatches(package)}
+        self.assertIn("AGFM Explode", names)
+        self.assertIn("AGFM Explode Solution", names)
 
     @PENDING
     def test_package_version_matches_the_manifest(self):
