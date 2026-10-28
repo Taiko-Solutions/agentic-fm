@@ -25,7 +25,7 @@ Si el MCP `obsidian-trabajo` responde, lee `Organización/Skills/Claude-Code-Fil
 
 ## 3. Herramientas vivas
 
-- **Estructura** (IDs, quién usa qué, call trees, knowledge): MCP `agentic-fm-app` si está (`fm_find`, `fm_refs`, `kb_search`…); si no, el árbol de búsqueda de `CLAUDE.md` (CONTEXT.json → index → xml_parsed).
+- **Estructura** (IDs, quién usa qué, call trees, knowledge): MCP `agentic-fm-app` si está (`fm_search`, `fm_find`, `fm_refs`, `kb_search`…; qué herramienta para cada pregunta — auditorías, objetos sin uso, referencias rotas, historial, privilegios, rutas entre TOs, informes — en la nota de Obsidian `Organización/Skills/FileMaker/Indice-Agentic-FM-App.md`, skill `taiko-filemaker:fm-indice`; parámetros exactos en `~/GITs/agentic-fm-app/docs/mcp.md`); si no, el árbol de búsqueda de `CLAUDE.md` (CONTEXT.json → index → xml_parsed).
 - **Estado vivo** (valores, "¿existe aún X?", drift de un layout, ERD): ProofKit MCP, siempre tras `connectedFiles`.
 - **Docs FM**: Dash MCP primero; `help.claris.com/llms.txt` como complemento.
 
