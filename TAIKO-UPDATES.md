@@ -4,6 +4,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-10-28 — `paths.conf` permite `.cursor/skills/`
+
+- `.claude/skills` es un enlace simbólico a `.cursor/skills` (estructura de upstream), así que cualquier cambio en una skill sube como `.cursor/skills/...`. La regla `[allow]` no lo incluía y `paths-and-sanity` bloqueaba toda PR que tocase una skill. Ahora `^\.cursor/skills/` está en `[allow]` y en `[changelog-trigger]`; el resto de `.cursor/` sigue bloqueado.
+- **Acción opcional:** `agentic-fm-sync` en los clones para que el hook `pre-push` local use la regla nueva.
+
 ## 2026-10-28 — Documentación del MCP `agentic-fm-app` al día (v0.8.1)
 
 - `.claude/CLAUDE.md` deja de listar las herramientas del índice a mano: nombra las clave (`fm_search`, `fm_find`/`fm_get`, `fm_refs`/`fm_impact`, `kb_search`) y remite a la nota de Obsidian `Organización/Skills/FileMaker/Indice-Agentic-FM-App.md` (skill `taiko-filemaker:fm-indice`) para qué herramienta usar y a `docs/mcp.md` de agentic-fm-app para los parámetros. La jerarquía de búsqueda no cambia.

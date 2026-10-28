@@ -54,6 +54,16 @@ class AllowlistTests(unittest.TestCase):
         r = cpp.classify(files, "mejora/x", False, RULES)
         self.assertTrue(r.ok, r.blocked)
 
+    def test_skills_under_cursor_pass(self):
+        # .claude/skills es un symlink a .cursor/skills (estructura de upstream): las skills se editan ahí.
+        r = cpp.classify([".cursor/skills/trace/SKILL.md"], "mejora/x", False, RULES)
+        self.assertTrue(r.ok, r.blocked)
+        self.assertTrue(any("TAIKO-UPDATES.md" in w for w in r.warnings))
+
+    def test_rest_of_cursor_still_blocked(self):
+        r = cpp.classify([".cursor/rules/x.mdc"], "mejora/x", False, RULES)
+        self.assertFalse(r.ok)
+
     def test_mejora_rules_without_changelog_warns(self):
         r = cpp.classify(["agent/docs/taiko/knowledge/a.md"], "mejora/x", False, RULES)
         self.assertTrue(r.ok)
