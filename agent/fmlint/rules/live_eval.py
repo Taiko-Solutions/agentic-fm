@@ -6,98 +6,49 @@ and developer confirmation before execution.
 """
 
 import json
-import urllib.request
-import urllib.error
-import base64
 
 from ..engine import rule, LintRule
+from ..odata import (
+    BridgeError,
+    ODataConfigError,
+    ScriptMissing,
+    bridge_call,
+    load_solutions,
+    resolve,
+)
 from ..types import Diagnostic, Severity
 
-
-def _odata_call(odata_config, script_name, parameter=""):
-    """Call a FileMaker script via AGFMScriptBridge over OData.
-
-    Returns the parsed scriptResult dict, or None on failure.
-    """
-    base_url = odata_config.get("base_url", "")
-    database = odata_config.get("database", "")
-    username = odata_config.get("username", "")
-    password = odata_config.get("password", "")
-    bridge = odata_config.get("script_bridge", "AGFMScriptBridge")
-
-    if not all([base_url, database, username, password]):
-        return None
-
-    # URL-encode the database name
-    encoded_db = urllib.request.quote(database, safe="")
-    url = f"{base_url}/{encoded_db}/Script.{bridge}"
-
-    # Build the double-serialized payload
-    inner_param = json.dumps({"script": script_name, "parameter": parameter})
-    payload = json.dumps({"scriptParameterValue": inner_param})
-
-    # Basic auth
-    credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
-
-    req = urllib.request.Request(
-        url,
-        data=payload.encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Basic {credentials}",
-        },
-        method="POST",
-    )
-
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-            return result.get("scriptResult", result)
-    except (urllib.error.URLError, json.JSONDecodeError, OSError):
-        return None
+# Errores del puente AGFMAgentCall que invalidan toda la tanda.
+AGENT_FATAL_ERRORS = ("agent_unreachable", "mode_not_allowed")
 
 
-def _evaluate_expression(odata_config, expression, layout=None):
-    """Evaluate a FileMaker calculation via AGFMEvaluation.
+def _evaluate_expression(target, expression, layout=None):
+    """Evalúa un cálculo por el destino resuelto (el principal, con o sin data_source).
 
-    Returns dict with keys: success, error_code, result, expression, layout
+    Devuelve el veredicto ya desenvuelto (dict). Lanza BridgeError / ODataConfigError.
     """
     param = {"expression": expression}
     if layout:
         param["layout"] = layout
+    if target.data_source is None:
+        return bridge_call(target.odata, "AGFMEvaluation", json.dumps(param))
+    param = {"mode": "evaluate", **param, "data_source": target.data_source}
+    return bridge_call(target.odata, "AGFMAgentCall", json.dumps(param))
 
-    result = _odata_call(odata_config, "AGFMEvaluation", json.dumps(param))
-    if result is None:
-        return None
 
-    # The result might be in resultParameter (JSON string)
-    rp = result.get("resultParameter", "")
-    if isinstance(rp, str) and rp:
-        try:
-            result = json.loads(rp)
-        except json.JSONDecodeError:
-            pass
-
-    # Some AGFMScriptBridge builds wrap the evaluation verdict one layer
-    # deeper: the outer envelope's `result` is itself a JSON string holding the
-    # real {error_code, result, success}. Peel nested JSON-object string layers
-    # so the caller sees the actual verdict — otherwise a genuine "?" result
-    # hides behind the outer envelope's success:true and is never flagged.
-    for _ in range(3):
-        if not isinstance(result, dict):
-            break
-        inner = result.get("result")
-        if isinstance(inner, str):
-            stripped = inner.strip()
-            if stripped.startswith("{") and stripped.endswith("}"):
-                try:
-                    result = json.loads(stripped)
-                    continue
-                except json.JSONDecodeError:
-                    pass
-        break
-
-    return result
+def _bridge_error_message(exc, target):
+    if isinstance(exc, ScriptMissing):
+        if exc.script == "AGFMAgentCall":
+            return (f"{target.main} no tiene AGFMAgentCall: "
+                    "actualiza el add-on agentic-fm del archivo principal")
+        return (f"{target.main} no tiene {exc.script}: "
+                "instala o actualiza el add-on agentic-fm")
+    if exc.status in (401, 403):
+        return f"credenciales OData rechazadas ({exc.status}) en {target.main}: revisa automation.json"
+    if exc.status == 404:
+        return (f"{target.main}: no se encuentra AGFMScriptBridge o la base de datos (404): "
+                "revisa automation.json y el add-on")
+    return f"no se pudo contactar con FileMaker Server ({exc.reason})"
 
 
 # ---------------------------------------------------------------------------
@@ -115,35 +66,6 @@ class LiveEvalError(LintRule):
     formats = {"xml", "hr"}
     tier = 3
     requires_confirmation = True
-
-    def _get_odata_config(self, context):
-        """Extract OData config from context's automation.json data."""
-        if not context or not context._project_root:
-            return None
-
-        auto_path = context._project_root / "agent" / "config" / "automation.json"
-        if not auto_path.exists():
-            return None
-
-        try:
-            with open(auto_path, "r", encoding="utf-8") as f:
-                auto_data = json.load(f)
-        except (json.JSONDecodeError, OSError):
-            return None
-
-        solutions = auto_data.get("solutions", {})
-        # Use the solution from context if available
-        sol_name = context.solution_name
-        if sol_name and sol_name in solutions:
-            return solutions[sol_name].get("odata")
-
-        # Fall back to first solution with OData config
-        for sol in solutions.values():
-            odata = sol.get("odata")
-            if odata and odata.get("base_url"):
-                return odata
-
-        return None
 
     def _extract_calcs_xml(self, steps):
         """Extract (step_index, calc_text) from XML steps."""
@@ -168,11 +90,36 @@ class LiveEvalError(LintRule):
                     calcs.append((ln.line_number, calc))
         return calcs
 
+    def _warn(self, message):
+        return Diagnostic(
+            rule_id="C005",
+            severity=Severity.WARNING,
+            message=f"Evaluación en vivo omitida: {message}",
+            line=None,
+        )
+
     def _evaluate_calcs(self, calcs, context):
-        """Evaluate calculations and return diagnostics."""
-        odata_config = self._get_odata_config(context)
-        if not odata_config:
+        """Evalúa los cálculos y devuelve diagnósticos. Ante un fallo de
+        transporte o de configuración emite un único aviso C005 y corta."""
+        if not context or not context._project_root:
             return []
+        try:
+            solutions = load_solutions(context._project_root)
+        except ODataConfigError as exc:
+            return [self._warn(str(exc))]
+        has_base_url = any(
+            isinstance(e, dict)
+            and isinstance(e.get("odata"), dict)
+            and e["odata"].get("base_url")
+            for e in solutions.values()
+        )
+        if not has_base_url:
+            return []  # la regla no aplica
+
+        try:
+            target = resolve(solutions, context.solution_name)
+        except ODataConfigError as exc:
+            return [self._warn(str(exc))]
 
         diags = []
         cache = {}
@@ -183,11 +130,42 @@ class LiveEvalError(LintRule):
             if cache_key in cache:
                 result = cache[cache_key]
             else:
-                result = _evaluate_expression(odata_config, calc_text, layout)
+                try:
+                    result = _evaluate_expression(target, calc_text, layout)
+                except ODataConfigError as exc:
+                    diags.append(self._warn(str(exc)))
+                    break
+                except BridgeError as exc:
+                    diags.append(self._warn(_bridge_error_message(exc, target)))
+                    break
                 cache[cache_key] = result
 
-            if result is None:
-                continue  # Connection issue, skip silently
+            if not isinstance(result, dict):
+                diags.append(self._warn(
+                    f"respuesta inesperada de {target.main}: {str(result)[:80]!r}"
+                ))
+                break
+
+            err = result.get("error")
+            if err in AGENT_FATAL_ERRORS:
+                where = (
+                    f"AGFM Agent de la fuente de datos «{target.data_source}»"
+                    if target.data_source is not None
+                    else "AGFMEvaluation"
+                )
+                diags.append(self._warn(
+                    f"{target.main}: {where} no responde (error {result.get('error_code', '?')}): "
+                    "pega AGFM Agent en ese archivo o revisa data_source"
+                ))
+                break
+            if err:
+                detail = str(err)[:80]
+                if result.get("message"):
+                    detail += f" ({str(result['message'])[:120]})"
+                diags.append(self._warn(
+                    f"respuesta inesperada de {target.main}: {detail}"
+                ))
+                break
 
             if not result.get("success", True):
                 error_code = result.get("error_code", "unknown")
@@ -201,10 +179,9 @@ class LiveEvalError(LintRule):
                     line=line,
                 ))
             elif str(result.get("result", "")).strip() == "?":
-                # AGFMEvaluation reports success even when the engine returns "?"
-                # (unknown custom function, missing reference, or a feature the
-                # host server does not support). EvaluationError only catches
-                # syntax errors, so guard the "?" sentinel here as a hard failure.
+                # EvaluationError solo captura errores de sintaxis; una función
+                # personalizada desconocida, una referencia inexistente o una
+                # función no soportada evalúan a "?" con success:true.
                 diags.append(Diagnostic(
                     rule_id=self.rule_id,
                     severity=self.default_severity,
