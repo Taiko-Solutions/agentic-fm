@@ -10,6 +10,22 @@
   "repo_path_override": "/home/<you>/agentic-fm",
   "export_dir_override": "/mnt/c/Users/<you>/Desktop",
 
+  "_solutions_note": "One entry per FileMaker file. The main file carries the OData account; a secondary file only says which main reaches it (via) and its data source name in the main (data_source). Keys match CONTEXT.json solution, with or without .fmp12.",
+  "solutions": {
+    "SolutionApp": {
+      "odata": {
+        "base_url": "https://<host>/fmi/odata/v4",
+        "database": "SolutionApp",
+        "username": "<odata_account>",
+        "password": "<password>",
+        "script_bridge": "AGFMScriptBridge"
+      }
+    },
+    "SolutionData": {
+      "odata": { "via": "SolutionApp", "data_source": "SolutionData" }
+    }
+  },
+
   "tiers": {
     "0": {
       "description": "Plug-in direct — agent selects a script-write endpoint from the AgenticFM plug-in's /api/discover suite (zero keystrokes); requires the plug-in to be usable",

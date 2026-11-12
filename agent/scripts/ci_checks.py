@@ -97,6 +97,7 @@ def main() -> int:
                               ("clipboard tests", "agent/scripts/test_clipboard.py"),
                               ("add-on bundle tests", "agent/scripts/test_filemaker_bundle.py"),
                               ("add-on snippet tests", "agent/scripts/test_build_addon_snippet.py"),
+                              ("refresh_context tests", "agent/scripts/test_refresh_context.py"),
                               ("git test isolation", "agent/scripts/test_git_test_env.py")):
             checks.append((label, lambda label=label, script=script: run_cmd(
                 label, [sys.executable, script])))

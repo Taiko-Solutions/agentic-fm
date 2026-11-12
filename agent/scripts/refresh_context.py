@@ -2,15 +2,29 @@
 """Refresh agent/CONTEXT.json without leaving the agent session.
 
 Chains the documented automation flow (agent/docs/AUTOMATION.md §"Switch
-layout context and refresh CONTEXT.json") into one command:
+layout context and refresh CONTEXT.json") into one command.
 
-  1. (optional) AGFMGoToLayout  { "layout": "<name>" }   — switch FM context
-  2. Push Context               { "task", "repo_path", "companion_url" }
-  3. Poll agent/CONTEXT.json until it is rewritten, then summarize it.
+Over OData (current add-on) it takes ONE request and no FileMaker-side push:
+
+  1. AGFMAgentCall  { "mode": "context", "task", "layout"?, "data_source"? }
+     through the main file's AGFMScriptBridge; AGFM Agent returns the Context
+     JSON (secondary files are evaluated by the main via `data_source`).
+  2. The script delivers it to the local app (POST <companion>/context). If the
+     app does not answer, it writes agent/CONTEXT.json and warns that the task
+     was not registered.
+
+Fallback for a main file with an old add-on (the Bridge answers "Script not
+found: AGFMAgentCall") and no secondary: the legacy path — Push Context { "task", "repo_path",
+"companion_url", "layout"? } and polling agent/CONTEXT.json until rewritten.
+With a secondary file an old main is a clear error (update the add-on).
+
+Over the companion route the flow is unchanged: optional AGFMGoToLayout, then
+Push Context, then polling.
 
 Dispatch routes (--via):
   odata      — AGFMScriptBridge on FileMaker Server (Tier 3, fully headless).
-               Requires an `odata` block in automation.json for the solution.
+               Requires an `odata` block in automation.json for the solution
+               (a secondary file uses `via` + `data_source`).
   companion  — companion server /trigger (Tier 2, local FM Pro via
                AppleScript). Parameter passing to FM scripts over this route
                is best-effort: if the embedded Push Context prompts, the
@@ -40,9 +54,16 @@ import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
+from agent.fmlint.odata import (  # noqa: E402
+    BridgeError, ODataConfigError, ScriptMissing, bridge_call, find_key,
+    load_solutions, resolve, same_name)
+
 CONTEXT_PATH = REPO_ROOT / "agent" / "CONTEXT.json"
 AUTOMATION_PATH = REPO_ROOT / "agent" / "config" / "automation.json"
 DEFAULT_COMPANION = "http://127.0.0.1:8765"
+FETCH_TIMEOUT = 120  # segundos: el Context de una solución grande tarda
+DELIVER_TIMEOUT = 10
 
 
 def load_automation():
@@ -58,16 +79,18 @@ def load_automation():
 def resolve_solution(auto_cfg, requested):
     solutions = auto_cfg.get("solutions", {})
     if requested:
-        if requested not in solutions:
+        key = find_key(solutions, requested)
+        if key is None:
             sys.exit(f"❌ Solución '{requested}' no está en automation.json "
                      f"(disponibles: {', '.join(solutions) or 'ninguna'})")
-        return requested, solutions[requested]
+        return key, solutions[key]
     # Infer from CONTEXT.json, else single-entry automation.json
     if CONTEXT_PATH.exists():
         try:
             name = json.loads(CONTEXT_PATH.read_text(encoding="utf-8")).get("solution")
-            if name and name in solutions:
-                return name, solutions[name]
+            key = find_key(solutions, name) if name else None
+            if key is not None:
+                return key, solutions[key]
         except (json.JSONDecodeError, OSError):
             pass
     if len(solutions) == 1:
@@ -125,13 +148,93 @@ def via_companion(companion_url, script, parameter_obj, target_file=""):
     return resp
 
 
+def local_companion_url():
+    """Companion URL from companion.json (advertise_host + port), else the default."""
+    try:
+        data = json.loads((REPO_ROOT / "agent" / "config" / "companion.json")
+                          .read_text(encoding="utf-8"))
+        comp = data.get("companion") if isinstance(data, dict) else None
+        host, port = (comp or {}).get("advertise_host"), (comp or {}).get("port")
+        if host and port:
+            return f"http://{host}:{port}"
+    except (OSError, ValueError):
+        pass
+    return DEFAULT_COMPANION
+
+
+def fetch_context(target, task, layout, expected_solution=None):
+    """Ask AGFMAgentCall (context mode) for the Context JSON; error key = failure.
+
+    Checks the answer belongs to the requested file (and layout): AGFM Agent
+    1.0.0 ignores `mode` and answers for whatever file/layout is active.
+    """
+    param = {"mode": "context", "task": task}
+    if layout:
+        param["layout"] = layout
+    if target.data_source is not None:
+        param["data_source"] = target.data_source
+    result = bridge_call(target.odata, "AGFMAgentCall",
+                         json.dumps(param, ensure_ascii=False), timeout=FETCH_TIMEOUT)
+    if not isinstance(result, dict):
+        raise RuntimeError("AGFMAgentCall devolvió una respuesta inesperada")
+    if result.get("error"):
+        raise RuntimeError(str(result.get("message") or result["error"]))
+    stale = (f"AGFM Agent de {expected_solution or 'el archivo'} anterior a 1.1.0 "
+             "o contexto inesperado: actualízalo")
+    if expected_solution and not same_name(result.get("solution"), expected_solution):
+        raise RuntimeError(stale)
+    if layout:
+        current = result.get("current_layout")
+        if not isinstance(current, dict) or current.get("name") != layout:
+            raise RuntimeError(stale)
+    return result
+
+
+def deliver_context(context, repo_path, companion_url):
+    """POST the context to the app; on any failure write CONTEXT.json.
+
+    Returns ("app", "") or ("file", <motivo del fallo>).
+    """
+    try:
+        resp = http_post_json(companion_url.rstrip("/") + "/context",
+                              {"repo_path": repo_path, "context": context},
+                              timeout=DELIVER_TIMEOUT)
+        if isinstance(resp, dict) and resp.get("success"):
+            return "app", ""
+        reason = "respuesta sin éxito"
+    except Exception as exc:  # noqa: BLE001 — cualquier fallo cae a fichero
+        reason = str(exc) or type(exc).__name__
+    CONTEXT_PATH.write_text(json.dumps(context, indent=2, ensure_ascii=False),
+                            encoding="utf-8")
+    return "file", reason
+
+
+def summarize(ctx, route, as_json, delivery=None):
+    summary = {
+        "solution": ctx.get("solution"),
+        "layout": (ctx.get("current_layout") or {}).get("name"),
+        "task": ctx.get("task"),
+        "generated_at": ctx.get("generated_at"),
+        "route": route,
+    }
+    if delivery:
+        summary["delivery"] = delivery
+    if as_json:
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+    else:
+        where = {"app": "entregado a la app",
+                 "file": "escrito en CONTEXT.json"}.get(delivery, "CONTEXT.json fresco")
+        print(f"✅ Contexto {where} — solución {summary['solution']} · "
+              f"layout \"{summary['layout']}\" · task \"{(summary['task'] or '')[:70]}\"")
+
+
 # ---------------------------------------------------------------------------
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--task", required=True, help="descripción de la tarea para Push Context")
-    parser.add_argument("--layout", default="", help="layout al que navegar antes (AGFMGoToLayout)")
+    parser.add_argument("--layout", default="", help="layout del contexto (viaja en la llamada a AGFMAgentCall; por companion, AGFMGoToLayout)")
     parser.add_argument("--solution", default="", help="clave de automation.json (si hay varias)")
     parser.add_argument("--via", choices=("auto", "odata", "companion"), default="auto")
     parser.add_argument("--timeout", type=int, default=45, help="segundos de espera del CONTEXT.json fresco")
@@ -141,27 +244,45 @@ def main() -> int:
 
     auto_cfg = load_automation()
     sol_name, sol = resolve_solution(auto_cfg, args.solution)
-    odata = sol.get("odata") or {}
     explode = sol.get("explode_xml") or {}
 
+    target = None
+    config_error = ""
+    if args.via in ("auto", "odata"):
+        try:
+            target = resolve(load_solutions(REPO_ROOT), sol_name or args.solution)
+            if not target.odata.get("base_url"):
+                target, config_error = None, "sin base_url OData"
+        except ODataConfigError as exc:
+            config_error = str(exc)
+            if args.via == "auto":
+                print(f"⚠️  OData no disponible ({config_error}); uso la vía companion.",
+                      file=sys.stderr)
     route = args.via
     if route == "auto":
-        route = "odata" if odata.get("base_url") else "companion"
-    if route == "odata" and not odata.get("base_url"):
-        sys.exit("❌ Vía odata solicitada pero la solución no tiene bloque odata en automation.json")
+        route = "odata" if target else "companion"
+    if route == "odata" and not target:
+        sys.exit(f"❌ Vía odata solicitada pero no hay destino OData: {config_error}")
+    odata = target.odata if target else {}
 
     repo_path = explode.get("repo_path") or str(REPO_ROOT)
     if route == "odata":
         companion_url_for_fm = explode.get("companion_url") or "http://host.docker.internal:8765"
     else:
         companion_url_for_fm = explode.get("companion_url") or DEFAULT_COMPANION
-    companion_local = DEFAULT_COMPANION
+    companion_local = local_companion_url()
     target_file = sol.get("target_file", "") or (f"{sol_name}.fmp12" if sol_name else "")
 
     plan = []
-    if args.layout:
-        plan.append(f'AGFMGoToLayout {{"layout": "{args.layout}"}}')
-    plan.append(f'Push Context {{"task": "{args.task[:50]}…", "repo_path": …, "companion_url": …}}')
+    if route == "odata":
+        plan.append(f'AGFMAgentCall {{"mode": "context", "task": "{args.task[:50]}…"'
+                    + (f', "layout": "{args.layout}"' if args.layout else "")
+                    + (f', "data_source": "{target.data_source}"' if target.data_source else "")
+                    + "}")
+    else:
+        if args.layout:
+            plan.append(f'AGFMGoToLayout {{"layout": "{args.layout}"}}')
+        plan.append(f'Push Context {{"task": "{args.task[:50]}…", "repo_path": …, "companion_url": …}}')
     print(f"Refresh de contexto — solución: {sol_name or '(sin resolver)'} · vía: {route}")
     for step in plan:
         print(f"  → {step}")
@@ -171,21 +292,52 @@ def main() -> int:
             print("Cancelado.")
             return 1
 
+    if route == "odata":
+        try:
+            ctx = fetch_context(target, args.task, args.layout, sol_name)
+        except ScriptMissing as exc:
+            if exc.script != "AGFMAgentCall":
+                print(f"❌ {target.main} no tiene {exc.script}: actualiza el add-on "
+                      "agentic-fm.", file=sys.stderr)
+                return 1
+            if target.data_source is not None:
+                print("❌ El archivo principal no tiene AGFMAgentCall: actualiza el add-on "
+                      "del archivo principal para evaluar archivos secundarios.",
+                      file=sys.stderr)
+                return 1
+            ctx = None  # add-on antiguo, sin secundario: camino Push Context
+        except BridgeError as exc:
+            if exc.status == 404:
+                print(f"❌ {target.main}: no se encuentra AGFMScriptBridge o la base de "
+                      "datos (404): revisa automation.json y el add-on.", file=sys.stderr)
+            else:
+                print(f"❌ Disparo fallido vía odata: {exc.reason}", file=sys.stderr)
+            return 1
+        except Exception as exc:  # noqa: BLE001
+            print(f"❌ Contexto no obtenido vía odata: {exc}", file=sys.stderr)
+            return 1
+        if ctx is not None:
+            delivery, reason = deliver_context(ctx, repo_path, companion_local)
+            if delivery == "file":
+                print(f"⚠️  la app no respondió ({reason}): tarea no registrada "
+                      "(CONTEXT.json escrito en local).", file=sys.stderr)
+            summarize(ctx, route, args.json, delivery)
+            return 0
+
     mtime_before = CONTEXT_PATH.stat().st_mtime if CONTEXT_PATH.exists() else 0
 
     try:
-        if args.layout:
-            if route == "odata":
-                via_odata(odata, "AGFMGoToLayout", {"layout": args.layout})
-            else:
-                via_companion(companion_local, "AGFMGoToLayout",
-                              {"layout": args.layout}, target_file)
-            time.sleep(1.0)
         push_param = {"task": args.task, "repo_path": repo_path,
                       "companion_url": companion_url_for_fm}
         if route == "odata":
+            if args.layout:
+                push_param["layout"] = args.layout
             via_odata(odata, "Push Context", push_param)
         else:
+            if args.layout:
+                via_companion(companion_local, "AGFMGoToLayout",
+                              {"layout": args.layout}, target_file)
+                time.sleep(1.0)
             via_companion(companion_local, "Push Context", push_param, target_file)
     except Exception as exc:  # noqa: BLE001
         print(f"❌ Disparo fallido vía {route}: {exc}", file=sys.stderr)
@@ -210,18 +362,7 @@ def main() -> int:
         print(f"❌ CONTEXT.json fresco pero ilegible: {exc}", file=sys.stderr)
         return 1
 
-    summary = {
-        "solution": ctx.get("solution"),
-        "layout": (ctx.get("current_layout") or {}).get("name"),
-        "task": ctx.get("task"),
-        "generated_at": ctx.get("generated_at"),
-        "route": route,
-    }
-    if args.json:
-        print(json.dumps(summary, ensure_ascii=False, indent=2))
-    else:
-        print(f"✅ CONTEXT.json fresco — solución {summary['solution']} · "
-              f"layout \"{summary['layout']}\" · task \"{(summary['task'] or '')[:70]}\"")
+    summarize(ctx, route, args.json)
     return 0
 
 
