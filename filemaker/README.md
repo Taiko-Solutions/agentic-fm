@@ -96,7 +96,7 @@ The explode and OData parts of the bundle ship as one FileMaker add-on, `agentic
 `filemaker/addon/agentic-fm/` (what FileMaker loads from `AddonModules`) and the same package as one file,
 `filemaker/addon/agentic-fm.fmaddon` (double-click to install it on a Mac). It holds `Get agentic-fm path`, `AGFM Start`, `AGFM Explode`, `AGFM Version`,
 `AGFM Choose Folder`, `Explode XML`, `Push Context` with the `Context` custom function, the `OData` folder and
-`Agentic-fm Debug`, and since 1.1.0 `AGFM Explode Solution` and `AGFM Agent` (list in `filemaker/addon/manifest.json`). Since 1.2.0 the explodes it posts carry `origin` (`card`, or `explode-xml` from `Explode XML` and `AGFM Explode`) and, from the card, the comment typed there (`comment`); Agentic-FM-APP 0.8.0 records both. Since 1.3.0 «Exportar y marcar como migrado» in the card also sends `migration_mark: true`, and Agentic-FM-APP (F11a) records a migration mark for each exploded file. The web viewer scripts are not in the add-on; if you use the editor, paste
+`Agentic-fm Debug`, and since 1.1.0 `AGFM Explode Solution` and `AGFM Agent` (list in `filemaker/addon/manifest.json`). Since 1.4.0 the `OData` folder also holds `AGFMAgentCall`, which lets the main file reach `AGFM Agent` in the secondary files (fmlint's live evaluation and `refresh_context.py` use it), and `AGFMEvaluation` is a wrapper over it. Since 1.2.0 the explodes it posts carry `origin` (`card`, or `explode-xml` from `Explode XML` and `AGFM Explode`) and, from the card, the comment typed there (`comment`); Agentic-FM-APP 0.8.0 records both. Since 1.3.0 «Exportar y marcar como migrado» in the card also sends `migration_mark: true`, and Agentic-FM-APP (F11a) records a migration mark for each exploded file. The web viewer scripts are not in the add-on; if you use the editor, paste
 `filemaker/addon/agentic-fm-webviewer.xml` (only `Agentic-fm Webviewer`, `Menu` and `Paste`; their calls into the
 add-on are by name) — never the full `agentic-fm.xml` on top of the add-on, which would duplicate its scripts. Updating a solution is uninstall + install; nothing is
 pasted by hand.
@@ -132,7 +132,7 @@ package step now fails with «the package has no draggable object» when the bui
 ### One add-on per solution (user guide)
 
 A solution can span several FileMaker files. You install the add-on **once**, in the main file; every other file
-carries only the script `AGFM Agent`.
+carries only the script `AGFM Agent` (1.1.0 adds the modes `evaluate` and `context` with `layout`; update it in every secondary file with «Copiar pasos (actualizar)»).
 
 - **Main file** = the file where you install the add-on. Drag the add-on from the Add-ons tab onto a developer
   layout: you get the button «agentic-fm», which opens the card (list of files, Export, Check).

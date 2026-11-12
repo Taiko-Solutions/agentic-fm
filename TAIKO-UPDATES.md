@@ -4,6 +4,16 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-11-12 — add-on 1.4.0: fmlint y refresh_context llegan a los archivos secundarios por el principal
+
+**Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`); pega `AGFM Agent` 1.1.0 en cada archivo secundario (Agentic-FM-APP: «Copiar AGFM Agent», o «Copiar pasos (actualizar)»); en `agent/config/automation.json`, cambia el bloque `odata` de cada secundario a `{"via": "<principal>", "data_source": "<nombre de la fuente de datos en el principal>"}`; y borra de los secundarios los guiones OData pegados a mano.
+
+- Nuevo guion `AGFMAgentCall` en el principal: reenvía `evaluate`, `context` y `version` a `AGFM Agent` del principal o de un secundario (por su fuente de datos). `AGFM Agent` 1.1.0 añade el modo `evaluate` y `layout` en `context`. `AGFMEvaluation` pasa a ser un envoltorio de `AGFMAgentCall`.
+- fmlint C004 evalúa en los secundarios por el principal. Si la primera petición falla (401/403, 404 por Bridge o base de datos ausentes, script `AGFMAgentCall`/`AGFMEvaluation` ausente, red, cuerpo que no es JSON, `agent_unreachable`, `mode_not_allowed`), emite un único aviso C005 y no hace más peticiones en esa ejecución (un 401/404 ya no se repite por cada cálculo).
+- Con varias soluciones y sin `solution` reconocible en `CONTEXT.json`, fmlint ya no evalúa en la primera: un aviso y ninguna petición. Un secundario sin bloque `odata` no se evalúa en el principal.
+- `AGFMEvaluation` ya no escribe `snapshot-eval.xml`.
+- `refresh_context.py` por OData hace una sola petición y entrega el Context a la app local: FileMaker Server ya no necesita alcanzar el companion del Mac del desarrollador.
+
 ## 2026-10-28 — `paths.conf` permite `.cursor/skills/`
 
 - `.claude/skills` es un enlace simbólico a `.cursor/skills` (estructura de upstream), así que cualquier cambio en una skill sube como `.cursor/skills/...`. La regla `[allow]` no lo incluía y `paths-and-sanity` bloqueaba toda PR que tocase una skill. Ahora `^\.cursor/skills/` está en `[allow]` y en `[changelog-trigger]`; el resto de `.cursor/` sigue bloqueado.
