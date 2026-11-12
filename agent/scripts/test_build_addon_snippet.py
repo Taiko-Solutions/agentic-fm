@@ -399,13 +399,13 @@ class TestAgentSnippets(unittest.TestCase):
         self.assertIn("Let ( task = $task ;", out)
         self.assertNotIn(B.PLACEHOLDER, out)
 
-    def test_manifest_lists_agent_and_version_1_3_0(self):
+    def test_manifest_lists_agent_and_version_1_4_0(self):
         manifest = json.loads((REPO / "filemaker" / "addon" / "manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "1.3.0")
-        self.assertEqual(manifest["agent_version"], "1.0.0")
+        self.assertEqual(manifest["version"], "1.4.0")
+        self.assertEqual(manifest["agent_version"], "1.1.0")
         self.assertIn("AGFM Agent", manifest["scripts"])
         self.assertIn("AGFM Explode Solution", manifest["scripts"])
-        self.assertIn('"1.0.0"', self.steps)                 # Set Variable [ $version ; "1.0.0" ]
+        self.assertIn('"1.1.0"', self.steps)                 # Set Variable [ $version ; "1.1.0" ]
 
     def test_context_calculation_is_byte_for_byte_the_inlined_function(self):
         expected = B.inline_context(real_fmfn())

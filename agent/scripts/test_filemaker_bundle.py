@@ -71,7 +71,7 @@ def bundle_version():
 
 class TestVersion(unittest.TestCase):
     def test_version_is_a_quoted_semver_literal(self):
-        self.assertEqual(bundle_version(), "1.3.0")
+        self.assertEqual(bundle_version(), "1.4.0")
 
     def test_version_script_lives_in_the_top_folder(self):
         top = _ROOT.find("Group")
@@ -389,6 +389,98 @@ class TestWebViewerCallsByName(unittest.TestCase):
         self.assertIn('"Get agentic-fm path"', by_name)
         self.assertIn('"AGFM Choose Folder"', by_name)
         self.assertIn('not JSONGetElement ( $pathResult ; "ok" )', calcs("Agentic-fm Webviewer"))
+
+
+def version_literal(name, var):
+    """The quoted literal a script assigns to $var with Set Variable."""
+    for st in steps(name):
+        if st.get("name") == "Set Variable" and st.findtext("Name") == var:
+            return st.findtext("Value/Calculation")
+    raise AssertionError(f"{name} never sets {var}")
+
+
+class TestAgentEvaluate(unittest.TestCase):
+    """AGFM Agent 1.1.0: mode evaluate (EvaluationError + Evaluate), optional layout, no snapshot, no other script."""
+    NAME = "AGFM Agent"
+
+    def _goto_by_calc(self):
+        return [st for st in steps(self.NAME) if st.get("name") == "Go to Layout"
+                and st.find("LayoutDestination").get("value") == "LayoutNameByCalc"]
+
+    def test_agent_version_is_1_1_0(self):
+        self.assertEqual(version_literal(self.NAME, "$version"), '"1.1.0"')
+
+    def test_evaluate_mode_uses_evaluationerror_then_evaluate(self):
+        texts = calcs(self.NAME)
+        self.assertIn("EvaluationError ( Evaluate ( $expression ) )", texts)
+        self.assertIn('If ( $errorCode = 0 ; Evaluate ( $expression ) ; "" )', texts)
+
+    def test_agent_has_no_snapshot_in_evaluate(self):
+        snaps = [st for st in steps(self.NAME) if st.get("name") == "Save Records as Snapshot Link"]
+        self.assertEqual(len(snaps), 1)        # the one of push
+
+    def test_agent_performs_no_script(self):
+        self.assertEqual([st for st in steps(self.NAME) if st.get("name") == "Perform Script"], [])
+
+    def test_context_mode_can_go_to_a_layout_by_name(self):
+        self.assertGreaterEqual(len(self._goto_by_calc()), 2)       # evaluate + context
+        self.assertIn("Layout no encontrado", "\n".join(calcs(self.NAME)))
+
+    def test_result_carries_file(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('[ "file" ; Get ( FileName ) ; JSONString ]', joined)
+        self.assertIn('[ "success" ; $errorCode = 0 ; JSONBoolean ]', joined)
+
+
+class TestAgentCall(unittest.TestCase):
+    NAME = "AGFMAgentCall"
+
+    def test_in_manifest_and_odata_folder(self):
+        names = manifest()["scripts"]
+        self.assertIn(self.NAME, names)
+        self.assertEqual(names.index(self.NAME), names.index("AGFMEvaluation") + 1)
+        folder = next(g for g in _ROOT.iter("Group") if g.get("name") == "OData")
+        self.assertIn(self.NAME, [s.get("name") for s in folder.findall("Script")])
+
+    def test_only_three_modes_pass(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn("mode_not_allowed", joined)
+        for mode in ("version", "evaluate", "context"):
+            self.assertIn(f'$mode = "{mode}"', joined)
+
+    def test_calls_by_name_with_retry_on_104(self):
+        by_name = [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
+        self.assertEqual(len(by_name), 2)
+        self.assertIn("$callError = 104", calcs(self.NAME))
+
+    def test_strips_data_source_before_forwarding(self):
+        self.assertIn('JSONDeleteElement ( $p ; "data_source" )', calcs(self.NAME))
+
+    def test_reports_agent_unreachable(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn("agent_unreachable", joined)
+        self.assertIn('$dataSource & "::AGFM Agent"', joined)
+
+
+class TestEvaluationWrapper(unittest.TestCase):
+    NAME = "AGFMEvaluation"
+
+    def test_delegates_to_agfmagentcall(self):
+        performs = [st for st in steps(self.NAME) if st.get("name") == "Perform Script"]
+        self.assertEqual(len(performs), 1)
+        self.assertEqual(performs[0].find("Script").get("name"), "AGFMAgentCall")
+        self.assertIn('JSONSetElement ( $input ; "mode" ; "evaluate" ; JSONString )', calcs(self.NAME))
+
+    def test_reports_agent_unreachable(self):
+        self.assertIn("agent_unreachable", "\n".join(calcs(self.NAME)))
+        self.assertIn("Set Error Capture", [st.get("name") for st in steps(self.NAME)])
+        self.assertIn("$callError ≠ 0", calcs(self.NAME))
+
+    def test_no_snapshot(self):
+        self.assertEqual([st for st in steps(self.NAME) if st.get("name") == "Save Records as Snapshot Link"], [])
+        text = ET.tostring(script(self.NAME), encoding="unicode")
+        self.assertNotIn("snapshot-eval", text)
+        self.assertNotIn("SIDE EFFECT", text)
 
 
 if __name__ == "__main__":

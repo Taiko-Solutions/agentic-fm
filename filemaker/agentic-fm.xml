@@ -123,7 +123,7 @@
         <Text>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Text>
       </Step>
       <Step enable="True" id="103" name="Exit Script">
-        <Calculation><![CDATA["1.3.0"]]></Calculation>
+        <Calculation><![CDATA["1.4.0"]]></Calculation>
       </Step>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="23" name="AGFM Choose Folder">
@@ -1811,12 +1811,12 @@
       <Step enable="True" id="89" name="# (comment)"/>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="24" name="AGFM Agent">
-      <Step enable="True" id="89" name="# (comment)"><Text>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</Text></Step>
+      <Step enable="True" id="89" name="# (comment)"><Text>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context, evaluate. Context and evaluate accept an optional { layout } to go to first.</Text></Step>
       <Step enable="True" id="89" name="# (comment)"><Text>RETURNS: JSON { error, message, ... } through Exit Script. Capture the caller's error state before any other step resets it.</Text></Step>
       <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$callerError</Name></Step>
       <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastErrorLocation )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$callerErrorLocation</Name></Step>
       <Step enable="True" id="86" name="Set Error Capture"><Set state="True"/></Step>
-      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA["1.0.0"]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$version</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA["1.1.0"]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$version</Name></Step>
       <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( ScriptParameter )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$p</Name></Step>
       <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[If ( IsEmpty ( $p ) ; "push" ; JSONGetElement ( $p ; "mode" ) )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$mode</Name></Step>
       <Step enable="True" id="89" name="# (comment)"/>
@@ -1824,6 +1824,45 @@
       <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
 	[ "error" ; 0 ; JSONNumber ] ;
 	[ "version" ; $version ; JSONString ] ;
+	[ "file" ; Get ( FileName ) ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="125" name="Else If"><Restore state="False"/><Calculation><![CDATA[$mode = "evaluate"]]></Calculation></Step>
+      <Step enable="True" id="89" name="# (comment)"><Text>Evaluate a calculation in this file (read-only: no snapshot). Optional layout gives the evaluation its table occurrence context.</Text></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $p ; "expression" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$expression</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $p ; "layout" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$layout</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[IsEmpty ( $expression )]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error_code" ; -1 ; JSONNumber ] ;
+	[ "result" ; "" ; JSONString ] ;
+	[ "expression" ; $expression ; JSONString ] ;
+	[ "layout" ; $layout ; JSONString ] ;
+	[ "file" ; Get ( FileName ) ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[not IsEmpty ( $layout )]]></Calculation></Step>
+      <Step enable="True" id="6" name="Go to Layout"><LayoutDestination value="LayoutNameByCalc"/><Layout id="0" name=""><Calculation><![CDATA[$layout]]></Calculation></Layout></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$gotoError</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$gotoError ≠ 0]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error_code" ; $gotoError ; JSONNumber ] ;
+	[ "result" ; "" ; JSONString ] ;
+	[ "expression" ; $expression ; JSONString ] ;
+	[ "layout" ; $layout ; JSONString ] ;
+	[ "file" ; Get ( FileName ) ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="89" name="# (comment)"><Text>EvaluationError returns 0 when the expression is valid, the FileMaker error code otherwise.</Text></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[EvaluationError ( Evaluate ( $expression ) )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$errorCode</Name></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[If ( $errorCode = 0 ; Evaluate ( $expression ) ; "" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$result</Name></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; $errorCode = 0 ; JSONBoolean ] ;
+	[ "error_code" ; $errorCode ; JSONNumber ] ;
+	[ "result" ; $result ; JSONString ] ;
+	[ "expression" ; $expression ; JSONString ] ;
+	[ "layout" ; Get ( LayoutName ) ; JSONString ] ;
 	[ "file" ; Get ( FileName ) ; JSONString ]
 )]]></Calculation></Step>
       <Step enable="True" id="125" name="Else If"><Restore state="False"/><Calculation><![CDATA[$mode = "export"]]></Calculation></Step>
@@ -1894,6 +1933,17 @@
       <Step enable="True" id="70" name="End If"/>
       <Step enable="True" id="69" name="Else"><Restore state="False"/></Step>
       <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $p ; "task" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$task</Name></Step>
+      <Step enable="True" id="70" name="End If"/>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$mode = "context" and not IsEmpty ( JSONGetElement ( $p ; "layout" ) )]]></Calculation></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[JSONGetElement ( $p ; "layout" )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$layout</Name></Step>
+      <Step enable="True" id="6" name="Go to Layout"><LayoutDestination value="LayoutNameByCalc"/><Layout id="0" name=""><Calculation><![CDATA[$layout]]></Calculation></Layout></Step>
+      <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[Get ( LastError )]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$gotoError</Name></Step>
+      <Step enable="True" id="68" name="If"><Restore state="False"/><Calculation><![CDATA[$gotoError ≠ 0]]></Calculation></Step>
+      <Step enable="True" id="103" name="Exit Script"><Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "error" ; $gotoError ; JSONNumber ] ;
+	[ "message" ; "Layout no encontrado: " & $layout ; JSONString ]
+)]]></Calculation></Step>
+      <Step enable="True" id="70" name="End If"/>
       <Step enable="True" id="70" name="End If"/>
       <Step enable="True" id="89" name="# (comment)"><Text>Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</Text></Step>
       <Step enable="True" id="141" name="Set Variable"><Value><Calculation><![CDATA[__AGFM_CONTEXT_BODY__]]></Calculation></Value><Repetition><Calculation><![CDATA[1]]></Calculation></Repetition><Name>$context</Name></Step>
@@ -2082,16 +2132,16 @@
       </Script>
       <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="16" name="AGFMEvaluation">
         <Step enable="True" id="89" name="# (comment)">
-          <Text>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</Text>
+          <Text>PURPOSE: Evaluate a FileMaker calculation expression and return the result. Thin wrapper: forwards to AGFMAgentCall with mode evaluate.</Text>
         </Step>
         <Step enable="False" id="61" name="Insert Text">
           <SelectAll state="False"/>
-          <Text>CALLED BY: agent via OData &#x2192; AGFMScriptBridge&#xD;&#xD;PARAMETER: JSON object&#xD;  expression &#x2014; the FM calculation string to evaluate (required)&#xD;  layout     &#x2014; layout name to navigate to before evaluating (optional; recommended for field-reference calcs)&#xD;&#xD;RETURNS:&#xD;  { success: true,  error_code: 0,    result: "...", expression: "...", layout: "..." }&#xD;  { success: false, error_code: &lt;N&gt;, result: "",    expression: "...", layout: "..." }&#xD;&#xD;SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification.&#xD;  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name.&#xD;&#xD;EXAMPLE call via AGFMScriptBridge:&#xD;  { "script": "AGFMEvaluation", "parameter": "{\"expression\": \"Sum ( LineItems::ExtendedPrice )\", \"layout\": \"Invoices Details\"}" }</Text>
+          <Text>CALLED BY: agent via OData &#x2192; AGFMScriptBridge&#xD;&#xD;This script is a wrapper kept for existing callers. The work is done by AGFM Agent (mode evaluate), reached through AGFMAgentCall, which also lets the call target another open file with data_source.&#xD;&#xD;PARAMETER: JSON object&#xD;  expression &#x2014; the FM calculation string to evaluate (required)&#xD;  layout     &#x2014; layout name to navigate to before evaluating (optional; recommended for field-reference calcs)&#xD;&#xD;RETURNS (from AGFM Agent):&#xD;  { success: true,  error_code: 0,    result: "...", expression: "...", layout: "...", file: "..." }&#xD;  { success: false, error_code: &lt;N&gt;, result: "",    expression: "...", layout: "...", file: "..." }&#xD;&#xD;EXAMPLE call via AGFMScriptBridge:&#xD;  { "script": "AGFMEvaluation", "parameter": "{\"expression\": \"Sum ( LineItems::ExtendedPrice )\", \"layout\": \"Invoices Details\"}" }</Text>
           <Field>$README</Field>
         </Step>
         <Step enable="True" id="89" name="# (comment)"/>
-        <Step enable="True" id="89" name="# (comment)">
-          <Text>Parse parameters</Text>
+        <Step enable="True" id="86" name="Set Error Capture">
+          <Set state="True"/>
         </Step>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
@@ -2113,51 +2163,9 @@
 )]]></Calculation>
         </Step>
         <Step enable="True" id="70" name="End If"/>
-        <Step enable="True" id="89" name="# (comment)"/>
-        <Step enable="True" id="141" name="Set Variable">
-          <Value>
-            <Calculation><![CDATA[JSONGetElement ( $input ; "expression" )]]></Calculation>
-          </Value>
-          <Repetition>
-            <Calculation><![CDATA[1]]></Calculation>
-          </Repetition>
-          <Name>$expression</Name>
-        </Step>
-        <Step enable="True" id="141" name="Set Variable">
-          <Value>
-            <Calculation><![CDATA[JSONGetElement ( $input ; "layout" )]]></Calculation>
-          </Value>
-          <Repetition>
-            <Calculation><![CDATA[1]]></Calculation>
-          </Repetition>
-          <Name>$layout</Name>
-        </Step>
-        <Step enable="True" id="89" name="# (comment)"/>
-        <Step enable="True" id="68" name="If">
-          <Restore state="False"/>
-          <Calculation><![CDATA[IsEmpty ( $expression )]]></Calculation>
-        </Step>
-        <Step enable="True" id="103" name="Exit Script">
-          <Calculation><![CDATA[JSONSetElement ( "{}" ;
-	[ "success" ; False ; JSONBoolean ] ;
-	[ "error" ; "Missing required key: expression" ; JSONString ]
-)]]></Calculation>
-        </Step>
-        <Step enable="True" id="70" name="End If"/>
-        <Step enable="True" id="89" name="# (comment)"/>
-        <Step enable="True" id="89" name="# (comment)">
-          <Text>Navigate to layout if provided</Text>
-        </Step>
-        <Step enable="True" id="68" name="If">
-          <Restore state="False"/>
-          <Calculation><![CDATA[not IsEmpty ( $layout )]]></Calculation>
-        </Step>
-        <Step enable="True" id="6" name="Go to Layout">
-          <LayoutDestination value="LayoutNameByCalc"/>
-          <Calculation><![CDATA[$layout]]></Calculation>
-          <Layout id="0" name="">
-            <Calculation><![CDATA[$layout]]></Calculation>
-          </Layout>
+        <Step enable="True" id="1" name="Perform Script">
+          <Calculation><![CDATA[JSONSetElement ( $input ; "mode" ; "evaluate" ; JSONString )]]></Calculation>
+          <Script id="26" name="AGFMAgentCall"/>
         </Step>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
@@ -2166,72 +2174,166 @@
           <Repetition>
             <Calculation><![CDATA[1]]></Calculation>
           </Repetition>
-          <Name>$gotoError</Name>
-        </Step>
-        <Step enable="True" id="68" name="If">
-          <Restore state="False"/>
-          <Calculation><![CDATA[$gotoError ≠ 0]]></Calculation>
-        </Step>
-        <Step enable="True" id="103" name="Exit Script">
-          <Calculation><![CDATA[JSONSetElement ( "{}" ;
-	[ "success" ; False ; JSONBoolean ] ;
-	[ "error_code" ; $gotoError ; JSONNumber ] ;
-	[ "error" ; "Go to Layout failed — layout not found: " & $layout ; JSONString ] ;
-	[ "expression" ; $expression ; JSONString ]
-)]]></Calculation>
-        </Step>
-        <Step enable="True" id="70" name="End If"/>
-        <Step enable="True" id="70" name="End If"/>
-        <Step enable="True" id="89" name="# (comment)"/>
-        <Step enable="True" id="89" name="# (comment)">
-          <Text>Evaluate &#x2014; EvaluationError returns 0 if valid, FM error code otherwise</Text>
+          <Name>$callError</Name>
         </Step>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
-            <Calculation><![CDATA[EvaluationError ( $expression )]]></Calculation>
-          </Value>
-          <Repetition>
-            <Calculation><![CDATA[1]]></Calculation>
-          </Repetition>
-          <Name>$errorCode</Name>
-        </Step>
-        <Step enable="True" id="141" name="Set Variable">
-          <Value>
-            <Calculation><![CDATA[If ( $errorCode = 0 ; Evaluate ( $expression ) ; "" )]]></Calculation>
+            <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
           </Value>
           <Repetition>
             <Calculation><![CDATA[1]]></Calculation>
           </Repetition>
           <Name>$result</Name>
         </Step>
-        <Step enable="True" id="89" name="# (comment)"/>
-        <Step enable="True" id="89" name="# (comment)">
-          <Text>Save verification snapshot for agent context check</Text>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$callError ≠ 0]]></Calculation>
         </Step>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error_code" ; $callError ; JSONNumber ] ;
+	[ "error" ; "agent_unreachable" ; JSONString ]
+)]]></Calculation>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[$result]]></Calculation>
+        </Step>
+      </Script>
+      <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="26" name="AGFMAgentCall">
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>PURPOSE: Single entry point from outside (OData via AGFMScriptBridge) to AGFM Agent, in this file or in another open file (data_source). Only the read-only modes pass.</Text>
+        </Step>
+        <Step enable="False" id="61" name="Insert Text">
+          <SelectAll state="False"/>
+          <Text>PARAMETER: JSON object&#xD;  mode        &#x2014; version | evaluate | context (anything else is refused)&#xD;  data_source &#x2014; name of the file as set in the File Reference (optional; empty = this file)&#xD;  &#x2026; the rest of the keys go to AGFM Agent unchanged (expression, layout, task)&#xD;&#xD;RETURNS: what AGFM Agent returns, or&#xD;  { success: false, error: "mode_not_allowed", mode }&#xD;  { success: false, error_code: &lt;N&gt;, error: "agent_unreachable", data_source }</Text>
+          <Field>$README</Field>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)"/>
         <Step enable="True" id="141" name="Set Variable">
           <Value>
-            <Calculation><![CDATA[Get ( DocumentsPath ) & "snapshot-eval.xml"]]></Calculation>
+            <Calculation><![CDATA[Get ( ScriptParameter )]]></Calculation>
           </Value>
           <Repetition>
             <Calculation><![CDATA[1]]></Calculation>
           </Repetition>
-          <Name>$snapshotPath</Name>
+          <Name>$p</Name>
         </Step>
-        <Step enable="True" id="152" name="Save Records as Snapshot Link">
-          <CreateDirectories state="False"/>
-          <CreateEmail state="False"/>
-          <SaveType value="BrowsedRecords"/>
-          <UniversalPathList>$snapshotPath</UniversalPathList>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONGetElement ( $p ; "mode" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$mode</Name>
         </Step>
-        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[not ( $mode = "version" or $mode = "evaluate" or $mode = "context" )]]></Calculation>
+        </Step>
         <Step enable="True" id="103" name="Exit Script">
           <Calculation><![CDATA[JSONSetElement ( "{}" ;
-	[ "success" ; $errorCode = 0 ; JSONBoolean ] ;
-	[ "error_code" ; $errorCode ; JSONNumber ] ;
-	[ "result" ; $result ; JSONString ] ;
-	[ "expression" ; $expression ; JSONString ] ;
-	[ "layout" ; Get ( LayoutName ) ; JSONString ]
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error" ; "mode_not_allowed" ; JSONString ] ;
+	[ "mode" ; $mode ; JSONString ]
 )]]></Calculation>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="89" name="# (comment)"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONGetElement ( $p ; "data_source" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$dataSource</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[If ( IsEmpty ( $dataSource ) ; "AGFM Agent" ; $dataSource & "::AGFM Agent" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$target</Name>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[JSONDeleteElement ( $p ; "data_source" )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$param</Name>
+        </Step>
+        <Step enable="True" id="86" name="Set Error Capture">
+          <Set state="True"/>
+        </Step>
+        <Step enable="True" id="1" name="Perform Script">
+          <Calculated>
+            <Calculation><![CDATA[$target]]></Calculation>
+          </Calculated>
+          <Calculation><![CDATA[$param]]></Calculation>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$callError</Name>
+        </Step>
+        <Step enable="True" id="89" name="# (comment)">
+          <Text>A file that is not open answers 104 the first time; one more try opens it.</Text>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$callError = 104]]></Calculation>
+        </Step>
+        <Step enable="True" id="1" name="Perform Script">
+          <Calculated>
+            <Calculation><![CDATA[$target]]></Calculation>
+          </Calculated>
+          <Calculation><![CDATA[$param]]></Calculation>
+        </Step>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( LastError )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$callError</Name>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="141" name="Set Variable">
+          <Value>
+            <Calculation><![CDATA[Get ( ScriptResult )]]></Calculation>
+          </Value>
+          <Repetition>
+            <Calculation><![CDATA[1]]></Calculation>
+          </Repetition>
+          <Name>$result</Name>
+        </Step>
+        <Step enable="True" id="68" name="If">
+          <Restore state="False"/>
+          <Calculation><![CDATA[$callError ≠ 0]]></Calculation>
+        </Step>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[JSONSetElement ( "{}" ;
+	[ "success" ; False ; JSONBoolean ] ;
+	[ "error_code" ; $callError ; JSONNumber ] ;
+	[ "error" ; "agent_unreachable" ; JSONString ] ;
+	[ "data_source" ; $dataSource ; JSONString ]
+)]]></Calculation>
+        </Step>
+        <Step enable="True" id="70" name="End If"/>
+        <Step enable="True" id="103" name="Exit Script">
+          <Calculation><![CDATA[$result]]></Calculation>
         </Step>
       </Script>
     </Group>

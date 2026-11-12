@@ -336,6 +336,31 @@ class TestAgentVersion(unittest.TestCase):
                 entries = C._agent_entries(scripts, Path("/unused"), self.HR_TOOL, Path(work), "1.0.0")
         self.assertEqual([e["status"] for e in entries], ["CURRENT"])
 
+    def test_an_agent_1_0_0_against_the_1_1_0_bundle_is_outdated(self):
+        entry = self._entries({"Main": "1.0.0"}, agent_version="1.1.0")["AGFM Agent (Main)"]
+        self.assertEqual(entry["status"], "OUTDATED")
+        self.assertEqual(entry["diff"], "1.0.0 \u2192 1.1.0")
+
+    def test_a_main_solution_without_agfmagentcall_is_missing_it(self):
+        """The add-on's manifest lists AGFMAgentCall: an explode that has the add-on but not that script is MISSING."""
+        bundle = ('<fmxmlsnippet type="FMObjectList"><Group id="1" name="agentic-fm">'
+                  '<Script id="20" name="AGFM Version"><Step enable="True" id="103" name="Exit Script">'
+                  '<Calculation><![CDATA["1.4.0"]]></Calculation></Step></Script>'
+                  '<Script id="26" name="AGFMAgentCall"><Step enable="True" id="103" name="Exit Script">'
+                  '<Calculation><![CDATA[Get ( ScriptResult )]]></Calculation></Step></Script>'
+                  '</Group></fmxmlsnippet>')
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "filemaker" / "addon").mkdir(parents=True)
+            (root / "filemaker" / "agentic-fm.xml").write_text(bundle, encoding="utf-8")
+            (root / "filemaker" / "addon" / "manifest.json").write_text(
+                '{"name": "agentic-fm", "version": "1.4.0", "scripts": ["AGFM Version", "AGFMAgentCall"], "custom_functions": []}',
+                encoding="utf-8")
+            _snippet_script(root / "agent" / "xml_parsed" / "scripts" / "Main" / "agentic-fm - ID 1" / "AGFM Version - ID 20.xml",
+                            '"1.4.0"')
+            names = {o["name"]: o["status"] for o in C.check(root)["objects"]}
+        self.assertEqual(names["AGFMAgentCall"], "MISSING")
+
     def test_without_an_agent_version_there_is_nothing_to_compare(self):
         self.assertEqual(self._entries({"Main": "1.0.0"}, agent_version=None), {})
 
