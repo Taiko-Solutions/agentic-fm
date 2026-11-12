@@ -49,13 +49,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.0603E9AAF6BE84D313B16EE91180B4E0</StringID>
-	<SourceText>snapshot-eval.xml</SourceText>
-	<TargetText>snapshot-eval.xml</TargetText>
-	<Comment>com.fmi.calculation.text.snapshot-eval.xml</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.07221A81D49D1E8A1C64AFCE1A819F3A</StringID>
 	<SourceText>agentic-fm-app no responde. Ábrela y vuelve a intentarlo.</SourceText>
 	<TargetText>agentic-fm-app no responde. Ábrela y vuelve a intentarlo.</TargetText>
@@ -81,13 +74,6 @@
 	<SourceText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</SourceText>
 	<TargetText>) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</TargetText>
 	<Comment>com.fmi.calculation.text.) and no folder was chosen.¶¶Register the clone in agentic-fm-app (Projects), or pick this solution&apos;s clone there if it is in several clones.</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.0998BDA6B76150B5509DDE8D55BD86AE</StringID>
-	<SourceText>1.3.0</SourceText>
-	<TargetText>1.3.0</TargetText>
-	<Comment>com.fmi.calculation.text.1.3.0</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -203,6 +189,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.21C3AC765D738FB8D77270E1DF609F1D</StringID>
+	<SourceText>agent_unreachable</SourceText>
+	<TargetText>agent_unreachable</TargetText>
+	<Comment>com.fmi.calculation.text.agent_unreachable</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.22BF6CD6AF8310A8F54A5EAD58067F84</StringID>
 	<SourceText>date</SourceText>
 	<TargetText>date</TargetText>
@@ -242,13 +235,6 @@
 	<SourceText>Save a Copy as XML failed (error </SourceText>
 	<TargetText>Save a Copy as XML failed (error </TargetText>
 	<Comment>com.fmi.calculation.text.Save a Copy as XML failed (error</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.27650E8691BFE2195EFA1A173E7A646F</StringID>
-	<SourceText>Go to Layout failed — layout not found: </SourceText>
-	<TargetText>Go to Layout failed — layout not found: </TargetText>
-	<Comment>com.fmi.calculation.text.Go to Layout failed — layout not found:</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -406,13 +392,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.41A9C7B72775DAA1DED9BED2BBB7C325</StringID>
-	<SourceText>1.0.0</SourceText>
-	<TargetText>1.0.0</TargetText>
-	<Comment>com.fmi.calculation.text.1.0.0</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.41D994AD52D04D684D69E6297B630195</StringID>
 	<SourceText>datetime</SourceText>
 	<TargetText>datetime</TargetText>
@@ -452,6 +431,13 @@
 	<SourceText>current_layout.base_to_id</SourceText>
 	<TargetText>current_layout.base_to_id</TargetText>
 	<Comment>com.fmi.calculation.text.current_layout.base_to_id</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.457C6A34F38E04430B1AA59AFC8C0E9A</StringID>
+	<SourceText>mode_not_allowed</SourceText>
+	<TargetText>mode_not_allowed</TargetText>
+	<Comment>com.fmi.calculation.text.mode_not_allowed</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -676,6 +662,13 @@
 	<SourceText>SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</SourceText>
 	<TargetText>SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</TargetText>
 	<Comment>com.fmi.calculation.text.SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.6584DAE555D798C954AF810EFCB4423A</StringID>
+	<SourceText>1.4.0</SourceText>
+	<TargetText>1.4.0</TargetText>
+	<Comment>com.fmi.calculation.text.1.4.0</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1260,13 +1253,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.BC8865825FDBA1D62DA39CE1F8066F16</StringID>
-	<SourceText>Missing required key: expression</SourceText>
-	<TargetText>Missing required key: expression</TargetText>
-	<Comment>com.fmi.calculation.text.Missing required key: expression</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.BD89B0F8193F8C54FE2F8A873FED1D93</StringID>
 	<SourceText>)</SourceText>
 	<TargetText>)</TargetText>
@@ -1470,6 +1456,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D8F7949C6C0C8313618BAB73807E1E03</StringID>
+	<SourceText>1.1.0</SourceText>
+	<TargetText>1.1.0</TargetText>
+	<Comment>com.fmi.calculation.text.1.1.0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.D9A9E0F5D2E0BAFC47CEC71F53CB7597</StringID>
 	<SourceText>AGFM Agent</SourceText>
 	<TargetText>AGFM Agent</TargetText>
@@ -1666,6 +1659,20 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FBB06855D4ADED5A5D88FC0520096385</StringID>
+	<SourceText>evaluate</SourceText>
+	<TargetText>evaluate</TargetText>
+	<Comment>com.fmi.calculation.text.evaluate</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FD2E96901E14B1D1A237E39340EA8A01</StringID>
+	<SourceText>Layout no encontrado: </SourceText>
+	<TargetText>Layout no encontrado: </TargetText>
+	<Comment>com.fmi.calculation.text.Layout no encontrado:</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288</StringID>
 	<SourceText>layout_objects</SourceText>
 	<TargetText>layout_objects</TargetText>
@@ -1733,6 +1740,13 @@
 	<SourceText>AGFMScriptBridge</SourceText>
 	<TargetText>AGFMScriptBridge</TargetText>
 	<Comment>com.fmi.script.AGFMScriptBridge</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.script.395DDBEE188967B193941A918B61CB3A</StringID>
+	<SourceText>AGFMAgentCall</SourceText>
+	<TargetText>AGFMAgentCall</TargetText>
+	<Comment>com.fmi.script.AGFMAgentCall</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1834,6 +1848,20 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.0E2C4C201AB4BCFDC32891EE9297B1F3</StringID>
+	<SourceText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context, evaluate. Context and evaluate accept an optional { layout } to go to first.</SourceText>
+	<TargetText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context, evaluate. Context and evaluate accept an optional { layout } to go to first.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context, evaluate. Context and evaluate accept an optional { layout } to go to first.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.0EDD801747FA99BD4C7B4F0F10E711F1</StringID>
+	<SourceText>A file that is not open answers 104 the first time; one more try opens it.</SourceText>
+	<TargetText>A file that is not open answers 104 the first time; one more try opens it.</TargetText>
+	<Comment>com.fmi.scriptstep.text.A file that is not open answers 104 the first time; one more try opens it.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.1C4618C434531AF55B91CE994B08F1AE</StringID>
 	<SourceText>DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</SourceText>
 	<TargetText>DEPENDENCY: The companion server must be running (agent/scripts/companion_server.py)</TargetText>
@@ -1852,6 +1880,13 @@
 	<SourceText>MARK: Server mode</SourceText>
 	<TargetText>MARK: Server mode</TargetText>
 	<Comment>com.fmi.scriptstep.text.MARK: Server mode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.24E8DCF2D093300AA2ADEC8CDDBE002E</StringID>
+	<SourceText>CALLED BY: agent via OData → AGFMScriptBridge<CR/><CR/>This script is a wrapper kept for existing callers. The work is done by AGFM Agent (mode evaluate), reached through AGFMAgentCall, which also lets the call target another open file with data_source.<CR/><CR/>PARAMETER: JSON object<CR/>  expression — the FM calculation string to evaluate (required)<CR/>  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)<CR/><CR/>RETURNS (from AGFM Agent):<CR/>  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot;, file: &quot;...&quot; }<CR/>  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot;, file: &quot;...&quot; }<CR/><CR/>EXAMPLE call via AGFMScriptBridge:<CR/>  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</SourceText>
+	<TargetText>CALLED BY: agent via OData → AGFMScriptBridge<CR/><CR/>This script is a wrapper kept for existing callers. The work is done by AGFM Agent (mode evaluate), reached through AGFMAgentCall, which also lets the call target another open file with data_source.<CR/><CR/>PARAMETER: JSON object<CR/>  expression — the FM calculation string to evaluate (required)<CR/>  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)<CR/><CR/>RETURNS (from AGFM Agent):<CR/>  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot;, file: &quot;...&quot; }<CR/>  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot;, file: &quot;...&quot; }<CR/><CR/>EXAMPLE call via AGFMScriptBridge:<CR/>  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</TargetText>
+	<Comment>com.fmi.scriptstep.text.CALLED BY: agent via OData → AGFMScriptBridge_CR/__CR/_This script is a wrapper kept for existing callers. The work is done by AGFM Agent (mode evaluate), reached through AGFMAgentCall, which also lets the call target another open file with data_source._CR/__CR/_PARAMETER: JSON object_CR/_  expression — the FM calculation string to evaluate (required)_CR/_  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)_CR/__CR/_RETURNS (from AGFM Agent):_CR/_  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot;, file: &quot;...&quot; }_CR/_  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot;, file: &quot;...&quot; }_CR/__CR/_EXAMPLE call via AGFMScriptBridge:_CR/_  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1890,24 +1925,10 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.2B3305FD478AD63B7FDBEF1D28E5BBCF</StringID>
-	<SourceText>CALLED BY: agent via OData → AGFMScriptBridge<CR/><CR/>PARAMETER: JSON object<CR/>  expression — the FM calculation string to evaluate (required)<CR/>  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)<CR/><CR/>RETURNS:<CR/>  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/>  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/><CR/>SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification.<CR/>  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name.<CR/><CR/>EXAMPLE call via AGFMScriptBridge:<CR/>  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</SourceText>
-	<TargetText>CALLED BY: agent via OData → AGFMScriptBridge<CR/><CR/>PARAMETER: JSON object<CR/>  expression — the FM calculation string to evaluate (required)<CR/>  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)<CR/><CR/>RETURNS:<CR/>  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/>  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot; }<CR/><CR/>SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification.<CR/>  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name.<CR/><CR/>EXAMPLE call via AGFMScriptBridge:<CR/>  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</TargetText>
-	<Comment>com.fmi.scriptstep.text.CALLED BY: agent via OData → AGFMScriptBridge_CR/__CR/_PARAMETER: JSON object_CR/_  expression — the FM calculation string to evaluate (required)_CR/_  layout     — layout name to navigate to before evaluating (optional; recommended for field-reference calcs)_CR/__CR/_RETURNS:_CR/_  { success: true,  error_code: 0,    result: &quot;...&quot;, expression: &quot;...&quot;, layout: &quot;...&quot; }_CR/_  { success: false, error_code: &lt;N&gt;, result: &quot;&quot;,    expression: &quot;...&quot;, layout: &quot;...&quot; }_CR/__CR/_SIDE EFFECT: saves snapshot-eval.xml to Get(DocumentsPath) for agent context verification._CR/_  Agent reads layout field in snapshot and confirms it matches agent/CONTEXT.json current_layout.name._CR/__CR/_EXAMPLE call via AGFMScriptBridge:_CR/_  { &quot;script&quot;: &quot;AGFMEvaluation&quot;, &quot;parameter&quot;: &quot;{\&quot;expression\&quot;: \&quot;Sum ( LineItems::ExtendedPrice )\&quot;, \&quot;layout\&quot;: \&quot;Invoices Details\&quot;}&quot; }</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.318A838C4952FA63B84838AF591E218A</StringID>
 	<SourceText>MARK:Input</SourceText>
 	<TargetText>MARK:Input</TargetText>
 	<Comment>com.fmi.scriptstep.text.MARK:Input</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.46AB1E36C2593E6DE6F488F0733AE170</StringID>
-	<SourceText>Evaluate — EvaluationError returns 0 if valid, FM error code otherwise</SourceText>
-	<TargetText>Evaluate — EvaluationError returns 0 if valid, FM error code otherwise</TargetText>
-	<Comment>com.fmi.scriptstep.text.Evaluate — EvaluationError returns 0 if valid, FM error code otherwise</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1925,13 +1946,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.58ED9C6FE2DCB8CEC45BC361194B7A87</StringID>
-	<SourceText>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</SourceText>
-	<TargetText>PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</TargetText>
-	<Comment>com.fmi.scriptstep.text.PURPOSE: Evaluate a FileMaker calculation expression server-side and return the result.</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.5F2368FD7C9F84EE0E3B1876E2ACED70</StringID>
 	<SourceText>Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</SourceText>
 	<TargetText>Same calculation as the Context custom function (inlined by build_addon_snippet.py from filemaker/Context.fmfn).</TargetText>
@@ -1939,24 +1953,10 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.601ED2BD9324E4929762A71B60C4873B</StringID>
-	<SourceText>Save verification snapshot for agent context check</SourceText>
-	<TargetText>Save verification snapshot for agent context check</TargetText>
-	<Comment>com.fmi.scriptstep.text.Save verification snapshot for agent context check</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.638D70A6F338364789458C414571465E</StringID>
 	<SourceText>Capture caller&apos;s error state before any other step can reset Get(LastError) to 0</SourceText>
 	<TargetText>Capture caller&apos;s error state before any other step can reset Get(LastError) to 0</TargetText>
 	<Comment>com.fmi.scriptstep.text.Capture caller&apos;s error state before any other step can reset Get(LastError) to 0</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.63E44F18801088B1B164B11292A14F30</StringID>
-	<SourceText>Parse parameters</SourceText>
-	<TargetText>Parse parameters</TargetText>
-	<Comment>com.fmi.scriptstep.text.Parse parameters</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1974,17 +1974,17 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.707C64F024EFC5C2C9EDC7CF49B0ED91</StringID>
-	<SourceText>Navigate to layout if provided</SourceText>
-	<TargetText>Navigate to layout if provided</TargetText>
-	<Comment>com.fmi.scriptstep.text.Navigate to layout if provided</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.729E7655BE428A722B86CD8E8A61A6FF</StringID>
 	<SourceText>PARAMETER: JSON { action: &quot;export&quot; | &quot;check&quot;, files: [ { solution, data_source } ], comment?, migration_mark? }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</SourceText>
 	<TargetText>PARAMETER: JSON { action: &quot;export&quot; | &quot;check&quot;, files: [ { solution, data_source } ], comment?, migration_mark? }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</TargetText>
 	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON { action: &quot;export&quot; | &quot;check&quot;, files: [ { solution, data_source } ], comment?, migration_mark? }, main file first (data_source empty = this file; otherwise the external data source name). Called by the card through FileMaker.PerformScript.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.79B679E19129C7B21770A295B8A351EA</StringID>
+	<SourceText>EvaluationError returns 0 when the expression is valid, the FileMaker error code otherwise.</SourceText>
+	<TargetText>EvaluationError returns 0 when the expression is valid, the FileMaker error code otherwise.</TargetText>
+	<Comment>com.fmi.scriptstep.text.EvaluationError returns 0 when the expression is valid, the FileMaker error code otherwise.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -2044,6 +2044,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.B6184053561DBD77E8C84CF8BF32909A</StringID>
+	<SourceText>Evaluate a calculation in this file (read-only: no snapshot). Optional layout gives the evaluation its table occurrence context.</SourceText>
+	<TargetText>Evaluate a calculation in this file (read-only: no snapshot). Optional layout gives the evaluation its table occurrence context.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Evaluate a calculation in this file (read-only: no snapshot). Optional layout gives the evaluation its table occurrence context.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.B85A07F27F6CAEF51FBAC5E8ED727E84</StringID>
 	<SourceText>PURPOSE: Set $$AGENTIC.FM (clone path) and $$AGENTIC.FM.COMPANION.IP from agentic-fm-app (GET /config). Silent: no dialogs.</SourceText>
 	<TargetText>PURPOSE: Set $$AGENTIC.FM (clone path) and $$AGENTIC.FM.COMPANION.IP from agentic-fm-app (GET /config). Silent: no dialogs.</TargetText>
@@ -2055,6 +2062,13 @@
 	<SourceText>MARK: Interactive mode</SourceText>
 	<TargetText>MARK: Interactive mode</TargetText>
 	<Comment>com.fmi.scriptstep.text.MARK: Interactive mode</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.C9C9FF6276320CCE623EE0237AB69835</StringID>
+	<SourceText>PURPOSE: Evaluate a FileMaker calculation expression and return the result. Thin wrapper: forwards to AGFMAgentCall with mode evaluate.</SourceText>
+	<TargetText>PURPOSE: Evaluate a FileMaker calculation expression and return the result. Thin wrapper: forwards to AGFMAgentCall with mode evaluate.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Evaluate a FileMaker calculation expression and return the result. Thin wrapper: forwards to AGFMAgentCall with mode evaluate.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -2086,17 +2100,17 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.D3768E628A0BD3522E45DAD41C0C5956</StringID>
+	<SourceText>PURPOSE: Single entry point from outside (OData via AGFMScriptBridge) to AGFM Agent, in this file or in another open file (data_source). Only the read-only modes pass.</SourceText>
+	<TargetText>PURPOSE: Single entry point from outside (OData via AGFMScriptBridge) to AGFM Agent, in this file or in another open file (data_source). Only the read-only modes pass.</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: Single entry point from outside (OData via AGFMScriptBridge) to AGFM Agent, in this file or in another open file (data_source). Only the read-only modes pass.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.D4BA71564D9E9CBE88B3204695E295AB</StringID>
 	<SourceText>MARK:Resolve</SourceText>
 	<TargetText>MARK:Resolve</TargetText>
 	<Comment>com.fmi.scriptstep.text.MARK:Resolve</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.D779DDAAD03D7AD5B21BBB35AAE592A2</StringID>
-	<SourceText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</SourceText>
-	<TargetText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</TargetText>
-	<Comment>com.fmi.scriptstep.text.PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -2160,6 +2174,13 @@
 	<SourceText>PARAMETER: JSON object with key:<CR/>  layout — exact name of the layout to navigate to<CR/><CR/>RETURNS: JSON { success, layout, tableOccurrence } on success<CR/>         JSON { success, error } on failure<CR/><CR/>EXAMPLE call via AGFMBridge:<CR/>  { &quot;script&quot;: &quot;AGFMGoToLayout&quot;, &quot;parameter&quot;: &quot;{\&quot;layout\&quot;: \&quot;Invoices\&quot;}&quot; }</SourceText>
 	<TargetText>PARAMETER: JSON object with key:<CR/>  layout — exact name of the layout to navigate to<CR/><CR/>RETURNS: JSON { success, layout, tableOccurrence } on success<CR/>         JSON { success, error } on failure<CR/><CR/>EXAMPLE call via AGFMBridge:<CR/>  { &quot;script&quot;: &quot;AGFMGoToLayout&quot;, &quot;parameter&quot;: &quot;{\&quot;layout\&quot;: \&quot;Invoices\&quot;}&quot; }</TargetText>
 	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with key:_CR/_  layout — exact name of the layout to navigate to_CR/__CR/_RETURNS: JSON { success, layout, tableOccurrence } on success_CR/_         JSON { success, error } on failure_CR/__CR/_EXAMPLE call via AGFMBridge:_CR/_  { &quot;script&quot;: &quot;AGFMGoToLayout&quot;, &quot;parameter&quot;: &quot;{\&quot;layout\&quot;: \&quot;Invoices\&quot;}&quot; }</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.FE4E0839FFE08A3E7091DDCE4FA00171</StringID>
+	<SourceText>PARAMETER: JSON object<CR/>  mode        — version | evaluate | context (anything else is refused)<CR/>  data_source — name of the file as set in the File Reference (optional; empty = this file)<CR/>  … the rest of the keys go to AGFM Agent unchanged (expression, layout, task)<CR/><CR/>RETURNS: what AGFM Agent returns, or<CR/>  { success: false, error: &quot;mode_not_allowed&quot;, mode }<CR/>  { success: false, error_code: &lt;N&gt;, error: &quot;agent_unreachable&quot;, data_source }</SourceText>
+	<TargetText>PARAMETER: JSON object<CR/>  mode        — version | evaluate | context (anything else is refused)<CR/>  data_source — name of the file as set in the File Reference (optional; empty = this file)<CR/>  … the rest of the keys go to AGFM Agent unchanged (expression, layout, task)<CR/><CR/>RETURNS: what AGFM Agent returns, or<CR/>  { success: false, error: &quot;mode_not_allowed&quot;, mode }<CR/>  { success: false, error_code: &lt;N&gt;, error: &quot;agent_unreachable&quot;, data_source }</TargetText>
+	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object_CR/_  mode        — version | evaluate | context (anything else is refused)_CR/_  data_source — name of the file as set in the File Reference (optional; empty = this file)_CR/_  … the rest of the keys go to AGFM Agent unchanged (expression, layout, task)_CR/__CR/_RETURNS: what AGFM Agent returns, or_CR/_  { success: false, error: &quot;mode_not_allowed&quot;, mode }_CR/_  { success: false, error_code: &lt;N&gt;, error: &quot;agent_unreachable&quot;, data_source }</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
