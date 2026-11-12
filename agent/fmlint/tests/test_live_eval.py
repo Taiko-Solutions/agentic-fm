@@ -8,7 +8,10 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from types import SimpleNamespace
 
+from agent.fmlint.engine import LintRunner
 from agent.fmlint.rules.live_eval import LiveEvalError
+
+REPO = Path(__file__).resolve().parents[3]
 
 CALCS = [(i, f"Expr ( {i} )") for i in range(1, 6)]
 
@@ -115,6 +118,37 @@ class LiveEvalTests(unittest.TestCase):
         diags = self.run_rule(sols, solution="SolutionData")
         self.assertEqual(len(self.requests), 0)
         self.assertEqual([(d.rule_id, d.severity.name) for d in diags], [("C005", "WARNING")])
+
+    def test_c005_is_file_level_line_0(self):
+        self.responder = lambda p: (401, "{}", "application/json")
+        diags = self.run_rule({"SolutionApp": {"odata": self.full()}})
+        self.assertEqual([(d.rule_id, d.line) for d in diags], [("C005", 0)])
+
+    def test_runner_sorts_c005_with_line_diagnostics(self):
+        # Regresión: C005 con line=None tumbaba el ordenado del motor (TypeError).
+        self.responder = lambda p: (401, "{}", "application/json")
+        (self.root / "agent" / "config" / "automation.json").write_text(
+            json.dumps({"solutions": {"SolutionApp": {"odata": self.full()}}}), encoding="utf-8"
+        )
+        (self.root / "agent" / "CONTEXT.json").write_text(
+            json.dumps({"solution": "SolutionApp", "current_layout": {"name": "Lay"}}),
+            encoding="utf-8",
+        )
+        runner = LintRunner(
+            project_root=self.root,
+            catalog_path=REPO / "agent" / "catalogs" / "step-catalog-en.json",
+        )
+        snippet = (
+            '<fmxmlsnippet type="FMObjectList">'
+            '<Step enable="True" id="141" name="Set Variable">'
+            '<Value><Calculation><![CDATA[Left ( "abc" ; 1 )]]></Calculation></Value>'
+            '<Repetition><Calculation><![CDATA[1]]></Calculation></Repetition>'
+            '<Name>$Prueba</Name></Step></fmxmlsnippet>'
+        )
+        result = runner.lint(snippet, fmt="xml")
+        c005 = [d for d in result.diagnostics if d.rule_id == "C005"]
+        self.assertEqual(len(c005), 1)
+        self.assertEqual(len(self.requests), 1)
 
     def test_401_stops_after_one_request(self):
         self.responder = lambda p: (401, "{}", "application/json")

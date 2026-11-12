@@ -4,6 +4,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-11-12 — fmlint: el aviso C005 ya no tumba la ejecución
+
+- Con credenciales OData rechazadas (o cualquier fallo de la primera petición), el aviso C005 de la evaluación en vivo hacía caer fmlint con `TypeError` al ordenar los diagnósticos. Ahora C005 es un aviso de archivo (`file:`) y el motor ordena sin fallar aunque una regla no indique línea.
+- **Acción opcional:** `agentic-fm-sync` en los clones que usen la evaluación en vivo.
+
 ## 2026-11-12 — add-on 1.4.0: fmlint y refresh_context llegan a los archivos secundarios por el principal
 
 **Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`); pega `AGFM Agent` 1.1.0 en cada archivo secundario (Agentic-FM-APP: «Copiar AGFM Agent», o «Copiar pasos (actualizar)»); en `agent/config/automation.json`, cambia el bloque `odata` de cada secundario a `{"via": "<principal>", "data_source": "<nombre de la fuente de datos en el principal>"}`; y borra de los secundarios los guiones OData pegados a mano.

@@ -95,7 +95,7 @@ class LiveEvalError(LintRule):
             rule_id="C005",
             severity=Severity.WARNING,
             message=f"Evaluación en vivo omitida: {message}",
-            line=None,
+            line=0,
         )
 
     def _evaluate_calcs(self, calcs, context):

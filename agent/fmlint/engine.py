@@ -188,7 +188,7 @@ class LintRunner:
 
         # Sort by line number, then severity
         severity_order = {Severity.ERROR: 0, Severity.WARNING: 1, Severity.INFO: 2, Severity.HINT: 3}
-        result.diagnostics.sort(key=lambda d: (d.line, severity_order.get(d.severity, 9)))
+        result.diagnostics.sort(key=lambda d: (d.line or 0, severity_order.get(d.severity, 9)))
 
         return result
 
