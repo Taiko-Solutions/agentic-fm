@@ -201,6 +201,18 @@ class RunScriptTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("puede haberse ejecutado", err)
 
+    def test_last_error_of_a_script_that_ran_is_a_warning(self):
+        code, out, err = self.run_cli("--solution", "SolutionData", "--script", "S", "--yes", replies=[
+            VERSION_OK, _env(success=True, script="S", data_source=DS, last_error=105, result="r")])
+        self.assertEqual(code, 0)
+        self.assertIn("r", out)
+        self.assertIn("105", err)
+
+    def test_no_warning_when_last_error_is_zero(self):
+        _, _, err = self.run_cli("--solution", "SolutionData", "--script", "S", "--yes", replies=[
+            VERSION_OK, _env(success=True, script="S", data_source=DS, last_error=0, result="r")])
+        self.assertNotIn("último paso", err)
+
 
 class ParseVersionTests(unittest.TestCase):
     def test_parse_version(self):

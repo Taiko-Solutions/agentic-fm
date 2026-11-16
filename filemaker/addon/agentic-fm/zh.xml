@@ -1253,13 +1253,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.BA43FCF1FB0518B8F44E582AAEDF4059</StringID>
-	<SourceText>script_unreachable</SourceText>
-	<TargetText>script_unreachable</TargetText>
-	<Comment>com.fmi.calculation.text.script_unreachable</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21</StringID>
 	<SourceText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </SourceText>
 	<TargetText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </TargetText>
@@ -1313,6 +1306,13 @@
 	<SourceText>push</SourceText>
 	<TargetText>push</TargetText>
 	<Comment>com.fmi.calculation.text.push</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.C4B57E9AD89B7887CC138B6C2B425CF0</StringID>
+	<SourceText>last_error</SourceText>
+	<TargetText>last_error</TargetText>
+	<Comment>com.fmi.calculation.text.last_error</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1862,6 +1862,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.0D081D938D3C9E9D4E618CA72AD5E222</StringID>
+	<SourceText>Only 104 (script or data source not found) and 100 (file not available) mean the script did not start. Any other code is the error of the last step of a script that ran: it is reported as last_error and the call is never retried, or the script would run twice.</SourceText>
+	<TargetText>Only 104 (script or data source not found) and 100 (file not available) mean the script did not start. Any other code is the error of the last step of a script that ran: it is reported as last_error and the call is never retried, or the script would run twice.</TargetText>
+	<Comment>com.fmi.scriptstep.text.Only 104 (script or data source not found) and 100 (file not available) mean the script did not start. Any other code is the error of the last step of a script that ran: it is reported as last_error and the call is never retried, or the script would run twice.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.0E2C4C201AB4BCFDC32891EE9297B1F3</StringID>
 	<SourceText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context, evaluate. Context and evaluate accept an optional { layout } to go to first.</SourceText>
 	<TargetText>PURPOSE: One-file agentic-fm agent for this FileMaker file. Self-contained: it performs no other script. Modes (JSON parameter { mode }): version, export, push (default, interactive), debug, context, evaluate. Context and evaluate accept an optional { layout } to go to first.</TargetText>
@@ -1873,6 +1880,13 @@
 	<SourceText>A file that is not open answers 104 the first time; one more try opens it.</SourceText>
 	<TargetText>A file that is not open answers 104 the first time; one more try opens it.</TargetText>
 	<Comment>com.fmi.scriptstep.text.A file that is not open answers 104 the first time; one more try opens it.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.11F05C8FCE619C6B864274D9290818F6</StringID>
+	<SourceText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/>  data_source — name of another file as set in the File Reference (optional; empty = this file)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/>  with data_source: JSON { success, script, data_source, last_error, result }<CR/>         or JSON { success: false, error, error_code, script, data_source }<CR/>         error = script_or_data_source_not_found (104) | file_unavailable (100)<CR/>         last_error = error of the last step of the script that ran (0 = none); never retried<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</SourceText>
+	<TargetText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/>  data_source — name of another file as set in the File Reference (optional; empty = this file)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/>  with data_source: JSON { success, script, data_source, last_error, result }<CR/>         or JSON { success: false, error, error_code, script, data_source }<CR/>         error = script_or_data_source_not_found (104) | file_unavailable (100)<CR/>         last_error = error of the last step of the script that ran (0 = none); never retried<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</TargetText>
+	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with keys:_CR/_  script    — name of the script to run_CR/_  parameter — value to pass as script parameter (optional)_CR/_  data_source — name of another file as set in the File Reference (optional; empty = this file)_CR/__CR/_RETURNS: JSON { success, script, result } on success_CR/_         JSON { success, error } on failure_CR/_  with data_source: JSON { success, script, data_source, last_error, result }_CR/_         or JSON { success: false, error, error_code, script, data_source }_CR/_         error = script_or_data_source_not_found (104) | file_unavailable (100)_CR/_         last_error = error of the last step of the script that ran (0 = none); never retried_CR/__CR/_CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge_CR/_  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -2023,13 +2037,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.7A647D4DDDBCAF30FE2F89A6F5D62664</StringID>
-	<SourceText>A file that is not open may answer 104 the first time; one more try opens it.</SourceText>
-	<TargetText>A file that is not open may answer 104 the first time; one more try opens it.</TargetText>
-	<Comment>com.fmi.scriptstep.text.A file that is not open may answer 104 the first time; one more try opens it.</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.7F2A0D1FA10645439CB191FC631CB7CA</StringID>
 	<SourceText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Saves XML to the temporary folder, POSTs to the companion (agentic-fm-app) /explode.<CR/>  Requires companion server running and $$AGENTIC.FM configured.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    export_path   — absolute POSIX path where FMS will write the XML export (must be host-accessible)<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    solution_name — (optional) override solution name; defaults to Get(FileName)<CR/><CR/>  NOTE: export_path must be a path FMS can write to AND the companion server host can read.<CR/>  On a Linux FMS container with a host-mounted Data dir, use that mount path.<CR/>  The FM path is constructed as &quot;filelinux:&quot; &amp; export_path — adjust prefix for other OS.<CR/><CR/>RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</SourceText>
 	<TargetText>INTERACTIVE MODE (FM Pro):<CR/>  Run with no parameter. Saves XML to the temporary folder, POSTs to the companion (agentic-fm-app) /explode.<CR/>  Requires companion server running and $$AGENTIC.FM configured.<CR/><CR/>SERVER MODE (OData via AGFMScriptBridge):<CR/>  Pass JSON parameter with keys:<CR/>    repo_path     — absolute POSIX path to the agentic-fm project root on the companion server host<CR/>    export_path   — absolute POSIX path where FMS will write the XML export (must be host-accessible)<CR/>    companion_url — base URL of the companion server (e.g. http://host.docker.internal:8765)<CR/>    solution_name — (optional) override solution name; defaults to Get(FileName)<CR/><CR/>  NOTE: export_path must be a path FMS can write to AND the companion server host can read.<CR/>  On a Linux FMS container with a host-mounted Data dir, use that mount path.<CR/>  The FM path is constructed as &quot;filelinux:&quot; &amp; export_path — adjust prefix for other OS.<CR/><CR/>RETURNS (server mode): companion server response JSON { success, exit_code, stdout, stderr }</TargetText>
@@ -2153,13 +2160,6 @@
 	<SourceText>Called by other scripts via Perform Script with a JSON parameter.</SourceText>
 	<TargetText>Called by other scripts via Perform Script with a JSON parameter.</TargetText>
 	<Comment>com.fmi.scriptstep.text.Called by other scripts via Perform Script with a JSON parameter.</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.DC64A1E2970E02F2A67D27BC9EF75261</StringID>
-	<SourceText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/>  data_source — name of another file as set in the File Reference (optional; empty = this file)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/>  with data_source: JSON { success, script, data_source, result }<CR/>         or JSON { success: false, error, error_code, script, data_source }<CR/>         error = script_or_data_source_not_found (104) | file_unavailable (100) | script_unreachable<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</SourceText>
-	<TargetText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/>  data_source — name of another file as set in the File Reference (optional; empty = this file)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/>  with data_source: JSON { success, script, data_source, result }<CR/>         or JSON { success: false, error, error_code, script, data_source }<CR/>         error = script_or_data_source_not_found (104) | file_unavailable (100) | script_unreachable<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</TargetText>
-	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with keys:_CR/_  script    — name of the script to run_CR/_  parameter — value to pass as script parameter (optional)_CR/_  data_source — name of another file as set in the File Reference (optional; empty = this file)_CR/__CR/_RETURNS: JSON { success, script, result } on success_CR/_         JSON { success, error } on failure_CR/_  with data_source: JSON { success, script, data_source, result }_CR/_         or JSON { success: false, error, error_code, script, data_source }_CR/_         error = script_or_data_source_not_found (104) | file_unavailable (100) | script_unreachable_CR/__CR/_CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge_CR/_  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>

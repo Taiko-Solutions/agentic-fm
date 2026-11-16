@@ -129,6 +129,10 @@ def main(argv=None) -> int:
         detail = f" (código FileMaker {code})" if code not in (None, "") else ""
         return _fail(f"{answer.get('error') or 'el Bridge no ejecutó el guion'}{detail}", 1)
 
+    last_error = answer.get("last_error")
+    if last_error not in (None, "", 0, "0"):
+        print(f"⚠️  El guion se ejecutó y su último paso terminó con el error FileMaker {last_error}.",
+              file=sys.stderr)
     if args.json:
         print(json.dumps(answer, ensure_ascii=False, indent=2))
     else:

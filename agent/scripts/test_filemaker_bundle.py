@@ -484,20 +484,32 @@ class TestEvaluationWrapper(unittest.TestCase):
 
 
 class TestBridgeDataSource(unittest.TestCase):
-    """Add-on 1.5.0: AGFMScriptBridge runs <data_source>::<script> in another file; the local path is unchanged."""
+    """Add-on 1.5.0: AGFMScriptBridge runs <data_source>::<script> in another file; the local path is unchanged.
+
+    Pilot 2026-11-16: after Perform Script, Get ( LastError ) carries the error of the called script's last
+    step even when it ran (and even after its Exit Script). Only 100 and 104 mean it never started, so the
+    call is never retried and any other code is reported as last_error of a script that ran.
+    """
     NAME = "AGFMScriptBridge"
 
-    def test_remote_call_is_by_name_with_retry_on_104(self):
-        by_name = [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
-        self.assertEqual(len(by_name), 3)                      # local + remote + retry
-        self.assertIn('$dataSource & "::" & $script', calcs(self.NAME))
-        self.assertIn("$callError = 104", calcs(self.NAME))
+    def _by_name(self):
+        return [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
 
-    def test_error_names_follow_the_filemaker_code(self):
+    def test_remote_call_is_by_name_and_never_retried(self):
+        self.assertEqual(len(self._by_name()), 2)              # local + remote, no retry
+        self.assertIn('$dataSource & "::" & $script', calcs(self.NAME))
+        self.assertNotIn("$callError = 104", calcs(self.NAME))
+
+    def test_only_100_and_104_mean_the_script_did_not_start(self):
         joined = "\n".join(calcs(self.NAME))
-        self.assertIn('$callError = 104 ; "script_or_data_source_not_found"', joined)
-        self.assertIn('$callError = 100 ; "file_unavailable"', joined)
-        self.assertIn('"script_unreachable"', joined)
+        self.assertIn("$callError = 100 or $callError = 104", joined)
+        self.assertIn('$callError = 104 ; "script_or_data_source_not_found" ; "file_unavailable"', joined)
+        self.assertNotIn("script_unreachable", joined)
+
+    def test_a_script_that_ran_reports_its_last_error(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('[ "last_error" ; $callError ; JSONNumber ]', joined)
+        self.assertIn('[ "result" ; Get ( ScriptResult ) ; JSONString ]', joined)
 
     def test_both_remote_answers_echo_data_source(self):
         echoes = [c for c in calcs(self.NAME) if '[ "data_source" ; $dataSource ; JSONString ]' in c]
