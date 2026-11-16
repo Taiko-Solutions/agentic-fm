@@ -164,6 +164,29 @@ class BridgeCallTests(unittest.TestCase):
         self.assertEqual(inner, {"script": "AGFMAgentCall", "parameter": param})
         self.assertEqual(json.loads(inner["parameter"])["data_source"], "Datos Históricos")
 
+    def test_data_source_travels_next_to_script(self):
+        self.server.reply = (200, "application/json", json.dumps(
+            {"scriptResult": {"code": 0, "resultParameter": json.dumps({"success": True})}}))
+        bridge_call(self.odata, "Mi Guion", "p", data_source="Datos Históricos")
+        inner = json.loads(json.loads(self.server.seen["body"])["scriptParameterValue"])
+        self.assertEqual(inner, {"script": "Mi Guion", "parameter": "p", "data_source": "Datos Históricos"})
+
+    def test_without_data_source_the_payload_is_unchanged(self):
+        self.server.reply = (200, "application/json", json.dumps(
+            {"scriptResult": {"code": 0, "resultParameter": json.dumps({"success": True})}}))
+        for ds in (None, ""):
+            bridge_call(self.odata, "S", "p", data_source=ds)
+            inner = json.loads(json.loads(self.server.seen["body"])["scriptParameterValue"])
+            self.assertEqual(inner, {"script": "S", "parameter": "p"})
+
+    def test_peel_false_returns_the_bridge_envelope(self):
+        env = {"success": True, "script": "S", "data_source": "D",
+               "result": json.dumps({"success": False, "script": "x"})}
+        self.server.reply = (200, "application/json", json.dumps(
+            {"scriptResult": {"code": 0, "resultParameter": json.dumps(env)}}))
+        self.assertEqual(bridge_call(self.odata, "S", "", data_source="D", peel=False), env)
+        self.assertEqual(bridge_call(self.odata, "S", "", data_source="D"), {"success": False, "script": "x"})
+
     def test_http_401_raises_bridge_error_with_status(self):
         self.server.reply = (401, "text/plain", "no")
         with self.assertRaises(BridgeError) as cm:

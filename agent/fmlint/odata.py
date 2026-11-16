@@ -146,8 +146,12 @@ def unwrap(body):
     return _peel(_envelope(body))
 
 
-def bridge_call(odata, script, parameter, timeout=30):
-    """Call a FileMaker script through AGFMScriptBridge over OData."""
+def bridge_call(odata, script, parameter, timeout=30, data_source=None, peel=True):
+    """Call a FileMaker script through AGFMScriptBridge over OData.
+
+    data_source: run the script in that data source of the main file (add-on 1.5.0+).
+    peel=False: return the Bridge envelope itself, not the script's own answer.
+    """
     base_url = odata.get("base_url", "")
     database = odata.get("database", "")
     username = odata.get("username", "")
@@ -159,7 +163,10 @@ def bridge_call(odata, script, parameter, timeout=30):
         )
 
     url = f"{base_url}/{urllib.request.quote(database, safe='')}/Script.{bridge}"
-    inner = json.dumps({"script": script, "parameter": parameter})
+    call = {"script": script, "parameter": parameter}
+    if data_source:
+        call["data_source"] = data_source
+    inner = json.dumps(call)
     payload = json.dumps({"scriptParameterValue": inner})
     credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
     req = urllib.request.Request(
@@ -184,4 +191,4 @@ def bridge_call(odata, script, parameter, timeout=30):
     if (isinstance(env, dict) and env.get("success") is False
             and str(env.get("error", "")).startswith(NOT_FOUND_PREFIX)):
         raise ScriptMissing(str(env["error"])[len(NOT_FOUND_PREFIX):].strip())
-    return _peel(env)
+    return _peel(env) if peel else env
