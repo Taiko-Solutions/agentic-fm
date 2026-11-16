@@ -7,6 +7,7 @@ import json
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -31,6 +32,7 @@ class _Handler(BaseHTTPRequestHandler):
         body = self.rfile.read(int(self.headers.get("Content-Length", 0))).decode("utf-8")
         call = json.loads(json.loads(body)["scriptParameterValue"])
         self.server.calls.append(call)
+        time.sleep(getattr(self.server, "delay", 0))
         status, payload = self.server.replies.pop(0)
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
@@ -55,6 +57,11 @@ class RunScriptTests(unittest.TestCase):
         (cfg / "automation.json").write_text(json.dumps({"solutions": {
             "SolutionApp": {"odata": main},
             "SolutionData": {"odata": {"via": "SolutionApp", "data_source": DS}}}}), encoding="utf-8")
+
+    def write_solutions(self, solutions):
+        path = Path(self.tmp.name) / "agent" / "config" / "automation.json"
+        main = json.loads(path.read_text(encoding="utf-8"))["solutions"]["SolutionApp"]
+        path.write_text(json.dumps({"solutions": dict({"SolutionApp": main}, **solutions)}), encoding="utf-8")
 
     def tearDown(self):
         self.server.shutdown()
@@ -162,7 +169,37 @@ class RunScriptTests(unittest.TestCase):
         code, out, _ = self.run_cli("--solution", "SolutionApp", "--script", "S", "--yes", "--json",
                                     replies=[_env(success=True, script="S", result="r")])
         self.assertEqual(code, 0)
-        self.assertEqual(json.loads(out[out.index("{"):]), {"success": True, "script": "S", "result": "r"})
+        self.assertEqual(json.loads(out), {"success": True, "script": "S", "result": "r"})
+
+    def test_unknown_solution_with_a_single_one_configured_sends_nothing(self):
+        self.write_solutions({})                       # only the main file is configured
+        code, _, err = self.run_cli("--solution", "SolutionData", "--script", "S", "--yes",
+                                    replies=[_env(success=True, script="S", result="ran in main")])
+        self.assertEqual(code, 2)
+        self.assertEqual(self.calls, [])
+        self.assertIn("SolutionData", err)
+
+    def test_via_without_data_source_sends_nothing(self):
+        for block in ({"via": "SolutionApp"}, {"via": "SolutionApp", "data_source": ""}):
+            self.write_solutions({"SolutionData": {"odata": block}})
+            code, _, err = self.run_cli("--solution", "SolutionData", "--script", "S", "--yes",
+                                        replies=[_env(success=True, script="S", result="ran in main")])
+            self.assertEqual(code, 2)
+            self.assertEqual(self.calls, [])
+            self.assertIn("data_source", err)
+
+    def test_answer_with_another_data_source_is_an_error(self):
+        code, out, _ = self.run_cli("--solution", "SolutionData", "--script", "S", "--yes", replies=[
+            VERSION_OK, _env(success=True, script="S", data_source="Otra", result="ok")])
+        self.assertEqual(code, 2)
+        self.assertNotIn("ok", out)
+
+    def test_a_timeout_warns_that_the_script_may_have_run(self):
+        self.server.delay = 2
+        code, _, err = self.run_cli("--solution", "SolutionApp", "--script", "S", "--yes", "--timeout", "1",
+                                    replies=[_env(success=True, script="S", result="late")])
+        self.assertEqual(code, 1)
+        self.assertIn("puede haberse ejecutado", err)
 
 
 class ParseVersionTests(unittest.TestCase):

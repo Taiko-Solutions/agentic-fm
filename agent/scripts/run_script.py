@@ -76,18 +76,26 @@ def main(argv=None) -> int:
 
     try:
         solutions = load_solutions(args.repo)
+        # resolve() falls back to the only configured solution: a named one must exist,
+        # or a call meant for a secondary file would run in the main one.
+        if args.solution and find_key(solutions, args.solution) is None:
+            return _fail(f"Solución '{args.solution}' no encontrada en automation.json", 2)
         target = resolve(solutions, args.solution)
     except ODataConfigError as exc:
         return _fail(str(exc), 2)
-    name = find_key(solutions, args.solution) or args.solution or target.main
+    name = find_key(solutions, args.solution) or target.main
     data_source = target.data_source
+    if (solutions[name].get("odata") or {}).get("via") and not data_source:
+        return _fail(f"El bloque odata de {name} tiene 'via' pero no 'data_source': "
+                     "sin la fuente de datos el guion se ejecutaría en el archivo principal.", 2)
 
-    print(f"Ejecutar «{args.script}» en {name}")
+    # The plan goes to stderr: stdout carries only the script's result (or the --json answer).
+    print(f"Ejecutar «{args.script}» en {name}", file=sys.stderr)
     if data_source:
-        print(f"  a través de {target.main} (fuente de datos «{data_source}»)")
+        print(f"  a través de {target.main} (fuente de datos «{data_source}»)", file=sys.stderr)
     if not args.yes:
         if input("¿Ejecutar este guion en FileMaker? [s/N] ").strip().lower() not in _YES:
-            print("Cancelado.")
+            print("Cancelado.", file=sys.stderr)
             return 1
 
     try:
@@ -106,7 +114,11 @@ def main(argv=None) -> int:
     except ODataConfigError as exc:
         return _fail(str(exc), 2)
     except BridgeError as exc:
-        return _fail(exc.reason, 1)
+        hint = ""
+        if exc.status is None and "timed out" in str(exc.reason).lower():
+            hint = (" El guion puede haberse ejecutado (o seguir ejecutándose) en el servidor: "
+                    "compruébalo antes de reintentar, o sube --timeout.")
+        return _fail(exc.reason + hint, 1)
 
     if not isinstance(answer, dict):
         return _fail(f"Respuesta inesperada del Bridge: {answer!r}", 1)
