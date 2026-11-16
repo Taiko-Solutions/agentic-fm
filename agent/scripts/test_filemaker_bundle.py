@@ -71,7 +71,7 @@ def bundle_version():
 
 class TestVersion(unittest.TestCase):
     def test_version_is_a_quoted_semver_literal(self):
-        self.assertEqual(bundle_version(), "1.4.0")
+        self.assertEqual(bundle_version(), "1.5.0")
 
     def test_version_script_lives_in_the_top_folder(self):
         top = _ROOT.find("Group")
@@ -481,6 +481,42 @@ class TestEvaluationWrapper(unittest.TestCase):
         text = ET.tostring(script(self.NAME), encoding="unicode")
         self.assertNotIn("snapshot-eval", text)
         self.assertNotIn("SIDE EFFECT", text)
+
+
+class TestBridgeDataSource(unittest.TestCase):
+    """Add-on 1.5.0: AGFMScriptBridge runs <data_source>::<script> in another file; the local path is unchanged."""
+    NAME = "AGFMScriptBridge"
+
+    def test_remote_call_is_by_name_with_retry_on_104(self):
+        by_name = [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
+        self.assertEqual(len(by_name), 3)                      # local + remote + retry
+        self.assertIn('$dataSource & "::" & $script', calcs(self.NAME))
+        self.assertIn("$callError = 104", calcs(self.NAME))
+
+    def test_error_names_follow_the_filemaker_code(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('$callError = 104 ; "script_or_data_source_not_found"', joined)
+        self.assertIn('$callError = 100 ; "file_unavailable"', joined)
+        self.assertIn('"script_unreachable"', joined)
+
+    def test_both_remote_answers_echo_data_source(self):
+        echoes = [c for c in calcs(self.NAME) if '[ "data_source" ; $dataSource ; JSONString ]' in c]
+        self.assertEqual(len(echoes), 2)
+
+    def test_local_path_is_untouched(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('not Position ( ¶ & ScriptNames ( "" ) & ¶ ; ¶ & $script & ¶ ; 1 ; 1 )', joined)
+        self.assertIn('"Script not found: " & $script', joined)
+
+    def test_remote_branch_comes_before_the_local_lookup(self):
+        texts = calcs(self.NAME)
+        self.assertLess(texts.index("not IsEmpty ( $dataSource )"),
+                        next(i for i, c in enumerate(texts) if "ScriptNames" in c))
+
+    def test_add_on_version_is_1_5_0(self):
+        self.assertEqual(bundle_version(), "1.5.0")
+        self.assertEqual(manifest()["version"], "1.5.0")
+        self.assertEqual(manifest()["agent_version"], "1.1.0")
 
 
 if __name__ == "__main__":

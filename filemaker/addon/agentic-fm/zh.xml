@@ -532,6 +532,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.54F858B78A8FCFFBA3232FD40E5B24DD</StringID>
+	<SourceText>1.5.0</SourceText>
+	<TargetText>1.5.0</TargetText>
+	<Comment>com.fmi.calculation.text.1.5.0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.57AE11E947E3055BAEC10E6EF93D2B58</StringID>
 	<SourceText> Build field object </SourceText>
 	<TargetText> Build field object </TargetText>
@@ -662,13 +669,6 @@
 	<SourceText>SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</SourceText>
 	<TargetText>SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</TargetText>
 	<Comment>com.fmi.calculation.text.SELECT TableId FROM FileMaker_Tables WHERE TableName = ?</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.6584DAE555D798C954AF810EFCB4423A</StringID>
-	<SourceText>1.4.0</SourceText>
-	<TargetText>1.4.0</TargetText>
-	<Comment>com.fmi.calculation.text.1.4.0</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -844,6 +844,13 @@
 	<SourceText>companion_host</SourceText>
 	<TargetText>companion_host</TargetText>
 	<Comment>com.fmi.calculation.text.companion_host</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.86C7C8DE145B552EE555CADC3D8AFD78</StringID>
+	<SourceText>file_unavailable</SourceText>
+	<TargetText>file_unavailable</TargetText>
+	<Comment>com.fmi.calculation.text.file_unavailable</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1246,6 +1253,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BA43FCF1FB0518B8F44E582AAEDF4059</StringID>
+	<SourceText>script_unreachable</SourceText>
+	<TargetText>script_unreachable</TargetText>
+	<Comment>com.fmi.calculation.text.script_unreachable</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21</StringID>
 	<SourceText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </SourceText>
 	<TargetText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </TargetText>
@@ -1460,6 +1474,13 @@
 	<SourceText>1.1.0</SourceText>
 	<TargetText>1.1.0</TargetText>
 	<Comment>com.fmi.calculation.text.1.1.0</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D98B870E6732752C8D9DDD30DDBBC392</StringID>
+	<SourceText>script_or_data_source_not_found</SourceText>
+	<TargetText>script_or_data_source_not_found</TargetText>
+	<Comment>com.fmi.calculation.text.script_or_data_source_not_found</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1694,10 +1715,10 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.layoutobject.text.3F868D17CFB579ECA89E032F15EDD204</StringID>
-	<SourceText>agentic-fm<CR/>1.3.0</SourceText>
-	<TargetText>agentic-fm<CR/>1.3.0</TargetText>
-	<Comment>com.fmi.layoutobject.text.agentic-fm_CR/_1.3.0</Comment>
+	<StringID>com.fmi.layoutobject.text.8A4613A9CA6EECB2C0000318A6961F0B</StringID>
+	<SourceText>agentic-fm<CR/>1.5.0</SourceText>
+	<TargetText>agentic-fm<CR/>1.5.0</TargetText>
+	<Comment>com.fmi.layoutobject.text.agentic-fm_CR/_1.5.0</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1834,13 +1855,6 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.05A1A51864BBD8FDF4D8DB1C149E265A</StringID>
-	<SourceText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</SourceText>
-	<TargetText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</TargetText>
-	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with keys:_CR/_  script    — name of the script to run_CR/_  parameter — value to pass as script parameter (optional)_CR/__CR/_RETURNS: JSON { success, script, result } on success_CR/_         JSON { success, error } on failure_CR/__CR/_CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge_CR/_  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.0AD28F9057B5642643DF8B6458C52EC0</StringID>
 	<SourceText>RETURNS: JSON { ok, source: cached | app, repo_path, solution } or { ok: false, error: no_service | no_config | unknown_solution | ambiguous_solution }. A {&quot;Proceso&quot;:&quot;Inicio&quot;} parameter is accepted and ignored.</SourceText>
 	<TargetText>RETURNS: JSON { ok, source: cached | app, repo_path, solution } or { ok: false, error: no_service | no_config | unknown_solution | ambiguous_solution }. A {&quot;Proceso&quot;:&quot;Inicio&quot;} parameter is accepted and ignored.</TargetText>
@@ -1939,6 +1953,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.4BC62B521C1B90B40774F85211B19EB3</StringID>
+	<SourceText>With data_source the script runs in that file (the name of the data source in this file). Nothing below this block runs in that case.</SourceText>
+	<TargetText>With data_source the script runs in that file (the name of the data source in this file). Nothing below this block runs in that case.</TargetText>
+	<Comment>com.fmi.scriptstep.text.With data_source the script runs in that file (the name of the data source in this file). Nothing below this block runs in that case.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.54E741E888EA09F11FDDDF4DB288D1C4</StringID>
 	<SourceText>The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</SourceText>
 	<TargetText>The __FMAddonTemplateDirectives_ prefix keeps this script out of the package. Replace UUIDs stays Off so every rebuild is the same add-on.</TargetText>
@@ -1967,6 +1988,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.6A960A11810A77B5E4C0C94D8DD0C412</StringID>
+	<SourceText>PURPOSE: OData bridge — accepts JSON { script, parameter, data_source } and performs the named script, in this file or in another one</SourceText>
+	<TargetText>PURPOSE: OData bridge — accepts JSON { script, parameter, data_source } and performs the named script, in this file or in another one</TargetText>
+	<Comment>com.fmi.scriptstep.text.PURPOSE: OData bridge — accepts JSON { script, parameter, data_source } and performs the named script, in this file or in another one</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.6D0BB34F40C7ECC5A6360A5B3AA5DAE8</StringID>
 	<SourceText>Example of how to call Agentic-fm Debug</SourceText>
 	<TargetText>Example of how to call Agentic-fm Debug</TargetText>
@@ -1992,6 +2020,13 @@
 	<SourceText>PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</SourceText>
 	<TargetText>PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</TargetText>
 	<Comment>com.fmi.scriptstep.text.PURPOSE: Navigate to a layout by name. For use via OData/AGFMBridge.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.7A647D4DDDBCAF30FE2F89A6F5D62664</StringID>
+	<SourceText>A file that is not open may answer 104 the first time; one more try opens it.</SourceText>
+	<TargetText>A file that is not open may answer 104 the first time; one more try opens it.</TargetText>
+	<Comment>com.fmi.scriptstep.text.A file that is not open may answer 104 the first time; one more try opens it.</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -2114,17 +2149,17 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.scriptstep.text.DACA4F5122CC699F2AA346CB940137BF</StringID>
-	<SourceText>PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</SourceText>
-	<TargetText>PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</TargetText>
-	<Comment>com.fmi.scriptstep.text.PURPOSE: OData bridge — accepts JSON { script, parameter } and performs the named script</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
 	<StringID>com.fmi.scriptstep.text.DBD1594BCF7F306A2C4977B90C1646B9</StringID>
 	<SourceText>Called by other scripts via Perform Script with a JSON parameter.</SourceText>
 	<TargetText>Called by other scripts via Perform Script with a JSON parameter.</TargetText>
 	<Comment>com.fmi.scriptstep.text.Called by other scripts via Perform Script with a JSON parameter.</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.scriptstep.text.DC64A1E2970E02F2A67D27BC9EF75261</StringID>
+	<SourceText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/>  data_source — name of another file as set in the File Reference (optional; empty = this file)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/>  with data_source: JSON { success, script, data_source, result }<CR/>         or JSON { success: false, error, error_code, script, data_source }<CR/>         error = script_or_data_source_not_found (104) | file_unavailable (100) | script_unreachable<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</SourceText>
+	<TargetText>PARAMETER: JSON object with keys:<CR/>  script    — name of the script to run<CR/>  parameter — value to pass as script parameter (optional)<CR/>  data_source — name of another file as set in the File Reference (optional; empty = this file)<CR/><CR/>RETURNS: JSON { success, script, result } on success<CR/>         JSON { success, error } on failure<CR/>  with data_source: JSON { success, script, data_source, result }<CR/>         or JSON { success: false, error, error_code, script, data_source }<CR/>         error = script_or_data_source_not_found (104) | file_unavailable (100) | script_unreachable<CR/><CR/>CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge<CR/>  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</TargetText>
+	<Comment>com.fmi.scriptstep.text.PARAMETER: JSON object with keys:_CR/_  script    — name of the script to run_CR/_  parameter — value to pass as script parameter (optional)_CR/_  data_source — name of another file as set in the File Reference (optional; empty = this file)_CR/__CR/_RETURNS: JSON { success, script, result } on success_CR/_         JSON { success, error } on failure_CR/_  with data_source: JSON { success, script, data_source, result }_CR/_         or JSON { success: false, error, error_code, script, data_source }_CR/_         error = script_or_data_source_not_found (104) | file_unavailable (100) | script_unreachable_CR/__CR/_CALLED VIA: OData POST /fmi/odata/v4/{db}/Script.AGFMScriptBridge_CR/_  body: { &quot;scriptParameterValue&quot;: &quot;{\&quot;script\&quot;:\&quot;Push Context\&quot;,\&quot;parameter\&quot;:\&quot;...\&quot;}&quot; }</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>

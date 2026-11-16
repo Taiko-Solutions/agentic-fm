@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-11-12T13:38:07">
+<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-11-16T15:47:24">
 	<Structure membercount="1">
 		<AddAction membercount="11">
 			<BaseTableCatalog membercount="1">
@@ -111,7 +111,7 @@
 			</CustomMenuCatalog>
 			<PasteIndexList membercount="0"></PasteIndexList>
 			<ScriptCatalog membercount="20">
-				<UUID modifications="21" userName="" accountName="" timestamp="2026-11-12T13:30:54">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
+				<UUID modifications="24" userName="" accountName="" timestamp="2026-11-16T15:46:12">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
 				<TagList></TagList>
 				<Script id="36" name="com.fmi.script.folder.DEA3CF9E8D9F055B574DEAD904F6BD24" isFolder="True">
 					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">C63107CF-E36B-4563-B4F7-97143AFDE943</UUID>
@@ -124,7 +124,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="38" name="com.fmi.script.EB5744F9AC3D65D45430632F605FEE94">
-					<UUID modifications="6" userName="" accountName="" timestamp="2026-11-12T13:27:12">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
+					<UUID modifications="7" userName="" accountName="" timestamp="2026-11-16T15:45:15">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -174,7 +174,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="48" name="com.fmi.script.2778A69EC3166CD0C084226AB5516976">
-					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">45AF9A17-3EE0-4E77-A0E1-E61A53A77D4D</UUID>
+					<UUID modifications="2" userName="" accountName="" timestamp="2026-11-16T15:42:30">45AF9A17-3EE0-4E77-A0E1-E61A53A77D4D</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -230,7 +230,7 @@
 				</BinaryData>
 			</LibraryCatalog>
 			<LayoutCatalog membercount="1">
-				<UUID modifications="21" userName="" accountName="" timestamp="2026-10-25T19:43:09">2686B568-8364-4B58-9F1C-88EEF669867F</UUID>
+				<UUID modifications="22" userName="" accountName="" timestamp="2026-10-25T19:43:09">2686B568-8364-4B58-9F1C-88EEF669867F</UUID>
 				<TagList></TagList>
 				<Layout id="3" name="com.fmi.layout.9D72E2AAFB6E345C75FF44E903812444" width="530">
 					<TableOccurrenceReference id="1065089" name="com.fmi.tableoccurrence.59E799C8D64DB245C2EF8BEDD483B48C" UUID="8FEF98FE-534E-4DF4-828D-6781257D710B"></TableOccurrenceReference>
@@ -644,8 +644,8 @@
 				<Script>
 					<ScriptReference id="38" name="com.fmi.script.EB5744F9AC3D65D45430632F605FEE94" UUID="B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C"></ScriptReference>
 					<ObjectList membercount="2">
-						<Step hash="8DB02DED97AC72E44681EDEFCD69B3B4" index="0" id="89" name="# (comment)" enable="True">
-							<UUID>D43764EE-6086-417D-90F1-911FB44E365A</UUID>
+						<Step hash="F426A5860EA2FCCD21005A765891DE23" index="0" id="89" name="# (comment)" enable="True">
+							<UUID>1BBC3003-FC6F-4992-B7C5-B2E08E13AD20</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -654,15 +654,15 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="41CC5102551924082F39E6A90C49F432" index="1" id="103" name="Exit Script" enable="True">
-							<UUID>71FDB32A-C67A-4A17-8586-37D00DC37AB9</UUID>
+						<Step hash="12169E45736DE5818A474A7D987DBC5C" index="1" id="103" name="Exit Script" enable="True">
+							<UUID>887FCFE7-BF01-4119-8126-7D82B081890C</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
-											<Text><![CDATA["com.fmi.calculation.text.6584DAE555D798C954AF810EFCB4423A"]]></Text>
+											<Text><![CDATA["com.fmi.calculation.text.54F858B78A8FCFFBA3232FD40E5B24DD"]]></Text>
 										</Calculation>
 									</Calculation>
 								</Parameter>
@@ -7868,19 +7868,19 @@
 				</Script>
 				<Script>
 					<ScriptReference id="48" name="com.fmi.script.2778A69EC3166CD0C084226AB5516976" UUID="45AF9A17-3EE0-4E77-A0E1-E61A53A77D4D"></ScriptReference>
-					<ObjectList membercount="25">
-						<Step hash="193F449DBFB5BECC12602BA728DFB13D" index="0" id="89" name="# (comment)" enable="True">
-							<UUID>A04E4DBA-E05E-4D4F-9D06-3D6460090539</UUID>
+					<ObjectList membercount="42">
+						<Step hash="AF70FA3683A91E200BAF711982F3F580" index="0" id="89" name="# (comment)" enable="True">
+							<UUID>043C8E92-E751-44D8-A0F2-CEA95CDFBBCD</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
 								<Parameter type="Comment">
-									<Comment value="com.fmi.scriptstep.text.DACA4F5122CC699F2AA346CB940137BF"></Comment>
+									<Comment value="com.fmi.scriptstep.text.6A960A11810A77B5E4C0C94D8DD0C412"></Comment>
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="8AADB4A20B2F4D5002E04C5F7A429C04" index="1" id="61" name="Insert Text" enable="False">
-							<UUID>34327975-1D72-4057-94E1-1116BF5CB8CD</UUID>
+						<Step hash="D0D1CB5CED1A34257F2E82893717C561" index="1" id="61" name="Insert Text" enable="False">
+							<UUID>4710FCA3-7F40-4038-9B5E-012BE729DA53</UUID>
 							<OwnerID></OwnerID>
 							<Options>5</Options>
 							<ParameterValues membercount="3">
@@ -7899,12 +7899,12 @@
 									</Variable>
 								</Parameter>
 								<Parameter type="Text">
-									<Text value="com.fmi.scriptstep.text.05A1A51864BBD8FDF4D8DB1C149E265A"></Text>
+									<Text value="com.fmi.scriptstep.text.DC64A1E2970E02F2A67D27BC9EF75261"></Text>
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="67A2EBE070B87EBCE4B4E4B25E33D158" index="2" id="89" name="# (comment)" enable="True">
-							<UUID>5701F703-09D2-4743-BE0F-8A2634ED562C</UUID>
+						<Step hash="8621AC91125619AFA00070854EC2E529" index="2" id="89" name="# (comment)" enable="True">
+							<UUID>651C780F-4D71-400B-ADF7-B777C65992AE</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -7913,8 +7913,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="1974C7764CDC9D20ACE958E3C657E170" index="3" id="141" name="Set Variable" enable="False">
-							<UUID>37A5D587-C684-4DEA-9F19-2F495285C2FC</UUID>
+						<Step hash="BE2B549818BCD06FC13CFA363C98B18B" index="3" id="141" name="Set Variable" enable="False">
+							<UUID>90FD5B2E-0A2B-4DA6-8E30-7C6866E9EDCC</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7931,8 +7931,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="48865C95ABAB8992CE994944DC7329A1" index="4" id="89" name="# (comment)" enable="True">
-							<UUID>1731316C-9C4A-4A97-A38E-A5F4B6FFCE22</UUID>
+						<Step hash="67D978EAA713EF62575C793D96499271" index="4" id="89" name="# (comment)" enable="True">
+							<UUID>B1DADCAE-4273-4849-90E7-D19B59C513F7</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -7941,8 +7941,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="98221E2D29358D80249BF3C8B63D4E79" index="5" id="89" name="# (comment)" enable="False">
-							<UUID>B2A62F37-8491-40F3-9D3F-C2718663C338</UUID>
+						<Step hash="1AD1508059611AA2323B4D0D8105BBCE" index="5" id="89" name="# (comment)" enable="False">
+							<UUID>61D7FD13-3D2C-4F88-B45C-E7EF9A3FBA2D</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -7951,8 +7951,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="8E3CA92AEA0983A72B80A523463BD800" index="6" id="141" name="Set Variable" enable="True">
-							<UUID>7F8039DF-420F-47D9-A2CD-7CC32A2A9EE9</UUID>
+						<Step hash="91441EF66F9FEB31933807BDC2DEC0DD" index="6" id="141" name="Set Variable" enable="True">
+							<UUID>764BE272-2F33-444E-9843-98CCB63E1927</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7969,8 +7969,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="92F020B16585E30626E0A1E54FE2A77A" index="7" id="89" name="# (comment)" enable="True">
-							<UUID>7FA801BA-F163-43EB-9F60-7A0C1B4D0CDB</UUID>
+						<Step hash="24477EFED9F5A3CA0CF77F646D18E5E9" index="7" id="89" name="# (comment)" enable="True">
+							<UUID>1FD13DB9-B513-4931-B80B-9D5C79A7D713</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -7979,8 +7979,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="44E2C8B1999EF6EB9DC7F77414B849C3" index="8" id="68" name="If" enable="True">
-							<UUID>58409388-95FA-4A30-AF3F-90A9A01BE058</UUID>
+						<Step hash="0C1CB038C8EE0839A3EA8DF7BCE4481A" index="8" id="68" name="If" enable="True">
+							<UUID>35FCDE14-9B9D-4E53-8B53-C510B374FBF3</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -7996,8 +7996,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="A074F5EBC7CF090AB686DC3AB8354084" index="9" id="103" name="Exit Script" enable="True">
-							<UUID>7242C8C2-ADFE-4A34-98FB-E8371D375825</UUID>
+						<Step hash="F82D9495ADAECEACBFB79C250671B7A9" index="9" id="103" name="Exit Script" enable="True">
+							<UUID>9D2AD89C-1467-4E62-BAB8-5D38319B5654</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -8010,13 +8010,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="317030DD4691073986FDCBFAA2E7EDF9" index="10" id="70" name="End If" enable="True">
-							<UUID>E8B7D1E0-5081-40D1-A6F0-3D9F7204C34B</UUID>
+						<Step hash="80C0807E01BC7509DF8D84D654A091BA" index="10" id="70" name="End If" enable="True">
+							<UUID>B4551462-D95D-4628-BB5B-8C082F867835</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="FB4DBC774DEF077E3366D8A0C87B3EAC" index="11" id="89" name="# (comment)" enable="True">
-							<UUID>13388C36-A26F-4D04-8F7B-F2CE677525FA</UUID>
+						<Step hash="2CFFCB09BD5F708D8E1AD51B8F0F41C6" index="11" id="89" name="# (comment)" enable="True">
+							<UUID>6DF59532-58BF-44FF-9543-685FB43A5462</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -8025,8 +8025,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="2A4E1AB690EF730965687F7171D4C4FF" index="12" id="89" name="# (comment)" enable="False">
-							<UUID>974F2AFF-B092-4757-AB83-5435A26F9046</UUID>
+						<Step hash="336EEE8A75FD4061EE7DC0A68E4AFF21" index="12" id="89" name="# (comment)" enable="False">
+							<UUID>F35B7D6B-1496-4F2B-B861-006637B3AC91</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -8035,8 +8035,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="0AD2791F42D8A36AE3BF2B01614B548E" index="13" id="141" name="Set Variable" enable="True">
-							<UUID>3B0F91D3-5473-4036-91D9-0E5BD47D9918</UUID>
+						<Step hash="DEF4004F4875E2BF9ABE443BFBCB8E1C" index="13" id="141" name="Set Variable" enable="True">
+							<UUID>AE76B53C-D7F2-41B8-A6BB-10ED4D7D3895</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -8053,8 +8053,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="BEDC87332109BC329161354D9B8EF3A1" index="14" id="141" name="Set Variable" enable="True">
-							<UUID>97020D25-B05E-472A-B8E6-977CEE9B91B3</UUID>
+						<Step hash="9B980E6300D4DBB16FB1E1B8A2259A3A" index="14" id="141" name="Set Variable" enable="True">
+							<UUID>28474D25-344B-477D-9198-8D1B33468EFE</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -8071,8 +8071,278 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="EB96A8080DCF11DA097422C83435678D" index="15" id="89" name="# (comment)" enable="True">
-							<UUID>C0FF7BEC-1C95-473A-A179-255F9948A432</UUID>
+						<Step hash="7214B792FDC778ED3A0C8F443A3E7898" index="15" id="141" name="Set Variable" enable="True">
+							<UUID>7B39A5AC-6EF5-4E93-A142-38FD2137BCA1</UUID>
+							<OwnerID></OwnerID>
+							<Options>16388</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Variable">
+									<value>
+										<Calculation datatype="1" position="1">
+											<Calculation>
+												<Text><![CDATA[JSONGetElement ( $input ; "com.fmi.calculation.text.A4C4465718E827AE1E96EE2459B4BB46" )]]></Text>
+											</Calculation>
+										</Calculation>
+									</value>
+									<Name value="$dataSource"></Name>
+									<repetition>
+										<Calculation datatype="1" position="2">
+											<Calculation>
+												<Text><![CDATA[1]]></Text>
+											</Calculation>
+										</Calculation>
+									</repetition>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="F143CBA7B6EEF0E3E1F8944E308FC6F0" index="16" id="89" name="# (comment)" enable="True">
+							<UUID>B4532B4A-12B2-41F7-900D-91A90B5C66AD</UUID>
+							<OwnerID></OwnerID>
+							<Options>4</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Comment">
+									<Comment value="com.fmi.scriptstep.text.4BC62B521C1B90B40774F85211B19EB3"></Comment>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="0C31AEA96FA4AD1A58DD10A022E8A380" index="17" id="68" name="If" enable="True">
+							<UUID>FAF8828C-77EF-4CA1-846E-B9B42EDF74B0</UUID>
+							<OwnerID></OwnerID>
+							<Options>16384</Options>
+							<ParameterValues membercount="2">
+								<Parameter type="Boolean">
+									<Boolean type="Collapsed" id="33554432" value="False"></Boolean>
+								</Parameter>
+								<Parameter type="Calculation">
+									<Calculation datatype="7" position="0">
+										<Calculation>
+											<Text><![CDATA[not IsEmpty ( $dataSource )]]></Text>
+										</Calculation>
+									</Calculation>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="DE99CCCAD4B3F06E63529FBB4A905E15" index="18" id="141" name="Set Variable" enable="True">
+							<UUID>A431D03A-5B5B-456A-8912-E6191C1D181E</UUID>
+							<OwnerID></OwnerID>
+							<Options>16388</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Variable">
+									<value>
+										<Calculation datatype="1" position="1">
+											<Calculation>
+												<Text><![CDATA[$dataSource & "com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8" & $script]]></Text>
+											</Calculation>
+										</Calculation>
+									</value>
+									<Name value="$target"></Name>
+									<repetition>
+										<Calculation datatype="1" position="2">
+											<Calculation>
+												<Text><![CDATA[1]]></Text>
+											</Calculation>
+										</Calculation>
+									</repetition>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="33FB2006FD568AA68886B74C3616F8B9" index="19" id="86" name="Set Error Capture" enable="True">
+							<UUID>EB76C4D9-8629-4858-951B-183AA598C8A4</UUID>
+							<OwnerID></OwnerID>
+							<Options>196608</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Boolean">
+									<Boolean id="131072" value="True"></Boolean>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="E476853F267B7B45E79EEC42DC9A53CF" index="20" id="1" name="Perform Script" enable="True">
+							<UUID>A7F1DA8C-8131-4504-9221-98D13F629B21</UUID>
+							<OwnerID></OwnerID>
+							<Options>33572864</Options>
+							<ParameterValues membercount="2">
+								<Parameter type="List">
+									<List name="By name" value="2">
+										<Calculation datatype="1" position="2">
+											<Calculation>
+												<Text><![CDATA[$target]]></Text>
+											</Calculation>
+										</Calculation>
+									</List>
+								</Parameter>
+								<Parameter type="Parameter">
+									<Parameter>
+										<Calculation datatype="1" position="0">
+											<Calculation>
+												<Text><![CDATA[$parameter]]></Text>
+											</Calculation>
+										</Calculation>
+									</Parameter>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="9B2F0E8B4EC5883B4AB0009A3B08E76D" index="21" id="141" name="Set Variable" enable="True">
+							<UUID>B6218179-8622-4BE3-BA12-AE18D39B3034</UUID>
+							<OwnerID></OwnerID>
+							<Options>16388</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Variable">
+									<value>
+										<Calculation datatype="1" position="1">
+											<Calculation>
+												<Text><![CDATA[Get ( LastError )]]></Text>
+											</Calculation>
+										</Calculation>
+									</value>
+									<Name value="$callError"></Name>
+									<repetition>
+										<Calculation datatype="1" position="2">
+											<Calculation>
+												<Text><![CDATA[1]]></Text>
+											</Calculation>
+										</Calculation>
+									</repetition>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="E5A59ECFD659552AF30E44DE6C6E853D" index="22" id="89" name="# (comment)" enable="True">
+							<UUID>6A06C595-578D-4D9E-8345-344C5FF5DF59</UUID>
+							<OwnerID></OwnerID>
+							<Options>4</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Comment">
+									<Comment value="com.fmi.scriptstep.text.7A647D4DDDBCAF30FE2F89A6F5D62664"></Comment>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="68C967986D11D9F077DF43F74F498EBD" index="23" id="68" name="If" enable="True">
+							<UUID>1FB68A9F-1CE5-4509-9E25-10D48F4CD12E</UUID>
+							<OwnerID></OwnerID>
+							<Options>16384</Options>
+							<ParameterValues membercount="2">
+								<Parameter type="Boolean">
+									<Boolean type="Collapsed" id="33554432" value="False"></Boolean>
+								</Parameter>
+								<Parameter type="Calculation">
+									<Calculation datatype="7" position="0">
+										<Calculation>
+											<Text><![CDATA[$callError = 104]]></Text>
+										</Calculation>
+									</Calculation>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="598936D4742B31EE3040280C943F2ACE" index="24" id="1" name="Perform Script" enable="True">
+							<UUID>D2B22676-E56F-4118-A48F-2F39728D6C52</UUID>
+							<OwnerID></OwnerID>
+							<Options>33572864</Options>
+							<ParameterValues membercount="2">
+								<Parameter type="List">
+									<List name="By name" value="2">
+										<Calculation datatype="1" position="2">
+											<Calculation>
+												<Text><![CDATA[$target]]></Text>
+											</Calculation>
+										</Calculation>
+									</List>
+								</Parameter>
+								<Parameter type="Parameter">
+									<Parameter>
+										<Calculation datatype="1" position="0">
+											<Calculation>
+												<Text><![CDATA[$parameter]]></Text>
+											</Calculation>
+										</Calculation>
+									</Parameter>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="B2E9B7C6EBD4859A31EE54BE859E75AE" index="25" id="141" name="Set Variable" enable="True">
+							<UUID>9CCA8CFD-6E87-4565-9085-C520C09DBDAA</UUID>
+							<OwnerID></OwnerID>
+							<Options>16388</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Variable">
+									<value>
+										<Calculation datatype="1" position="1">
+											<Calculation>
+												<Text><![CDATA[Get ( LastError )]]></Text>
+											</Calculation>
+										</Calculation>
+									</value>
+									<Name value="$callError"></Name>
+									<repetition>
+										<Calculation datatype="1" position="2">
+											<Calculation>
+												<Text><![CDATA[1]]></Text>
+											</Calculation>
+										</Calculation>
+									</repetition>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="10AEAEE7DE918BDFA95932A816B24582" index="26" id="70" name="End If" enable="True">
+							<UUID>D572928F-B9C3-443A-8909-45E84E9645C3</UUID>
+							<OwnerID></OwnerID>
+							<Options>0</Options>
+						</Step>
+						<Step hash="F4CFDB0E631B990A79DC3EAC7B55FC86" index="27" id="68" name="If" enable="True">
+							<UUID>EB1A104F-4935-4DCB-9182-CAC2B571B334</UUID>
+							<OwnerID></OwnerID>
+							<Options>16384</Options>
+							<ParameterValues membercount="2">
+								<Parameter type="Boolean">
+									<Boolean type="Collapsed" id="33554432" value="False"></Boolean>
+								</Parameter>
+								<Parameter type="Calculation">
+									<Calculation datatype="7" position="0">
+										<Calculation>
+											<Text><![CDATA[$callError ≠ 0]]></Text>
+										</Calculation>
+									</Calculation>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="D1935F72E029E9293F4C79E6E58A6870" index="28" id="103" name="Exit Script" enable="True">
+							<UUID>E051E067-4675-46AC-9318-BD774D131C06</UUID>
+							<OwnerID></OwnerID>
+							<Options>16384</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Calculation">
+									<Calculation datatype="1" position="0">
+										<Calculation>
+											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.0C921C1D5DF8752B4B0BE58C9F034941" ; False ; JSONBoolean ] ;	[ "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ; Case (		$callError = 104 ; "com.fmi.calculation.text.D98B870E6732752C8D9DDD30DDBBC392" ;		$callError = 100 ; "com.fmi.calculation.text.86C7C8DE145B552EE555CADC3D8AFD78" ;		"com.fmi.calculation.text.BA43FCF1FB0518B8F44E582AAEDF4059"	) ; JSONString ] ;	[ "com.fmi.calculation.text.CF89B62DF482D28D4B22EBB4C6B9A60D" ; $callError ; JSONNumber ] ;	[ "com.fmi.calculation.text.465E1F4E24F01643AAEAA291F019E952" ; $script ; JSONString ] ;	[ "com.fmi.calculation.text.A4C4465718E827AE1E96EE2459B4BB46" ; $dataSource ; JSONString ])]]></Text>
+										</Calculation>
+									</Calculation>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="A9E3409A9CB29F5CCA7964924C8A695C" index="29" id="70" name="End If" enable="True">
+							<UUID>D4AC878A-AC6D-4EC3-A9CC-60386237F4D3</UUID>
+							<OwnerID></OwnerID>
+							<Options>0</Options>
+						</Step>
+						<Step hash="7E99011AF64058B1A13756CA751199C5" index="30" id="103" name="Exit Script" enable="True">
+							<UUID>5B547E0C-E921-43DB-BFDC-4539A1E98471</UUID>
+							<OwnerID></OwnerID>
+							<Options>16384</Options>
+							<ParameterValues membercount="1">
+								<Parameter type="Calculation">
+									<Calculation datatype="1" position="0">
+										<Calculation>
+											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;	[ "com.fmi.calculation.text.0C921C1D5DF8752B4B0BE58C9F034941" ; True ; JSONBoolean ] ;	[ "com.fmi.calculation.text.465E1F4E24F01643AAEAA291F019E952" ; $script ; JSONString ] ;	[ "com.fmi.calculation.text.A4C4465718E827AE1E96EE2459B4BB46" ; $dataSource ; JSONString ] ;	[ "com.fmi.calculation.text.BF27CA10BA6CC8943349796AD49F4166" ; Get ( ScriptResult ) ; JSONString ])]]></Text>
+										</Calculation>
+									</Calculation>
+								</Parameter>
+							</ParameterValues>
+						</Step>
+						<Step hash="2193B115BFA32A4F0AC3217D3899BD9A" index="31" id="70" name="End If" enable="True">
+							<UUID>A42D610A-BCC6-43AD-959F-321628B90EE8</UUID>
+							<OwnerID></OwnerID>
+							<Options>0</Options>
+						</Step>
+						<Step hash="DCE0AD25101DA6B641CF2E35DB804761" index="32" id="89" name="# (comment)" enable="True">
+							<UUID>663665D8-AEF7-489C-AB38-26083CBAB25C</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -8081,8 +8351,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="A343AE71767339BE6FC88DF198FECCAF" index="16" id="68" name="If" enable="True">
-							<UUID>C148E10A-870F-45D8-A6D2-FFCC17963C81</UUID>
+						<Step hash="07F54AA8395895F84E2A186116A6F114" index="33" id="68" name="If" enable="True">
+							<UUID>259956C5-1B6C-4C6D-A1D0-264D87B8D365</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -8098,8 +8368,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="0D843C21D344B803F24EC397AC308EB2" index="17" id="103" name="Exit Script" enable="True">
-							<UUID>322C6917-3040-4B91-AFA4-A2D3209930A8</UUID>
+						<Step hash="C4D1EFA826D78A4E59FBE527FD4192FD" index="34" id="103" name="Exit Script" enable="True">
+							<UUID>9E15C645-3686-4048-9A69-22743451E739</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -8112,13 +8382,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B0A1BB5F34F7E671565A5377D0A38E2D" index="18" id="70" name="End If" enable="True">
-							<UUID>80D95FD3-2593-4C24-9A4F-9360F3C9ED85</UUID>
+						<Step hash="6C23253AFD4E804A41FF7E7FC872DBFA" index="35" id="70" name="End If" enable="True">
+							<UUID>DF1AC335-A725-4E37-92F2-80ACE3D9EF34</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="DC6260EA5C82D0867397746A35A96434" index="19" id="89" name="# (comment)" enable="True">
-							<UUID>C0E14DD8-6604-4F3F-AE2C-71234C1753D3</UUID>
+						<Step hash="4B5453D533EC8A98D908B72DDFE8BEA0" index="36" id="89" name="# (comment)" enable="True">
+							<UUID>EC8EA079-2BC6-4EB0-B542-ABFD1752802F</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -8127,8 +8397,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="A23A4E25C8DDFCD4E77B390C90F9D67B" index="20" id="89" name="# (comment)" enable="False">
-							<UUID>7D6FCBB7-D81D-43DB-9D7E-B68CD51942F3</UUID>
+						<Step hash="9951BFD34F792B97125F33868CF31827" index="37" id="89" name="# (comment)" enable="False">
+							<UUID>7D963588-3636-4365-A71F-7DD8E68F4A00</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -8137,8 +8407,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="A5A24CFA2CC6C4E8300F941A0C6C2CE1" index="21" id="1" name="Perform Script" enable="True">
-							<UUID>EDA296C7-812A-416F-A038-F29A380F5552</UUID>
+						<Step hash="79713C1528C0516A513C7AB50A462801" index="38" id="1" name="Perform Script" enable="True">
+							<UUID>0C1C10FE-BC81-4A9E-829F-3C098EC4A698</UUID>
 							<OwnerID></OwnerID>
 							<Options>33572864</Options>
 							<ParameterValues membercount="2">
@@ -8162,8 +8432,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="D826AAF46003266EF08A076A49EAA12C" index="22" id="141" name="Set Variable" enable="True">
-							<UUID>23D5185D-C7B0-40FE-9DDD-9D767BABF825</UUID>
+						<Step hash="E45189E4F7582E37ED613FAA9E3FF476" index="39" id="141" name="Set Variable" enable="True">
+							<UUID>E24A6E5B-B5F6-4A15-B965-D04B45FF8DDA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -8180,8 +8450,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="24E853D14E0CFD465CBE6AA3FD5C87B3" index="23" id="89" name="# (comment)" enable="True">
-							<UUID>B25BEFE3-4689-45A9-B88E-4BEEEB2699EB</UUID>
+						<Step hash="A84A519BDB118EEDCED50D48D9A3C549" index="40" id="89" name="# (comment)" enable="True">
+							<UUID>C897D1A6-401A-4E23-959F-96036CDA7A52</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -8190,8 +8460,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="DA44C1CF2DB72720074C5D7C9A342697" index="24" id="103" name="Exit Script" enable="True">
-							<UUID>8B760A95-117F-4C73-A27B-EC0CB9472C62</UUID>
+						<Step hash="D219484E302DD849E67F33607709F42D" index="41" id="103" name="Exit Script" enable="True">
+							<UUID>666B72E9-B3D7-4A0A-BD15-30EE55740B52</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -9379,7 +9649,7 @@ self:normal .baseline
 }
 ]]></FullCSS>
 								</LayoutObject>
-								<LayoutObject hash="D7BE9944A99149A561B989E422574451" id="2" type="Button" name="" kind="10">
+								<LayoutObject hash="9B186621AA9347B7545405B2A5A6E6B0" id="2" type="Button" name="" kind="10">
 									<Bounds top="0" left="0" bottom="58" right="170"></Bounds>
 									<Options>805371912</Options>
 									<Button>
@@ -9388,15 +9658,7 @@ self:normal .baseline
 											<Text>
 												<Options>2</Options>
 												<StyledText>
-													<Data><![CDATA[com.fmi.layoutobject.text.3F868D17CFB579ECA89E032F15EDD204]]></Data>
-													<CharacterStyleList membercount="1">
-														<CharacterStyle Start="11" End="4294967295">
-															<Text><![CDATA[1.3.0]]></Text>
-															<Style>
-																<FontStyle mask="2"></FontStyle>
-															</Style>
-														</CharacterStyle>
-													</CharacterStyleList>
+													<Data><![CDATA[com.fmi.layoutobject.text.8A4613A9CA6EECB2C0000318A6961F0B]]></Data>
 												</StyledText>
 											</Text>
 										</Label>

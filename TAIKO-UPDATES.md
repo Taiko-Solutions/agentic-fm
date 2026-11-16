@@ -4,6 +4,16 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
+## 2026-11-16 — add-on 1.5.0: ejecutar guiones en archivos secundarios por el principal
+
+**Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon`). En los archivos secundarios no hay que pegar nada.
+
+- `AGFMScriptBridge` acepta un `data_source` opcional: `{ script, parameter, data_source }` ejecuta `<fuente de datos>::<guion>` en el archivo secundario y devuelve su resultado. Sin `data_source` se comporta igual que antes.
+- Nuevo `agent/scripts/run_script.py --script "<guion>" [--solution <clave>] [--param '<texto>'] [--yes]`: resuelve la solución en `automation.json` (bloque completo o `via` + `data_source`), pide confirmación y enseña el resultado. Antes de enviar nada a un secundario comprueba que el add-on del principal sea 1.5.0: un Bridge anterior ignoraría `data_source` y podría ejecutar un guion del mismo nombre en el principal.
+- Errores del Bridge con `data_source`: `script_or_data_source_not_found` (104; FileMaker no distingue guion de fuente de datos), `file_unavailable` (100) y `script_unreachable` (el resto). `success: true` solo dice que el guion se lanzó; lo que falle dentro lo cuenta el propio guion en su resultado.
+- La cuenta de OData tiene que existir en el archivo secundario con permiso para ejecutar el guion. Los guiones que muestran diálogos no funcionan por OData.
+- **Corrección de la entrada de la 1.4.0:** un archivo secundario con bloque `odata` completo y `AGFMScriptBridge` pegado sigue funcionando. Borrar esos guiones de los secundarios es opcional; con la 1.5.0 ya no hacen falta.
+
 ## 2026-11-12 — fmlint: el aviso C005 ya no tumba la ejecución
 
 - Con credenciales OData rechazadas (o cualquier fallo de la primera petición), el aviso C005 de la evaluación en vivo hacía caer fmlint con `TypeError` al ordenar los diagnósticos. Ahora C005 es un aviso de archivo (`file:`) y el motor ordena sin fallar aunque una regla no indique línea.
