@@ -71,7 +71,7 @@ def bundle_version():
 
 class TestVersion(unittest.TestCase):
     def test_version_is_a_quoted_semver_literal(self):
-        self.assertEqual(bundle_version(), "1.4.0")
+        self.assertEqual(bundle_version(), "1.5.0")
 
     def test_version_script_lives_in_the_top_folder(self):
         top = _ROOT.find("Group")
@@ -481,6 +481,54 @@ class TestEvaluationWrapper(unittest.TestCase):
         text = ET.tostring(script(self.NAME), encoding="unicode")
         self.assertNotIn("snapshot-eval", text)
         self.assertNotIn("SIDE EFFECT", text)
+
+
+class TestBridgeDataSource(unittest.TestCase):
+    """Add-on 1.5.0: AGFMScriptBridge runs <data_source>::<script> in another file; the local path is unchanged.
+
+    Pilot 2026-11-16: after Perform Script, Get ( LastError ) carries the error of the called script's last
+    step even when it ran (and even after its Exit Script). Only 100 and 104 mean it never started, so the
+    call is never retried and any other code is reported as last_error of a script that ran.
+    """
+    NAME = "AGFMScriptBridge"
+
+    def _by_name(self):
+        return [st for st in steps(self.NAME) if st.get("name") == "Perform Script" and st.find("Calculated") is not None]
+
+    def test_remote_call_is_by_name_and_never_retried(self):
+        self.assertEqual(len(self._by_name()), 2)              # local + remote, no retry
+        self.assertIn('$dataSource & "::" & $script', calcs(self.NAME))
+        self.assertNotIn("$callError = 104", calcs(self.NAME))
+
+    def test_only_100_and_104_mean_the_script_did_not_start(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn("$callError = 100 or $callError = 104", joined)
+        self.assertIn('$callError = 104 ; "script_or_data_source_not_found" ; "file_unavailable"', joined)
+        self.assertNotIn("script_unreachable", joined)
+
+    def test_a_script_that_ran_reports_its_last_error(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('[ "last_error" ; $callError ; JSONNumber ]', joined)
+        self.assertIn('[ "result" ; Get ( ScriptResult ) ; JSONString ]', joined)
+
+    def test_both_remote_answers_echo_data_source(self):
+        echoes = [c for c in calcs(self.NAME) if '[ "data_source" ; $dataSource ; JSONString ]' in c]
+        self.assertEqual(len(echoes), 2)
+
+    def test_local_path_is_untouched(self):
+        joined = "\n".join(calcs(self.NAME))
+        self.assertIn('not Position ( ¶ & ScriptNames ( "" ) & ¶ ; ¶ & $script & ¶ ; 1 ; 1 )', joined)
+        self.assertIn('"Script not found: " & $script', joined)
+
+    def test_remote_branch_comes_before_the_local_lookup(self):
+        texts = calcs(self.NAME)
+        self.assertLess(texts.index("not IsEmpty ( $dataSource )"),
+                        next(i for i, c in enumerate(texts) if "ScriptNames" in c))
+
+    def test_add_on_version_is_1_5_0(self):
+        self.assertEqual(bundle_version(), "1.5.0")
+        self.assertEqual(manifest()["version"], "1.5.0")
+        self.assertEqual(manifest()["agent_version"], "1.1.0")
 
 
 if __name__ == "__main__":
