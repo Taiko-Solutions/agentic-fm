@@ -197,6 +197,7 @@ Each now holds FileMaker's value in `enumValues` and FileMaker's label in `hrEnu
 | `Go to Layout` / `LayoutDestination` | `CurrentLayout`, `LayoutNameByCalc`, `LayoutNumberByCalc` | `SelectedLayout`, `OriginalLayout`, `LayoutNameByCalc`, `LayoutNumberByCalc` | *(the layout token)* |
 | `Go to List of Records` / `LayoutDestination` | `<Current Layout>` | `CurrentLayout` | *(the layout token)* |
 | `Go to Related Record` / `LayoutDestination` | `OriginalLayout` | `UseExternalTableLayouts` was missing; `OriginalLayout` is not accepted | *(the layout token)* |
+| `New Window` / `LayoutDestination` | `SelectedLayout` only, the layout not discriminated | `SelectedLayout`, `CurrentLayout`, `LayoutNameByCalc`, `LayoutNumberByCalc`; `OriginalLayout` is not accepted (FileMaker Pro 26.0.3) | *(the layout token, after `Using layout:`)* |
 
 Two spellings that look interchangeable and are not: `RowPageLocation` is `ByCalculation` in fmxmlsnippet, `By Calculation…` in SaXML (with a trailing ellipsis), and the Script Workspace shows **no token at all** — FileMaker puts the calculation in that slot instead.
 And `LayoutDestination` is `LayoutNameByCalc` on `Go to Related Record` and `Go to List of Records` but the *same* short spelling on `Go to Layout`, where the corpus comment had claimed `LayoutNameByCalculation`; FileMaker 26.0.1 discards the long form. `CurrentLayout` is legal on the other two steps and not on `Go to Layout`.
@@ -397,6 +398,19 @@ The TypeScript HR → fmxmlsnippet direction has no Python counterpart and is ga
 
 See `agent/docs/SCHEMA_GUIDANCE.md` for the complete param type → XML mapping reference.
 
+### Attribute-bearing wrappers inside a group, and joined companions
+
+Insert from Device stores its options inside `<DeviceOptions>`, and two of them are elements that carry a value and wrap a child: `<ScanFrom type="Field"><Field …/></ScanFrom>` and `<MaxDuration state="True"><Calculation>…</Calculation></MaxDuration>`.
+FileMaker writes both in every state, with or without the child (`<ScanFrom type="Camera"/>`, `<MaxDuration state="False"/>`).
+
+- **Nested attribute-bearing wrapper.** An `enum` or `boolean` param with a `parentElement`, whose own element is the `parentElement` of other params (`"DeviceOptions/ScanFrom"`), is written as that wrapper's attribute rather than as a separate element. It opens at its own position, so it is serialized even when no child follows, and closes self-closed then. A governed one is left out where its discriminator does not reveal it; a hidden boolean takes its derived state (below). The step-level form (an enum with no `parentElement`) keeps its existing behaviour.
+- **`hrRevealSeparator`** on a governing discriminator — the separator FileMaker draws between the labeled companions a value reveals, when it is not the step's ` ; `. Insert from Device draws `Insert from Device [ $out ; Type: Camera ; Camera: Back; Resolution: Full; Flash: Auto ]`. Render-only: HR → XML splits on `;` either way.
+- **`hrLabelWhen` on an enum** — the label varies with a sibling's value on enums too, not only on named calculations (`Flash:` for Camera, `Flashlight:` for Barcode).
+- **`hrLabelWhen` with empty `values`** — a label the HR parser accepts and no output prints: `New Window` prints `Using layout:`, the label FileMaker draws for every layout choice, and still reads the older `Layout:`.
+- A revealed companion that is `hrHidden` renders no token; its value comes from the token it gates.
+
+`agent/fixtures/converter/insert-from-device-fm-lines.json` holds 36 FileMaker-captured pairs (stored step, FileMaker's line) covering every device type, option and state; `test_insert_from_device_hr.py` and `insert-from-device-hr.test.ts` read it.
+
 ### Hidden booleans and the params they gate
 
 Some catalog booleans render no HR token at all.
@@ -414,7 +428,7 @@ The grammar closes that with a derive rule:
 Read the gate-open value from a gating sibling's `visibleWhen.values[0]` rather than assuming `True`.
 Letting `defaultValue` answer instead is the defect this replaced: both `Restore` params default to `True`, so HR meaning "no stored import order" serialized as "restore the stored order".
 
-Three params carry the facet today — `Import Records.Restore` (gates `Table`, `ImportOptions`), `Export Records.Restore` (gates `ExportOptions`) and `Fine-Tune Model.Option` (gates `Table`).
+Four params carry the facet today — `Import Records.Restore` (gates `Table`, `ImportOptions`), `Export Records.Restore` (gates `ExportOptions`), `Fine-Tune Model.Option` (gates `Table`) and `Insert from Device.MaxDuration` (gates the duration calculation).
 Derive the list rather than trusting it; the catalog is the source of truth.
 
 **Why only these three, when fifteen params are `hrHidden`.**

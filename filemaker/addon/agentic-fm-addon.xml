@@ -123,7 +123,7 @@
         <Text>PURPOSE: Version of the agentic-fm add-on. Bump with every package (same value as info_en.json).</Text>
       </Step>
       <Step enable="True" id="103" name="Exit Script">
-        <Calculation><![CDATA["1.5.0"]]></Calculation>
+        <Calculation><![CDATA["1.5.1"]]></Calculation>
       </Step>
     </Script>
     <Script includeInMenu="False" SiriShortcutVisible="False" runFullAccess="False" id="23" name="AGFM Choose Folder">
@@ -2305,7 +2305,7 @@ Let ( [
         Right ( "0" & Day ( ~ts ) ; 2 ) & "T" &
         Right ( "0" & Hour ( ~ts ) ; 2 ) & ":" &
         Right ( "0" & Minute ( ~ts ) ; 2 ) & ":" &
-        Right ( "0" & Seconds ( ~ts ) ; 2 ) & "Z" ;
+        Right ( "0" & Int ( Seconds ( ~ts ) ) ; 2 ) & "Z" ;
 
     ~json = JSONSetElement ( "{}" ;
         [ "context_version"           ; 2                    ; JSONNumber ] ;

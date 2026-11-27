@@ -110,7 +110,8 @@ def test_flag_boolean_normalized_to_boolean():
 
 
 def test_flag_boolean_params_render():
-    assert _render("Paste") == "Paste [ Select: On ; No style: On ; Link if available: Off ]"
+    # Paste's flags are also flagStyle: FileMaker draws them bare, only when on.
+    assert _render("Paste") == "Paste [ Select ; No style ; <Table Missing> ]"
 
 
 def test_governing_discriminator_reveals_companions():
@@ -131,6 +132,31 @@ def test_param_key_used_for_discriminator_reveal():
     assert G.param_key(name_param) == "Name"
 
 
+def _render_xml(step_xml):
+    step = ET.fromstring(step_xml)
+    return G.render_step_hr(ENTRIES[step.get("name")], step)
+
+
+def test_empty_leading_positional_keeps_its_slot():
+    # A bare field param before a rendered positional token keeps its slot, so the
+    # value is not read back into the field's slot. An empty <Field> fills it with
+    # FileMaker's own `<Table Missing>`.
+    assert _render("Set Next Serial Value") == "Set Next Serial Value [ <Table Missing> ; 100 ]"
+    # A governed companion (revealed by a discriminator) is positional too.
+    assert _render("Replace Field Contents") == (
+        'Replace Field Contents [ With dialog: Off ; <Table Missing> ; "value" ]'
+    )
+
+
+def test_trailing_empty_positional_is_dropped():
+    out = _render_xml(
+        '<Step enable="True" id="76" name="Set Field">'
+        "<Calculation><![CDATA[]]></Calculation>"
+        '<Field table="Invoices" id="1" name="ID"/></Step>'
+    )
+    assert out == "Set Field [ Invoices::ID ]"
+
+
 if __name__ == "__main__":
     test_engine_renders_whole_corpus_without_error()
     test_inverted_hr_boolean()
@@ -143,4 +169,6 @@ if __name__ == "__main__":
     test_governing_discriminator_reveals_companions()
     test_hr_param_order_stable_without_hrslot()
     test_param_key_used_for_discriminator_reveal()
+    test_empty_leading_positional_keeps_its_slot()
+    test_trailing_empty_positional_is_dropped()
     print("all catalog_grammar engine tests passed")

@@ -93,7 +93,8 @@ describe('catalog-grammar engine (TS port parity with Python)', () => {
     const flags = entry.params.filter((p) => p.raw.type === 'flagBoolean');
     expect(flags.length).toBeGreaterThan(0);
     expect(flags.every((p) => p.type === 'boolean')).toBe(true);
-    expect(render('Paste')).toBe('Paste [ Select: On ; No style: On ; Link if available: Off ]');
+    // Paste's flags are also flagStyle: FileMaker draws them bare, only when on.
+    expect(render('Paste')).toBe('Paste [ Select ; No style ; <Table Missing> ]');
   });
 
   it('governing discriminator reveals companions', () => {
@@ -110,5 +111,27 @@ describe('catalog-grammar engine (TS port parity with Python)', () => {
     const nameParam = entry.params.find((p) => p.wrapperElement === 'Name');
     expect(nameParam).toBeTruthy();
     expect(paramKey(nameParam!)).toBe('Name');
+  });
+
+  it('empty leading positional keeps its slot', () => {
+    // A bare field param before a rendered positional token keeps its slot, so
+    // the value is not read back into the field's slot. An empty <Field> fills
+    // it with FileMaker's own `<Table Missing>`.
+    expect(render('Set Next Serial Value')).toBe('Set Next Serial Value [ <Table Missing> ; 100 ]');
+    // A governed companion (revealed by a discriminator) is positional too.
+    expect(render('Replace Field Contents')).toBe(
+      'Replace Field Contents [ With dialog: Off ; <Table Missing> ; "value" ]',
+    );
+  });
+
+  it('trailing empty positional is dropped', () => {
+    const step = loadStep(
+      '<fmxmlsnippet type="FMObjectList"><Step enable="True" id="76" name="Set Field">' +
+        '<Calculation><![CDATA[]]></Calculation>' +
+        '<Field table="Invoices" id="1" name="ID"/></Step></fmxmlsnippet>',
+    );
+    expect(renderStepHr(getGrammarEntry('Set Field') as GrammarEntry, step)).toBe(
+      'Set Field [ Invoices::ID ]',
+    );
   });
 });

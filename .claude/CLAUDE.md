@@ -487,6 +487,7 @@ La tabla representa un **backlog de adopción** — está vacía cuando no hay n
 
 | Patrón | Triggers (contextos donde tiene sentido) | Doc upstream | Notas |
 |---|---|---|---|
+| Fallos repetibles al pegar objetos de layout en XML2 (`LayoutObjectList`) | Generar objetos de layout (skill `layout-design`, salida XML2): ToolTip + `<<ƒ:…>>` en el mismo objeto; Text justo detrás de un Button con etiqueta o de otro Text; merge `<<Tabla::Campo>>` sin `ƒ:`; Text con `flags="805306368"` debajo de un Button; formato condicional `<Item flags="4">` | Issue petrowsky/agentic-fm#115 (sin doc aún) | Reportado por un usuario externo, no verificado por Taiko. Trucos que propone: Button vacío de 1×1 delante de cada Text, `<<ƒ:Tabla::Campo>>` en vez del merge simple, `flags="0"` en el Text que va bajo un botón, `flags="7"` con fondo y color. Verificar en el primer layout XML2 real antes de formalizarlo. |
 
 # Metodología de desarrollo — Superpowers (Taiko)
 

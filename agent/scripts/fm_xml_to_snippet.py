@@ -26,15 +26,18 @@ Architecture (P6.4 — catalog unification):
     Script, Allow User Abort, and Set Error Capture (folded into the grammar in P6.3).
 
 Notes:
-    - The Options bitmask on each step is intentionally ignored. Meaningful state
-      (Restore, NoInteract, bitmask window styles, etc.) is derived from the
-      structured ParameterValues via the catalog grammar.
+    - Meaningful state (NoInteract, bitmask window styles, etc.) is derived from
+      the structured ParameterValues via the catalog grammar. The Options bitmask
+      is read only where FileMaker keeps a setting nowhere else: the find steps'
+      Restore (saxml_read._FIND_RESTORE_OPTION_BIT).
     - The hash attribute on each step is not included in output.
     - A step whose SaXML shape a decoder cannot yet render correctly raises
       ``UnsupportedSaXML`` and is emitted as a clearly-marked TODO placeholder with a
       stderr warning — never silently-wrong output (fail loud, constraint #3).
     - Step types absent from the catalog emit a self-closing Step and a TODO comment.
 """
+
+from __future__ import annotations
 
 import os
 import sys
@@ -61,17 +64,27 @@ L2 = '      '   # grandchildren of <Step>
 # ---------------------------------------------------------------------------
 
 def escape_xml(text: str) -> str:
-    """Escape &, <, > for XML text content."""
+    """Escape &, <, > for XML text content, and write a carriage return as ``&#13;``.
+
+    XML parsing turns a raw CR into LF, and FileMaker stores CR and LF as different
+    characters, so a multi-line comment written with a raw CR pastes back as LF.
+    """
     if not text:
         return ''
-    if '&' not in text and '<' not in text and '>' not in text:
+    if '&' not in text and '<' not in text and '>' not in text and '\r' not in text:
         return text
-    return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    return (text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            .replace('\r', '&#13;'))
 
 
 def cdata(text: str) -> str:
-    """Wrap text in a CDATA section."""
-    return f'<![CDATA[{text or ""}]]>'
+    """Wrap text in a CDATA section, splitting each "]]>" across two sections.
+
+    "]]>" ends a CDATA section, so an unsplit one leaves malformed XML that
+    FileMaker refuses to paste; FileMaker joins the sections back into one value.
+    """
+    body = (text or "").replace("]]>", "]]]]><![CDATA[>")
+    return f'<![CDATA[{body}]]>'
 
 
 def get_calc_text(element) -> str:

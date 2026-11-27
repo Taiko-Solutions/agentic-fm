@@ -28,6 +28,33 @@ export interface StepCatalogEntry {
   status: 'auto' | 'reviewed' | 'complete';
   /** Link to Claris help documentation */
   helpUrl: string | null;
+  /** Minimum FileMaker version of the step (see FmMinVersion). Absent = unknown. */
+  fmMin?: FmMinVersion;
+  /** How `fmMin` is known. Present exactly when `fmMin` is. */
+  fmMinSource?: FmMinSource;
+}
+
+/**
+ * Version data. A version ("MAJOR", "MAJOR.MINOR" or "MAJOR.MINOR.PATCH",
+ * major not zero, e.g. "21.0") is the first FileMaker version that has the
+ * item; "any" means every FileMaker version the version data covers has it;
+ * "unknown" means looked at and still undecided (or a retracted value). An
+ * absent `fmMin` also means unknown. Read by version checks only, never by
+ * the converters.
+ *
+ * The union is documentation only: `'any' | 'unknown' | string` collapses to
+ * `string` for the type checker, which therefore accepts any text. Validate a
+ * value before comparing it as a version.
+ */
+export type FmMinVersion = 'any' | 'unknown' | string;
+
+/** "measured" = observed on a running FileMaker; "documented" = Claris documentation. */
+export type FmMinSource = 'measured' | 'documented';
+
+/** One `fmMinValues` entry: the minimum version of one enum value. */
+export interface FmMinValue {
+  fmMin: FmMinVersion;
+  fmMinSource: FmMinSource;
 }
 
 /**
@@ -146,12 +173,28 @@ export interface StepParam {
    *  rendered without a "Label: " prefix and parsed by position (Show Custom Dialog's
    *  Title/Message). Set only where FileMaker renders bare, verified against live FM. */
   hrBare?: boolean;
-  /** Inverse of `hrBare`: a `calc`/`field`/`script` param FileMaker renders WITH its
+  /** Inverse of `hrBare`: a `calc`/`field`/`script`, step-level `text`/`name` or legacy
+   *  `calculation` param FileMaker renders WITH its
    *  `hrLabel` prefix (and parsed by that label), even though those types print bare by
    *  default. FileMaker labels the same value type per step (Perform Script's name is
-   *  bare; Configure Region Monitor Script's is `Script: "…"`). Needs a non-empty
+   *  bare; Configure Region Monitor Script's is `Script: "…"`; Delete File's path is
+   *  `Target file: “…”`). Needs a non-empty
    *  hrLabel; set only where FileMaker renders the label, verified against live FM. */
   hrLabeled?: boolean;
+  /** A literal-text param (`text`/`name`) FileMaker displays wrapped in quotes (Insert
+   *  Text's `… ; “x” ]`). XML→HR writes the value as ONE text literal (`quoteCalcLiteral`:
+   *  embedded `"`/`“`/`”` backslash-escaped) so the line parser reads it back as one
+   *  token whatever quotes, `;` or `]` it holds; HR→XML decodes it. An empty value
+   *  renders no token, as FileMaker does. Set only where FM quotes the value (verified live). */
+  hrQuoted?: boolean;
+  /** The delimiter an hrQuoted param is written with: unset (default) is FileMaker's
+   *  curly `“…”`; `"straight"` is `"…"`, where FileMaker shows the literal
+   *  straight-quoted (Perform AppleScript's text). */
+  hrQuoteStyle?: string;
+  /** Governing discriminator: the separator FileMaker draws BETWEEN the labeled
+   *  companions a value reveals when it is not the step's ` ; ` (Insert from Device:
+   *  `Camera: Back; Resolution: Full; Flash: Auto`). Render-only. */
+  hrRevealSeparator?: string;
   /** Governing enum branches: enum value → what it reveals / how it renders */
   discriminatorValues?: Record<string, DiscriminatorValue>;
   /** String form: names the sibling element that governs this param's shape */
@@ -194,6 +237,12 @@ export interface StepParam {
   defaultValue?: string;
   /** Human-readable description of the parameter */
   description?: string;
+  /** Minimum FileMaker version of the element/attribute this param models. Absent = unknown. */
+  fmMin?: FmMinVersion;
+  /** How `fmMin` is known. Present exactly when `fmMin` is. */
+  fmMinSource?: FmMinSource;
+  /** Enum params: minimum FileMaker version per XML value (keys are `enumValues` entries). */
+  fmMinValues?: Record<string, FmMinValue>;
 }
 
 export interface StepBlockPair {

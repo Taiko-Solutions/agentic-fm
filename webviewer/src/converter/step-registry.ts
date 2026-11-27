@@ -46,18 +46,28 @@ export function getXmlToHrConverter(xmlStepName: string): XmlStepConverter | und
   return xmlToHrRegistry.get(xmlStepName);
 }
 
-/** XML helper: escape special chars for XML content */
+/**
+ * XML helper: escape special chars for XML content. A carriage return is written
+ * as `&#13;` (FileMaker's own serialization): XML parsing turns a raw CR into LF,
+ * and FileMaker stores CR and LF as different characters, so a raw CR in a path
+ * list or text param pastes back as LF.
+ */
 export function escXml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/"/g, '&quot;')
+    .replace(/\r/g, '&#13;');
 }
 
-/** XML helper: wrap in CDATA */
+/**
+ * XML helper: wrap in CDATA, splitting each "]]>" across two sections.
+ * "]]>" ends a CDATA section, so an unsplit one leaves malformed XML that
+ * FileMaker refuses to paste; FileMaker joins the sections back into one value.
+ */
 export function cdata(s: string): string {
-  return `<![CDATA[${s}]]>`;
+  return `<![CDATA[${s.split(']]>').join(']]]]><![CDATA[>')}]]>`;
 }
 
 /** XML helper: create a Step opening tag (with FM's universal step-type id). */

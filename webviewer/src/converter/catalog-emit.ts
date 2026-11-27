@@ -21,15 +21,37 @@ import type { ParsedLine } from './parser';
 import type { IdResolver } from './id-resolver';
 import { cdata, escXml } from './step-registry';
 import {
+  decodeWholeCalcLiteral,
+  hrBracketDepthDelta,
+  hrCalcOpaqueSpanAt,
+  isCalcCloseBracket,
+  isCalcCloseParen,
+  isCalcOpenBracket,
+  isCalcOpenParen,
+  readsAsQuotedLiteralText,
+} from './calc-literal';
+import {
+  FIELD_MISSING_SENTINEL,
+  TABLE_MISSING_SENTINEL,
   type GrammarEntry,
   type GrammarParam,
   paramKey,
+  groupFieldsOf,
+  projectionOwner,
   isGoverningDiscriminator,
   isDrivenDiscriminator,
   governingDiscriminatorFor,
   valueRevealsCompanion,
   candidateHrLabels,
   hrParamOrder,
+  closedVocabEnum,
+  rendersBareInHr,
+  shapeRoutedValues,
+  groupQuoteValue,
+  groupUnquoteValue,
+  resolveMirrorSource,
+  resolveMirrorSibling,
+  splitFieldEntrySuffix,
 } from './catalog-grammar';
 
 // ---------------------------------------------------------------------------
@@ -38,6 +60,15 @@ import {
 // ---------------------------------------------------------------------------
 function trim(s: string): string {
   return s.replace(/^[ \t]+/, '').replace(/[ \t]+$/, '');
+}
+
+/**
+ * Trim a split piece: a line comment ends at a line break, so a piece can end
+ * with the break XML→HR wrote after it (calc-literal.ts hrSep); it is not part
+ * of the value.
+ */
+function trimPiece(s: string): string {
+  return s.replace(/^[ \t\r\n]+/, '').replace(/[ \t\r\n]+$/, '');
 }
 
 function ciEquals(a: string, b: string): boolean {
@@ -73,54 +104,65 @@ function escXmlAttr(s: string): string {
   return r;
 }
 
-/** Split on top-level commas, respecting paren/bracket/brace depth + quotes. */
+/**
+ * Split on top-level commas, respecting paren/bracket/brace depth + text literals.
+ * Used by the parametersList grammar and the attrGroup/repeatGroup body parser,
+ * whose quoted values are written as calculation literals (groupQuoteValue). A
+ * literal or a calculation comment is stepped over whole with the calculation
+ * grammar (calc-literal.ts hrCalcOpaqueSpanAt), so a comma inside `"a\", b"`,
+ * `“c, d”` or a block comment is content.
+ */
 function splitTopLevelCommas(s: string): string[] {
   const out: string[] = [];
   if (!s) return out;
   let cur = '';
   let paren = 0, bracket = 0, brace = 0;
-  let inQuote = false;
   for (let i = 0; i < s.length; i++) {
+    const lit = hrCalcOpaqueSpanAt(s, i, ',');
+    if (lit) { cur += s.slice(i, i + lit); i += lit - 1; continue; }
     const c = s[i];
-    if (inQuote) {
-      cur += c;
-      if (c === '"') {
-        if (i + 1 < s.length && s[i + 1] === '"') { cur += '"'; i++; }
-        else inQuote = false;
-      }
-      continue;
-    }
-    if (c === '"') { inQuote = true; cur += c; continue; }
-    if (c === '(') paren++;
-    else if (c === ')') { if (paren > 0) paren--; }
-    else if (c === '[') bracket++;
-    else if (c === ']') { if (bracket > 0) bracket--; }
+    // Every form FileMaker reads as a parenthesis or bracket counts
+    // (`Left （ "abc" , 2 ）` is one item).
+    if (isCalcOpenParen(c)) paren++;
+    else if (isCalcCloseParen(c)) { if (paren > 0) paren--; }
+    else if (isCalcOpenBracket(c)) bracket++;
+    else if (isCalcCloseBracket(c)) { if (bracket > 0) bracket--; }
     else if (c === '{') brace++;
     else if (c === '}') { if (brace > 0) brace--; }
     if (c === ',' && paren === 0 && bracket === 0 && brace === 0) {
-      const item = trim(cur);
+      const item = trimPiece(cur);
       if (item) out.push(item);
       cur = '';
       continue;
     }
     cur += c;
   }
-  const tail = trim(cur);
+  const tail = trimPiece(cur);
   if (tail) out.push(tail);
   return out;
 }
 
-/** Split `s` on every top-level occurrence of multi-char `delim` (quote-aware). */
-function splitOnDelim(s: string, delim: string): string[] {
+/**
+ * Split `s` on every top-level occurrence of multi-char `delim`, keeping a
+ * delimiter inside a quoted region. With `calcLiterals` the region is a
+ * calculation text literal or comment (the repeatGroup entries, whose values are
+ * calculations or groupQuoteValue-quoted text); without it a straight `"`
+ * toggles a find-request phrase (the findRequests rows and criteria: find text
+ * is not a calculation, and `"` is FileMaker's match-phrase operator there).
+ */
+function splitOnDelim(s: string, delim: string, calcLiterals: boolean): string[] {
   const out: string[] = [];
   if (!delim) { out.push(s); return out; }
   let start = 0;
   let inQuote = false;
   let i = 0;
   while (i + delim.length <= s.length) {
-    if (s[i] === '"') { inQuote = !inQuote; i++; continue; }
+    if (calcLiterals) {
+      const lit = hrCalcOpaqueSpanAt(s, i, delim.trim()[0] ?? delim[0]);
+      if (lit) { i += lit; continue; }
+    } else if (s[i] === '"') { inQuote = !inQuote; i++; continue; }
     if (!inQuote && s.slice(i, i + delim.length) === delim) {
-      const piece = trim(s.slice(start, i));
+      const piece = trimPiece(s.slice(start, i));
       if (piece) out.push(piece);
       i += delim.length;
       start = i;
@@ -128,43 +170,40 @@ function splitOnDelim(s: string, delim: string): string[] {
     }
     i++;
   }
-  const tail = trim(s.slice(start));
+  const tail = trimPiece(s.slice(start));
   if (tail) out.push(tail);
   return out;
 }
 
-/** Split a fieldList body on top-level commas, PRESERVING empty entries. */
+/**
+ * Split a fieldList body on top-level commas, PRESERVING empty entries. Text
+ * literals and comments are stepped over whole, as in splitTopLevelCommas.
+ */
 function splitListEntries(s: string): string[] {
   const out: string[] = [];
-  if (!trim(s)) return out;
+  if (!trimPiece(s)) return out;
   let cur = '';
   let paren = 0, bracket = 0, brace = 0;
-  let inQuote = false;
   for (let i = 0; i < s.length; i++) {
+    const lit = hrCalcOpaqueSpanAt(s, i, ',');
+    if (lit) { cur += s.slice(i, i + lit); i += lit - 1; continue; }
     const c = s[i];
-    if (inQuote) {
-      cur += c;
-      if (c === '"') {
-        if (i + 1 < s.length && s[i + 1] === '"') { cur += '"'; i++; }
-        else inQuote = false;
-      }
-      continue;
-    }
-    if (c === '"') { inQuote = true; cur += c; continue; }
-    if (c === '(') paren++;
-    else if (c === ')') { if (paren > 0) paren--; }
-    else if (c === '[') bracket++;
-    else if (c === ']') { if (bracket > 0) bracket--; }
+    // Every form FileMaker reads as a parenthesis or bracket counts
+    // (`Left （ "abc" , 2 ）` is one item).
+    if (isCalcOpenParen(c)) paren++;
+    else if (isCalcCloseParen(c)) { if (paren > 0) paren--; }
+    else if (isCalcOpenBracket(c)) bracket++;
+    else if (isCalcCloseBracket(c)) { if (bracket > 0) bracket--; }
     else if (c === '{') brace++;
     else if (c === '}') { if (brace > 0) brace--; }
     if (c === ',' && paren === 0 && bracket === 0 && brace === 0) {
-      out.push(trim(cur));
+      out.push(trimPiece(cur));
       cur = '';
       continue;
     }
     cur += c;
   }
-  out.push(trim(cur));
+  out.push(trimPiece(cur));
   return out;
 }
 
@@ -195,10 +234,174 @@ function isVariable(s: string): boolean {
 }
 
 /**
+ * Split a trailing `[N]` repetition subscript off a field/variable ref.
+ *
+ * `Invoices::Notes[2]` -> [`Invoices::Notes`, 2]; `$rep[3]` -> [`$rep`, 3].
+ * Only a positive integer subscript at the very end counts, with something
+ * before it; anything else (no subscript, `[]`, `[0]`, `[$i]`) returns the ref
+ * unchanged and 0. FileMaker repetitions are 1-based.
+ */
+function parseFieldRepetition(ref: string): [string, number] {
+  if (ref.length < 3 || ref[ref.length - 1] !== ']') return [ref, 0];
+  const open = ref.lastIndexOf('[');
+  if (open <= 0 || open + 1 === ref.length - 1) return [ref, 0];
+  const digits = ref.slice(open + 1, -1);
+  if (!/^[0-9]{1,7}$/.test(digits)) return [ref, 0];
+  const rep = parseInt(digits, 10);
+  if (rep < 1 || rep > 1000000) return [ref, 0];
+  return [ref.slice(0, open), rep];
+}
+
+/**
+ * Split a trailing repetition subscript that may be a literal OR a calculation.
+ *
+ * `T::F[2]` -> [`T::F`, 2, '']; `T::F[$i + 1]` -> [`T::F`, 0, `$i + 1`]. The
+ * subscript opens at the first `[` and must close, bracket-balanced (text
+ * literals and comments are opaque), on the last character; the calc is
+ * trimmed (XML→HR writes a line break before the closing `]` after a `//`
+ * comment). A digits-only subscript is the literal form with
+ * `parseFieldRepetition`'s rules. Anything else returns [ref, 0, ''].
+ */
+function parseFieldSubscript(ref: string): [string, number, string] {
+  if (ref.length < 3 || ref[ref.length - 1] !== ']') return [ref, 0, ''];
+  const open = ref.indexOf('[');
+  if (open <= 0) return [ref, 0, ''];
+  let depth = 0;
+  let close = -1;
+  for (let i = open; i < ref.length; ) {
+    const span = hrCalcOpaqueSpanAt(ref, i);
+    if (span) {
+      i += span;
+      continue;
+    }
+    // The subscript's own `[ ]` are ASCII; the calculation inside may use `［ ］` too.
+    const delta = hrBracketDepthDelta(ref, i, depth);
+    depth += delta;
+    if (delta < 0 && depth === 0) {
+      close = i;
+      break;
+    }
+    i++;
+  }
+  if (close !== ref.length - 1) return [ref, 0, ''];
+  const inner = ref.slice(open + 1, close).replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, '');
+  if (!inner) return [ref, 0, ''];
+  if (/^[0-9]+$/.test(inner)) {
+    const [bare, rep] = parseFieldRepetition(ref.slice(0, open) + '[' + inner + ']');
+    return [bare, rep, ''];
+  }
+  return [ref.slice(0, open), 0, inner];
+}
+
+/** FileMaker's `repetition` attribute: "0" for the calculated form, else "N" only for N > 1. */
+function repetitionAttr(rep: number, calc = ''): string {
+  if (calc) return ' repetition="0"';
+  return rep > 1 ? ` repetition="${rep}"` : '';
+}
+
+/**
+ * FileMaker's calculated-repetition sibling, written right after the `<Field>`
+ * it subscripts: `<Repetition><Calculation>` (measured, FileMaker Pro 26.0.2:
+ * Set Field, Go to Field, Insert Text field and variable targets).
+ */
+function repetitionCalcSibling(calc: string, indent: string): string {
+  if (!calc) return '';
+  return `\n${indent}<Repetition>\n${indent}  <Calculation>${cdata(calc)}</Calculation>\n${indent}</Repetition>`;
+}
+
+/**
+ * Resolve `Table::Field`; FileMaker's `Table::<Field Missing>` (a table with no
+ * field) reads back to its stored form, id 0 and an empty name, never a field
+ * literally named `<Field Missing>`, and its `<Table Missing>` (no table, no
+ * field) to the empty reference.
+ */
+function resolveFieldRef(
+  resolver: IdResolver,
+  ref: string,
+): { table: string; fieldId: number; fieldName: string } {
+  if (trim(ref) === TABLE_MISSING_SENTINEL) return { table: '', fieldId: 0, fieldName: '' };
+  const sep = ref.indexOf('::');
+  if (sep >= 0 && trim(ref.slice(sep + 2)) === FIELD_MISSING_SENTINEL) {
+    return { table: trim(ref.slice(0, sep)), fieldId: 0, fieldName: '' };
+  }
+  return resolver.resolveField(ref);
+}
+
+/**
+ * `<Field table id [repetition] name/>` for a `Table::Field[N]` ref, in
+ * FileMaker's attribute order, plus the `<Repetition>` sibling for a calculated
+ * `Table::Field[calc]`. The subscript is stripped before name resolution. Group
+ * children (`allowCalc` false) have no calculated form in FileMaker, whose
+ * input-target dialog takes digits only, so a calculated subscript is dropped.
+ */
+function fieldRefXml(
+  resolver: IdResolver,
+  ref: string,
+  extraAttrs = '',
+  indent = '    ',
+  allowCalc = true,
+): string {
+  const [bare, rep, parsedCalc] = parseFieldSubscript(trim(ref));
+  const calc = allowCalc ? parsedCalc : '';
+  const rf = resolveFieldRef(resolver, bare);
+  return (
+    `<Field${extraAttrs} table="${escXml(rf.table)}" id="${rf.fieldId}"${repetitionAttr(rep, calc)} name="${escXml(rf.fieldName)}"/>` +
+    repetitionCalcSibling(calc, indent)
+  );
+}
+
+/** `<Field [repetition]>$var</Field>` for a `$var[N]` target, plus the sibling for `$var[calc]`. */
+function variableFieldXml(v: string, extraAttrs = '', indent = '    ', allowCalc = true): string {
+  const [bare, rep, parsedCalc] = parseFieldSubscript(trim(v));
+  const calc = allowCalc ? parsedCalc : '';
+  return `<Field${extraAttrs}${repetitionAttr(rep, calc)}>${escXml(bare)}</Field>` + repetitionCalcSibling(calc, indent);
+}
+
+/**
  * True when `s`, after trimming and stripping one layer of matching quotes
  * (straight "…" or smart “…”), is a single variable token; returns the bare
  * variable via the tuple's second element.
  */
+/** Strip one surrounding quote pair (`"…"`, `“…”` or `‘…’`); a no-op on bare text. */
+function unquoteTextValue(s: string): string {
+  if (s.length >= 2 && ((s[0] === '"' && s.endsWith('"')) || (s[0] === '“' && s.endsWith('”'))
+      || (s[0] === '‘' && s.endsWith('’')))) {
+    return s.slice(1, -1);
+  }
+  return s;
+}
+
+/**
+ * The name for a `tableRef` / `tableOccurrence` / `reference` HR token. An
+ * `hrQuoted` one (Save Records as JSONL's `Table: “Invoices”`, Truncate Table's
+ * `Table: “Line Items”`) was rendered as one escaped literal: decode it, else
+ * strip one quote pair (FileMaker's own unescaped display).
+ */
+function tableParamValue(param: GrammarParam, hrValue: string): string {
+  if (param.hrQuoted) {
+    const t = trim(hrValue);
+    return decodeWholeCalcLiteral(t) ?? unquoteTextValue(t);
+  }
+  return unquote(hrValue);
+}
+
+/**
+ * The raw XML body for a `text`/`name` param's HR token. An `hrQuoted` param was
+ * rendered as one escaped text literal: decode it. A token that is not exactly one
+ * literal is FileMaker's own unescaped display (`“He said “hi”`) or bare text:
+ * strip one outer quote pair (a no-op on bare text). Any other text param is taken
+ * as written, except that a quoted lone variable used as a path/target unquotes to
+ * the bare `$` reference.
+ */
+function textParamValue(param: GrammarParam, hrValue: string): string {
+  if (param.hrQuoted) {
+    const t = trim(hrValue);
+    return decodeWholeCalcLiteral(t) ?? unquoteTextValue(t);
+  }
+  const [quoted, bare] = isQuotedLoneVariable(hrValue);
+  return quoted ? bare : hrValue;
+}
+
 function isQuotedLoneVariable(v: string): [boolean, string] {
   let t = trim(v);
   const lq = '“', rq = '”';
@@ -212,20 +415,6 @@ function isQuotedLoneVariable(v: string): [boolean, string] {
   if (!t || t[0] !== '$') return [false, ''];
   if (/[ \t"]/.test(t)) return [false, ''];
   return [true, t];
-}
-
-// ---------------------------------------------------------------------------
-// Group-value quoting (attr / text kinds) — mirrors the XML→HR side.
-// ---------------------------------------------------------------------------
-function groupUnquoteValue(v: string): string {
-  if (v.length < 2 || v[0] !== '"' || v[v.length - 1] !== '"') return v;
-  let out = '';
-  const last = v.length - 1;
-  for (let i = 1; i < last; i++) {
-    if (v[i] === '"' && i + 1 < last && v[i + 1] === '"') { out += '"'; i++; }
-    else out += v[i];
-  }
-  return out;
 }
 
 /** Parse one group body ("k1=v1, k2=(…)") into a lower-cased key→raw-value map. */
@@ -320,6 +509,13 @@ function paramVisibleHr(entry: GrammarEntry, values: string[], param: GrammarPar
 
 function resolveBoolState(param: GrammarParam, hrValue: string): string {
   let state = param.defaultValue ? param.defaultValue : 'False';
+  // A flagStyle boolean's HR presence is its value: the bare label means True and
+  // its absence means False. `defaultValue` documents FileMaker's fresh-step
+  // default; letting it answer for an absent token makes a flag whose default is
+  // "True" impossible to turn off from HR (`Copy [ Invoices::Description ]` would
+  // select the field's contents). The explicit off token keeps invertedHr and the
+  // hrEnumValues map on one path.
+  if (param.flagStyle && hrValue === '') hrValue = 'Off';
   if (hrValue !== '') {
     const lower = hrValue.toLowerCase();
     let hrMeansTrue: boolean;
@@ -361,28 +557,13 @@ function resolveBoolState(param: GrammarParam, hrValue: string): string {
  * that was previously working.
  */
 function positionalTokenFitsParam(param: GrammarParam, token: string): boolean {
-  if (param.type !== 'enum') return true;
+  if (!closedVocabEnum(param)) return true;
   const enumValues = (param.raw.enumValues as string[] | undefined) ?? [];
-  if (enumValues.length === 0) return true;
   for (const v of enumValues) if (ciEquals(token, v)) return true;
   // hrEnumValues holds FileMaker's DISPLAY spelling of a value; a token in that
   // form is legal input and resolves on emit.
   for (const label of Object.values(param.hrEnumValues))
     if (label && ciEquals(token, label)) return true;
-  return false;
-}
-
-/** Whether a param renders bare (positional) in HR — the pass-2 eligibility test. */
-function rendersBareInHr(param: GrammarParam): boolean {
-  if (param.hrBare) return true; // per-param opt-in: FileMaker prints it bare
-  if (!param.hrLabel) return true;
-  // Inverse of hrBare: a calc/field/script FileMaker renders WITH its label is
-  // matched by that label, never positionally.
-  if (param.hrLabeled) return false;
-  if (param.type === 'calc' || param.type === 'field' || param.type === 'script') return true;
-  if (param.type === 'layout') return !param.hrLabel;
-  if ((param.type === 'text' || param.type === 'name') && !param.parentElement) return true;
-  if (param.type === 'calculation' && !param.omitWhenEmpty) return true;
   return false;
 }
 
@@ -477,7 +658,62 @@ function resolveLayoutToken(
 // ---------------------------------------------------------------------------
 // Two-phase HR-param matching (parse-HR): pass 1 flags/labels, pass 2 positional.
 // ---------------------------------------------------------------------------
-function matchParamValues(entry: GrammarEntry, hrParams: string[]): string[] {
+// The value a bare token names for an fmLineBare boolean (`On` / `Off`, or one of
+// its hrEnumValues labels), or '' when it names none of them.
+function fmLineBareBooleanValue(param: GrammarParam, token: string): string {
+  const t = trim(token);
+  if (!t) return '';
+  for (const label of Object.values(param.hrEnumValues)) if (label && ciEquals(t, label)) return label;
+  for (const v of ['On', 'Off']) if (ciEquals(t, v)) return v;
+  return '';
+}
+
+// A FileMaker path list's own location prefixes (`file:a.csv`, `https://...`,
+// `image:p.png`). The word before their colon is the path, not a label.
+const FM_PATH_PREFIXES = new Set([
+  'file', 'filemac', 'filewin', 'filelinux',
+  'image', 'imagemac', 'imagewin', 'imagelinux',
+  'movie', 'moviemac', 'moviewin', 'movielinux',
+  'http', 'https', 'ftp', 'ftps', 'fmnet',
+]);
+
+// Whether a token reaching a path slot reads `Word: value`, an option written in
+// labeled style, rather than a path (`XMLSource: $xmlPath`, `XSLT: $xslPath`).
+// FileMaker would keep it as a literal path. The value after the colon is spaced
+// off or is a variable or quoted text, or the word is one of the step's own (an
+// enum value, a group field's key). A location prefix, a drive letter, a quoted
+// path, a variable and a calculation never read this way.
+function readsAsLabeledToken(entry: GrammarEntry, raw: string): boolean {
+  const t = trim(raw);
+  const colon = t.indexOf(':');
+  if (colon < 2) return false;
+  const word = t.slice(0, colon);
+  if (!/^[A-Za-z][A-Za-z0-9 _-]*$/.test(word)) return false;
+  if (FM_PATH_PREFIXES.has(word.toLowerCase())) return false;
+  const rest = t.slice(colon + 1);
+  if (rest === '' || /^\s/.test(rest) || rest[0] === '$' || rest[0] === '"') return true;
+  return entry.params.some(
+    (p) =>
+      rawStrArr(p.raw, 'enumValues').includes(word) ||
+      rawArr(p.raw, 'fields').some((f) => rawStr(f, 'key') === word),
+  );
+}
+
+// A token with no value shape: not quoted, a variable, a number, a field reference
+// or a calculation.
+function readsAsBareWord(raw: string): boolean {
+  const t = trim(raw);
+  if (t === '') return false;
+  if (/^["$0-9+.-]/.test(t) || t.charCodeAt(0) >= 0x80) return false;
+  if (t.includes('::')) return false;
+  return !/[()+*/&=<>"]/.test(t);
+}
+
+function matchParamValues(
+  entry: GrammarEntry,
+  hrParams: string[],
+  addWarning: (message: string) => void,
+): string[] {
   const values: string[] = new Array(entry.params.length).fill('');
   const resolved: boolean[] = new Array(entry.params.length).fill(false);
   const consumed: boolean[] = new Array(hrParams.length).fill(false);
@@ -486,10 +722,41 @@ function matchParamValues(entry: GrammarEntry, hrParams: string[]): string[] {
   // present-but-empty slot for a revealed companion, and that empty slot is
   // still evidence of which gate value is active (see the P7.2 derive below).
   const gotToken: boolean[] = new Array(entry.params.length).fill(false);
+  // Tokens pass 1 recognised as belonging to a param that did not consume them
+  // (a flag written `Label: <not On/Off>`, a hidden param's FileMaker-drawn
+  // `fmLineToken`). Never handed to a positional param: taken positionally, a
+  // labeled flag token became Save Records as PDF's file path (`Append: On`).
+  const reserved: boolean[] = new Array(hrParams.length).fill(false);
 
   for (let pi = 0; pi < entry.params.length; pi++) {
     const param = entry.params[pi];
-    if (param.hrHidden) { resolved[pi] = true; continue; }
+    if (param.hrHidden) {
+      resolved[pi] = true;
+      // hrOffKeepsGated: `<hrLabel>: On|Off` sets the gate's state outright
+      // (Import Records' `Specify import order: Off`), kept as On / Off for the
+      // derive in convertStepWithCatalog.
+      if (param.raw.hrOffKeepsGated === true && param.hrLabel) {
+        const prefix = param.hrLabel.toLowerCase() + ':';
+        for (let i = 0; i < hrParams.length; i++) {
+          const t = trim(hrParams[i]);
+          if (consumed[i] || !t.toLowerCase().startsWith(prefix)) continue;
+          const word = trim(t.slice(prefix.length));
+          if (ciEquals(word, 'On') || ciEquals(word, 'Off')) {
+            values[pi] = ciEquals(word, 'On') ? 'On' : 'Off';
+            consumed[i] = true;
+          } else {
+            reserved[i] = true;
+          }
+          break;
+        }
+      }
+      const lineToken = rawStr(param.raw, 'fmLineToken');
+      if (lineToken) {
+        for (let i = 0; i < hrParams.length; i++)
+          if (!consumed[i] && ciEquals(trim(hrParams[i]), lineToken)) reserved[i] = true;
+      }
+      continue;
+    }
     if (param.type === 'complex') { resolved[pi] = true; continue; }
     if (isDrivenDiscriminator(entry, param)) { resolved[pi] = true; continue; }
 
@@ -546,13 +813,36 @@ function matchParamValues(entry: GrammarEntry, hrParams: string[]): string[] {
     const isFlag = (param.flagStyle || param.type === 'flagElement') && !!param.hrLabel;
     if (isFlag) {
       resolved[pi] = true;
+      let claimed = false;
       for (let i = 0; i < hrParams.length; i++) {
         if (consumed[i]) continue;
         if (ciEquals(trim(hrParams[i]), param.hrLabel!)) {
           consumed[i] = true;
           values[pi] = 'True';
           gotToken[pi] = true;
+          claimed = true;
           break;
+        }
+      }
+      // The labeled boolean spelling of a bare flag (`Label: On` / `Label: Off`):
+      // On sets it, Off leaves it clear; any other value after the flag's label
+      // is reserved, never taken positionally.
+      const prefix = param.hrLabel + ':';
+      for (let i = 0; i < hrParams.length && !claimed; i++) {
+        if (consumed[i]) continue;
+        const t = trim(hrParams[i]);
+        if (!startsWithCi(t, prefix)) continue;
+        const v = trim(t.slice(prefix.length));
+        if (ciEquals(v, 'On')) {
+          consumed[i] = true;
+          values[pi] = 'True';
+          gotToken[pi] = true;
+          claimed = true;
+        } else if (ciEquals(v, 'Off')) {
+          consumed[i] = true;
+          claimed = true;
+        } else {
+          reserved[i] = true;
         }
       }
       continue;
@@ -574,31 +864,215 @@ function matchParamValues(entry: GrammarEntry, hrParams: string[]): string[] {
         }
         if (resolved[pi]) break;
       }
+      // fmLineBare boolean: FileMaker draws the value with no label
+      // (`Set Layout Object Animation [ Off ]`, `Set Error Logging [ On ; … ]`).
+      // Claim the first bare token naming one of its values when no labeled
+      // token gave it one.
+      if (!resolved[pi] && param.type === 'boolean' && rawBool(param.raw, 'fmLineBare')) {
+        for (let i = 0; i < hrParams.length; i++) {
+          if (consumed[i]) continue;
+          const v = fmLineBareBooleanValue(param, hrParams[i]);
+          if (!v) continue;
+          consumed[i] = true;
+          values[pi] = v;
+          gotToken[pi] = true;
+          resolved[pi] = true;
+          break;
+        }
+      }
+    }
+  }
+
+  // Shape-routed governing discriminator (shapeRoutedValues): FileMaker's line shows
+  // only the revealed companion, so its shape is the only evidence of the value.
+  // Perform AppleScript prints Text mode as the quoted literal (`[ "a "b";c] d" ]`,
+  // unescaped) and Calculation mode as the calculation (`[ "say " & $x ]`). A bare
+  // token naming one of the two values at the companion's position selects it
+  // explicitly (rendered when the companion's shape alone would read as the other
+  // value). Otherwise the token there selects the value revealing the hrQuoted
+  // companion when it reads as quoted literal text, else the other value. No token
+  // leaves the enum at its default.
+  for (let pi = 0; pi < entry.params.length; pi++) {
+    if (values[pi] !== '') continue;
+    const routed = shapeRoutedValues(entry, entry.params[pi]);
+    if (!routed) continue;
+    // The companion renders at the discriminator's HR slot, so it takes the bare
+    // token after those of the positional params rendered before it.
+    let before = 0;
+    for (const qi of hrParamOrder(entry)) {
+      if (qi === pi) break;
+      const q = entry.params[qi];
+      if (resolved[qi] || !rendersBareInHr(q) || governingDiscriminatorFor(entry, q)) continue;
+      before++;
+    }
+    for (let i = 0; i < hrParams.length; i++) {
+      if (consumed[i] || reserved[i]) continue;
+      if (before > 0) {
+        before--;
+        continue;
+      }
+      const t = trim(hrParams[i]);
+      if (ciEquals(t, routed.quoted) || ciEquals(t, routed.other)) {
+        consumed[i] = true;
+        values[pi] = ciEquals(t, routed.quoted) ? routed.quoted : routed.other;
+      } else if (t) {
+        values[pi] = readsAsQuotedLiteralText(t) ? routed.quoted : routed.other;
+      }
+      break;
     }
   }
 
   // Pass 2 — positional for the remaining bare-rendering params, in HR order.
-  let pos = 0;
-  for (const pi of hrParamOrder(entry)) {
-    if (resolved[pi]) continue;
-    if (!rendersBareInHr(entry.params[pi])) continue;
+  const positionalTarget = (pi: number): boolean => {
+    if (resolved[pi]) return false;
+    if (!rendersBareInHr(entry.params[pi])) return false;
     const gov = governingDiscriminatorFor(entry, entry.params[pi]);
     if (gov) {
       const gi = entry.params.indexOf(gov);
       const gval = values[gi] === '' ? (gov.defaultValue ?? '') : values[gi];
-      if (!valueRevealsCompanion(gov, gval, paramKey(entry.params[pi]))) continue;
+      if (!valueRevealsCompanion(gov, gval, paramKey(entry.params[pi]))) return false;
     }
-    while (pos < hrParams.length && consumed[pos]) pos++;
+    return true;
+  };
+  const order = hrParamOrder(entry);
+  // Missing optional slot, told apart by vocabulary: with FEWER bare tokens than
+  // positional slots, a token naming a value of a LATER closed-vocabulary enum is
+  // that enum's token, so a free param ahead of it is the one left out (Save a
+  // Copy as with no path: `[ copy of current file ; Create folders: On ]`). Only a
+  // deficit enables the skip. Mirrors the reference converter.
+  let missingSlots =
+    order.filter((pi) => positionalTarget(pi)).length -
+    hrParams.filter((t, i) => !consumed[i] && !reserved[i] && trim(t) !== '').length;
+  const namesLaterClosedEnum = (oi: number, token: string): boolean =>
+    order
+      .slice(oi + 1)
+      .some(
+        (qi) =>
+          closedVocabEnum(entry.params[qi]) &&
+          positionalTarget(qi) &&
+          positionalTokenFitsParam(entry.params[qi], token),
+      );
+  let pos = 0;
+  for (let oi = 0; oi < order.length; oi++) {
+    const pi = order[oi];
+    if (!positionalTarget(pi)) continue;
+    while (pos < hrParams.length && (consumed[pos] || reserved[pos])) pos++;
+    // A path slot takes no labeled option: FileMaker would keep `XMLSource:
+    // $xmlPath` as a literal path, silently. Those tokens stay unplaced. A
+    // value-shaped token after them is still the path; a bare word (`Add`, `UTF-8`)
+    // is not, so the slot stays empty.
+    if (entry.params[pi].xmlElement === 'UniversalPathList') {
+      let skippedLabeled = false;
+      while (
+        pos < hrParams.length &&
+        (consumed[pos] || reserved[pos] || readsAsLabeledToken(entry, hrParams[pos]))
+      ) {
+        if (!consumed[pos] && !reserved[pos]) {
+          reserved[pos] = true;
+          skippedLabeled = true;
+          addWarning(
+            `${entry.name}: "${trim(hrParams[pos])}" reads as a labeled option this step does not have, so it was left out of the path. If it is a path, quote it.`,
+          );
+        }
+        pos++;
+      }
+      if (skippedLabeled && pos < hrParams.length && readsAsBareWord(hrParams[pos])) {
+        resolved[pi] = true;
+        continue;
+      }
+    }
     if (pos < hrParams.length) {
       const token = trim(hrParams[pos]);
       // A closed-vocabulary enum only claims a token that names one of its own
       // values; anything else belongs to a later bare param.
       if (!positionalTokenFitsParam(entry.params[pi], token)) continue;
+      if (missingSlots > 0 && !closedVocabEnum(entry.params[pi]) && namesLaterClosedEnum(oi, token)) {
+        missingSlots--;
+        continue;
+      }
       consumed[pos] = true;
       values[pi] = token;
       gotToken[pi] = true;
       resolved[pi] = true;
       pos++;
+    }
+  }
+
+  // hrPositionalKey repeatGroup: FileMaker prints each non-empty entry's
+  // positional field bare after the step's own bare params (Show Custom Dialog
+  // `[ "T" ; "M" ; $a ; Invoices::Number ]`), so the bare tokens left after pass 2
+  // are those entries, in order -- capped at repeatCount, and only a token that
+  // can BE a target (a `$variable` or a `Table::Field` reference); anything else
+  // stays unconsumed and is reported dropped. Mirrors the reference converter.
+  for (let pi = 0; pi < entry.params.length; pi++) {
+    const param = entry.params[pi];
+    const key = rawStr(param.raw, 'hrPositionalKey');
+    if (param.type !== 'repeatGroup' || !key || resolved[pi]) continue;
+    const posField = rawArr(param.raw, 'fields').find((f) => rawStr(f, 'key') === key);
+    if (!posField) continue;
+    const kind = rawStr(posField, 'kind');
+    const cap = Number(param.raw.repeatCount ?? 0) || 0;
+    const fits = (tok: string): boolean => {
+      if (kind !== 'fieldOrVariable' && kind !== 'field') return true;
+      if (!tok || tok[0] === '"') return false;
+      if (kind === 'fieldOrVariable' && tok[0] === '$') return true;
+      return tok.includes('::');
+    };
+    const parts: string[] = [];
+    for (let i = 0; i < hrParams.length; i++) {
+      if (consumed[i] || reserved[i]) continue;
+      const tok = trim(hrParams[i]);
+      if (!tok) continue;
+      if (cap > 0 && parts.length >= cap) break;
+      if (!fits(tok)) break;
+      consumed[i] = true;
+      parts.push(key + '=' + groupQuoteValue(tok));
+    }
+    if (parts.length > 0) {
+      values[pi] = parts.join(' | ');
+      gotToken[pi] = true;
+      resolved[pi] = true;
+    }
+  }
+
+  // fmLineBare: FileMaker draws these labeled params bare, after the step's other
+  // tokens, and leaves an empty one out (Get Folder Path `[ Allow Folder Creation ;
+  // $result ; "t" ; Get ( DocumentsPath ) ]`). Once the bare params have their
+  // tokens, the bare tokens left are these params', in catalog order; an explicit
+  // empty token keeps its param's slot (`$result ; ; …`). Fewer tokens than params
+  // is FileMaker leaving one out, which the line cannot place: the tokens fill the
+  // first params. Mirrors the reference converter (which also warns about that guess).
+  const bareTargets: number[] = [];
+  for (let pi = 0; pi < entry.params.length; pi++)
+    // A boolean fmLineBare param is drawn in its own slot and claimed in pass 1.
+    if (rawBool(entry.params[pi].raw, 'fmLineBare') && entry.params[pi].type !== 'boolean' && !resolved[pi])
+      bareTargets.push(pi);
+  let nextBare = 0;
+  for (let i = 0; i < hrParams.length && nextBare < bareTargets.length; i++) {
+    if (consumed[i] || reserved[i]) continue;
+    const pi = bareTargets[nextBare++];
+    consumed[i] = true;
+    values[pi] = trim(hrParams[i]);
+    gotToken[pi] = true;
+    resolved[pi] = true;
+  }
+
+  // fmLineSubscriptOf: FileMaker draws this param as a repetition subscript on a
+  // sibling's token (`$result[2]`, `$result[$i]`). With no labeled token of its
+  // own, split a trailing `[…]` off the sibling's value into it.
+  for (let pi = 0; pi < entry.params.length; pi++) {
+    const of = rawStr(entry.params[pi].raw, 'fmLineSubscriptOf');
+    if (!of || gotToken[pi] || trim(values[pi])) continue;
+    for (let qi = 0; qi < entry.params.length; qi++) {
+      if (qi === pi || paramKey(entry.params[qi]) !== of) continue;
+      const [bare, rep, calc] = parseFieldSubscript(trim(values[qi]));
+      if (rep > 0 || calc) {
+        values[qi] = trim(bare);
+        values[pi] = calc || String(rep);
+        gotToken[pi] = true;
+        resolved[pi] = true;
+      }
+      break;
     }
   }
 
@@ -616,6 +1090,9 @@ function matchParamValues(entry: GrammarEntry, hrParams: string[]): string[] {
   for (let gi = 0; gi < entry.params.length; gi++) {
     const gate = entry.params[gi];
     if (gate.type !== 'enum' || values[gi] !== '') continue;
+    // A display projection's value comes from its token or the group body, never
+    // from its companions (FileMaker's default PDF step has no <PDFSaveType>).
+    if (groupFieldsOf(gate).length > 0) continue;
     const gateKey = paramKey(gate);
     let chosen = '';
     let ambiguous = false;
@@ -630,6 +1107,45 @@ function matchParamValues(entry: GrammarEntry, hrParams: string[]): string[] {
       }
     }
     if (!ambiguous && chosen !== '') values[gi] = chosen;
+  }
+
+  // hrEmptySlotWith: an empty token at a param's slot is FileMaker drawing the
+  // sibling it stands for (Save Records as Excel `With dialog: Off ; ; Records
+  // being browsed` is a step with a <Profile> and no path). An attrGroup with no
+  // token of its own takes a body of its attribute defaults.
+  for (let pi = 0; pi < entry.params.length; pi++) {
+    const slotWith = (entry.params[pi].raw.hrEmptySlotWith as string) ?? '';
+    if (!slotWith || !gotToken[pi] || trim(values[pi])) continue;
+    for (let qi = 0; qi < entry.params.length; qi++) {
+      const q = entry.params[qi];
+      if (paramKey(q) !== slotWith) continue;
+      if (q.type === 'attrGroup' && !trim(values[qi])) {
+        values[qi] = rawArr(q.raw, 'fields')
+          .filter((f) => rawStr(f, 'kind') === 'attr' && !rawBool(f, 'optional') && rawStr(f, 'defaultValue'))
+          .map((f) => rawStr(f, 'key') + '=' + groupQuoteValue(rawStr(f, 'defaultValue')))
+          .join(', ');
+      }
+      break;
+    }
+  }
+
+  // fmLineToken: FileMaker draws a derived hidden boolean as a bare token when it
+  // is on (Sort Records `[ Restore ; With dialog: Off ]`). Its state is derived
+  // on emit from whether a sibling it gates has a value (P7.1), so the token adds
+  // nothing: consume it when that derived state is on; otherwise it stays
+  // unconsumed. Mirrors the reference converter.
+  for (const param of entry.params) {
+    const lineToken = rawStr(param.raw, 'fmLineToken');
+    if (!lineToken || !param.hrHidden || param.type !== 'boolean') continue;
+    const key = paramKey(param);
+    const derivedOn = entry.params.some(
+      (q, qi) =>
+        !!q.visibleWhen && q.visibleWhen.param === key && q.visibleWhen.values.length > 0 &&
+        q.visibleWhen.values[0] === 'True' && trim(values[qi]) !== '',
+    );
+    if (!derivedOn) continue;
+    for (let i = 0; i < hrParams.length; i++)
+      if (!consumed[i] && reserved[i] && ciEquals(trim(hrParams[i]), lineToken)) consumed[i] = true;
   }
 
   return values;
@@ -678,7 +1194,7 @@ function emitParametersList(param: GrammarParam, hrValue: string): string {
 function emitFindRequests(hrValue: string, resolver: IdResolver): string {
   const v = trim(hrValue);
   if (!v) return '';
-  const rows = splitOnDelim(v, ' | ');
+  const rows = splitOnDelim(v, ' | ', false);
   if (rows.length === 0) return '';
   let out = '    <Query>\n';
   for (const row of rows) {
@@ -687,7 +1203,7 @@ function emitFindRequests(hrValue: string, resolver: IdResolver): string {
     if (startsWithCi(r, 'Omit ')) { op = 'Exclude'; r = trim(r.slice(5)); }
     else if (startsWithCi(r, 'Include ')) { r = trim(r.slice(8)); }
     out += `      <RequestRow operation="${op}">\n`;
-    const crits = splitOnDelim(r, ' & ');
+    const crits = splitOnDelim(r, ' & ', false);
     if (crits.length === 0) crits.push('');
     for (const crit of crits) {
       const c = trim(crit);
@@ -699,7 +1215,7 @@ function emitFindRequests(hrValue: string, resolver: IdResolver): string {
       if (!field) {
         out += '          <Field table="" id="0" name=""/>\n';
       } else {
-        const rf = resolver.resolveField(field);
+        const rf = resolveFieldRef(resolver, field);
         out += `          <Field table="${escXml(rf.table)}" id="${rf.fieldId}" name="${escXml(rf.fieldName)}"/>\n`;
       }
       out += `          <Text>${escXml(text)}</Text>\n`;
@@ -730,16 +1246,14 @@ function emitFieldOrVariable(
     ? ` ${typeAttr}="${escXml(rawStr(param.raw, 'typeValue'))}"`
     : '';
   if (isVariable(hrValue)) {
-    const trimmed = trim(hrValue);
     let out = '';
     if (!precededByTextElement) out += '    <Text/>\n';
-    out += `    <Field${typeAttrStr}>${escXml(trimmed)}</Field>`;
+    out += '    ' + variableFieldXml(hrValue, typeAttrStr);
     return out;
   }
   let out = '';
   if (rawBool(param.raw, 'textMarker') && !precededByTextElement) out += '    <Text/>\n';
-  const resolved = resolver.resolveField(hrValue);
-  out += `    <Field${typeAttrStr} table="${escXml(resolved.table)}" id="${resolved.fieldId}" name="${escXml(resolved.fieldName)}"/>`;
+  out += '    ' + fieldRefXml(resolver, hrValue, typeAttrStr);
   return out;
 }
 
@@ -750,7 +1264,11 @@ function emitGroupElement(
   kv: Map<string, string>,
   indent: string,
   resolver: IdResolver,
+  materialize = false,
 ): string {
+  // `materialize`: an hrOmitAtDefault group with no HR token writes its default
+  // element (a calc / text field with a defaultValue holds it, every sub-group
+  // is written), the element groupAtDefault accepts.
   let attrs = '';
   let children = '';
   const ci = indent + '  ';
@@ -759,6 +1277,30 @@ function emitGroupElement(
     const key = rawStr(f, 'key');
     const it = kv.get(lowerKey(key));
     const present = it !== undefined && it !== '';
+    const def = rawStr(f, 'defaultValue');
+    if (materialize && !present && (kind === 'calc' || kind === 'text') && def) {
+      const childElement = rawStr(f, 'childElement');
+      if (kind === 'text') {
+        children += `${ci}<${childElement}>${escXml(def)}</${childElement}>\n`;
+        continue;
+      }
+      const requireAttr = rawStr(f, 'requireAttr');
+      if (requireAttr) attrs += ` ${requireAttr}="True"`;
+      if (!childElement) {
+        children += `${ci}<Calculation>${cdata(def)}</Calculation>\n`;
+      } else {
+        children += `${ci}<${childElement}>\n`;
+        children += `${ci}  <Calculation>${cdata(def)}</Calculation>\n`;
+        children += `${ci}</${childElement}>\n`;
+      }
+      continue;
+    }
+    if (materialize && !present && kind === 'group') {
+      children += emitGroupElement(
+        rawStr(f, 'element'), rawArr(f, 'fields'), new Map(), ci, resolver, true,
+      ) + '\n';
+      continue;
+    }
     if (kind === 'attr') {
       if (rawBool(f, 'optional') && !present) continue;
       const v = present ? groupUnquoteValue(it!) : rawStr(f, 'defaultValue');
@@ -782,10 +1324,7 @@ function emitGroupElement(
         }
       }
     } else if (kind === 'field') {
-      if (present) {
-        const rf = resolver.resolveField(it!);
-        children += `${ci}<Field table="${escXml(rf.table)}" id="${rf.fieldId}" name="${escXml(rf.fieldName)}"/>\n`;
-      }
+      if (present) children += `${ci}${fieldRefXml(resolver, it!, '', ci, false)}\n`;
     } else if (kind === 'script') {
       if (present) {
         const rs = resolver.resolveScript(groupUnquoteValue(it!));
@@ -794,10 +1333,9 @@ function emitGroupElement(
     } else if (kind === 'fieldOrVariable') {
       const v = present ? groupUnquoteValue(it!) : '';
       if (v && isVariable(v)) {
-        children += `${ci}<Field>${escXml(trim(v))}</Field>\n`;
+        children += `${ci}${variableFieldXml(v, '', ci, false)}\n`;
       } else if (v) {
-        const rf = resolver.resolveField(v);
-        children += `${ci}<Field table="${escXml(rf.table)}" id="${rf.fieldId}" name="${escXml(rf.fieldName)}"/>\n`;
+        children += `${ci}${fieldRefXml(resolver, v, '', ci, false)}\n`;
       } else {
         children += `${ci}<Field table="" id="0" name=""/>\n`;
       }
@@ -816,8 +1354,13 @@ function emitGroupElement(
 }
 
 function emitRepeatGroup(param: GrammarParam, hrValue: string, resolver: IdResolver): string {
+  // hrDefault: no token means FileMaker's default content (its HR line omits it);
+  // repeatCount: FileMaker always serializes that many entries, padded.
+  if (!trim(hrValue)) hrValue = rawStr(param.raw, 'hrDefault');
   if (!trim(hrValue)) return '';
-  const entries = splitOnDelim(hrValue, ' | ');
+  const entries = splitOnDelim(hrValue, ' | ', true);
+  const cap = Number(param.raw.repeatCount ?? 0) || 0;
+  while (cap > 0 && entries.length < cap) entries.push('');
   let out = `    <${param.xmlElement}>\n`;
   for (const e of entries) {
     out += emitGroupElement(
@@ -829,12 +1372,20 @@ function emitRepeatGroup(param: GrammarParam, hrValue: string, resolver: IdResol
   return out;
 }
 
-function emitAttrGroup(param: GrammarParam, hrValue: string, resolver: IdResolver): string {
-  if (!trim(hrValue) && !param.hrHidden) return '';
-  return emitGroupElement(
-    param.xmlElement, rawArr(param.raw, 'fields'),
-    parseGroupKV(hrValue), '    ', resolver,
-  );
+function emitAttrGroup(
+  param: GrammarParam, hrValue: string, resolver: IdResolver, projected?: Map<string, string>,
+): string {
+  // `projected`: fields a display projection (groupFields) read from its own
+  // token, keyed lower-case; they override the body's and make the group present.
+  // hrOmitAtDefault: no token is the group at its catalog default, which the
+  // XML->HR side left out; write that default element back.
+  if (!trim(hrValue) && param.raw.hrOmitAtDefault === true && !(projected && projected.size > 0)) {
+    return emitGroupElement(param.xmlElement, rawArr(param.raw, 'fields'), new Map(), '    ', resolver, true);
+  }
+  if (!trim(hrValue) && !param.hrHidden && !(projected && projected.size > 0)) return '';
+  const kv = parseGroupKV(hrValue);
+  for (const [k, v] of projected ?? []) kv.set(k, v);
+  return emitGroupElement(param.xmlElement, rawArr(param.raw, 'fields'), kv, '    ', resolver);
 }
 
 // ── bitmaskGroup ─────────────────────────────────────────────────────────────
@@ -937,11 +1488,20 @@ function emitFieldList(param: GrammarParam, hrValue: string, resolver: IdResolve
     let fieldref = entryStr;
     let attrval = entryAttrDefault;
     const eq = entryStr.indexOf('=');
-    if (eq !== -1) { fieldref = trim(entryStr.slice(0, eq)); attrval = trim(entryStr.slice(eq + 1)); }
-    const rf = resolver.resolveField(groupUnquoteValue(fieldref));
+    let suffixed: Record<string, string> = {};
+    if (eq !== -1) {
+      fieldref = trim(entryStr.slice(0, eq));
+      const split = splitFieldEntrySuffix(param, trim(entryStr.slice(eq + 1)));
+      attrval = split.value;
+      suffixed = split.found;
+      if (Object.keys(suffixed).length > 0 && !attrval) attrval = entryAttrDefault;
+    }
+    const rf = resolveFieldRef(resolver, groupUnquoteValue(fieldref));
     let fattrs = '';
     for (const ff of fieldFixedAttrs) {
-      fattrs += ` ${rawStr(ff, 'xmlAttr')}="${escXmlAttr(rawStr(ff, 'defaultValue'))}"`;
+      const xattr = rawStr(ff, 'xmlAttr');
+      const fval = suffixed[xattr] || rawStr(ff, 'defaultValue');
+      fattrs += ` ${xattr}="${escXmlAttr(fval)}"`;
     }
     if (entryAttr && !entryElement) fattrs += ` ${entryAttr}="${escXmlAttr(attrval)}"`;
     let node = `<Field${fattrs} table="${escXml(rf.table)}" id="${rf.fieldId}" name="${escXml(rf.fieldName)}"/>`;
@@ -1065,8 +1625,35 @@ export function convertStepWithCatalog(
   let xml = `  <Step enable="${!line.disabled ? 'True' : 'False'}" id="${entry.id}" name="${escXml(entry.name)}">\n`;
 
   const crossFile = splitCrossFile(entry, normalizeSpecifiedMode(entry, line.params));
-  const values = matchParamValues(entry, crossFile.hrParams);
+  const values = matchParamValues(entry, crossFile.hrParams, (message) =>
+    resolver.addWarning(line.lineNumber, message),
+  );
   const byName = isByNameCall(entry, values);
+
+  // mirrorOf: FileMaker writes this param as a copy of a field inside a sibling
+  // attrGroup, so it takes that field's value (Create PDF [ Document: Title="t",
+  // … ] writes the step-level <Calculation> "t" too, as FileMaker does). HR gives
+  // the hidden copy no token, so with the field empty nothing is written.
+  for (let pi = 0; pi < params.length; pi++) {
+    const p = params[pi];
+    if (!p.raw.mirrorOf) continue;
+    // A one-segment mirrorOf copies a sibling text param (Trigger Claris Connect
+    // Flow's <Text> repeats its <Flow>).
+    const sib = resolveMirrorSibling(entry, p);
+    if (sib !== null) {
+      const v = trim(values[params.indexOf(sib)] ?? '');
+      if (v) values[pi] = v;
+      continue;
+    }
+    const src = resolveMirrorSource(entry, p);
+    if (src === null) continue;
+    let body = values[params.indexOf(src.owner)] ?? '';
+    for (let i = 0; i < src.chain.length && body; i++) {
+      const kv = parseGroupKV(i === 0 ? body : stripParens(body));
+      body = kv.get(lowerKey(String(src.chain[i].key ?? ''))) ?? '';
+    }
+    if (body.trim()) values[pi] = body.trim();
+  }
 
   // G10 attribute-bearing wrapper: a wrapper element may carry an enum value as an
   // attribute (FM serializes <Action value="Queue"> holding children).
@@ -1104,6 +1691,28 @@ export function convertStepWithCatalog(
     if (v === '') { skipParam[pi] = true; continue; }
     elementAttr.set(elem, (elementAttr.get(elem) ?? '') + ` ${attr}="${escXml(v)}"`);
     skipParam[pi] = true;
+  }
+
+  // attrGroup display projection (groupFields): a projection owns no element;
+  // its token's value (resolved back through hrEnumValues) is split over the
+  // fields it projects and handed to the owning group's emit.
+  const projectedFields = new Map<number, Map<string, string>>();
+  for (let pi = 0; pi < params.length; pi++) {
+    const p = params[pi];
+    const gf = groupFieldsOf(p);
+    if (gf.length === 0) continue;
+    skipParam[pi] = true;
+    if (!trim(values[pi])) continue;
+    const owner = projectionOwner(entry, p);
+    if (owner === null) continue;
+    const oi = params.indexOf(owner);
+    const parts = resolveEnumXmlValue(p, trim(values[pi])).split('|');
+    gf.forEach((key, i) => {
+      const part = parts[i] ?? '';
+      if (!part) return;
+      if (!projectedFields.has(oi)) projectedFields.set(oi, new Map());
+      projectedFields.get(oi)!.set(lowerKey(key), part);
+    });
   }
 
   // Discriminator-driven layout: pre-resolve destination + <Layout> piece.
@@ -1144,7 +1753,11 @@ export function convertStepWithCatalog(
   const impliedBool = new Map<number, string>(); // param idx -> state
   for (let gi = 0; gi < params.length; gi++) {
     const gate = params[gi];
-    if (!gate.hrHidden || gate.type !== 'boolean' || values[gi] !== '') continue;
+    // hrOffKeepsGated: an explicit On / Off from the HR names the state
+    // outright: the gated companions are written as given either way.
+    const explicit = gate.raw.hrOffKeepsGated === true && (values[gi] === 'On' || values[gi] === 'Off')
+      ? values[gi] : '';
+    if (!gate.hrHidden || gate.type !== 'boolean' || (values[gi] !== '' && !explicit)) continue;
     const gateKey = paramKey(gate);
     let onValue = ''; // the gate value that REVEALS a companion
     let gates = false, anyContent = false;
@@ -1157,15 +1770,89 @@ export function convertStepWithCatalog(
     }
     if (!gates) continue; // hrHidden but nothing gates on it: default emit
     const offValue = onValue === 'True' ? 'False' : 'True';
-    impliedBool.set(gi, anyContent ? onValue : offValue);
+    impliedBool.set(gi, explicit ? (explicit === 'On' ? onValue : offValue) : (anyContent ? onValue : offValue));
+  }
+
+  // G10 nested attribute-bearing wrapper: the step-level rule one level down. An
+  // enum or boolean INSIDE a group whose xmlElement names a wrapper other params
+  // nest inside (parentElement "<its parent>/<it>") carries its value as that
+  // wrapper's attribute: Insert from Device writes <ScanFrom type="Field"><Field
+  // …/></ScanFrom> and <MaxDuration state="True"><Calculation>…</Calculation>
+  // </MaxDuration>. FileMaker serializes such a wrapper in every state, child or
+  // not (<ScanFrom type="Camera"/>, <MaxDuration state="False"/>), so it opens at
+  // its own slot and closes self-closed when no child follows. A governed one is
+  // gated like any companion; a hidden boolean takes its derived state.
+  const wrapperAttrByPath = new Map<string, string>();
+  const nestedWrapperOpen = new Map<number, string>();
+  {
+    const wrapperPaths = new Set<string>();
+    for (const p of params) {
+      let prefix = '';
+      for (const seg of splitPath(p.parentElement ?? '')) {
+        prefix = prefix ? prefix + '/' + seg : seg;
+        wrapperPaths.add(prefix);
+      }
+    }
+    for (let pi = 0; pi < params.length; pi++) {
+      const p = params[pi];
+      if (!p.parentElement || (p.type !== 'enum' && p.type !== 'boolean')) continue;
+      if (splitElementAttr(p.xmlElement)[0]) continue;
+      const path = p.parentElement + '/' + p.xmlElement;
+      if (!wrapperPaths.has(path)) continue;
+      skipParam[pi] = true;
+      const gov = governingDiscriminatorFor(entry, p);
+      if (gov) {
+        const dval = govDiscrimValue.get(gov.xmlElement) ?? (gov.defaultValue ?? '');
+        if (!valueRevealsCompanion(gov, dval, paramKey(p))) continue;
+      }
+      const v =
+        p.type === 'boolean'
+          ? (impliedBool.get(pi) ?? resolveBoolState(p, values[pi]))
+          : resolveEnumXmlValue(p, values[pi]);
+      const attr = p.xmlAttr || (p.type === 'boolean' ? 'state' : 'value');
+      if (v) wrapperAttrByPath.set(path, ` ${attr}="${escXml(v)}"`);
+      nestedWrapperOpen.set(pi, path);
+    }
   }
 
   let prevWasTextElement = false;
   const openGroups: string[] = [];
+  // xml.length right after each open wrapper's start tag: a wrapper closed with
+  // nothing written inside it closes self-closed (<ScanFrom type="Camera"/>).
+  const openTagEnd: number[] = [];
+  // Keep the shared prefix of the open-wrapper stack, close what we left, open what
+  // is new (with any G10 attribute resolved for it).
+  const reconcileWrappers = (want: string[]): void => {
+    let common = 0;
+    while (common < openGroups.length && common < want.length && openGroups[common] === want[common]) {
+      common++;
+    }
+    for (let k = openGroups.length; k > common; k--) {
+      if (xml.length === openTagEnd[k - 1]) xml = xml.slice(0, -2) + '/>\n';
+      else xml += `    </${openGroups[k - 1]}>\n`;
+    }
+    openGroups.length = common;
+    openTagEnd.length = common;
+    let path = '';
+    for (let k = 0; k < want.length; k++) {
+      path = path ? path + '/' + want[k] : want[k];
+      if (k < common) continue;
+      const wa = wrapperAttrByPath.get(path) ?? wrapperAttr.get(want[k]) ?? '';
+      xml += `    <${want[k]}${wa}>\n`;
+      openGroups.push(want[k]);
+      openTagEnd.push(xml.length);
+    }
+  };
 
   for (const pi of emitOrder(entry)) {
     const param = params[pi];
     const hrValue = values[pi];
+    const nested = nestedWrapperOpen.get(pi);
+    if (nested !== undefined) {
+      reconcileWrappers(splitPath(nested));
+      prevWasTextElement = false;
+      continue;
+    }
     if (skipParam[pi]) continue;
     if (byName && param.type === 'script') continue;
 
@@ -1252,7 +1939,7 @@ export function convertStepWithCatalog(
         piece = `    <Calculation>${cdata(hrValue)}</Calculation>`;
       }
     } else if (param.type === 'attrGroup') {
-      piece = emitAttrGroup(param, hrValue, resolver);
+      piece = emitAttrGroup(param, hrValue, resolver, projectedFields.get(pi));
     } else if (param.type === 'bitmaskGroup') {
       piece = emitBitmaskGroup(param, hrValue);
     } else if (param.type === 'repeatGroup') {
@@ -1261,6 +1948,9 @@ export function convertStepWithCatalog(
       if (trim(hrValue)) piece = emitFieldList(param, hrValue, resolver);
     } else if (param.type === 'namedCalc') {
       if (hrValue !== '' || param.required) piece = emitNamedCalc(param, hrValue);
+      // hrOmitAtDefault: no token is the catalog default, written back.
+      else if (param.raw.hrOmitAtDefault && typeof param.raw.defaultValue === 'string' && param.raw.defaultValue)
+        piece = emitNamedCalc(param, param.raw.defaultValue);
     } else if (param.type === 'parametersList') {
       piece = emitParametersList(param, hrValue);
     } else if (param.type === 'findRequests') {
@@ -1270,10 +1960,7 @@ export function convertStepWithCatalog(
     } else if (param.type === 'flagElement') {
       if (hrValue !== '') piece = `    <${param.xmlElement}/>`;
     } else if (param.type === 'field') {
-      if (!param.omitWhenEmpty || trim(hrValue)) {
-        const resolved = resolver.resolveField(hrValue);
-        piece = `    <Field table="${escXml(resolved.table)}" id="${resolved.fieldId}" name="${escXml(resolved.fieldName)}"/>`;
-      }
+      if (!param.omitWhenEmpty || trim(hrValue)) piece = '    ' + fieldRefXml(resolver, hrValue);
     } else if (param.type === 'tableRef') {
       if (!trim(hrValue)) {
         // A present-driven, gated table (Fine-Tune Model's training <Table>,
@@ -1281,14 +1968,14 @@ export function convertStepWithCatalog(
         // emits nothing when unset.
         if (!param.omitWhenEmpty) piece = '    <Table id="" name=""/>';
       } else {
-        const rt = resolveTable(unquote(hrValue));
+        const rt = resolveTable(tableParamValue(param, hrValue));
         piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
       }
     } else if (param.type === 'tableOccurrence') {
       // An unset present-driven TO (omitWhenEmpty) emits no <Table> — matching
       // FM's TrainingFile form; otherwise the TO always serializes.
       if (trim(hrValue) || !param.omitWhenEmpty) {
-        const rt = resolveTable(unquote(hrValue));
+        const rt = resolveTable(tableParamValue(param, hrValue));
         piece = `    <Table id="${rt.toId}" name="${escXml(rt.toName)}"/>`;
       }
     } else if (param.type === 'fileReference') {
@@ -1300,17 +1987,34 @@ export function convertStepWithCatalog(
           `      <UniversalPathList>${escXml(emitValue)}</UniversalPathList>\n    </${param.xmlElement}>`;
       }
     } else if (param.type === 'reference') {
-      const name = unquote(hrValue);
+      // Fixed-id built-ins (enumValues = id FM writes, hrEnumValues = name FM
+      // displays) emit with their id: FM resolves some references by id alone on
+      // paste (Install Menu Set's <CustomMenuSet>). Mirrors the reference.
+      // An hrQuoted name came as one escaped literal (or FileMaker's own quoted
+      // display); a built-in label (`<Current Table>`) comes bare.
+      let name = tableParamValue(param, hrValue);
+      let fixedId = '';
+      for (const k of Object.keys(param.hrEnumValues).sort()) {
+        const label = param.hrEnumValues[k];
+        if (label && ciEquals(label, name)) {
+          fixedId = k;
+          name = label;
+          break;
+        }
+      }
       if (name !== '' || param.required) {
         const wa = rawStr(param.raw, 'wrapperAttr');
         const extra = wa ? ' ' + wa : '';
-        piece = `    <${param.xmlElement} name="${escXml(name)}"${extra}/>`;
+        const idAttr = fixedId ? ` id="${escXml(fixedId)}"` : '';
+        piece = `    <${param.xmlElement}${idAttr} name="${escXml(name)}"${extra}/>`;
       }
     } else if (param.type === 'layout') {
       if (param.discriminator) {
         if (layoutPiece.has(pi)) piece = layoutPiece.get(pi)!;
       } else {
-        const layoutName = unquote(hrValue);
+        // FileMaker's own line reads “Name” (TO): the curly quotes mark a layout
+        // reference and the suffix is decoration, as for a discriminated token.
+        const layoutName = unquote(stripResolvedLayoutDecoration(hrValue.trim()).tok);
         if (layoutName === '' || ciEquals(layoutName, '<unknown>')) {
           piece = '    <Layout id="0" name=""/>';
         } else {
@@ -1367,8 +2071,7 @@ export function convertStepWithCatalog(
       }
     } else if (param.type === 'text' || param.type === 'name') {
       if (!param.omitWhenEmpty || trim(hrValue)) {
-        const [quoted, bare] = isQuotedLoneVariable(hrValue);
-        const emitValue = quoted ? bare : hrValue;
+        const emitValue = textParamValue(param, hrValue);
         const attrs = elementAttr.get(param.xmlElement) ?? '';
         piece = `    <${param.xmlElement}${attrs}>${escXml(emitValue)}</${param.xmlElement}>`;
       }
@@ -1378,28 +2081,13 @@ export function convertStepWithCatalog(
     if (piece === '') continue;
 
     // Reconcile the open-wrapper stack with this param's parentElement path.
-    const want = splitPath(param.parentElement ?? '');
-    let common = 0;
-    while (common < openGroups.length && common < want.length && openGroups[common] === want[common]) {
-      common++;
-    }
-    for (let k = openGroups.length; k > common; k--) {
-      xml += `    </${openGroups[k - 1]}>\n`;
-    }
-    openGroups.length = common;
-    for (let k = common; k < want.length; k++) {
-      const wa = wrapperAttr.get(want[k]) ?? '';
-      xml += `    <${want[k]}${wa}>\n`;
-      openGroups.push(want[k]);
-    }
+    reconcileWrappers(splitPath(param.parentElement ?? ''));
 
     xml += piece + '\n';
     prevWasTextElement = isTextElement;
   }
 
-  for (let k = openGroups.length; k > 0; k--) {
-    xml += `    </${openGroups[k - 1]}>\n`;
-  }
+  reconcileWrappers([]);
 
   xml += '  </Step>';
   return xml;
