@@ -4,9 +4,11 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
 
 **Regla:** toda PR a `taiko` que cambie reglas o herramientas añade una entrada aquí, la más reciente arriba, con `**Acción requerida:**` u `**Acción opcional:**` cuando el desarrollador deba hacer algo.
 
-## 2026-11-27 — Upstream (petrowsky) hasta el 9-nov; `Context` con segundos válidos; scripts con el Python de macOS
+## 2026-11-27 — add-on 1.5.1 (`Context` con segundos válidos); upstream (petrowsky) hasta el 9-nov; scripts con el Python de macOS
 
-**Acción requerida:** en cada solución, abre la función personalizada `Context` y cambia la línea de los segundos de `generated_at` por `Right ( "0" & Int ( Seconds ( ~ts ) ) ; 2 ) & "Z" ;` (edítala en su sitio, no la borres: los guiones la referencian por ID). Después lanza Push Context. `check_embedded_agfm.py` marcará `Context` como `STALE` hasta que lo hagas.
+**Acción requerida:** actualiza el add-on en el archivo principal de cada solución (desinstalar + instalar `filemaker/addon/agentic-fm.fmaddon` 1.5.1) y lanza Push Context. Si la solución usa el `Context` pegado a mano en vez del add-on, edítalo en su sitio (no lo borres: los guiones lo referencian por ID) y cambia la línea de los segundos de `generated_at` por `Right ( "0" & Int ( Seconds ( ~ts ) ) ; 2 ) & "Z" ;`. `check_embedded_agfm.py` marcará `Context` como `STALE` hasta que lo hagas.
+
+**Acción opcional:** vuelve a pegar `AGFM Agent` en los archivos secundarios (Agentic-FM-APP: «Copiar pasos (actualizar)»). Sigue en la versión 1.1.0, pero lleva el `Context` corregido dentro; sin pegarlo, solo el `generated_at` de esos archivos puede salir con segundos imposibles.
 
 - **`Context`: `generated_at` ya no sale con segundos imposibles** (p. ej. `06:13:94Z`). `Seconds()` conservaba los milisegundos y `Right ( … ; 2 )` se quedaba con ellos. fmlint no podía leer la fecha y se saltaba en silencio el aviso de contexto antiguo. Arreglado en `filemaker/Context.fmfn`, `filemaker/context.xml` y los snippets del add-on (`AGFM Agent`). Origen: petrowsky/agentic-fm#112.
 - **Python 3.9 de macOS:** `deploy.py`, `fm_xml_to_snippet.py`, `fm_icon_extract.py` y `fm_svg_convert.py` llevan `from __future__ import annotations`. Antes fallaban al arrancar con el `/usr/bin/python3` de serie (3.9.6). Origen: petrowsky/agentic-fm#110.
@@ -16,7 +18,7 @@ Changelog de reglas, scripts, catálogos y fmlint de la rama `taiko`. Lo leen `s
   - fmlint: respeta comillas escapadas y tipográficas en los textos, y los paréntesis de ancho completo.
 - Conflictos resueltos a favor de Taiko: la regex de funciones de fmlint sigue capturando los nombres con punto (`transaction.SetError`) y acepta también los paréntesis Unicode de upstream; `catalog-emit.ts` conserva el Perform Script a otro archivo de Taiko con los avisos nuevos; New Window conserva las notas de `discriminator` de Taiko.
 - Backlog de patrones (`.claude/CLAUDE.md`): fallos repetibles al pegar objetos de layout en XML2 (petrowsky/agentic-fm#115), pendientes de verificar en un layout real.
-- **Pendiente:** el paquete `filemaker/addon/agentic-fm.fmaddon` aún lleva el `Context` antiguo. Hay que reconstruirlo en FileMaker y ejecutar `build_addon_snippet.py --package`; hasta entonces fallan dos tests de `test_build_addon_snippet.py`.
+- Add-on **1.5.1**: paquete reconstruido en FileMaker Pro 26.1.1 (el de la 1.5.0 era de 26.0.3, por eso el `template.xml` trae además el formato nuevo de 26.1, como la opción `AutoCloseTimer` desactivada en `Show Custom Dialog`) con `Context` y `AGFM Agent` corregidos; `AGFM Version` y `manifest.json` en 1.5.1. `run_script.py` sigue aceptando 1.5.0 o superior.
 
 ## 2026-11-16 — add-on 1.5.0: ejecutar guiones en archivos secundarios por el principal
 

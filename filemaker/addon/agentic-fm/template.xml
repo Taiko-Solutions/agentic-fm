@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FMAdd_on version="2.3.0.0" Source="26.0.3" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-11-16T16:09:32">
+<FMAdd_on version="2.3.0.1" Source="26.1.1" File="agentic-fm.fmp12" UUID="D33605F0-2F85-4BD3-B164-C55284E878BA" locale="English" Has_DDR_INFO="False" binary_under_lo="False" split_catalogs="False" timestamp="2026-11-27T17:26:15">
 	<Structure membercount="1">
 		<AddAction membercount="11">
 			<BaseTableCatalog membercount="1">
@@ -30,19 +30,26 @@
 				</TableOccurrence>
 			</TableOccurrenceCatalog>
 			<CustomFunctionsCatalog membercount="1">
-				<UUID modifications="1" userName="" accountName="" timestamp="2026-10-10T19:07:29">AC9B0B23-8BC3-45CD-AA1D-1FA99A536F64</UUID>
+				<SortOrder>1</SortOrder>
+				<CustomOrderList>
+					<key>1</key>
+				</CustomOrderList>
+				<UUID modifications="2" userName="" accountName="" timestamp="2026-11-27T17:24:25">AC9B0B23-8BC3-45CD-AA1D-1FA99A536F64</UUID>
 				<TagList></TagList>
 				<ObjectList membercount="1">
 					<CustomFunction id="1" name="Context" access="All">
-						<UUID modifications="1" userName="" accountName="" timestamp="2026-10-10T19:07:27">3834507C-8485-493B-BFDD-2583E18B041E</UUID>
+						<UUID modifications="2" userName="" accountName="" timestamp="2026-11-27T17:24:24">3834507C-8485-493B-BFDD-2583E18B041E</UUID>
 						<TagList></TagList>
 						<Calculation>
-							<Text><![CDATA[/*com.fmi.calculation.text.D66EB1912EC8DA70685FA15E9C46DA3B*/Let ( [    /*com.fmi.calculation.text.243774ED317326455884AF34CB67AA04*/    ~fn = Get ( FileName ) ;    ~layoutName = Get ( LayoutName ) ;    ~layoutTO = Get ( LayoutTableName ) ;    ~layoutId = GetValue ( LayoutIDs ( ~fn ) ; Get ( LayoutNumber ) ) ;    ~layoutTOid = ExecuteSQL (        "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;        "" ; "" ; ~layoutTO    ) ;    /*com.fmi.calculation.text.7AB0CF0B494BF45607F92CF97C7D56E7*/    ~fieldNamesList = FieldNames ( ~fn ; ~layoutName ) ;    ~uniqueTOs = While ( [        ~_fList  = ~fieldNamesList ;        ~_fCount = ValueCount ( ~fieldNamesList ) ;        ~_fi     = 0 ;        ~_tos    = ~layoutTO    ] ;        ~_fi < ~_fCount ;    [        ~_fList  = ~_fList ;        ~_fCount = ~_fCount ;        ~_fi     = ~_fi + 1 ;        ~_tos    = Let ( [            ~fld = GetValue ( ~_fList ; ~_fi ) ;            ~sep = Position ( ~fld ; "com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8" ; 1 ; 1 ) ;            ~to  = If ( ~sep > 0 ; Left ( ~fld ; ~sep - 1 ) ; "" )        ] ;            If (				~to ≠ "" and IsEmpty ( FilterValues ( ~_tos ; ~to ) ) ;                ~_tos & ¶ & ~to ;                ~_tos            )        )    ] ;        ~_tos    ) ;    /*com.fmi.calculation.text.42FA3A1D2C27D4070FFAC279289FBC62*/    ~tablesJSON = While ( [        ~_tCount  = ValueCount ( ~uniqueTOs ) ;        ~_ti      = 0 ;        ~_tResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_ti < ~_tCount ;    [        ~_tCount  = ~_tCount ;        ~_ti      = ~_ti + 1 ;        ~_tResult = Let ( [            ~toName = GetValue ( ~uniqueTOs ; ~_ti ) ;            ~toId   = ExecuteSQL (                "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;                "" ; "" ; ~toName            ) ;            ~btName = ExecuteSQL (                "com.fmi.calculation.text.0D46F215DE6D997B3E93CBAB92A427B4" ;                "" ; "" ; ~toName            ) ;            ~btId   = ExecuteSQL (                "com.fmi.calculation.text.D6291D2122B10478F41037911AC62183" ;                "" ; "" ; ~btName            ) ;            /*com.fmi.calculation.text.D3912A148029E1C96FF5B953CA1B057E*/            ~fData = ExecuteSQL (                "com.fmi.calculation.text.EAB50923DFB521B317FBF79E0523359B" ;                "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ; ~toName            ) ;            /*com.fmi.calculation.text.A890BF40BD49C839E350BDAF7E9E7D8D*/            ~fieldsObj = While ( [                ~_fCount2 = ValueCount ( ~fData ) ;                ~_fj      = 0 ;                ~_fObj    = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"            ] ;                ~_fj < ~_fCount2 ;            [                ~_fCount2 = ~_fCount2 ;                ~_fj      = ~_fj + 1 ;                ~_fObj    = Let ( [                    ~row     = GetValue ( ~fData ; ~_fj ) ;                    ~parts   = Substitute ( ~row ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;                    ~fname   = GetValue ( ~parts ; 1 ) ;                    ~fid     = GetValue ( ~parts ; 2 ) ;                    ~fsqlRaw = GetValue ( ~parts ; 3 ) ;                    ~fclass  = GetValue ( ~parts ; 4 ) ;                    /*com.fmi.calculation.text.773A03B06826D53FEEF46EDE854440C7*/                    ~fmType = Case (                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.1008913D05625D6772346DB6D2548432"   ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.A238CF967B73E6BEB5601066DA31B25A"      ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.B48A868C643A68C639219B68A79CB846"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.5E011A4AFD84B55B6E46F99A28AB6346"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.A445D354F10C686D45B587901A5E2A6B"                     ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.22BF6CD6AF8310A8F54A5EAD58067F84"                    ; "com.fmi.calculation.text.42FB9E7BEB6125DB7F2D9FE414DC8C69" ;                        ~fsqlRaw = "com.fmi.calculation.text.BEB06E2CA146960316DC9594614ABD97"                    ; "com.fmi.calculation.text.2CA765AB9D7BEE797110A28B7B5E988C" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.49AE69F793E196F618E8C5D5A10FA1FD" ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 8 ) = "com.fmi.calculation.text.41D994AD52D04D684D69E6297B630195"  ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.33F53A7E4CCE631CB160EE666395CC5E" ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.09C3059F754CEEBF41F83512F817CD12"      ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        ~fsqlRaw                    ) ;                    /*com.fmi.calculation.text.57AE11E947E3055BAEC10E6EF93D2B58*/                    ~fieldObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"   ; ~fid    ; JSONNumber ] ;                        [ "com.fmi.calculation.text.E8242F9CA220C53035AFF0819EEDB978" ; ~fmType ; JSONString ]                    ) ;                    ~fieldObj = If (						~fclass ≠ "com.fmi.calculation.text.5F91071A15427802DFBC07D947C43A9F" and ~fclass ≠ "" ;                        JSONSetElement ( ~fieldObj ; "com.fmi.calculation.text.FA56F7B1CA6FAB546B4D079941EE0644" ; ~fclass ; JSONString ) ;                        ~fieldObj                    )                ] ;                    JSONSetElement ( ~_fObj ; ~fname ; ~fieldObj ; JSONObject )                )            ] ;                ~_fObj            ) ;            /*com.fmi.calculation.text.DE7E8663EFD34402BA2DAAE96EED740E*/            ~tObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"         ; ~btId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.7D530CE6CED94702FB83406CB059277F" ; ~btName    ; JSONString ] ;                [ "com.fmi.calculation.text.90F3A370125A58B0E78F5289A50B63CD"         ; ~toName    ; JSONString ] ;                [ "com.fmi.calculation.text.B609E43A579CBB0DFB2258220C871928"      ; ~toId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.C81174295D29BEDB1E68D3FC3DF46853"     ; ~fieldsObj ; JSONObject ]            )        ] ;            /*com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21*/            JSONSetElement ( ~_tResult ; ~toName ; ~tObj ; JSONObject )        )    ] ;        ~_tResult    ) ;    /*com.fmi.calculation.text.A587A64286526D6D74172CD462E02293*/    ~ddlArray = While ( [        ~_dCount = ValueCount ( ~uniqueTOs ) ;        ~_di     = 0 ;        ~_dArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_di < ~_dCount ;    [        ~_dCount = ~_dCount ;        ~_di     = ~_di + 1 ;        ~_dArr   = JSONSetElement ( ~_dArr ; ~_di - 1 ; GetValue ( ~uniqueTOs ; ~_di ) ; JSONString )    ] ;        ~_dArr    ) ;    ~ddl = GetTableDDL ( ~ddlArray ; True ) ;    /*com.fmi.calculation.text.4E62AEC9B37A5E5155FDE6B79CA92507*/    ~sNames = ScriptNames ( ~fn ) ;    ~sIds   = ScriptIDs ( ~fn ) ;    ~scriptsJSON = While ( [        ~_sCount  = ValueCount ( ~sNames ) ;        ~_si      = 0 ;        ~_sPairs  = ""    ] ;        ~_si < ~_sCount ;    [        ~_sCount  = ~_sCount ;        ~_si      = ~_si + 1 ;        ~_sPairs  = Let ( [            ~sName = GetValue ( ~sNames ; ~_si ) ;            ~sId   = GetValue ( ~sIds ; ~_si ) ;			/*com.fmi.calculation.text.97BBB266F49214C66591088FF4E5C80C*/            ~escaped = Substitute ( ~sName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~sId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~sName ) ;                If ( IsEmpty ( ~_sPairs ) ;                    ~pair ;                    ~_sPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_sPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_sPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.616CD86D3D2E667AFA97B562A49F69D4*/    ~layNames = LayoutNames ( ~fn ) ;    ~layIds   = LayoutIDs ( ~fn ) ;    ~layoutsJSON = While ( [        ~_lCount  = ValueCount ( ~layNames ) ;        ~_li      = 0 ;        ~_lPairs  = ""    ] ;        ~_li < ~_lCount ;    [        ~_lCount  = ~_lCount ;        ~_li      = ~_li + 1 ;        ~_lPairs  = Let ( [            ~lName = GetValue ( ~layNames ; ~_li ) ;            ~lId   = GetValue ( ~layIds ; ~_li ) ;            /*com.fmi.calculation.text.F7F4716EF3BA10458AC611E69C0A0F84*/            ~escaped = Substitute ( ~lName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~lId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~lName ) ;                If ( IsEmpty ( ~_lPairs ) ;                    ~pair ;                    ~_lPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_lPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_lPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.FA448BF879578EC5BE5F32E0CFE60A48*/    ~vlSQL = ExecuteSQL (        "com.fmi.calculation.text.E802A6F069CD8738C6E083E04682A3E0" ;        "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶    ) ;    ~vlJSON = While ( [        ~_vCount  = ValueCount ( ~vlSQL ) ;        ~_vi      = 0 ;        ~_vResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_vi < ~_vCount ;    [        ~_vCount  = ~_vCount ;        ~_vi      = ~_vi + 1 ;        ~_vResult = Let ( [            ~vParts  = Substitute ( GetValue ( ~vlSQL ; ~_vi ) ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;            ~vName   = GetValue ( ~vParts ; 1 ) ;            ~vId     = GetValue ( ~vParts ; 2 ) ;            ~vSource = GetValue ( ~vParts ; 3 )        ] ;            If ( not IsEmpty ( ~vName ) ;                JSONSetElement ( ~_vResult ;                    ~vName ;                    JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"     ; ~vId     ; JSONNumber ] ;                        [ "com.fmi.calculation.text.91F127C4B704FC5AC212BA970EB65F39" ; ~vSource ; JSONString ]                    ) ;                    JSONObject                ) ;                ~_vResult            )        )    ] ;        ~_vResult    ) ;    /*com.fmi.calculation.text.93CA15A878BB34A9358B13AAC7C4686D*/    ~objList = LayoutObjectNames ( ~fn ; ~layoutName ) ;    ~layoutObjectsJSON = While ( [        ~_oCount = ValueCount ( ~objList ) ;        ~_oi     = 0 ;        ~_oIdx   = 0 ;        ~_oArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_oi < ~_oCount ;    [        ~_oCount = ~_oCount ;        ~_oi     = ~_oi + 1 ;        ~_oIdx   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           ~_oIdx + 1 ;                           ~_oIdx                       )                   ) ;        ~_oArr   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           JSONSetElement ( ~_oArr ; ~_oIdx - 1 ; ~n ; JSONString ) ;                           ~_oArr                       )                   )    ] ;        ~_oArr    ) ;    /*com.fmi.calculation.text.1FEE49E661BD359FE044633E419AC801*/    /*com.fmi.calculation.text.13F0B3D657435C88F32D1F90078D2856*/    ~ts = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) ;    ~generatedAt =        Year ( ~ts ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Month ( ~ts ) ; 2 ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Day ( ~ts ) ; 2 ) & "com.fmi.calculation.text.D491787BD81ED43CB9E05191BBA37E6C" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Hour ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Minute ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Seconds ( ~ts ) ; 2 ) & "com.fmi.calculation.text.F7EFEBB853CFAA469FB4B8F6C49F50B9" ;    ~json = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;        [ "com.fmi.calculation.text.9CD6CD30E4547B3800299B5C2B734FA8"           ; 2                    ; JSONNumber ] ;        [ "com.fmi.calculation.text.A548D8D3BF1DBEA966A3C60FD421DF49"                  ; ~fn                  ; JSONString ] ;        [ "com.fmi.calculation.text.7C595C11BD6A09ECDD887FA0D1943FF6"                      ; task                 ; JSONString ] ;        [ "com.fmi.calculation.text.61E379EC729D4B339996D762E221A930"              ; ~generatedAt         ; JSONString ] ;        [ "com.fmi.calculation.text.39F0190861D2037CDF12B458B9D6F114"       ; ~layoutName          ; JSONString ] ;        [ "com.fmi.calculation.text.D4B6B420F385A747050CBD182CC5DB43"         ; ~layoutId            ; JSONNumber ] ;        [ "com.fmi.calculation.text.2D9606654C2919094668B970379CFEEE"    ; ~layoutTO            ; JSONString ] ;        [ "com.fmi.calculation.text.4479EB4EB3719741A5B60C902D683EE2" ; ~layoutTOid          ; JSONNumber ] ;        [ "com.fmi.calculation.text.BA16000A8B737B8B4AF90C0FF29D8808"                    ; ~tablesJSON          ; JSONObject ] ;        [ "com.fmi.calculation.text.8DCDD773AD19BE3DE539F0EE0AEAB594"                       ; ~ddl                 ; JSONString ] ;        [ "com.fmi.calculation.text.4B3F2A37CCBB0951ED498CA514484590"                   ; ~scriptsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.23D4BBAA8043BD45E0349EF70E5C0318"                   ; ~layoutsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.3518E21708FDBDEEDC727CFFBB53B037"               ; ~vlJSON              ; JSONObject ] ;        [ "com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288"            ; ~layoutObjectsJSON   ; JSONArray  ]    )] ;    ~json)]]></Text>
+							<Text><![CDATA[/*com.fmi.calculation.text.D66EB1912EC8DA70685FA15E9C46DA3B*/Let ( [    /*com.fmi.calculation.text.243774ED317326455884AF34CB67AA04*/    ~fn = Get ( FileName ) ;    ~layoutName = Get ( LayoutName ) ;    ~layoutTO = Get ( LayoutTableName ) ;    ~layoutId = GetValue ( LayoutIDs ( ~fn ) ; Get ( LayoutNumber ) ) ;    ~layoutTOid = ExecuteSQL (        "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;        "" ; "" ; ~layoutTO    ) ;    /*com.fmi.calculation.text.7AB0CF0B494BF45607F92CF97C7D56E7*/    ~fieldNamesList = FieldNames ( ~fn ; ~layoutName ) ;    ~uniqueTOs = While ( [        ~_fList  = ~fieldNamesList ;        ~_fCount = ValueCount ( ~fieldNamesList ) ;        ~_fi     = 0 ;        ~_tos    = ~layoutTO    ] ;        ~_fi < ~_fCount ;    [        ~_fList  = ~_fList ;        ~_fCount = ~_fCount ;        ~_fi     = ~_fi + 1 ;        ~_tos    = Let ( [            ~fld = GetValue ( ~_fList ; ~_fi ) ;            ~sep = Position ( ~fld ; "com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8" ; 1 ; 1 ) ;            ~to  = If ( ~sep > 0 ; Left ( ~fld ; ~sep - 1 ) ; "" )        ] ;            If (				~to ≠ "" and IsEmpty ( FilterValues ( ~_tos ; ~to ) ) ;                ~_tos & ¶ & ~to ;                ~_tos            )        )    ] ;        ~_tos    ) ;    /*com.fmi.calculation.text.42FA3A1D2C27D4070FFAC279289FBC62*/    ~tablesJSON = While ( [        ~_tCount  = ValueCount ( ~uniqueTOs ) ;        ~_ti      = 0 ;        ~_tResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_ti < ~_tCount ;    [        ~_tCount  = ~_tCount ;        ~_ti      = ~_ti + 1 ;        ~_tResult = Let ( [            ~toName = GetValue ( ~uniqueTOs ; ~_ti ) ;            ~toId   = ExecuteSQL (                "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;                "" ; "" ; ~toName            ) ;            ~btName = ExecuteSQL (                "com.fmi.calculation.text.0D46F215DE6D997B3E93CBAB92A427B4" ;                "" ; "" ; ~toName            ) ;            ~btId   = ExecuteSQL (                "com.fmi.calculation.text.D6291D2122B10478F41037911AC62183" ;                "" ; "" ; ~btName            ) ;            /*com.fmi.calculation.text.D3912A148029E1C96FF5B953CA1B057E*/            ~fData = ExecuteSQL (                "com.fmi.calculation.text.EAB50923DFB521B317FBF79E0523359B" ;                "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ; ~toName            ) ;            /*com.fmi.calculation.text.A890BF40BD49C839E350BDAF7E9E7D8D*/            ~fieldsObj = While ( [                ~_fCount2 = ValueCount ( ~fData ) ;                ~_fj      = 0 ;                ~_fObj    = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"            ] ;                ~_fj < ~_fCount2 ;            [                ~_fCount2 = ~_fCount2 ;                ~_fj      = ~_fj + 1 ;                ~_fObj    = Let ( [                    ~row     = GetValue ( ~fData ; ~_fj ) ;                    ~parts   = Substitute ( ~row ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;                    ~fname   = GetValue ( ~parts ; 1 ) ;                    ~fid     = GetValue ( ~parts ; 2 ) ;                    ~fsqlRaw = GetValue ( ~parts ; 3 ) ;                    ~fclass  = GetValue ( ~parts ; 4 ) ;                    /*com.fmi.calculation.text.773A03B06826D53FEEF46EDE854440C7*/                    ~fmType = Case (                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.1008913D05625D6772346DB6D2548432"   ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.A238CF967B73E6BEB5601066DA31B25A"      ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.B48A868C643A68C639219B68A79CB846"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.5E011A4AFD84B55B6E46F99A28AB6346"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.A445D354F10C686D45B587901A5E2A6B"                     ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.22BF6CD6AF8310A8F54A5EAD58067F84"                    ; "com.fmi.calculation.text.42FB9E7BEB6125DB7F2D9FE414DC8C69" ;                        ~fsqlRaw = "com.fmi.calculation.text.BEB06E2CA146960316DC9594614ABD97"                    ; "com.fmi.calculation.text.2CA765AB9D7BEE797110A28B7B5E988C" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.49AE69F793E196F618E8C5D5A10FA1FD" ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 8 ) = "com.fmi.calculation.text.41D994AD52D04D684D69E6297B630195"  ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.33F53A7E4CCE631CB160EE666395CC5E" ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.09C3059F754CEEBF41F83512F817CD12"      ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        ~fsqlRaw                    ) ;                    /*com.fmi.calculation.text.57AE11E947E3055BAEC10E6EF93D2B58*/                    ~fieldObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"   ; ~fid    ; JSONNumber ] ;                        [ "com.fmi.calculation.text.E8242F9CA220C53035AFF0819EEDB978" ; ~fmType ; JSONString ]                    ) ;                    ~fieldObj = If (						~fclass ≠ "com.fmi.calculation.text.5F91071A15427802DFBC07D947C43A9F" and ~fclass ≠ "" ;                        JSONSetElement ( ~fieldObj ; "com.fmi.calculation.text.FA56F7B1CA6FAB546B4D079941EE0644" ; ~fclass ; JSONString ) ;                        ~fieldObj                    )                ] ;                    JSONSetElement ( ~_fObj ; ~fname ; ~fieldObj ; JSONObject )                )            ] ;                ~_fObj            ) ;            /*com.fmi.calculation.text.DE7E8663EFD34402BA2DAAE96EED740E*/            ~tObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"         ; ~btId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.7D530CE6CED94702FB83406CB059277F" ; ~btName    ; JSONString ] ;                [ "com.fmi.calculation.text.90F3A370125A58B0E78F5289A50B63CD"         ; ~toName    ; JSONString ] ;                [ "com.fmi.calculation.text.B609E43A579CBB0DFB2258220C871928"      ; ~toId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.C81174295D29BEDB1E68D3FC3DF46853"     ; ~fieldsObj ; JSONObject ]            )        ] ;            /*com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21*/            JSONSetElement ( ~_tResult ; ~toName ; ~tObj ; JSONObject )        )    ] ;        ~_tResult    ) ;    /*com.fmi.calculation.text.A587A64286526D6D74172CD462E02293*/    ~ddlArray = While ( [        ~_dCount = ValueCount ( ~uniqueTOs ) ;        ~_di     = 0 ;        ~_dArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_di < ~_dCount ;    [        ~_dCount = ~_dCount ;        ~_di     = ~_di + 1 ;        ~_dArr   = JSONSetElement ( ~_dArr ; ~_di - 1 ; GetValue ( ~uniqueTOs ; ~_di ) ; JSONString )    ] ;        ~_dArr    ) ;    ~ddl = GetTableDDL ( ~ddlArray ; True ) ;    /*com.fmi.calculation.text.4E62AEC9B37A5E5155FDE6B79CA92507*/    ~sNames = ScriptNames ( ~fn ) ;    ~sIds   = ScriptIDs ( ~fn ) ;    ~scriptsJSON = While ( [        ~_sCount  = ValueCount ( ~sNames ) ;        ~_si      = 0 ;        ~_sPairs  = ""    ] ;        ~_si < ~_sCount ;    [        ~_sCount  = ~_sCount ;        ~_si      = ~_si + 1 ;        ~_sPairs  = Let ( [            ~sName = GetValue ( ~sNames ; ~_si ) ;            ~sId   = GetValue ( ~sIds ; ~_si ) ;			/*com.fmi.calculation.text.97BBB266F49214C66591088FF4E5C80C*/            ~escaped = Substitute ( ~sName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~sId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~sName ) ;                If ( IsEmpty ( ~_sPairs ) ;                    ~pair ;                    ~_sPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_sPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_sPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.616CD86D3D2E667AFA97B562A49F69D4*/    ~layNames = LayoutNames ( ~fn ) ;    ~layIds   = LayoutIDs ( ~fn ) ;    ~layoutsJSON = While ( [        ~_lCount  = ValueCount ( ~layNames ) ;        ~_li      = 0 ;        ~_lPairs  = ""    ] ;        ~_li < ~_lCount ;    [        ~_lCount  = ~_lCount ;        ~_li      = ~_li + 1 ;        ~_lPairs  = Let ( [            ~lName = GetValue ( ~layNames ; ~_li ) ;            ~lId   = GetValue ( ~layIds ; ~_li ) ;            /*com.fmi.calculation.text.F7F4716EF3BA10458AC611E69C0A0F84*/            ~escaped = Substitute ( ~lName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~lId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~lName ) ;                If ( IsEmpty ( ~_lPairs ) ;                    ~pair ;                    ~_lPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_lPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_lPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.FA448BF879578EC5BE5F32E0CFE60A48*/    ~vlSQL = ExecuteSQL (        "com.fmi.calculation.text.E802A6F069CD8738C6E083E04682A3E0" ;        "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶    ) ;    ~vlJSON = While ( [        ~_vCount  = ValueCount ( ~vlSQL ) ;        ~_vi      = 0 ;        ~_vResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_vi < ~_vCount ;    [        ~_vCount  = ~_vCount ;        ~_vi      = ~_vi + 1 ;        ~_vResult = Let ( [            ~vParts  = Substitute ( GetValue ( ~vlSQL ; ~_vi ) ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;            ~vName   = GetValue ( ~vParts ; 1 ) ;            ~vId     = GetValue ( ~vParts ; 2 ) ;            ~vSource = GetValue ( ~vParts ; 3 )        ] ;            If ( not IsEmpty ( ~vName ) ;                JSONSetElement ( ~_vResult ;                    ~vName ;                    JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"     ; ~vId     ; JSONNumber ] ;                        [ "com.fmi.calculation.text.91F127C4B704FC5AC212BA970EB65F39" ; ~vSource ; JSONString ]                    ) ;                    JSONObject                ) ;                ~_vResult            )        )    ] ;        ~_vResult    ) ;    /*com.fmi.calculation.text.93CA15A878BB34A9358B13AAC7C4686D*/    ~objList = LayoutObjectNames ( ~fn ; ~layoutName ) ;    ~layoutObjectsJSON = While ( [        ~_oCount = ValueCount ( ~objList ) ;        ~_oi     = 0 ;        ~_oIdx   = 0 ;        ~_oArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_oi < ~_oCount ;    [        ~_oCount = ~_oCount ;        ~_oi     = ~_oi + 1 ;        ~_oIdx   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           ~_oIdx + 1 ;                           ~_oIdx                       )                   ) ;        ~_oArr   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           JSONSetElement ( ~_oArr ; ~_oIdx - 1 ; ~n ; JSONString ) ;                           ~_oArr                       )                   )    ] ;        ~_oArr    ) ;    /*com.fmi.calculation.text.1FEE49E661BD359FE044633E419AC801*/    /*com.fmi.calculation.text.13F0B3D657435C88F32D1F90078D2856*/    ~ts = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) ;    ~generatedAt =        Year ( ~ts ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Month ( ~ts ) ; 2 ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Day ( ~ts ) ; 2 ) & "com.fmi.calculation.text.D491787BD81ED43CB9E05191BBA37E6C" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Hour ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Minute ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Int ( Seconds ( ~ts ) ) ; 2 ) & "com.fmi.calculation.text.F7EFEBB853CFAA469FB4B8F6C49F50B9" ;    ~json = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;        [ "com.fmi.calculation.text.9CD6CD30E4547B3800299B5C2B734FA8"           ; 2                    ; JSONNumber ] ;        [ "com.fmi.calculation.text.A548D8D3BF1DBEA966A3C60FD421DF49"                  ; ~fn                  ; JSONString ] ;        [ "com.fmi.calculation.text.7C595C11BD6A09ECDD887FA0D1943FF6"                      ; task                 ; JSONString ] ;        [ "com.fmi.calculation.text.61E379EC729D4B339996D762E221A930"              ; ~generatedAt         ; JSONString ] ;        [ "com.fmi.calculation.text.39F0190861D2037CDF12B458B9D6F114"       ; ~layoutName          ; JSONString ] ;        [ "com.fmi.calculation.text.D4B6B420F385A747050CBD182CC5DB43"         ; ~layoutId            ; JSONNumber ] ;        [ "com.fmi.calculation.text.2D9606654C2919094668B970379CFEEE"    ; ~layoutTO            ; JSONString ] ;        [ "com.fmi.calculation.text.4479EB4EB3719741A5B60C902D683EE2" ; ~layoutTOid          ; JSONNumber ] ;        [ "com.fmi.calculation.text.BA16000A8B737B8B4AF90C0FF29D8808"                    ; ~tablesJSON          ; JSONObject ] ;        [ "com.fmi.calculation.text.8DCDD773AD19BE3DE539F0EE0AEAB594"                       ; ~ddl                 ; JSONString ] ;        [ "com.fmi.calculation.text.4B3F2A37CCBB0951ED498CA514484590"                   ; ~scriptsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.23D4BBAA8043BD45E0349EF70E5C0318"                   ; ~layoutsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.3518E21708FDBDEEDC727CFFBB53B037"               ; ~vlJSON              ; JSONObject ] ;        [ "com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288"            ; ~layoutObjectsJSON   ; JSONArray  ]    )] ;    ~json)]]></Text>
 						</Calculation>
 						<Display>Context ( task )</Display>
 						<ObjectList membercount="1">
-							<Parameter name="task"></Parameter>
+							<Parameter name="task">
+								<ParameterDescription></ParameterDescription>
+							</Parameter>
 						</ObjectList>
+						<Description></Description>
 					</CustomFunction>
 				</ObjectList>
 			</CustomFunctionsCatalog>
@@ -111,7 +118,30 @@
 			</CustomMenuCatalog>
 			<PasteIndexList membercount="0"></PasteIndexList>
 			<ScriptCatalog membercount="20">
-				<UUID modifications="25" userName="" accountName="" timestamp="2026-11-16T16:09:29">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
+				<SortOrder>4</SortOrder>
+				<CustomOrderList>
+					<key>36</key>
+					<key>37</key>
+					<key>38</key>
+					<key>39</key>
+					<key>40</key>
+					<key>41</key>
+					<key>42</key>
+					<key>43</key>
+					<key>44</key>
+					<key>45</key>
+					<key>46</key>
+					<key>47</key>
+					<key>48</key>
+					<key>49</key>
+					<key>55</key>
+					<key>50</key>
+					<key>51</key>
+					<key>52</key>
+					<key>53</key>
+					<key>54</key>
+				</CustomOrderList>
+				<UUID modifications="27" userName="" accountName="" timestamp="2026-11-27T17:26:06">B23A8B9D-33DE-4E49-9A08-FC3E331FC464</UUID>
 				<TagList></TagList>
 				<Script id="36" name="com.fmi.script.folder.DEA3CF9E8D9F055B574DEAD904F6BD24" isFolder="True">
 					<UUID modifications="1" userName="" accountName="" timestamp="2026-10-25T19:39:20">C63107CF-E36B-4563-B4F7-97143AFDE943</UUID>
@@ -124,7 +154,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="38" name="com.fmi.script.EB5744F9AC3D65D45430632F605FEE94">
-					<UUID modifications="7" userName="" accountName="" timestamp="2026-11-16T15:45:15">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
+					<UUID modifications="8" userName="" accountName="" timestamp="2026-11-27T17:24:52">B8ABD0FA-FAD8-40C3-BF7C-3F17DA09CE0C</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -159,7 +189,7 @@
 					<TagList></TagList>
 				</Script>
 				<Script id="45" name="com.fmi.script.D9A9E0F5D2E0BAFC47CEC71F53CB7597">
-					<UUID modifications="2" userName="" accountName="" timestamp="2026-11-12T13:30:54">929C890F-28BF-4F76-AF04-0404810034B2</UUID>
+					<UUID modifications="3" userName="" accountName="" timestamp="2026-11-27T17:26:06">929C890F-28BF-4F76-AF04-0404810034B2</UUID>
 					<Options hidden="True" access="ReadWrite" SiriShortcutVisible="False" runwithfullaccess="False" compatibility="0">8</Options>
 					<TagList></TagList>
 				</Script>
@@ -222,7 +252,7 @@
 				<BinaryData>
 					<LibraryReference id="1" key="C5FC3A80D966059F0FA6662C41C0F17D"></LibraryReference>
 					<StreamList>
-						<Stream name="MAIN" type="id">SVG </Stream>
+						<Stream name="MAIN" type="id" size="4">SVG </Stream>
 						<Stream name="SVG " type="Base64" size="412">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjxzdmcgdmVyc2lvbj0iMS4yIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIg0KCSB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDI0IDI0Ij4NCjxnIGNsYXNzPSJmbV9maWxsIj4NCjxwYXRoIGQ9Ik0yNCwyMi4zNjNDMjQsMjMuMjY3LDIzLjI2OSwyNCwyMi4zNjQsMjRIMS42MzdjLTAuOTA0LDAtMS42MzYtMC43MzMtMS42MzYtMS42MzdWMS42MzYNCglDMC4wMDEsMC43MzIsMC43MzMsMCwxLjYzNywwaDIwLjcyN0MyMy4yNjksMCwyNCwwLjczMiwyNCwxLjYzNlYyMi4zNjN6Ii8+DQo8L2c+DQo8L3N2Zz4NCg==</Stream>
 						<Stream name="GLPH" type="Hex" size="1">01</Stream>
 						<Stream name="FNAM" type="Hex" size="24">000000010533373B3D3F000C053E3F3C3B2F362E74292C3D</Stream>
@@ -230,7 +260,11 @@
 				</BinaryData>
 			</LibraryCatalog>
 			<LayoutCatalog membercount="1">
-				<UUID modifications="22" userName="" accountName="" timestamp="2026-10-25T19:43:09">2686B568-8364-4B58-9F1C-88EEF669867F</UUID>
+				<SortOrder>4</SortOrder>
+				<CustomOrderList>
+					<key>3</key>
+				</CustomOrderList>
+				<UUID modifications="23" userName="" accountName="" timestamp="2026-10-25T19:43:09">2686B568-8364-4B58-9F1C-88EEF669867F</UUID>
 				<TagList></TagList>
 				<Layout id="3" name="com.fmi.layout.9D72E2AAFB6E345C75FF44E903812444" width="530">
 					<TableOccurrenceReference id="1065089" name="com.fmi.tableoccurrence.59E799C8D64DB245C2EF8BEDD483B48C" UUID="8FEF98FE-534E-4DF4-828D-6781257D710B"></TableOccurrenceReference>
@@ -253,6 +287,30 @@
 							</ObjectList>
 						</Part>
 					</PartsList>
+					<TableView>
+						<PartsList membercount="2">
+							<Part type="Header" kind="1">
+								<Definition type="Header" kind="1" size="24" absolute="0" Options="0">
+									<LocalCSS type="ObjectCustomStyle" name="" displayName=""><![CDATA[self:normal .self
+{
+	background-image: none;
+	background-color: rgba(100%,100%,100%,1);
+	border-image-source: none;
+}
+]]></LocalCSS>
+								</Definition>
+							</Part>
+							<Part type="Body" kind="4">
+								<Definition type="Body" kind="4" size="21" absolute="24" Options="512"></Definition>
+							</Part>
+						</PartsList>
+						<SortSpecification value="False" blanksLast="False" maintain="True"></SortSpecification>
+						<SortOrderStatus value="0"></SortOrderStatus>
+						<GridStyle>
+							<Color red="0.500000" green="0.500000" blue="0.500000" alpha="1.000000"></Color>
+							<Style>5</Style>
+						</GridStyle>
+					</TableView>
 					<UUID modifications="3" userName="" accountName="" timestamp="2026-10-25T19:44:27">CB4DEBE0-35D5-4E63-9DB5-5A50F1B776D0</UUID>
 					<TagList></TagList>
 					<GridStyle>
@@ -654,7 +712,7 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="12169E45736DE5818A474A7D987DBC5C" index="1" id="103" name="Exit Script" enable="True">
+						<Step hash="10DAE6D41CD49DA308ED5BE528CC8E84" index="1" id="103" name="Exit Script" enable="True">
 							<UUID>887FCFE7-BF01-4119-8126-7D82B081890C</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
@@ -662,7 +720,7 @@
 								<Parameter type="Calculation">
 									<Calculation datatype="1" position="0">
 										<Calculation>
-											<Text><![CDATA["com.fmi.calculation.text.54F858B78A8FCFFBA3232FD40E5B24DD"]]></Text>
+											<Text><![CDATA["com.fmi.calculation.text.1D4513FF818F9E3F76B3A2C738DE8D4A"]]></Text>
 										</Calculation>
 									</Calculation>
 								</Parameter>
@@ -820,11 +878,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="75A3ECC7569274C2DF32A4ADBE0436C5" index="8" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="877827CF729E7FF44A5A46F86934D593" index="8" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>25FA9D13-E01C-46D0-B799-374398B318F3</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -838,6 +896,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.54EC61754C07F4CE591386BE52CED175"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -1750,11 +1811,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="76E61B3AA061B377198996642CECD870" index="10" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="337BB11B8705A4BB3114D5CDA45D4D53" index="10" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>9E0027EE-BCA5-4E70-89F3-799BE7A12631</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -1768,6 +1829,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.7482EC73E1AC2B40592862BBE21EC249" & Case (	JSONGetElement ( $start ; "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ) = "com.fmi.calculation.text.8E9225F194347F3C5485A1E312CBFACD" ; "com.fmi.calculation.text.86F6AFC4C4F592E0B10A34FA068BDD24" ;	JSONGetElement ( $start ; "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ) = "com.fmi.calculation.text.961FDB05B2D5206D083C326D451EF773" or JSONGetElement ( $start ; "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ) = "com.fmi.calculation.text.9C8594B9AD7B3EF9EEDFED1B364668D1" ; "com.fmi.calculation.text.07F1749B27B4492E0FFE4DDFA28D03C6" ;	JSONGetElement ( $start ; "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ))]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -1897,11 +1961,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="1A4E4DFD56E3439AB6CB33A74681716D" index="17" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="B2565888E8873DB06E956EDA6BF72349" index="17" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>DCACE8DE-9C3C-48B5-9488-2E7C4B564ABC</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -1915,6 +1979,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.39CB351A1A565577E068043EAF288D12"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -4037,11 +4104,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="330ED31E77DC1A9A97B58E718EAEE3DA" index="35" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="C4609929B9772EF82B7D70497DDD2E7B" index="35" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>9C5CF19A-47C9-4164-836E-94C563595B02</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -4055,6 +4122,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.028FCEE09043ACC6F84C9B1750E6F866" & JSONGetElement ( $pathResult ; "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ) & "com.fmi.calculation.text.093D3FB8190E73CA213E3781F406445E"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -4298,11 +4368,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="97E3B90B8DFE26037406603D51C83D05" index="49" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="0C3D86D080F43E6A7D3555144769588C" index="49" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>5F3A9511-F410-4AFD-9C8D-5862CC7CD1B1</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -4316,6 +4386,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.D150534FFB8CF9746BB34B7C13EDC788"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -4471,11 +4544,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="567A234D2E895DBFFB67D3AA1FBAC151" index="59" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="C448F1D96403C753D6093A791AC521E5" index="59" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>234BBD7C-94AE-4619-89CC-276C6F0FCB26</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -4489,6 +4562,9 @@
 											<Text><![CDATA[$stderr & If ( not IsEmpty ( $stdout ) ; ¶ & $stdout ; "" )]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -4514,11 +4590,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="388BD1C750DB365ACE9EA96CCF2085FB" index="61" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="3E8CCE4A5C7CA24F661CB4B58189760B" index="61" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>E0C69904-DA75-4350-BCFA-4C6DF5DBEAC2</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -4532,6 +4608,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.3DDFAFE1876E7C8CA981DBB59FBE2615" & If ( not IsEmpty ( $stdout ) ; "com.fmi.calculation.text.3843BD0B8030ACA1CC2C93D2C5E28874" & $stdout ; "" )]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -5125,11 +5204,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="8584B5F3036DE2C8A1266F569F3DC85F" index="33" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="81E65047FF8A7A50729E649E4E50C26A" index="33" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>A3DB1CB8-E861-4373-ACCE-FBF2A9D01B27</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -5143,6 +5222,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.028FCEE09043ACC6F84C9B1750E6F866" & JSONGetElement ( $pathResult ; "com.fmi.calculation.text.81DDA427909D1792D7E52F1849852EFC" ) & "com.fmi.calculation.text.093D3FB8190E73CA213E3781F406445E"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -5204,11 +5286,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="74D8CC2CDE32E410C16E94418FF550D3" index="39" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="927FD086CCB4A97DA49017D4EA12FB18" index="39" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>D63E80B1-9D0B-4D08-8511-72B26CCFD029</UUID>
 							<OwnerID></OwnerID>
 							<Options>16389</Options>
-							<ParameterValues membercount="6">
+							<ParameterValues membercount="7">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -5222,6 +5304,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.5A9701DEA0701148E6020B2FDF8B602B"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -5649,11 +5734,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="56F30232336496E142C6EE3899752FBB" index="63" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="3DE96FBA6B5D592CF5C8DDCCED00C521" index="63" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>C0CD438C-9321-40F3-8A4F-A7B5F46817FB</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -5667,6 +5752,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.8E4D0F0235A6535DD40838E5FC2F8F8D"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -5714,8 +5802,8 @@
 				<Script>
 					<ScriptReference id="45" name="com.fmi.script.D9A9E0F5D2E0BAFC47CEC71F53CB7597" UUID="929C890F-28BF-4F76-AF04-0404810034B2"></ScriptReference>
 					<ObjectList membercount="104">
-						<Step hash="0F223C52E7CAEFE621A193B698257CCF" index="0" id="89" name="# (comment)" enable="True">
-							<UUID>A706D320-4CFE-4E09-91F1-632C9F04354F</UUID>
+						<Step hash="035AC51B2F77DA6007878AF5780D0F10" index="0" id="89" name="# (comment)" enable="True">
+							<UUID>999288B8-37F7-4830-92AF-BAF14E77ED73</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -5724,8 +5812,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="9D81C0937501CFD14BC0E2F8036E81C8" index="1" id="89" name="# (comment)" enable="True">
-							<UUID>4A420218-931D-426C-81E9-728B738DADBF</UUID>
+						<Step hash="0336355A1EF2D73DF85800CD2A99FF81" index="1" id="89" name="# (comment)" enable="True">
+							<UUID>05A67C41-DC52-4129-B665-7B9E8F4D5674</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -5734,8 +5822,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="122E09BB388C86610CE3EA4129B9A7C8" index="2" id="141" name="Set Variable" enable="True">
-							<UUID>E3C408E0-2688-4CFB-AADA-E726BAA0C658</UUID>
+						<Step hash="152ABA34C1201AF50EE0EA09CDE7B691" index="2" id="141" name="Set Variable" enable="True">
+							<UUID>13A0B875-4AB5-4D54-A5B5-C9CA8B2F8E7B</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5758,8 +5846,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="CD46B2CBCA1DAFCBFEDC59ED93767DDF" index="3" id="141" name="Set Variable" enable="True">
-							<UUID>0338082D-2E8F-41E9-A297-6D8715D0F4EF</UUID>
+						<Step hash="9CCC8D37DC89E052A3E873119DCE62AC" index="3" id="141" name="Set Variable" enable="True">
+							<UUID>8372BDBD-61AA-443E-AC27-765ABA9A771F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5782,8 +5870,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="103B8705C73399D53E6F22952644A59C" index="4" id="86" name="Set Error Capture" enable="True">
-							<UUID>55D06C9D-E6F9-4DB0-834B-E9AD53BC5C01</UUID>
+						<Step hash="09F3B6BF7DA8E83CA8BC30E45DE679C2" index="4" id="86" name="Set Error Capture" enable="True">
+							<UUID>9654C56F-0AB4-4814-962F-36425902480E</UUID>
 							<OwnerID></OwnerID>
 							<Options>196608</Options>
 							<ParameterValues membercount="1">
@@ -5792,8 +5880,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="EA8C23D949470ECFD55FEA8FB508AF0F" index="5" id="141" name="Set Variable" enable="True">
-							<UUID>B09539DA-585E-4E27-AE06-F2B5D84CD472</UUID>
+						<Step hash="7B250D1EE650E84B1C37C1B5F281DBBC" index="5" id="141" name="Set Variable" enable="True">
+							<UUID>6D04201E-1988-4965-882F-2174A0F8C96E</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5816,8 +5904,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="717CE1F2FE6FF98BA160F47EE0824EAF" index="6" id="141" name="Set Variable" enable="True">
-							<UUID>93BA0BA9-8922-4C00-90E0-894D52B352A2</UUID>
+						<Step hash="BCF266C4138C0EDA0F78128D487BDD78" index="6" id="141" name="Set Variable" enable="True">
+							<UUID>F28E53D6-2400-4D41-A810-66C416493766</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5840,8 +5928,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="6031E3B40A597007C69FBB30888BCD7E" index="7" id="141" name="Set Variable" enable="True">
-							<UUID>AA82C71F-7935-4A62-A629-E8AD763E07D4</UUID>
+						<Step hash="E3D765E2F83EBDF645163A3C82BF5E15" index="7" id="141" name="Set Variable" enable="True">
+							<UUID>930FCDBF-A7EB-4650-9632-D1096772D9A8</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5864,8 +5952,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="9A810D47E8FA0A7830F154CE2DA34E79" index="8" id="89" name="# (comment)" enable="True">
-							<UUID>19EF6BB2-55FB-47AD-98FD-031BE552C868</UUID>
+						<Step hash="5AB12819192286D0A7957D8EC84657E2" index="8" id="89" name="# (comment)" enable="True">
+							<UUID>D6FB1863-2E6A-4C18-B9A0-36207EC80C6D</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="1">
@@ -5874,8 +5962,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="812F6DD6B99D5D40D2AB5602B0A9C822" index="9" id="68" name="If" enable="True">
-							<UUID>FFEE7460-126C-409D-8053-A30002813E10</UUID>
+						<Step hash="FC095B96F346D9FCD94345B95C965DA7" index="9" id="68" name="If" enable="True">
+							<UUID>D30C2EFE-BBC8-4FAF-B577-C3F64939C48F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -5891,8 +5979,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="A80A908DDA5CA04D53195198ADBA14C6" index="10" id="103" name="Exit Script" enable="True">
-							<UUID>FAD8515E-39EB-4C6A-87FC-DC16038151C1</UUID>
+						<Step hash="5538012B0020A3F856A3A59C8A3B8ED2" index="10" id="103" name="Exit Script" enable="True">
+							<UUID>EE282720-9352-4FEE-8CF6-A0555069A999</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -5905,8 +5993,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="565CA9A74D09AE96034A7F9C1ABDD4A3" index="11" id="125" name="Else If" enable="True">
-							<UUID>274A85AE-AF27-4963-BD54-4AADBA7F0228</UUID>
+						<Step hash="CAD2C2BDEAE34A2D41F7E0E16E36DBA2" index="11" id="125" name="Else If" enable="True">
+							<UUID>35D194A5-2DFB-4441-815E-B95188F6070F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -5922,8 +6010,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="6224EBFCC08BD3DB9585890FCABAE797" index="12" id="89" name="# (comment)" enable="True">
-							<UUID>8ADD970A-2B6D-4321-944E-C63A60009B1C</UUID>
+						<Step hash="70539798B1F9777F25DB44481A703469" index="12" id="89" name="# (comment)" enable="True">
+							<UUID>FD702E55-6D42-4F76-A0D9-F173BBEE9DC7</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -5932,8 +6020,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="56AC890FF91F4B46E7B28DDA9F66C3EB" index="13" id="141" name="Set Variable" enable="True">
-							<UUID>F111488C-6B10-4936-B159-17197F09CFB5</UUID>
+						<Step hash="748EB083E80FCBFD5A22F5A2980916CE" index="13" id="141" name="Set Variable" enable="True">
+							<UUID>413C027A-8070-4EE8-8E57-219A32FB9982</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5956,8 +6044,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="DD6C868B73725E9F2DA530EDAABBC2CE" index="14" id="141" name="Set Variable" enable="True">
-							<UUID>96805883-F816-4A1A-A573-7C898BEA455B</UUID>
+						<Step hash="944A6C2D8E3119BCE90C23B65080BBC6" index="14" id="141" name="Set Variable" enable="True">
+							<UUID>E1AEEE45-CE05-42AD-B4F3-90E507C25721</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -5980,8 +6068,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="CA63F08075B6AC64358E4846899CBDC7" index="15" id="68" name="If" enable="True">
-							<UUID>6D81ED53-7666-4199-90AF-81DEC6D43B42</UUID>
+						<Step hash="1B8DF3359467E20B3F448535F886C8E1" index="15" id="68" name="If" enable="True">
+							<UUID>954D991F-B430-45A7-B790-119EDEE859AC</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -5997,8 +6085,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="CB99D81E3C248178124323DC7EE0FC75" index="16" id="103" name="Exit Script" enable="True">
-							<UUID>FCB98ED3-338C-4FAA-9257-41054F7418D7</UUID>
+						<Step hash="26AA561E554F7FEC40ED60F0B621167D" index="16" id="103" name="Exit Script" enable="True">
+							<UUID>547447C2-1118-4F19-8DDB-C0FAEB22451F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6011,13 +6099,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="2C6E71C87EC1BCAADF3E498A639C8E07" index="17" id="70" name="End If" enable="True">
-							<UUID>D607D40B-0109-48ED-8FF0-21EDBD250513</UUID>
+						<Step hash="00BEF690FF23D727A0B95BBAA3A54B8D" index="17" id="70" name="End If" enable="True">
+							<UUID>5E24F334-9B1F-4AC7-B952-6F9E7F7B0DFB</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="606DCCB19D265D25DE533A3F3478F96A" index="18" id="68" name="If" enable="True">
-							<UUID>7E2A68AD-D566-41CF-BF92-AC640FF023D5</UUID>
+						<Step hash="A308C3341DD8FBEAF3E6489B7F8863F6" index="18" id="68" name="If" enable="True">
+							<UUID>72998BAB-B365-4B27-A5B4-4613191499F3</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6033,8 +6121,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="CB6E627321918F49AB2009CEAC5954B6" index="19" id="6" name="Go to Layout" enable="True">
-							<UUID>D0E2F431-C16D-4DBC-BA70-2F4AE0B96982</UUID>
+						<Step hash="18135DA3F23E92D11CA92D44785FE608" index="19" id="6" name="Go to Layout" enable="True">
+							<UUID>183228CA-4EEA-421F-9CC7-1263603A6BD0</UUID>
 							<OwnerID></OwnerID>
 							<Options>16394</Options>
 							<ParameterValues membercount="2">
@@ -6052,8 +6140,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B7038BE0DE179B5C26EDA592F8D18FB4" index="20" id="141" name="Set Variable" enable="True">
-							<UUID>2CD15141-7999-4711-A374-40B38A0EEEFD</UUID>
+						<Step hash="4714A79462970EC257FE3B84E3E1EFF4" index="20" id="141" name="Set Variable" enable="True">
+							<UUID>E6083212-40CE-4E12-BBA6-1A1049B8D99F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6076,8 +6164,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="0BAA8A7F1F2AC41A259C2249B712FC9F" index="21" id="68" name="If" enable="True">
-							<UUID>B592EEC1-E3AB-4EA7-A0B3-9AC5FF83B7F4</UUID>
+						<Step hash="ED43A71CABDD8AF6CA3E488F95269E13" index="21" id="68" name="If" enable="True">
+							<UUID>368600D6-9A3B-4B7A-8C03-B86AE9003C04</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6093,8 +6181,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B19FBF907A30E0D87F8A60ED875F1EAC" index="22" id="103" name="Exit Script" enable="True">
-							<UUID>B12728C1-9BB9-402D-AB86-4A318668EA49</UUID>
+						<Step hash="3B7561C0DF06B74B1F40F76CFAAB34F4" index="22" id="103" name="Exit Script" enable="True">
+							<UUID>8B19F1A7-617B-4240-A92A-14C7CE48974D</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6107,18 +6195,18 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="EA1EBA0B1876B270B23F1B814249B342" index="23" id="70" name="End If" enable="True">
-							<UUID>14126CA7-0D5B-41D9-95DD-4CD2B4716AEB</UUID>
+						<Step hash="66E8EF69364446EF7C36E3F9CAB810E9" index="23" id="70" name="End If" enable="True">
+							<UUID>9A30ED53-7C6F-464B-BBBF-B4390800914F</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="E58AF921BA3A7EE60FEDA57639C64CDC" index="24" id="70" name="End If" enable="True">
-							<UUID>448003B2-BCD1-45D4-9403-1DBFA353E003</UUID>
+						<Step hash="4C1485B94A114CE0EBD0043ED50A6EF0" index="24" id="70" name="End If" enable="True">
+							<UUID>537AF9AF-C560-4263-AC3A-A16EA17ADF35</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="AD5B9B63C4FF814748BB05B04F3EA66A" index="25" id="89" name="# (comment)" enable="True">
-							<UUID>04B371D6-9BB9-4E9F-B109-5E525CC948FA</UUID>
+						<Step hash="7CC186D9D63D83FD980AD6CAE6A180BD" index="25" id="89" name="# (comment)" enable="True">
+							<UUID>65512C53-5A1C-4F77-B62E-62B431BB6BE0</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -6127,8 +6215,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="F6EE243990A028CD07A5A6652741A25E" index="26" id="141" name="Set Variable" enable="True">
-							<UUID>271099E4-3268-4B3B-945E-2D3EB575A020</UUID>
+						<Step hash="DF8362591A34D7659EA1876BE9CF87B3" index="26" id="141" name="Set Variable" enable="True">
+							<UUID>F3AAF83E-F728-4311-91C1-6A436E3714AF</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6151,8 +6239,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B8D7679277188B900A986D5C4974AAD7" index="27" id="141" name="Set Variable" enable="True">
-							<UUID>ABC2714D-D7B3-4DBD-B6F4-A2EB75F0D625</UUID>
+						<Step hash="CC11EEF96F904D9D7B102D0B1DF6033F" index="27" id="141" name="Set Variable" enable="True">
+							<UUID>B6D52E05-361A-4836-9939-1F0AFC298535</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6175,8 +6263,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="C57ED5219BDA7AFCE8AD00C5CE39F45E" index="28" id="103" name="Exit Script" enable="True">
-							<UUID>19E00FED-90D4-46DE-803F-E940C7A1064F</UUID>
+						<Step hash="D03A7FDC96576956E2604E0A48B99560" index="28" id="103" name="Exit Script" enable="True">
+							<UUID>12C5B0AA-C0D2-4535-A9B9-B20FEB3447B9</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6189,8 +6277,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="4240BD17D6BE0FBFF543338815F798C0" index="29" id="125" name="Else If" enable="True">
-							<UUID>2D434032-04CC-4095-B6BF-BCF1517C5A72</UUID>
+						<Step hash="91AD7ABFA56A0B7A41AA38FEFFD96553" index="29" id="125" name="Else If" enable="True">
+							<UUID>F5D15C03-BE94-4CB1-86B5-EA0CB1B5D573</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6206,8 +6294,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="01C06FED6F50B8CC1BF746BB93333DBA" index="30" id="141" name="Set Variable" enable="True">
-							<UUID>45CDAEB3-F265-4D79-ADAD-CD8359B98528</UUID>
+						<Step hash="E279173AEADE0C68ECE9145D82BC65C8" index="30" id="141" name="Set Variable" enable="True">
+							<UUID>3E84CDAE-306C-4CD2-B206-2C7CAB3B02DF</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6230,8 +6318,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="587D15C8F669609C7BFDA482FF29B287" index="31" id="68" name="If" enable="True">
-							<UUID>95F7BABB-BE65-400F-BF6A-2AB890A868E1</UUID>
+						<Step hash="BE452783D32D5921201AD7487771F5A8" index="31" id="68" name="If" enable="True">
+							<UUID>FAB66AF2-BEB6-4BE4-BC26-2BBB8087F8D2</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6247,8 +6335,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="11BDD7D86E544A1DE779728F62E490E5" index="32" id="103" name="Exit Script" enable="True">
-							<UUID>0B743D3B-9C25-4B8E-9D9B-DD6D4B5F0194</UUID>
+						<Step hash="03D77C41FC2B1EA359E107BA0CF28525" index="32" id="103" name="Exit Script" enable="True">
+							<UUID>D08522F5-95A7-4B31-BD6D-51103C72CF82</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6261,13 +6349,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="3E23AE8BC85A46D8247AC3F0CB313CA5" index="33" id="70" name="End If" enable="True">
-							<UUID>537682A3-9BFB-45CE-800B-9222E70CCC77</UUID>
+						<Step hash="A4007B9BA7E3F40F454A0E365B5B78DF" index="33" id="70" name="End If" enable="True">
+							<UUID>53F45A81-BC85-4719-AF4D-7FADCF3369F8</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="AD6C9A783FF9B6B0D70E8E11429F73DE" index="34" id="141" name="Set Variable" enable="True">
-							<UUID>C6C2A437-661D-4CB1-B740-D662AD175EDF</UUID>
+						<Step hash="A75A78A050D5BB262FAEC31EA13A25F5" index="34" id="141" name="Set Variable" enable="True">
+							<UUID>6DEDD80B-3155-4B1F-A136-D9C48621CD1A</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6290,8 +6378,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="D001A481E491C96C24CD52E5473C7EE7" index="35" id="190" name="Create Data File" enable="True">
-							<UUID>109E858A-16A4-4437-969C-70EEDE2BB8D0</UUID>
+						<Step hash="F7C66A1FE382D3E5D8F093F5E505091A" index="35" id="190" name="Create Data File" enable="True">
+							<UUID>C30FC1A6-C1C7-42D5-84AE-0475F87E0ACC</UUID>
 							<OwnerID></OwnerID>
 							<Options>544</Options>
 							<ParameterValues membercount="2">
@@ -6307,8 +6395,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="5C2533C3A549AFBE8DFA4044BE5DEBC2" index="36" id="141" name="Set Variable" enable="True">
-							<UUID>EA0825E0-D9A5-4635-9014-72D1C8B83DFE</UUID>
+						<Step hash="A39622F10FFFB0DAB5FFAE3E87FDF143" index="36" id="141" name="Set Variable" enable="True">
+							<UUID>73ECF6FF-5F0B-4CA7-8EC5-F4422F79B0A6</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6331,8 +6419,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="1C10AEF3903B12384EF33C3AA169F8AF" index="37" id="3" name="Save a Copy as XML" enable="True">
-							<UUID>E730E5F5-1B61-42B9-905A-79E4F99016A8</UUID>
+						<Step hash="98596B521449A7E351F31A724578AF02" index="37" id="3" name="Save a Copy as XML" enable="True">
+							<UUID>A7A21002-9C05-417F-B6C8-0B92EEB4F3AC</UUID>
 							<OwnerID></OwnerID>
 							<Options>16416</Options>
 							<ParameterValues membercount="6">
@@ -6363,20 +6451,47 @@
 									<Calculation datatype="1" position="1">
 										<Calculation>
 											<Text><![CDATA[JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;
-  [ "com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254" ; JSONMakeArray (
-  "com.fmi.calculation.text.5EB2BB15168614B39A0A8F31CB217CFD"
-  ; "com.fmi.calculation.text.9286618FE0B2C104A3FBBEC4C6CD20A4" ; JSONString ) ; JSONArray ] ;
-  [ "com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91" ; False ; JSONBoolean ] ;
-  [ "com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA" ; False ; JSONBoolean ] ;
-  [ "com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA" ; False ; JSONBoolean ]
+	[
+		"com.fmi.calculation.text.3E7D936545CD873A579B398BB64AB254" ;
+		JSONMakeArray (
+			List (
+				"com.fmi.calculation.text.17D34FFAB033FA2BD8DA6738151184E8" ;
+				"com.fmi.calculation.text.BC8E34EF869CB5F488CC12F8583FF2BA" ;
+				"com.fmi.calculation.text.4C46B7A93E0AD37156C7892BE7E32128" ;
+				"com.fmi.calculation.text.B09CF77B47AD702151A932801889D172" ;
+				"com.fmi.calculation.text.FF99BC3BE01E82B4F49644C27CB1E323" ;
+				"com.fmi.calculation.text.704724102BD9CA9620A115CCC8072B4B" ;
+				"com.fmi.calculation.text.358A7BC81B93ADF3F166CF88D33F03E1" ;
+				"com.fmi.calculation.text.CAD54D63DC21B738321A014F3FE3A90E" ;
+				"com.fmi.calculation.text.46B94BB7453BB62FCC10BDE22DCF3448" ;
+				"com.fmi.calculation.text.F3003E04EF5A11FCAA13C508961A8FC7" ;
+				"com.fmi.calculation.text.7F7343D23D8FAA018FC37FF299EEEF0A" ;
+				"com.fmi.calculation.text.2DE73AAEC8855707614BC852E6257A14" ;
+				"com.fmi.calculation.text.BC0F8F08ADCEEE23A947AF517D97B17A" ;
+				"com.fmi.calculation.text.1CFC67699C7F942AB7276B35E8384087" ;
+				"com.fmi.calculation.text.E6A770E10367DDA98E3AD40E135DE0B4" ;
+				"com.fmi.calculation.text.D8E733CA1D637D585FCD73DEFC1D76DD" ;
+				"com.fmi.calculation.text.7D79AAE3E2DB0012C9AFA308F5373533" ;
+				"com.fmi.calculation.text.FA8EF125F0D6B69D05BC29AAD1E1157B" ;
+				"com.fmi.calculation.text.FE2168BB4F3FEBB6ADF3A677D33835BD" ;
+				"com.fmi.calculation.text.713DBABA5CDD454B03AA717FFD463B33"
+			) ;
+			"" ;
+			JSONString
+		) ;
+		JSONArray
+	] ;
+	[ "com.fmi.calculation.text.0876A2060E4028A788D78C822D0CBF91"       ; False ; JSONBoolean ] ;
+	[ "com.fmi.calculation.text.5039C9FFD524085C7D82CF66C6D9F5EA"        ; False ; JSONBoolean ] ;
+	[ "com.fmi.calculation.text.15A9517C84C8239062015A853074FEBA" ; False ; JSONBoolean ]
 )]]></Text>
 										</Calculation>
 									</Calculation>
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="3F9EBEB91440AB6744010231282E9CFC" index="38" id="141" name="Set Variable" enable="True">
-							<UUID>D902D59E-2F5A-4A03-93F2-4D191D7E81D5</UUID>
+						<Step hash="F30454917293907170AD8479FC72C217" index="38" id="141" name="Set Variable" enable="True">
+							<UUID>835E6BC0-18EE-4505-B2C2-54C54E8A6CB4</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6399,8 +6514,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="F166179A8E7BBFA6414A6B2A9FCEBE4F" index="39" id="103" name="Exit Script" enable="True">
-							<UUID>C4ADA389-2754-4B14-BF0E-EB56F4F42147</UUID>
+						<Step hash="F23400ED914269698CCB15AD64B21F1B" index="39" id="103" name="Exit Script" enable="True">
+							<UUID>9D8721D6-A692-40FD-BA3F-D3A90293E39F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6413,8 +6528,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="C4175E00F5013E8C7BB574B1898FA089" index="40" id="125" name="Else If" enable="True">
-							<UUID>6A5E4E41-9E57-40C3-9499-1555ABAB192A</UUID>
+						<Step hash="A047B2C0515A161CEB1334A0001D205A" index="40" id="125" name="Else If" enable="True">
+							<UUID>9D18B96C-6A74-47CF-8860-4AFCA294FD37</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6430,8 +6545,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="DF14FE2FF01D0DC2D371C47C344195A7" index="41" id="89" name="# (comment)" enable="True">
-							<UUID>80B72563-2353-4B0A-A323-1F0BA1349728</UUID>
+						<Step hash="007640B97E579FC535691CAD7AB9A4F3" index="41" id="89" name="# (comment)" enable="True">
+							<UUID>3626DDC5-7A9D-4DFE-BA65-BB9834AC8289</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -6440,8 +6555,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="1D8AE019CF8483ACFF6D9778BBCC184E" index="42" id="160" name="Insert from URL" enable="True">
-							<UUID>8E789B5F-2FD5-48D4-83D7-42BEDF9DE8E7</UUID>
+						<Step hash="998FB9381D2DB50E11F80362B02F1D32" index="42" id="160" name="Insert from URL" enable="True">
+							<UUID>1C7443A3-50A9-4F2A-9EA6-9D4692DF6E25</UUID>
 							<OwnerID></OwnerID>
 							<Options>20869</Options>
 							<ParameterValues membercount="6">
@@ -6483,8 +6598,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="730E95FEB1E1840480290493B229E0A9" index="43" id="141" name="Set Variable" enable="True">
-							<UUID>679D836D-8677-41B7-83AC-6AFD71F94B24</UUID>
+						<Step hash="E7191C3A112C102284ABF544B333E7E9" index="43" id="141" name="Set Variable" enable="True">
+							<UUID>C62032F8-4AB5-4288-86E2-4323BB93D099</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6507,8 +6622,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="94BDDE1115D1B8DB741C524B14B4969C" index="44" id="141" name="Set Variable" enable="True">
-							<UUID>FF087F64-BA0C-43CD-8AF8-4B03B77BA682</UUID>
+						<Step hash="83D0C293EA13DD8542C35DC091BB8A20" index="44" id="141" name="Set Variable" enable="True">
+							<UUID>AE2F0C71-E901-4578-92DB-B8C69A6F2606</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6531,8 +6646,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="815DD52F50E91BB0C06AC9D24B2A8A7A" index="45" id="141" name="Set Variable" enable="True">
-							<UUID>3487BE70-32C8-4B33-A127-1B7FCA54762F</UUID>
+						<Step hash="0C3B3C59483B7AB564EE01DD17FA5642" index="45" id="141" name="Set Variable" enable="True">
+							<UUID>96B9DA28-13AA-4238-A9C9-F0A9E9C599BA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6555,8 +6670,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="474F54DB95EF1CD3A4B76062711A3019" index="46" id="68" name="If" enable="True">
-							<UUID>04AA91B0-8F49-4BAA-B947-0FBBC6A1044D</UUID>
+						<Step hash="BDCA7129DA92CD0D4BDFF8462DA6FB2F" index="46" id="68" name="If" enable="True">
+							<UUID>7A613547-E7F4-4B97-AA9E-48FDB147CB71</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6572,8 +6687,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="8D550937676E2E4C639BDDC1895CE57E" index="47" id="141" name="Set Variable" enable="True">
-							<UUID>667756E2-C9B8-4F38-8AFA-E53133B3EE4C</UUID>
+						<Step hash="663FE1C536FA130CCB557C6983CF9FEE" index="47" id="141" name="Set Variable" enable="True">
+							<UUID>E00973BD-0FD0-4680-BE80-7F8BE0BDCC58</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6596,13 +6711,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="126C4AA8ABDAAAF87C31A5B3DC19168F" index="48" id="70" name="End If" enable="True">
-							<UUID>8D3D5C1E-DAF2-4C84-BC87-774A004871D1</UUID>
+						<Step hash="40395415734A499C86B278A2FA4D5AF3" index="48" id="70" name="End If" enable="True">
+							<UUID>6AF368E9-EBD3-47B2-8F84-2167F8139858</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="1004CD7F95574024BC05ACE73C4D90F9" index="49" id="160" name="Insert from URL" enable="True">
-							<UUID>BF1A1EA8-0282-466E-B320-CC17185BA3B7</UUID>
+						<Step hash="4C81566EBABECE9A075662A19B480151" index="49" id="160" name="Insert from URL" enable="True">
+							<UUID>1F1FDA33-997F-41BB-B65E-90C744AA2888</UUID>
 							<OwnerID></OwnerID>
 							<Options>20613</Options>
 							<ParameterValues membercount="6">
@@ -6644,8 +6759,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="6E40510D885676A8630F397EFC9D7E00" index="50" id="141" name="Set Variable" enable="True">
-							<UUID>11704F54-7EF6-4605-8EFC-D9077EF278E3</UUID>
+						<Step hash="254010A46C30E300464BF1177F628037" index="50" id="141" name="Set Variable" enable="True">
+							<UUID>26DC2ED0-FEB3-4513-98F5-43791A4DD7A2</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6668,8 +6783,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="C49F79355BBEB62E20B75A0444A8788A" index="51" id="141" name="Set Variable" enable="True">
-							<UUID>57821434-63FD-4FA6-A4A5-526F1F66ABDC</UUID>
+						<Step hash="DCB24B2E9CB74E28231535BAA2DE1539" index="51" id="141" name="Set Variable" enable="True">
+							<UUID>7CB4BC0C-5D08-44F2-890A-2B12EBC6B5D1</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6692,8 +6807,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="AF3F556AAB0EC2E4DD08023D8ABE701C" index="52" id="103" name="Exit Script" enable="True">
-							<UUID>5EE3B7CA-0CCA-49F3-A2E4-EF9AD5C57B71</UUID>
+						<Step hash="4035E7610F4B432176A7505F6BD4E77A" index="52" id="103" name="Exit Script" enable="True">
+							<UUID>8CAFD511-05C0-4384-924E-CEF7DA247D46</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6706,8 +6821,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="8E4D0D03061E93BA7229AF812092F057" index="53" id="125" name="Else If" enable="True">
-							<UUID>729334A3-7B23-41FC-8C52-4A7D6DFA6CE0</UUID>
+						<Step hash="B36089023BAA604214E8815CDA1393EF" index="53" id="125" name="Else If" enable="True">
+							<UUID>75667BB8-E087-4EA0-9B4D-218FF402CD42</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6723,8 +6838,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E9F2B78439E5924B99549675064D2E5F" index="54" id="68" name="If" enable="True">
-							<UUID>A95A6E49-C901-40DC-9474-9E96D6FC0C40</UUID>
+						<Step hash="C140C985D7B42CEE8FC3FB02C143D0FC" index="54" id="68" name="If" enable="True">
+							<UUID>EE5AABFE-6705-401B-B6D3-DB217B844F3D</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6740,8 +6855,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B6E4830A692C10C53F788EC74CCDA1A2" index="55" id="160" name="Insert from URL" enable="True">
-							<UUID>5822B529-6D16-4CAA-BF38-32C8FCE37FB1</UUID>
+						<Step hash="E4549C893B5BD441C3C72DD842278DA0" index="55" id="160" name="Insert from URL" enable="True">
+							<UUID>4E638D5C-9671-4008-87F4-5809400E331D</UUID>
 							<OwnerID></OwnerID>
 							<Options>20869</Options>
 							<ParameterValues membercount="6">
@@ -6783,8 +6898,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="228CCE4E1B9A2E15A44227ECCE814909" index="56" id="141" name="Set Variable" enable="True">
-							<UUID>F968FEED-1EC9-4F31-B5D7-B03677A4BBAB</UUID>
+						<Step hash="8C67213E36D4D5AF570AE87BADCCD8FD" index="56" id="141" name="Set Variable" enable="True">
+							<UUID>E39B5743-A043-43F9-8962-DC97260595B7</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6807,8 +6922,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="7F9EFF2B5D05DDF0876CFC58866887DB" index="57" id="141" name="Set Variable" enable="True">
-							<UUID>4CAEE5AE-5F6D-4131-BE84-E0F2243B3D98</UUID>
+						<Step hash="AE4FB59D9506933CA54D3762A9D6AA3A" index="57" id="141" name="Set Variable" enable="True">
+							<UUID>3B95A212-0B16-4032-8310-E6758866F5D4</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6831,8 +6946,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="265ED9C7A7B26C61FABF607F87522327" index="58" id="68" name="If" enable="True">
-							<UUID>CB2FF20A-60DC-4714-A78B-CBB9E2CCE3AE</UUID>
+						<Step hash="0B1BCD1C1100216DA56F99056EB30930" index="58" id="68" name="If" enable="True">
+							<UUID>00FE6BE5-005E-4BD4-B199-8D1218D12064</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -6848,8 +6963,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="4C20894FE1F0DB9C400F2572F83B46E0" index="59" id="141" name="Set Variable" enable="True">
-							<UUID>621E6730-D4E7-4F02-9FEB-EC7D204095D7</UUID>
+						<Step hash="91E0C6501CC3B29666646B22AD6E51DF" index="59" id="141" name="Set Variable" enable="True">
+							<UUID>F6A8DC33-E41B-4990-8DAA-1338B21FD9C7</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6872,8 +6987,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="3A2B2BFEEBE4098104667694DAE29DCC" index="60" id="141" name="Set Variable" enable="True">
-							<UUID>A03B0F44-B8B5-40C4-B2AD-539FA6980C9F</UUID>
+						<Step hash="3075DCF68D3E4C01AC17FC5901CE63DF" index="60" id="141" name="Set Variable" enable="True">
+							<UUID>0BC8A922-CF00-4133-B312-66918FA4E10D</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6896,11 +7011,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="51FF8B3333BA2BA25D5BCD36E50C5631" index="61" id="87" name="Show Custom Dialog" enable="True">
-							<UUID>42A4EA34-BAD6-4B25-BCD1-902CADB11DE4</UUID>
+						<Step hash="193496C7963E1B8D81ECDE44AE27D822" index="61" id="87" name="Show Custom Dialog" enable="True">
+							<UUID>CF9D4761-3F18-4EC6-AF54-19C53187B82B</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -6915,6 +7030,9 @@
 										</Calculation>
 									</Calculation>
 								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
+								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
 								</Parameter>
@@ -6926,8 +7044,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="274A463F3A686AFCD91E7ED83CAA5307" index="62" id="103" name="Exit Script" enable="True">
-							<UUID>76AC3BD3-CEED-4220-B5F3-B1C8407FE261</UUID>
+						<Step hash="2A80EEC2315C7878698C80A0A02F728A" index="62" id="103" name="Exit Script" enable="True">
+							<UUID>9AA1C1B7-A316-4A4F-848F-DAB92401D91B</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -6940,13 +7058,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="FBE4962CE31B3A27CD520AE52BA506B2" index="63" id="70" name="End If" enable="True">
-							<UUID>EB7F10FA-F179-44C6-91F1-FD6FB7B0D58A</UUID>
+						<Step hash="E10053E02FBD63C4DA90172C087A8F87" index="63" id="70" name="End If" enable="True">
+							<UUID>230D4506-1058-436B-902A-F5161EF95B9C</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="E94FACCCDF57DE70D9BC881E299FEAE9" index="64" id="141" name="Set Variable" enable="True">
-							<UUID>B1852A9B-1455-4C1F-ADE8-C5B938AEFFF9</UUID>
+						<Step hash="ECAA247B9C672607788B4AA7AA920FD3" index="64" id="141" name="Set Variable" enable="True">
+							<UUID>8E8630A9-FD30-42F7-840D-67E826958AE1</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -6969,11 +7087,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="9A2A6D3341CDB33978950B248E9A9ACB" index="65" id="87" name="Show Custom Dialog" enable="True">
-							<UUID>579276C2-8FDA-4F11-A444-5713764157A5</UUID>
+						<Step hash="2F7B9B243BAFFAFF1EDD69059A7168F3" index="65" id="87" name="Show Custom Dialog" enable="True">
+							<UUID>8D59ADBA-38DE-4625-8162-8A0F29DFEC84</UUID>
 							<OwnerID></OwnerID>
 							<Options>16389</Options>
-							<ParameterValues membercount="6">
+							<ParameterValues membercount="7">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -6987,6 +7105,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.E2E1DEEE7169F633A85602FAA2ECF7DE"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
@@ -7020,8 +7141,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="7B3D342AFAC18CE01821CBAB81616748" index="66" id="68" name="If" enable="True">
-							<UUID>D9B9C5ED-379C-4CFD-B307-CF9AA0D77FFC</UUID>
+						<Step hash="04025B77FAE39CFA5BEF9109896EC7A2" index="66" id="68" name="If" enable="True">
+							<UUID>C1A65DC4-1E09-4311-AB04-FBAD3035DBF1</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -7037,8 +7158,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E31462393588C09CB9F1BCB6D0B9B217" index="67" id="103" name="Exit Script" enable="True">
-							<UUID>947C19E7-DD68-4612-9519-C73490D94C25</UUID>
+						<Step hash="7C0AD95FB95CB243F76129CB942AE270" index="67" id="103" name="Exit Script" enable="True">
+							<UUID>3465DD44-683F-4E06-A674-8E35176E5F67</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -7051,13 +7172,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="99A96D38DEFE6A3903588151499BCBF9" index="68" id="70" name="End If" enable="True">
-							<UUID>163AD433-27B6-4C41-8772-3BFB49C33A14</UUID>
+						<Step hash="C03C78D6B4AB3E44542599EBDBD76C97" index="68" id="70" name="End If" enable="True">
+							<UUID>92E32E79-DA13-4688-B079-9959763AB1F8</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="C1A59A1DD18F46E2F6CAC606700537CD" index="69" id="69" name="Else" enable="True">
-							<UUID>BC2AFAEA-45C1-49B2-AD48-B8912CEDEB38</UUID>
+						<Step hash="B4C2D2C02D388C9AE7E364415AFD8378" index="69" id="69" name="Else" enable="True">
+							<UUID>991DD145-BF81-4DD0-9E66-9DD525833EB1</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="2">
@@ -7069,8 +7190,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="103FC95A43BF41E284BE0D8E7AF622F4" index="70" id="141" name="Set Variable" enable="True">
-							<UUID>D29483E1-C3AD-40DD-B418-22F36DE96F8E</UUID>
+						<Step hash="46E8C67754052F8A99844C2E4957E9E8" index="70" id="141" name="Set Variable" enable="True">
+							<UUID>799844E2-64AC-4D1F-A8E0-17B28A7C68FA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7093,13 +7214,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="69818D07DF517DCF058E4C60523789FB" index="71" id="70" name="End If" enable="True">
-							<UUID>D2E84416-1F73-4164-98AC-B91B4FE8B59D</UUID>
+						<Step hash="E803AE0682A08C787705DBAE5BBC76C6" index="71" id="70" name="End If" enable="True">
+							<UUID>247D0337-4A27-4DCB-8728-394B71B74734</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="AAFBA99A47AA8D2259766C237331127D" index="72" id="68" name="If" enable="True">
-							<UUID>49CB4874-640F-4E15-A84D-98B83F58ABD1</UUID>
+						<Step hash="F52BBB4C7104057134DCBA81F9F209F4" index="72" id="68" name="If" enable="True">
+							<UUID>6AF50785-2C25-4F58-BAFE-2A0850DD3655</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -7115,8 +7236,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="FB38AF8CD5F7E55FB438A151AF00AAE1" index="73" id="141" name="Set Variable" enable="True">
-							<UUID>83634424-4573-43A9-B495-EE772F594B03</UUID>
+						<Step hash="7785EA164E8BA70E4A49C116947C53CF" index="73" id="141" name="Set Variable" enable="True">
+							<UUID>529BE8A1-1193-4CF4-8694-59475610397C</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7139,8 +7260,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="C7AEF0AE3329925F298EED7ECC4C3B9B" index="74" id="6" name="Go to Layout" enable="True">
-							<UUID>D91C02F3-36DE-459C-9D71-6B505218776C</UUID>
+						<Step hash="CFA91D78247BFE2907DC0A33BFB557AB" index="74" id="6" name="Go to Layout" enable="True">
+							<UUID>C6E60E16-29B3-4905-A6EC-8522F5166FDB</UUID>
 							<OwnerID></OwnerID>
 							<Options>16394</Options>
 							<ParameterValues membercount="2">
@@ -7158,8 +7279,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="33D49788A54937FAD6FAFDF43D93B97C" index="75" id="141" name="Set Variable" enable="True">
-							<UUID>23972F27-9003-4914-BF6E-0C23046AD569</UUID>
+						<Step hash="389D067A1EC17D980207C580FBCCC3BF" index="75" id="141" name="Set Variable" enable="True">
+							<UUID>857DD927-FBCD-47FE-85FB-464AD926B515</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7182,8 +7303,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="50277A1C1F035A0B19AC6E4C84C877EE" index="76" id="68" name="If" enable="True">
-							<UUID>438E5D3C-9701-4695-8595-CF04D5AC1A4B</UUID>
+						<Step hash="C6B455306F0150720B2A292E5D0094AA" index="76" id="68" name="If" enable="True">
+							<UUID>F04A51D6-D859-4772-A6DF-7A5656CFB6DC</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -7199,8 +7320,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="0EA6D36CD29A2BE803A0D9B1BD502477" index="77" id="103" name="Exit Script" enable="True">
-							<UUID>6A9EFDC9-2B68-4CEC-9B51-EFFD7E26B76F</UUID>
+						<Step hash="0F6793CE1759C0649A63150B4AE61FFC" index="77" id="103" name="Exit Script" enable="True">
+							<UUID>C096B019-B760-49F8-8DD9-42212300E96E</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -7213,18 +7334,18 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="0683EF069ECB63A8184FE512C76ECBF6" index="78" id="70" name="End If" enable="True">
-							<UUID>C3B2D056-64AC-414D-B294-EDF4826DDCB6</UUID>
+						<Step hash="EE657CA4897F24CA146A247D90081ACB" index="78" id="70" name="End If" enable="True">
+							<UUID>E948D887-27F9-4BD5-89C3-2A4916A4D270</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="11C51E2B61A14BF3D38F697A4318A529" index="79" id="70" name="End If" enable="True">
-							<UUID>5846C36B-8A27-4CCB-98BD-C048CD746F7D</UUID>
+						<Step hash="96F07B5C8D6163DE351581A0944E774D" index="79" id="70" name="End If" enable="True">
+							<UUID>773339FB-070B-4DCA-BD9A-CA393A6D75D1</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="9914B8D7F7C46E31D9D11A0996D82DB3" index="80" id="89" name="# (comment)" enable="True">
-							<UUID>248C3711-8436-489C-8734-21F61D7755B9</UUID>
+						<Step hash="2B2563B91ADCC01C0E6AB4652D787C30" index="80" id="89" name="# (comment)" enable="True">
+							<UUID>B8BFCECA-D7ED-4C51-9095-58D213575818</UUID>
 							<OwnerID></OwnerID>
 							<Options>4</Options>
 							<ParameterValues membercount="1">
@@ -7233,8 +7354,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="27C35A40B1DA35E22C845E30FBEC6866" index="81" id="141" name="Set Variable" enable="True">
-							<UUID>5766B1EB-CF2B-4BE4-BD79-56409BCA40DE</UUID>
+						<Step hash="F50DFC7D33B011A5BA8FFBE2283F3225" index="81" id="141" name="Set Variable" enable="True">
+							<UUID>87AA023A-9705-42F6-B88D-A295CAA4B785</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7242,7 +7363,7 @@
 									<value>
 										<Calculation datatype="1" position="1">
 											<Calculation>
-												<Text><![CDATA[Let ( task = $task ;Let ( [    /*com.fmi.calculation.text.243774ED317326455884AF34CB67AA04*/    ~fn = Get ( FileName ) ;    ~layoutName = Get ( LayoutName ) ;    ~layoutTO = Get ( LayoutTableName ) ;    ~layoutId = GetValue ( LayoutIDs ( ~fn ) ; Get ( LayoutNumber ) ) ;    ~layoutTOid = ExecuteSQL (        "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;        "" ; "" ; ~layoutTO    ) ;    /*com.fmi.calculation.text.7AB0CF0B494BF45607F92CF97C7D56E7*/    ~fieldNamesList = FieldNames ( ~fn ; ~layoutName ) ;    ~uniqueTOs = While ( [        ~_fList  = ~fieldNamesList ;        ~_fCount = ValueCount ( ~fieldNamesList ) ;        ~_fi     = 0 ;        ~_tos    = ~layoutTO    ] ;        ~_fi < ~_fCount ;    [        ~_fList  = ~_fList ;        ~_fCount = ~_fCount ;        ~_fi     = ~_fi + 1 ;        ~_tos    = Let ( [            ~fld = GetValue ( ~_fList ; ~_fi ) ;            ~sep = Position ( ~fld ; "com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8" ; 1 ; 1 ) ;            ~to  = If ( ~sep > 0 ; Left ( ~fld ; ~sep - 1 ) ; "" )        ] ;            If (				~to ≠ "" and IsEmpty ( FilterValues ( ~_tos ; ~to ) ) ;                ~_tos & ¶ & ~to ;                ~_tos            )        )    ] ;        ~_tos    ) ;    /*com.fmi.calculation.text.42FA3A1D2C27D4070FFAC279289FBC62*/    ~tablesJSON = While ( [        ~_tCount  = ValueCount ( ~uniqueTOs ) ;        ~_ti      = 0 ;        ~_tResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_ti < ~_tCount ;    [        ~_tCount  = ~_tCount ;        ~_ti      = ~_ti + 1 ;        ~_tResult = Let ( [            ~toName = GetValue ( ~uniqueTOs ; ~_ti ) ;            ~toId   = ExecuteSQL (                "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;                "" ; "" ; ~toName            ) ;            ~btName = ExecuteSQL (                "com.fmi.calculation.text.0D46F215DE6D997B3E93CBAB92A427B4" ;                "" ; "" ; ~toName            ) ;            ~btId   = ExecuteSQL (                "com.fmi.calculation.text.D6291D2122B10478F41037911AC62183" ;                "" ; "" ; ~btName            ) ;            /*com.fmi.calculation.text.D3912A148029E1C96FF5B953CA1B057E*/            ~fData = ExecuteSQL (                "com.fmi.calculation.text.EAB50923DFB521B317FBF79E0523359B" ;                "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ; ~toName            ) ;            /*com.fmi.calculation.text.A890BF40BD49C839E350BDAF7E9E7D8D*/            ~fieldsObj = While ( [                ~_fCount2 = ValueCount ( ~fData ) ;                ~_fj      = 0 ;                ~_fObj    = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"            ] ;                ~_fj < ~_fCount2 ;            [                ~_fCount2 = ~_fCount2 ;                ~_fj      = ~_fj + 1 ;                ~_fObj    = Let ( [                    ~row     = GetValue ( ~fData ; ~_fj ) ;                    ~parts   = Substitute ( ~row ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;                    ~fname   = GetValue ( ~parts ; 1 ) ;                    ~fid     = GetValue ( ~parts ; 2 ) ;                    ~fsqlRaw = GetValue ( ~parts ; 3 ) ;                    ~fclass  = GetValue ( ~parts ; 4 ) ;                    /*com.fmi.calculation.text.773A03B06826D53FEEF46EDE854440C7*/                    ~fmType = Case (                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.1008913D05625D6772346DB6D2548432"   ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.A238CF967B73E6BEB5601066DA31B25A"      ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.B48A868C643A68C639219B68A79CB846"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.5E011A4AFD84B55B6E46F99A28AB6346"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.A445D354F10C686D45B587901A5E2A6B"                     ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.22BF6CD6AF8310A8F54A5EAD58067F84"                    ; "com.fmi.calculation.text.42FB9E7BEB6125DB7F2D9FE414DC8C69" ;                        ~fsqlRaw = "com.fmi.calculation.text.BEB06E2CA146960316DC9594614ABD97"                    ; "com.fmi.calculation.text.2CA765AB9D7BEE797110A28B7B5E988C" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.49AE69F793E196F618E8C5D5A10FA1FD" ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 8 ) = "com.fmi.calculation.text.41D994AD52D04D684D69E6297B630195"  ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.33F53A7E4CCE631CB160EE666395CC5E" ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.09C3059F754CEEBF41F83512F817CD12"      ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        ~fsqlRaw                    ) ;                    /*com.fmi.calculation.text.57AE11E947E3055BAEC10E6EF93D2B58*/                    ~fieldObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"   ; ~fid    ; JSONNumber ] ;                        [ "com.fmi.calculation.text.E8242F9CA220C53035AFF0819EEDB978" ; ~fmType ; JSONString ]                    ) ;                    ~fieldObj = If (						~fclass ≠ "com.fmi.calculation.text.5F91071A15427802DFBC07D947C43A9F" and ~fclass ≠ "" ;                        JSONSetElement ( ~fieldObj ; "com.fmi.calculation.text.FA56F7B1CA6FAB546B4D079941EE0644" ; ~fclass ; JSONString ) ;                        ~fieldObj                    )                ] ;                    JSONSetElement ( ~_fObj ; ~fname ; ~fieldObj ; JSONObject )                )            ] ;                ~_fObj            ) ;            /*com.fmi.calculation.text.DE7E8663EFD34402BA2DAAE96EED740E*/            ~tObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"         ; ~btId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.7D530CE6CED94702FB83406CB059277F" ; ~btName    ; JSONString ] ;                [ "com.fmi.calculation.text.90F3A370125A58B0E78F5289A50B63CD"         ; ~toName    ; JSONString ] ;                [ "com.fmi.calculation.text.B609E43A579CBB0DFB2258220C871928"      ; ~toId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.C81174295D29BEDB1E68D3FC3DF46853"     ; ~fieldsObj ; JSONObject ]            )        ] ;            /*com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21*/            JSONSetElement ( ~_tResult ; ~toName ; ~tObj ; JSONObject )        )    ] ;        ~_tResult    ) ;    /*com.fmi.calculation.text.A587A64286526D6D74172CD462E02293*/    ~ddlArray = While ( [        ~_dCount = ValueCount ( ~uniqueTOs ) ;        ~_di     = 0 ;        ~_dArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_di < ~_dCount ;    [        ~_dCount = ~_dCount ;        ~_di     = ~_di + 1 ;        ~_dArr   = JSONSetElement ( ~_dArr ; ~_di - 1 ; GetValue ( ~uniqueTOs ; ~_di ) ; JSONString )    ] ;        ~_dArr    ) ;    ~ddl = GetTableDDL ( ~ddlArray ; True ) ;    /*com.fmi.calculation.text.4E62AEC9B37A5E5155FDE6B79CA92507*/    ~sNames = ScriptNames ( ~fn ) ;    ~sIds   = ScriptIDs ( ~fn ) ;    ~scriptsJSON = While ( [        ~_sCount  = ValueCount ( ~sNames ) ;        ~_si      = 0 ;        ~_sPairs  = ""    ] ;        ~_si < ~_sCount ;    [        ~_sCount  = ~_sCount ;        ~_si      = ~_si + 1 ;        ~_sPairs  = Let ( [            ~sName = GetValue ( ~sNames ; ~_si ) ;            ~sId   = GetValue ( ~sIds ; ~_si ) ;			/*com.fmi.calculation.text.97BBB266F49214C66591088FF4E5C80C*/            ~escaped = Substitute ( ~sName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~sId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~sName ) ;                If ( IsEmpty ( ~_sPairs ) ;                    ~pair ;                    ~_sPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_sPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_sPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.616CD86D3D2E667AFA97B562A49F69D4*/    ~layNames = LayoutNames ( ~fn ) ;    ~layIds   = LayoutIDs ( ~fn ) ;    ~layoutsJSON = While ( [        ~_lCount  = ValueCount ( ~layNames ) ;        ~_li      = 0 ;        ~_lPairs  = ""    ] ;        ~_li < ~_lCount ;    [        ~_lCount  = ~_lCount ;        ~_li      = ~_li + 1 ;        ~_lPairs  = Let ( [            ~lName = GetValue ( ~layNames ; ~_li ) ;            ~lId   = GetValue ( ~layIds ; ~_li ) ;            /*com.fmi.calculation.text.F7F4716EF3BA10458AC611E69C0A0F84*/            ~escaped = Substitute ( ~lName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~lId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~lName ) ;                If ( IsEmpty ( ~_lPairs ) ;                    ~pair ;                    ~_lPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_lPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_lPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.FA448BF879578EC5BE5F32E0CFE60A48*/    ~vlSQL = ExecuteSQL (        "com.fmi.calculation.text.E802A6F069CD8738C6E083E04682A3E0" ;        "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶    ) ;    ~vlJSON = While ( [        ~_vCount  = ValueCount ( ~vlSQL ) ;        ~_vi      = 0 ;        ~_vResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_vi < ~_vCount ;    [        ~_vCount  = ~_vCount ;        ~_vi      = ~_vi + 1 ;        ~_vResult = Let ( [            ~vParts  = Substitute ( GetValue ( ~vlSQL ; ~_vi ) ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;            ~vName   = GetValue ( ~vParts ; 1 ) ;            ~vId     = GetValue ( ~vParts ; 2 ) ;            ~vSource = GetValue ( ~vParts ; 3 )        ] ;            If ( not IsEmpty ( ~vName ) ;                JSONSetElement ( ~_vResult ;                    ~vName ;                    JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"     ; ~vId     ; JSONNumber ] ;                        [ "com.fmi.calculation.text.91F127C4B704FC5AC212BA970EB65F39" ; ~vSource ; JSONString ]                    ) ;                    JSONObject                ) ;                ~_vResult            )        )    ] ;        ~_vResult    ) ;    /*com.fmi.calculation.text.93CA15A878BB34A9358B13AAC7C4686D*/    ~objList = LayoutObjectNames ( ~fn ; ~layoutName ) ;    ~layoutObjectsJSON = While ( [        ~_oCount = ValueCount ( ~objList ) ;        ~_oi     = 0 ;        ~_oIdx   = 0 ;        ~_oArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_oi < ~_oCount ;    [        ~_oCount = ~_oCount ;        ~_oi     = ~_oi + 1 ;        ~_oIdx   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           ~_oIdx + 1 ;                           ~_oIdx                       )                   ) ;        ~_oArr   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           JSONSetElement ( ~_oArr ; ~_oIdx - 1 ; ~n ; JSONString ) ;                           ~_oArr                       )                   )    ] ;        ~_oArr    ) ;    /*com.fmi.calculation.text.1FEE49E661BD359FE044633E419AC801*/    /*com.fmi.calculation.text.13F0B3D657435C88F32D1F90078D2856*/    ~ts = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) ;    ~generatedAt =        Year ( ~ts ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Month ( ~ts ) ; 2 ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Day ( ~ts ) ; 2 ) & "com.fmi.calculation.text.D491787BD81ED43CB9E05191BBA37E6C" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Hour ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Minute ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Seconds ( ~ts ) ; 2 ) & "com.fmi.calculation.text.F7EFEBB853CFAA469FB4B8F6C49F50B9" ;    ~json = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;        [ "com.fmi.calculation.text.9CD6CD30E4547B3800299B5C2B734FA8"           ; 2                    ; JSONNumber ] ;        [ "com.fmi.calculation.text.A548D8D3BF1DBEA966A3C60FD421DF49"                  ; ~fn                  ; JSONString ] ;        [ "com.fmi.calculation.text.7C595C11BD6A09ECDD887FA0D1943FF6"                      ; task                 ; JSONString ] ;        [ "com.fmi.calculation.text.61E379EC729D4B339996D762E221A930"              ; ~generatedAt         ; JSONString ] ;        [ "com.fmi.calculation.text.39F0190861D2037CDF12B458B9D6F114"       ; ~layoutName          ; JSONString ] ;        [ "com.fmi.calculation.text.D4B6B420F385A747050CBD182CC5DB43"         ; ~layoutId            ; JSONNumber ] ;        [ "com.fmi.calculation.text.2D9606654C2919094668B970379CFEEE"    ; ~layoutTO            ; JSONString ] ;        [ "com.fmi.calculation.text.4479EB4EB3719741A5B60C902D683EE2" ; ~layoutTOid          ; JSONNumber ] ;        [ "com.fmi.calculation.text.BA16000A8B737B8B4AF90C0FF29D8808"                    ; ~tablesJSON          ; JSONObject ] ;        [ "com.fmi.calculation.text.8DCDD773AD19BE3DE539F0EE0AEAB594"                       ; ~ddl                 ; JSONString ] ;        [ "com.fmi.calculation.text.4B3F2A37CCBB0951ED498CA514484590"                   ; ~scriptsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.23D4BBAA8043BD45E0349EF70E5C0318"                   ; ~layoutsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.3518E21708FDBDEEDC727CFFBB53B037"               ; ~vlJSON              ; JSONObject ] ;        [ "com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288"            ; ~layoutObjectsJSON   ; JSONArray  ]    )] ;    ~json))]]></Text>
+												<Text><![CDATA[Let ( task = $task ;Let ( [    /*com.fmi.calculation.text.243774ED317326455884AF34CB67AA04*/    ~fn = Get ( FileName ) ;    ~layoutName = Get ( LayoutName ) ;    ~layoutTO = Get ( LayoutTableName ) ;    ~layoutId = GetValue ( LayoutIDs ( ~fn ) ; Get ( LayoutNumber ) ) ;    ~layoutTOid = ExecuteSQL (        "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;        "" ; "" ; ~layoutTO    ) ;    /*com.fmi.calculation.text.7AB0CF0B494BF45607F92CF97C7D56E7*/    ~fieldNamesList = FieldNames ( ~fn ; ~layoutName ) ;    ~uniqueTOs = While ( [        ~_fList  = ~fieldNamesList ;        ~_fCount = ValueCount ( ~fieldNamesList ) ;        ~_fi     = 0 ;        ~_tos    = ~layoutTO    ] ;        ~_fi < ~_fCount ;    [        ~_fList  = ~_fList ;        ~_fCount = ~_fCount ;        ~_fi     = ~_fi + 1 ;        ~_tos    = Let ( [            ~fld = GetValue ( ~_fList ; ~_fi ) ;            ~sep = Position ( ~fld ; "com.fmi.calculation.text.5EB445F26C7A13A09AD9CF5343EB63E8" ; 1 ; 1 ) ;            ~to  = If ( ~sep > 0 ; Left ( ~fld ; ~sep - 1 ) ; "" )        ] ;            If (				~to ≠ "" and IsEmpty ( FilterValues ( ~_tos ; ~to ) ) ;                ~_tos & ¶ & ~to ;                ~_tos            )        )    ] ;        ~_tos    ) ;    /*com.fmi.calculation.text.42FA3A1D2C27D4070FFAC279289FBC62*/    ~tablesJSON = While ( [        ~_tCount  = ValueCount ( ~uniqueTOs ) ;        ~_ti      = 0 ;        ~_tResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_ti < ~_tCount ;    [        ~_tCount  = ~_tCount ;        ~_ti      = ~_ti + 1 ;        ~_tResult = Let ( [            ~toName = GetValue ( ~uniqueTOs ; ~_ti ) ;            ~toId   = ExecuteSQL (                "com.fmi.calculation.text.64805B5508D792B2A94280F3D66D2488" ;                "" ; "" ; ~toName            ) ;            ~btName = ExecuteSQL (                "com.fmi.calculation.text.0D46F215DE6D997B3E93CBAB92A427B4" ;                "" ; "" ; ~toName            ) ;            ~btId   = ExecuteSQL (                "com.fmi.calculation.text.D6291D2122B10478F41037911AC62183" ;                "" ; "" ; ~btName            ) ;            /*com.fmi.calculation.text.D3912A148029E1C96FF5B953CA1B057E*/            ~fData = ExecuteSQL (                "com.fmi.calculation.text.EAB50923DFB521B317FBF79E0523359B" ;                "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ; ~toName            ) ;            /*com.fmi.calculation.text.A890BF40BD49C839E350BDAF7E9E7D8D*/            ~fieldsObj = While ( [                ~_fCount2 = ValueCount ( ~fData ) ;                ~_fj      = 0 ;                ~_fObj    = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"            ] ;                ~_fj < ~_fCount2 ;            [                ~_fCount2 = ~_fCount2 ;                ~_fj      = ~_fj + 1 ;                ~_fObj    = Let ( [                    ~row     = GetValue ( ~fData ; ~_fj ) ;                    ~parts   = Substitute ( ~row ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;                    ~fname   = GetValue ( ~parts ; 1 ) ;                    ~fid     = GetValue ( ~parts ; 2 ) ;                    ~fsqlRaw = GetValue ( ~parts ; 3 ) ;                    ~fclass  = GetValue ( ~parts ; 4 ) ;                    /*com.fmi.calculation.text.773A03B06826D53FEEF46EDE854440C7*/                    ~fmType = Case (                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.1008913D05625D6772346DB6D2548432"   ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.A238CF967B73E6BEB5601066DA31B25A"      ; "com.fmi.calculation.text.8791C49D38D9A4EF818768E52DE4AA90" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.B48A868C643A68C639219B68A79CB846"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        Left ( ~fsqlRaw ; 7 ) = "com.fmi.calculation.text.5E011A4AFD84B55B6E46F99A28AB6346"   ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.A445D354F10C686D45B587901A5E2A6B"                     ; "com.fmi.calculation.text.02DEE8F744E47E63772C1AC2AD02B5B4" ;                        ~fsqlRaw = "com.fmi.calculation.text.22BF6CD6AF8310A8F54A5EAD58067F84"                    ; "com.fmi.calculation.text.42FB9E7BEB6125DB7F2D9FE414DC8C69" ;                        ~fsqlRaw = "com.fmi.calculation.text.BEB06E2CA146960316DC9594614ABD97"                    ; "com.fmi.calculation.text.2CA765AB9D7BEE797110A28B7B5E988C" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.49AE69F793E196F618E8C5D5A10FA1FD" ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 8 ) = "com.fmi.calculation.text.41D994AD52D04D684D69E6297B630195"  ; "com.fmi.calculation.text.97F5DA01CA3F58D6CEE3EDADAF75976B" ;                        Left ( ~fsqlRaw ; 9 ) = "com.fmi.calculation.text.33F53A7E4CCE631CB160EE666395CC5E" ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        Left ( ~fsqlRaw ; 4 ) = "com.fmi.calculation.text.09C3059F754CEEBF41F83512F817CD12"      ; "com.fmi.calculation.text.3A1111B59F799854A9FCBDEF1DF195DF" ;                        ~fsqlRaw                    ) ;                    /*com.fmi.calculation.text.57AE11E947E3055BAEC10E6EF93D2B58*/                    ~fieldObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"   ; ~fid    ; JSONNumber ] ;                        [ "com.fmi.calculation.text.E8242F9CA220C53035AFF0819EEDB978" ; ~fmType ; JSONString ]                    ) ;                    ~fieldObj = If (						~fclass ≠ "com.fmi.calculation.text.5F91071A15427802DFBC07D947C43A9F" and ~fclass ≠ "" ;                        JSONSetElement ( ~fieldObj ; "com.fmi.calculation.text.FA56F7B1CA6FAB546B4D079941EE0644" ; ~fclass ; JSONString ) ;                        ~fieldObj                    )                ] ;                    JSONSetElement ( ~_fObj ; ~fname ; ~fieldObj ; JSONObject )                )            ] ;                ~_fObj            ) ;            /*com.fmi.calculation.text.DE7E8663EFD34402BA2DAAE96EED740E*/            ~tObj = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"         ; ~btId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.7D530CE6CED94702FB83406CB059277F" ; ~btName    ; JSONString ] ;                [ "com.fmi.calculation.text.90F3A370125A58B0E78F5289A50B63CD"         ; ~toName    ; JSONString ] ;                [ "com.fmi.calculation.text.B609E43A579CBB0DFB2258220C871928"      ; ~toId      ; JSONNumber ] ;                [ "com.fmi.calculation.text.C81174295D29BEDB1E68D3FC3DF46853"     ; ~fieldsObj ; JSONObject ]            )        ] ;            /*com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21*/            JSONSetElement ( ~_tResult ; ~toName ; ~tObj ; JSONObject )        )    ] ;        ~_tResult    ) ;    /*com.fmi.calculation.text.A587A64286526D6D74172CD462E02293*/    ~ddlArray = While ( [        ~_dCount = ValueCount ( ~uniqueTOs ) ;        ~_di     = 0 ;        ~_dArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_di < ~_dCount ;    [        ~_dCount = ~_dCount ;        ~_di     = ~_di + 1 ;        ~_dArr   = JSONSetElement ( ~_dArr ; ~_di - 1 ; GetValue ( ~uniqueTOs ; ~_di ) ; JSONString )    ] ;        ~_dArr    ) ;    ~ddl = GetTableDDL ( ~ddlArray ; True ) ;    /*com.fmi.calculation.text.4E62AEC9B37A5E5155FDE6B79CA92507*/    ~sNames = ScriptNames ( ~fn ) ;    ~sIds   = ScriptIDs ( ~fn ) ;    ~scriptsJSON = While ( [        ~_sCount  = ValueCount ( ~sNames ) ;        ~_si      = 0 ;        ~_sPairs  = ""    ] ;        ~_si < ~_sCount ;    [        ~_sCount  = ~_sCount ;        ~_si      = ~_si + 1 ;        ~_sPairs  = Let ( [            ~sName = GetValue ( ~sNames ; ~_si ) ;            ~sId   = GetValue ( ~sIds ; ~_si ) ;			/*com.fmi.calculation.text.97BBB266F49214C66591088FF4E5C80C*/            ~escaped = Substitute ( ~sName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~sId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~sName ) ;                If ( IsEmpty ( ~_sPairs ) ;                    ~pair ;                    ~_sPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_sPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_sPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.616CD86D3D2E667AFA97B562A49F69D4*/    ~layNames = LayoutNames ( ~fn ) ;    ~layIds   = LayoutIDs ( ~fn ) ;    ~layoutsJSON = While ( [        ~_lCount  = ValueCount ( ~layNames ) ;        ~_li      = 0 ;        ~_lPairs  = ""    ] ;        ~_li < ~_lCount ;    [        ~_lCount  = ~_lCount ;        ~_li      = ~_li + 1 ;        ~_lPairs  = Let ( [            ~lName = GetValue ( ~layNames ; ~_li ) ;            ~lId   = GetValue ( ~layIds ; ~_li ) ;            /*com.fmi.calculation.text.F7F4716EF3BA10458AC611E69C0A0F84*/            ~escaped = Substitute ( ~lName ;                [ Char ( 92 ) ; Char ( 92 ) & Char ( 92 ) ] ;                [ Char ( 34 ) ; Char ( 92 ) & Char ( 34 ) ]            ) ;            ~q = Char ( 34 ) ;            ~pair = ~q & ~escaped & ~q & "com.fmi.calculation.text.E69CBC3C3726749E3CD7B7DF22E1BBEE" & ~q & "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B" & ~q & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" & ~lId & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"        ] ;            If ( not IsEmpty ( ~lName ) ;                If ( IsEmpty ( ~_lPairs ) ;                    ~pair ;                    ~_lPairs & "com.fmi.calculation.text.13EDF26CBCCABA6863592B7386EC02E1" & ~pair                ) ;                ~_lPairs            )        )    ] ;        "com.fmi.calculation.text.C0DBCA29CC1164C40F4BEFDADBA296F9" & ~_lPairs & "com.fmi.calculation.text.E1542BF1157A45FA5434EF0F8EAD95FE"    ) ;    /*com.fmi.calculation.text.FA448BF879578EC5BE5F32E0CFE60A48*/    ~vlSQL = ExecuteSQL (        "com.fmi.calculation.text.E802A6F069CD8738C6E083E04682A3E0" ;        "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶    ) ;    ~vlJSON = While ( [        ~_vCount  = ValueCount ( ~vlSQL ) ;        ~_vi      = 0 ;        ~_vResult = "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25"    ] ;        ~_vi < ~_vCount ;    [        ~_vCount  = ~_vCount ;        ~_vi      = ~_vi + 1 ;        ~_vResult = Let ( [            ~vParts  = Substitute ( GetValue ( ~vlSQL ; ~_vi ) ; "com.fmi.calculation.text.DBDD4BDFB4316DAF0334C8DC0B796F80" ; ¶ ) ;            ~vName   = GetValue ( ~vParts ; 1 ) ;            ~vId     = GetValue ( ~vParts ; 2 ) ;            ~vSource = GetValue ( ~vParts ; 3 )        ] ;            If ( not IsEmpty ( ~vName ) ;                JSONSetElement ( ~_vResult ;                    ~vName ;                    JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;                        [ "com.fmi.calculation.text.4B68129F6621C41900B27BF59AB8FD9B"     ; ~vId     ; JSONNumber ] ;                        [ "com.fmi.calculation.text.91F127C4B704FC5AC212BA970EB65F39" ; ~vSource ; JSONString ]                    ) ;                    JSONObject                ) ;                ~_vResult            )        )    ] ;        ~_vResult    ) ;    /*com.fmi.calculation.text.93CA15A878BB34A9358B13AAC7C4686D*/    ~objList = LayoutObjectNames ( ~fn ; ~layoutName ) ;    ~layoutObjectsJSON = While ( [        ~_oCount = ValueCount ( ~objList ) ;        ~_oi     = 0 ;        ~_oIdx   = 0 ;        ~_oArr   = "com.fmi.calculation.text.7D1170F121C1516C8A3CD44EDA38E8B3"    ] ;        ~_oi < ~_oCount ;    [        ~_oCount = ~_oCount ;        ~_oi     = ~_oi + 1 ;        ~_oIdx   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           ~_oIdx + 1 ;                           ~_oIdx                       )                   ) ;        ~_oArr   = Let ( ~n = GetValue ( ~objList ; ~_oi ) ;                       If (		                   not IsEmpty ( ~n ) and ~n ≠ "com.fmi.calculation.text.A6CCBD9F07424F424C526EAE0BA345DB" and ~n ≠ "com.fmi.calculation.text.60F0933A262C16B7B7381AD760091BA5" ;                           JSONSetElement ( ~_oArr ; ~_oIdx - 1 ; ~n ; JSONString ) ;                           ~_oArr                       )                   )    ] ;        ~_oArr    ) ;    /*com.fmi.calculation.text.1FEE49E661BD359FE044633E419AC801*/    /*com.fmi.calculation.text.13F0B3D657435C88F32D1F90078D2856*/    ~ts = GetAsTimestamp ( Get ( CurrentTimeUTCMilliseconds ) / 1000 ) ;    ~generatedAt =        Year ( ~ts ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Month ( ~ts ) ; 2 ) & "-" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Day ( ~ts ) ; 2 ) & "com.fmi.calculation.text.D491787BD81ED43CB9E05191BBA37E6C" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Hour ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Minute ( ~ts ) ; 2 ) & "com.fmi.calculation.text.42D582097BC31476EA73935D4CDD61FF" &        Right ( "com.fmi.calculation.text.393DE2B027E1F15C0FEFE713B3BF2FD4" & Int ( Seconds ( ~ts ) ) ; 2 ) & "com.fmi.calculation.text.F7EFEBB853CFAA469FB4B8F6C49F50B9" ;    ~json = JSONSetElement ( "com.fmi.calculation.text.22FB870EE7AB348C700B68C887AFCC25" ;        [ "com.fmi.calculation.text.9CD6CD30E4547B3800299B5C2B734FA8"           ; 2                    ; JSONNumber ] ;        [ "com.fmi.calculation.text.A548D8D3BF1DBEA966A3C60FD421DF49"                  ; ~fn                  ; JSONString ] ;        [ "com.fmi.calculation.text.7C595C11BD6A09ECDD887FA0D1943FF6"                      ; task                 ; JSONString ] ;        [ "com.fmi.calculation.text.61E379EC729D4B339996D762E221A930"              ; ~generatedAt         ; JSONString ] ;        [ "com.fmi.calculation.text.39F0190861D2037CDF12B458B9D6F114"       ; ~layoutName          ; JSONString ] ;        [ "com.fmi.calculation.text.D4B6B420F385A747050CBD182CC5DB43"         ; ~layoutId            ; JSONNumber ] ;        [ "com.fmi.calculation.text.2D9606654C2919094668B970379CFEEE"    ; ~layoutTO            ; JSONString ] ;        [ "com.fmi.calculation.text.4479EB4EB3719741A5B60C902D683EE2" ; ~layoutTOid          ; JSONNumber ] ;        [ "com.fmi.calculation.text.BA16000A8B737B8B4AF90C0FF29D8808"                    ; ~tablesJSON          ; JSONObject ] ;        [ "com.fmi.calculation.text.8DCDD773AD19BE3DE539F0EE0AEAB594"                       ; ~ddl                 ; JSONString ] ;        [ "com.fmi.calculation.text.4B3F2A37CCBB0951ED498CA514484590"                   ; ~scriptsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.23D4BBAA8043BD45E0349EF70E5C0318"                   ; ~layoutsJSON         ; JSONObject ] ;        [ "com.fmi.calculation.text.3518E21708FDBDEEDC727CFFBB53B037"               ; ~vlJSON              ; JSONObject ] ;        [ "com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288"            ; ~layoutObjectsJSON   ; JSONArray  ]    )] ;    ~json))]]></Text>
 											</Calculation>
 										</Calculation>
 									</value>
@@ -7257,8 +7378,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="386DF1EDD58A72C51DE979144EF378BB" index="82" id="68" name="If" enable="True">
-							<UUID>B9415ACE-E296-4333-848E-FE5C5E358C35</UUID>
+						<Step hash="F9F49095CB7A3908A3465555F5B53BD7" index="82" id="68" name="If" enable="True">
+							<UUID>77461AFE-1711-414A-BB69-D64CBC9670BA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -7274,8 +7395,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="0D98D59EAF16745D0ECF91BCC4929AF3" index="83" id="103" name="Exit Script" enable="True">
-							<UUID>FF3879C5-34B9-4D51-9D6B-811EE197C281</UUID>
+						<Step hash="5E9951FB5D788D20D0DDDDC8D18C2999" index="83" id="103" name="Exit Script" enable="True">
+							<UUID>28B70EEB-FFEF-48F6-BEA6-AF4E6557A96E</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -7288,13 +7409,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="401878DC51BC8388231010920A761C97" index="84" id="70" name="End If" enable="True">
-							<UUID>9995042F-126C-4434-AFDC-B57B1AD6629C</UUID>
+						<Step hash="B1BED54FD12D5FC1DDB6F88A2D790681" index="84" id="70" name="End If" enable="True">
+							<UUID>DE7D55EE-421E-476C-9289-447D01712C4B</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="3BA211442EADFFC0BFB75E5C97E7751B" index="85" id="141" name="Set Variable" enable="True">
-							<UUID>8D383320-3959-4CED-83D7-A61925271133</UUID>
+						<Step hash="8F2BEC87612D5C52CE8F694AD5C30DBA" index="85" id="141" name="Set Variable" enable="True">
+							<UUID>D7F56B92-34CA-46AC-BD56-0AE47A2E98F2</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7317,8 +7438,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E58E79713F29BCF4A8AD70A0382CEE80" index="86" id="141" name="Set Variable" enable="True">
-							<UUID>98E3DD01-85C6-4FFD-8F60-2D632A999D58</UUID>
+						<Step hash="4DD538B9E845036735D1DB49E6AEDF23" index="86" id="141" name="Set Variable" enable="True">
+							<UUID>81EFFB5A-F319-44E2-80AB-99C4FEF88C2E</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7341,8 +7462,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="9E02A3CADD79D2652FF7D4081CC7B30A" index="87" id="152" name="Save Records as Snapshot Link" enable="True">
-							<UUID>F7B72DD1-7002-447C-99D5-9DE1EDD236C4</UUID>
+						<Step hash="62DBB22057B3D7AF7F54D38E00A045BA" index="87" id="152" name="Save Records as Snapshot Link" enable="True">
+							<UUID>35AAAF13-DAD6-433B-A1D2-02BA45250CD7</UUID>
 							<OwnerID></OwnerID>
 							<Options>546</Options>
 							<ParameterValues membercount="3">
@@ -7361,8 +7482,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B20B09FF205956CE536E4E3AADFD6962" index="88" id="141" name="Set Variable" enable="True">
-							<UUID>58D70114-57EE-4EC2-82EC-3AD16F733972</UUID>
+						<Step hash="A05011566897FF9134A71F612065E502" index="88" id="141" name="Set Variable" enable="True">
+							<UUID>076534F5-9E98-4F46-B9AD-8428D82C6E40</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7385,8 +7506,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="26B8AFB4F69ED2593693640DFBD37D4A" index="89" id="68" name="If" enable="True">
-							<UUID>7A835FC1-523B-4CB6-B4A9-4735ED48E04C</UUID>
+						<Step hash="3BD86880CDBC978C264ED5B6E24DCDA4" index="89" id="68" name="If" enable="True">
+							<UUID>987F5A2B-8E75-4E4F-8D57-38AB53E499B4</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="2">
@@ -7402,8 +7523,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B0B6EC65E52DBDE59233EF88F7A19B30" index="90" id="141" name="Set Variable" enable="True">
-							<UUID>DD6F6105-753A-4EB2-A1A5-61CC57A01C40</UUID>
+						<Step hash="B7B9CB95D0FC9BA3AAFA37D504D96D96" index="90" id="141" name="Set Variable" enable="True">
+							<UUID>5AFE3773-06A6-4985-B362-8D7ACAA6B2F7</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7426,11 +7547,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="41F39E85B5A3CB29A868A05B71C34696" index="91" id="87" name="Show Custom Dialog" enable="True">
-							<UUID>7A176492-7FCE-45BC-A3BC-4F9A454E9BD0</UUID>
+						<Step hash="8DECEA3D97C275A3D96512C9D03D1768" index="91" id="87" name="Show Custom Dialog" enable="True">
+							<UUID>16B91D20-8B1D-4504-8AD2-647E76D6018A</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -7445,6 +7566,9 @@
 										</Calculation>
 									</Calculation>
 								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
+								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
 								</Parameter>
@@ -7456,8 +7580,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="637BB1D5C548683E51C13206BB8948F2" index="92" id="103" name="Exit Script" enable="True">
-							<UUID>F2CAF46A-C78B-41E6-9D2D-B70C8559D3A3</UUID>
+						<Step hash="03573EECC1B1E25EAE1934A3F8D8940F" index="92" id="103" name="Exit Script" enable="True">
+							<UUID>F279DB09-D369-4EAF-A49C-8AC754F9B840</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -7470,13 +7594,13 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="B4A88F54B523F8C9664C1CA36DC18C43" index="93" id="70" name="End If" enable="True">
-							<UUID>177DDAD7-65B2-4451-A7D6-C3BD26A8A873</UUID>
+						<Step hash="1DE69CEFD7DC621350533A6E3FBFB417" index="93" id="70" name="End If" enable="True">
+							<UUID>05A3FF79-9BD8-46A3-A71D-68BF826D1137</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
-						<Step hash="6CD8B372933213F0D6996A0F82D04A3A" index="94" id="141" name="Set Variable" enable="True">
-							<UUID>158C723F-0666-4F53-AD62-2B9FDF95E07B</UUID>
+						<Step hash="FA39DADEAEBC55687E8D030564528D8D" index="94" id="141" name="Set Variable" enable="True">
+							<UUID>427F64B9-1514-4174-8DCD-8D92F90A36DB</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7499,8 +7623,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E2A9038DBE70BFEBC3C9BF5DE3367426" index="95" id="160" name="Insert from URL" enable="True">
-							<UUID>6FBB4851-E120-4111-8084-2F1A26B3DC45</UUID>
+						<Step hash="AAB385B89BEB6531EEC1D216C546261F" index="95" id="160" name="Insert from URL" enable="True">
+							<UUID>E808C191-A520-48A3-B4B2-0C3D9B971CBB</UUID>
 							<OwnerID></OwnerID>
 							<Options>20613</Options>
 							<ParameterValues membercount="6">
@@ -7542,8 +7666,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="7DA86AD7689512D984CCE02A5C0D5F8A" index="96" id="141" name="Set Variable" enable="True">
-							<UUID>BA0D6725-000F-4DD7-9B62-D652EEAF5596</UUID>
+						<Step hash="8A481E98B0CAD3A69B738A1F9C4F84C0" index="96" id="141" name="Set Variable" enable="True">
+							<UUID>0D3C84BF-63C6-4531-9485-14DF2F3CA55D</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7566,8 +7690,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="1FE8E6904E99C481F2EDBB4870FEEAE1" index="97" id="141" name="Set Variable" enable="True">
-							<UUID>AF53C014-C9BC-4FF1-8C0E-3D762D2BE97B</UUID>
+						<Step hash="9AE37E2689AC2D38DBB937AF1D90497F" index="97" id="141" name="Set Variable" enable="True">
+							<UUID>544DED1D-AA92-4FF6-B564-B9EA7C1A53EA</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7590,8 +7714,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="490DBA6E4B10B981F81026FB57DE9751" index="98" id="141" name="Set Variable" enable="True">
-							<UUID>74583645-EF82-4FBB-9033-6256EC4E9C1B</UUID>
+						<Step hash="FECF63247670B1E843671908CCCEED0A" index="98" id="141" name="Set Variable" enable="True">
+							<UUID>C9A00775-8DC0-4687-ADFE-9AEDBEA3C7D3</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
 							<ParameterValues membercount="1">
@@ -7614,11 +7738,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="16E50B4D79BCDD5266D5D105FF271421" index="99" id="87" name="Show Custom Dialog" enable="True">
-							<UUID>4E231E1F-8BF5-4FD4-AAFC-4EE7864F935A</UUID>
+						<Step hash="9FFAD7822C4D67D6B7E2073E769D5185" index="99" id="87" name="Show Custom Dialog" enable="True">
+							<UUID>5AB085EC-23E5-4B4B-8380-75EF69D7DAAE</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -7633,6 +7757,9 @@
 										</Calculation>
 									</Calculation>
 								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
+								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="True"></Boolean>
 								</Parameter>
@@ -7644,8 +7771,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="E9607FFA7B1E647C632DE57067BD6E8B" index="100" id="103" name="Exit Script" enable="True">
-							<UUID>81B71FE7-F3CE-41DE-B270-5FA673390B3D</UUID>
+						<Step hash="A9D689772DA3D82D76B924BE18D3D71B" index="100" id="103" name="Exit Script" enable="True">
+							<UUID>8BEC5413-A094-464D-9C04-0F993470813F</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -7658,8 +7785,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="F242EAE1F3FBB47CE84F122072B6D491" index="101" id="69" name="Else" enable="True">
-							<UUID>E4A269CB-F56A-4421-832F-DB50E714E8A8</UUID>
+						<Step hash="92615DF7B8AF1A0E2A9F7B7E86618613" index="101" id="69" name="Else" enable="True">
+							<UUID>CBACD068-9AFB-434C-B381-BFBB8EB2FE24</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 							<ParameterValues membercount="2">
@@ -7671,8 +7798,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="C800BDBB4D86C48790E4CB0D1A8C120F" index="102" id="103" name="Exit Script" enable="True">
-							<UUID>4CB615A3-6887-4475-AE7A-68BEF2EC27EB</UUID>
+						<Step hash="3038CA107B534B70D8792572DAD25FEE" index="102" id="103" name="Exit Script" enable="True">
+							<UUID>0EF35B7A-B131-40C2-8465-22CE10E5D7FD</UUID>
 							<OwnerID></OwnerID>
 							<Options>16384</Options>
 							<ParameterValues membercount="1">
@@ -7685,8 +7812,8 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="80BDF8F4C4EF7FB852FD643947FAC139" index="103" id="70" name="End If" enable="True">
-							<UUID>67A51EDE-929E-4984-B594-11FD080D4454</UUID>
+						<Step hash="670FAD5FDBFD66480D2665638C93237D" index="103" id="70" name="End If" enable="True">
+							<UUID>CD0B983A-9829-494C-8C0E-602681643752</UUID>
 							<OwnerID></OwnerID>
 							<Options>0</Options>
 						</Step>
@@ -9303,11 +9430,11 @@
 								</Parameter>
 							</ParameterValues>
 						</Step>
-						<Step hash="35863900D3FD2DB79FFB3F39E605EC9B" index="15" id="87" name="Show Custom Dialog" enable="True">
+						<Step hash="84845EBF9C0F9BA867C3F24AC9E231CB" index="15" id="87" name="Show Custom Dialog" enable="True">
 							<UUID>78860B5D-D099-49A8-957A-53B018BDD326</UUID>
 							<OwnerID></OwnerID>
 							<Options>16388</Options>
-							<ParameterValues membercount="5">
+							<ParameterValues membercount="6">
 								<Parameter type="Title">
 									<Calculation datatype="1" position="0">
 										<Calculation>
@@ -9321,6 +9448,9 @@
 											<Text><![CDATA["com.fmi.calculation.text.D7B4B5F0215CF03E4EA1D091165F2B32"]]></Text>
 										</Calculation>
 									</Calculation>
+								</Parameter>
+								<Parameter type="AutoCloseTimer">
+									<Boolean type="AutoCloseTimer" value="False"></Boolean>
 								</Parameter>
 								<Parameter type="Button1" value="OK">
 									<Boolean type="Commit" value="False"></Boolean>
@@ -9578,7 +9708,7 @@ self:normal .baseline
 }
 ]]></FullCSS>
 								</LayoutObject>
-								<LayoutObject hash="9B186621AA9347B7545405B2A5A6E6B0" id="2" type="Button" name="" kind="10">
+								<LayoutObject hash="BDCD7CFCB0964406E5940002BDC4D48B" id="2" type="Button" name="" kind="10">
 									<Bounds top="0" left="0" bottom="58" right="170"></Bounds>
 									<Options>805371912</Options>
 									<Button>
@@ -9587,7 +9717,7 @@ self:normal .baseline
 											<Text>
 												<Options>2</Options>
 												<StyledText>
-													<Data><![CDATA[com.fmi.layoutobject.text.8A4613A9CA6EECB2C0000318A6961F0B]]></Data>
+													<Data><![CDATA[com.fmi.layoutobject.text.85C4DECF1F9C10AF9C147F25312EC373]]></Data>
 												</StyledText>
 											</Text>
 										</Label>

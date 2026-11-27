@@ -161,6 +161,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.17D34FFAB033FA2BD8DA6738151184E8</StringID>
+	<SourceText>PersistentStoreCatalog</SourceText>
+	<TargetText>PersistentStoreCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.PersistentStoreCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.19A1DAAC36D5A305AA3AACA94AAFFF23</StringID>
 	<SourceText>solution_name</SourceText>
 	<TargetText>solution_name</TargetText>
@@ -172,6 +179,20 @@
 	<SourceText>agent/context/snapshot.xml</SourceText>
 	<TargetText>agent/context/snapshot.xml</TargetText>
 	<Comment>com.fmi.calculation.text.agent/context/snapshot.xml</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.1CFC67699C7F942AB7276B35E8384087</StringID>
+	<SourceText>ThemeCatalog</SourceText>
+	<TargetText>ThemeCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.ThemeCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.1D4513FF818F9E3F76B3A2C738DE8D4A</StringID>
+	<SourceText>1.5.1</SourceText>
+	<TargetText>1.5.1</TargetText>
+	<Comment>com.fmi.calculation.text.1.5.1</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -259,6 +280,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.2DE73AAEC8855707614BC852E6257A14</StringID>
+	<SourceText>CustomMenuSetCatalog</SourceText>
+	<TargetText>CustomMenuSetCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.CustomMenuSetCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.2E8FCB143FDF31EFC5C15C3BDBA9BB46</StringID>
 	<SourceText>:8765/debug</SourceText>
 	<TargetText>:8765/debug</TargetText>
@@ -298,6 +326,13 @@
 	<SourceText>value_lists</SourceText>
 	<TargetText>value_lists</TargetText>
 	<Comment>com.fmi.calculation.text.value_lists</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.358A7BC81B93ADF3F166CF88D33F03E1</StringID>
+	<SourceText>CustomFunctionsCatalog</SourceText>
+	<TargetText>CustomFunctionsCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.CustomFunctionsCatalog</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -455,6 +490,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.46B94BB7453BB62FCC10BDE22DCF3448</StringID>
+	<SourceText>FieldCatalog</SourceText>
+	<TargetText>FieldCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.FieldCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.49AE69F793E196F618E8C5D5A10FA1FD</StringID>
 	<SourceText>timestamp</SourceText>
 	<TargetText>timestamp</TargetText>
@@ -480,6 +522,13 @@
 	<SourceText>id</SourceText>
 	<TargetText>id</TargetText>
 	<Comment>com.fmi.calculation.text.id</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.4C46B7A93E0AD37156C7892BE7E32128</StringID>
+	<SourceText>FileAccessCatalog</SourceText>
+	<TargetText>FileAccessCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.FileAccessCatalog</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -529,13 +578,6 @@
 	<SourceText>That folder is not an agentic-fm clone (no fmparse.sh).</SourceText>
 	<TargetText>That folder is not an agentic-fm clone (no fmparse.sh).</TargetText>
 	<Comment>com.fmi.calculation.text.That folder is not an agentic-fm clone (no fmparse.sh).</Comment>
-</DynamicTemplateString>
-
-<DynamicTemplateString>
-	<StringID>com.fmi.calculation.text.54F858B78A8FCFFBA3232FD40E5B24DD</StringID>
-	<SourceText>1.5.0</SourceText>
-	<TargetText>1.5.0</TargetText>
-	<Comment>com.fmi.calculation.text.1.5.0</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -707,6 +749,20 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.704724102BD9CA9620A115CCC8072B4B</StringID>
+	<SourceText>TableOccurrenceCatalog</SourceText>
+	<TargetText>TableOccurrenceCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.TableOccurrenceCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.713DBABA5CDD454B03AA717FFD463B33</StringID>
+	<SourceText>Metadata</SourceText>
+	<TargetText>Metadata</TargetText>
+	<Comment>com.fmi.calculation.text.Metadata</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.7244C589DB346A548428B91A8360C02B</StringID>
 	<SourceText>Contexto enviado: ya puedes pedir el guion a la IA.</SourceText>
 	<TargetText>Contexto enviado: ya puedes pedir el guion a la IA.</TargetText>
@@ -819,10 +875,24 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7D79AAE3E2DB0012C9AFA308F5373533</StringID>
+	<SourceText>PrivilegeSetsCatalog</SourceText>
+	<TargetText>PrivilegeSetsCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.PrivilegeSetsCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.7E719A7DDFF2C23D0D8DC29791C8531D</StringID>
 	<SourceText>context</SourceText>
 	<TargetText>context</TargetText>
 	<Comment>com.fmi.calculation.text.context</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.7F7343D23D8FAA018FC37FF299EEEF0A</StringID>
+	<SourceText>CustomMenuCatalog</SourceText>
+	<TargetText>CustomMenuCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.CustomMenuCatalog</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1204,6 +1274,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.B09CF77B47AD702151A932801889D172</StringID>
+	<SourceText>ExternalDataSourceCatalog</SourceText>
+	<TargetText>ExternalDataSourceCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.ExternalDataSourceCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.B0ED615352E2C73BFF168FE6F2E78D1A</StringID>
 	<SourceText>agfm/</SourceText>
 	<TargetText>agfm/</TargetText>
@@ -1253,10 +1330,24 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BC0F8F08ADCEEE23A947AF517D97B17A</StringID>
+	<SourceText>ScriptCatalog</SourceText>
+	<TargetText>ScriptCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.ScriptCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.BC279D6540F371C8B86FCB488917BB21</StringID>
 	<SourceText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </SourceText>
 	<TargetText> Key by TO name — unique, prevents overwrites when<CR/>               multiple TOs share the same base table </TargetText>
 	<Comment>com.fmi.calculation.text. Key by TO name — unique, prevents overwrites when_CR/_               multiple TOs share the same base table</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.BC8E34EF869CB5F488CC12F8583FF2BA</StringID>
+	<SourceText>BaseDirectoryCatalog</SourceText>
+	<TargetText>BaseDirectoryCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.BaseDirectoryCatalog</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1341,6 +1432,13 @@
 	<SourceText>agent_version</SourceText>
 	<TargetText>agent_version</TargetText>
 	<Comment>com.fmi.calculation.text.agent_version</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.CAD54D63DC21B738321A014F3FE3A90E</StringID>
+	<SourceText>ValueListCatalog</SourceText>
+	<TargetText>ValueListCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.ValueListCatalog</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1470,6 +1568,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.D8E733CA1D637D585FCD73DEFC1D76DD</StringID>
+	<SourceText>LibraryCatalog</SourceText>
+	<TargetText>LibraryCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.LibraryCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.D8F7949C6C0C8313618BAB73807E1E03</StringID>
 	<SourceText>1.1.0</SourceText>
 	<TargetText>1.1.0</TargetText>
@@ -1575,6 +1680,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.E6A770E10367DDA98E3AD40E135DE0B4</StringID>
+	<SourceText>LayoutCatalog</SourceText>
+	<TargetText>LayoutCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.LayoutCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.E72BCB1D335E6553C46F3FF3DF27ECFE</StringID>
 	<SourceText>Companion server not running</SourceText>
 	<TargetText>Companion server not running</TargetText>
@@ -1638,6 +1750,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.F3003E04EF5A11FCAA13C508961A8FC7</StringID>
+	<SourceText>RelationshipCatalog</SourceText>
+	<TargetText>RelationshipCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.RelationshipCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.F4772381677290F3C5F86F74565F7C62</StringID>
 	<SourceText>&amp;host=</SourceText>
 	<TargetText>&amp;host=</TargetText>
@@ -1673,6 +1792,13 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FA8EF125F0D6B69D05BC29AAD1E1157B</StringID>
+	<SourceText>ExtendedPrivilegesCatalog</SourceText>
+	<TargetText>ExtendedPrivilegesCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.ExtendedPrivilegesCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.FB6D08BD99B42440C049EF4ABC0583B8</StringID>
 	<SourceText>folder</SourceText>
 	<TargetText>folder</TargetText>
@@ -1694,10 +1820,24 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FE2168BB4F3FEBB6ADF3A677D33835BD</StringID>
+	<SourceText>AccountsCatalog</SourceText>
+	<TargetText>AccountsCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.AccountsCatalog</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
 	<StringID>com.fmi.calculation.text.FEA385BF16B6D0EC895BA848BFD53288</StringID>
 	<SourceText>layout_objects</SourceText>
 	<TargetText>layout_objects</TargetText>
 	<Comment>com.fmi.calculation.text.layout_objects</Comment>
+</DynamicTemplateString>
+
+<DynamicTemplateString>
+	<StringID>com.fmi.calculation.text.FF99BC3BE01E82B4F49644C27CB1E323</StringID>
+	<SourceText>BaseTableCatalog</SourceText>
+	<TargetText>BaseTableCatalog</TargetText>
+	<Comment>com.fmi.calculation.text.BaseTableCatalog</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>
@@ -1715,10 +1855,10 @@
 </DynamicTemplateString>
 
 <DynamicTemplateString>
-	<StringID>com.fmi.layoutobject.text.8A4613A9CA6EECB2C0000318A6961F0B</StringID>
-	<SourceText>agentic-fm<CR/>1.5.0</SourceText>
-	<TargetText>agentic-fm<CR/>1.5.0</TargetText>
-	<Comment>com.fmi.layoutobject.text.agentic-fm_CR/_1.5.0</Comment>
+	<StringID>com.fmi.layoutobject.text.85C4DECF1F9C10AF9C147F25312EC373</StringID>
+	<SourceText>agentic-fm<CR/>1.5.1</SourceText>
+	<TargetText>agentic-fm<CR/>1.5.1</TargetText>
+	<Comment>com.fmi.layoutobject.text.agentic-fm_CR/_1.5.1</Comment>
 </DynamicTemplateString>
 
 <DynamicTemplateString>

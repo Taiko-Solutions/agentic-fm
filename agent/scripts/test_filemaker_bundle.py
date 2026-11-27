@@ -71,7 +71,7 @@ def bundle_version():
 
 class TestVersion(unittest.TestCase):
     def test_version_is_a_quoted_semver_literal(self):
-        self.assertEqual(bundle_version(), "1.5.0")
+        self.assertEqual(bundle_version(), "1.5.1")
 
     def test_version_script_lives_in_the_top_folder(self):
         top = _ROOT.find("Group")
@@ -525,9 +525,9 @@ class TestBridgeDataSource(unittest.TestCase):
         self.assertLess(texts.index("not IsEmpty ( $dataSource )"),
                         next(i for i, c in enumerate(texts) if "ScriptNames" in c))
 
-    def test_add_on_version_is_1_5_0(self):
-        self.assertEqual(bundle_version(), "1.5.0")
-        self.assertEqual(manifest()["version"], "1.5.0")
+    def test_add_on_version_is_1_5_1(self):
+        self.assertEqual(bundle_version(), "1.5.1")
+        self.assertEqual(manifest()["version"], "1.5.1")
         self.assertEqual(manifest()["agent_version"], "1.1.0")
 
 
