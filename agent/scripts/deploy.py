@@ -26,6 +26,8 @@ Result dict keys:
     error         — str (present on failure)
 """
 
+from __future__ import annotations
+
 import argparse
 import json
 import os

@@ -30,6 +30,8 @@ Usage:
     python3 agent/scripts/fm_svg_convert.py --check-deps
 """
 
+from __future__ import annotations
+
 import argparse
 import os
 import re
